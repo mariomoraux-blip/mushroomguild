@@ -73,7 +73,7 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
           const { score, newRecord } = result;
           body.push(
             el('div', { class: 'score__stars', role: 'img', 'aria-label': es.scoring.stars(score.stars) },
-              ...[1, 2, 3].map((n) => el('span', { class: `score__star${n <= score.stars ? ' is-on' : ''}`, 'aria-hidden': 'true' }, '★'))),
+              ...[1, 2, 3].map((n) => el('span', { class: `score__star${n <= score.stars ? ' is-on' : ''}`, 'aria-hidden': 'true' }))),
             el('p', { class: 'score__total' },
               el('strong', {}, String(score.total)), ` ${es.scoring.total}`,
               el('span', { class: 'score__time' }, ` · ${es.scoring.time} ${formatClock(score.timeMs)}`)),

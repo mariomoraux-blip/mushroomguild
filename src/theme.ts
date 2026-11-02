@@ -125,6 +125,7 @@ const UI_ART: Record<string, string> = {
   'btn-close': 'ui/buttons/close',
   calendar: 'ui/icons/calendar',
   play: 'ui/icons/play',
+  star: 'ui/icons/star',
   'btn-prev': 'ui/buttons/prev',
   'btn-next': 'ui/buttons/next',
   nutrients: 'ui/icons/nutrients',
