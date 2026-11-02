@@ -138,7 +138,7 @@ const UI_ART: Record<string, string> = {
   'bg-intro': 'backgrounds/intro',
   'bg-victory': 'backgrounds/victory',
   'bg-intro-wide': 'backgrounds/intro-wide',
-  'bg-victory-wide': 'backgrounds/victory-wide',
+  'bg-victory-wide': 'backgrounds/victory-landscape',
   moon: 'ui/icons/moon',
   recruit: 'ui/icons/recruit',
   sign: 'ui/panels/sign',

@@ -795,6 +795,9 @@ button { font: inherit; color: inherit; }
   .title__cast { margin-top: 0; }
   .story[data-bg='intro'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 45%, transparent)), var(--art-bg-intro-wide); }
   .story[data-bg='victory'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 35%, transparent)), var(--art-bg-victory-wide); }
+  /* El Árbol Padre queda al centro del fondo apaisado: la carta de final va a un costado. */
+  .story[data-kind='won'], .story[data-kind='lost'] { align-items: center; justify-content: flex-end; padding-right: max(24px, 5vw); }
+  .story[data-kind='won'] .story__card, .story[data-kind='lost'] .story__card { width: min(360px, 46%); }
   body {
     background:
       linear-gradient(color-mix(in srgb, var(--ink) 30%, transparent), transparent 25%, transparent 70%, color-mix(in srgb, var(--ink) 40%, transparent)),
