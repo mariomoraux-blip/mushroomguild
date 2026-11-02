@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { generateMap, MAP, MAP_GEN, mulberry32, newGame, newRandomGame, playAdvised, TREES_FOR_MOTHER } from '../src/rules';
+import { generateMap, MAP, MAP_GEN, mulberry32, newGame, newRandomGame, playAdvised, stars, thresholds, TREES_FOR_MOTHER } from '../src/rules';
 import { playGame, randomMonth } from './bots';
 
 // Balance como test (game-rules › Dificultad medida). Semillas fijas: resultados reproducibles.
@@ -43,4 +43,20 @@ describe('balance en claros generados', () => {
     expect(TREES_FOR_MOTHER).toBe(3);
     expect(newRandomGame(7).status).toBe('playing');
   });
+});
+
+describe('estrellas por claro (015)', () => {
+  it('en cada claro el bot con criterio saca 2 estrellas, y calibrar tarda menos de 100 ms', () => {
+    let slowest = 0;
+    for (let seed = 1; seed <= 100; seed++) {
+      const start = newRandomGame(seed);
+      const t0 = performance.now();
+      const th = thresholds(start);
+      slowest = Math.max(slowest, performance.now() - t0);
+      expect(th.reference).toBeGreaterThan(0);
+      expect(stars(th.reference, th)).toBe(2);
+    }
+    console.info(`[balance] calibración por claro: máx ${slowest.toFixed(1)} ms (Node)`);
+    expect(slowest).toBeLessThan(100);
+  }, 120_000);
 });

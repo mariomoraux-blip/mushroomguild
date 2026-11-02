@@ -2,8 +2,10 @@ import * as Phaser from 'phaser';
 import { es } from './copy/es';
 import { tileSize } from './layout';
 import { GameScene } from './scenes/GameScene';
-import { newGame, newRandomGame, type SpeciesId } from './rules';
-import { createStore, initialState } from './store';
+import { newGame, newRandomGame, scoreResult, thresholds, type SpeciesId } from './rules';
+import { formatClock, newClock, read, sync } from './clock';
+import { saveIfBest } from './records';
+import { clockShouldRun, createStore, initialState } from './store';
 import { applyTheme, BOARD_HEADROOM, renderResolution } from './theme';
 import { mountAmbient } from './ui/ambient';
 import { mountBoardOverlay } from './ui/board';
@@ -44,7 +46,28 @@ store.subscribe((state, prev) => {
   if (state.ui.seen !== prev.ui.seen) storage.set(SEEN, JSON.stringify(state.ui.seen));
 });
 
-const renderHud = mountHud($('hud'), store);
+// ─── Puntaje (015): umbrales por claro, cronómetro de juego activo y récord local ──────────
+let thresholdsNow = thresholds(firstGame);
+let clock = newClock();
+const now = () => performance.now();
+const syncClock = () => (clock = sync(clock, clockShouldRun(store.getState(), !document.hidden), now()));
+store.subscribe((state, prev) => {
+  if (state.game.mapId !== prev.game.mapId || state.game.log.length < prev.game.log.length) {
+    // Partida nueva ("Jugar de nuevo"): cronómetro en cero y umbrales del claro nuevo.
+    clock = newClock();
+    thresholdsNow = thresholds(state.game);
+  }
+  syncClock();
+  if (prev.game.status === 'playing' && state.game.status === 'won') {
+    const score = scoreResult(state.game, read(clock, now()), thresholdsNow);
+    const { newRecord } = saveIfBest(score);
+    queueMicrotask(() => store.dispatch({ type: 'scored', score, newRecord }));
+  }
+});
+document.addEventListener('visibilitychange', syncClock);
+setInterval(() => hud.setTime(formatClock(read(clock, now()))), 250);
+
+const hud = mountHud($('hud'), store);
 const renderDock = mountDock($('dock'), store);
 const overlay = mountBoardOverlay($('overlay'), store);
 const renderSheet = mountSheet($('sheet'), store);
@@ -62,7 +85,7 @@ cardBtn.addEventListener('click', () => {
 
 const renderDom = () => {
   const state = store.getState();
-  renderHud(state);
+  hud.render(state);
   renderDock(state);
   overlay.render(state);
   renderSheet(state);

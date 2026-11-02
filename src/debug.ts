@@ -47,5 +47,7 @@ function seasonPreview(month: number): GameState {
 export function debugGame(): GameState | null {
   if (!import.meta.env.DEV) return null;
   const name = new URLSearchParams(location.search).get('debugState');
-  return name ? (presets[name]?.() ?? null) : null;
+  const game = name ? presets[name]?.() : undefined;
+  // Los estados de depuración no guardan récord (015): su claro no se puede rejugar desde el inicio.
+  return game ? { ...game, mapId: 'debug', log: [] } : null;
 }

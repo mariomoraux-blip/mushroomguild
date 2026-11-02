@@ -31,7 +31,17 @@ export interface Member {
   readonly at: Point | null;
 }
 
+/** Acción registrada (015): permite rejugar una partida y verificar su puntaje. */
+export type LoggedAction =
+  | { readonly type: 'act'; readonly memberId: number; readonly x: number; readonly y: number; readonly spell?: Spell }
+  | { readonly type: 'recruit'; readonly species: RecruitableSpecies }
+  | { readonly type: 'endMonth' };
+
 export interface GameState {
+  /** Claro de la partida: `clasico`, `seed-<n>` (claro generado), `custom` (mapa de prueba) o `debug`. */
+  readonly mapId: string;
+  /** Acciones aceptadas, en orden (015). */
+  readonly log: readonly LoggedAction[];
   readonly tiles: readonly Tile[];
   readonly month: number;
   readonly nutrients: number;

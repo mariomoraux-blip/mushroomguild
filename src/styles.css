@@ -100,6 +100,7 @@ button { font: inherit; color: inherit; }
 }
 .hud__month-value { font-family: var(--font-display); font-weight: 700; font-size: 16px; white-space: nowrap; letter-spacing: -0.3px; text-shadow: 0 1.5px 0 var(--mossDark); }
 .hud__month-caption { display: flex; align-items: center; gap: 2px; font-size: 11px; font-weight: 800; white-space: nowrap; color: var(--glow); }
+.hud__time { font-variant-numeric: tabular-nums; letter-spacing: 0.2px; }
 .hud__season { flex: 0 0 13px; height: 13px; background: var(--art-season-spring) center / contain no-repeat; }
 .hud__season[data-season='summer'] { background-image: var(--art-season-summer); }
 .hud__season[data-season='autumn'] { background-image: var(--art-season-autumn); }
@@ -738,6 +739,19 @@ button { font: inherit; color: inherit; }
 .guild__role { font-family: var(--font-body); font-size: 13px; color: var(--moss); }
 .guild__verb { font-size: 13px; color: var(--ink-soft); line-height: 1.25; }
 .guild__chev { font-family: var(--font-display); font-size: 28px; color: var(--wood); }
+
+/* ─── Puntaje en la carta de victoria (015) ───────────────────────────────── */
+.score__stars { display: flex; justify-content: center; gap: 6px; margin: -2px 0 0; }
+.score__star { font-size: 38px; line-height: 1; color: color-mix(in srgb, var(--stone) 55%, var(--paper)); -webkit-text-stroke: 2px var(--ink); }
+.score__star.is-on { color: var(--sun); filter: drop-shadow(0 0 6px var(--glow)); }
+.score__total { margin: 0; font-size: 14px; font-weight: 800; color: var(--ink-soft); }
+.score__total strong { font-family: var(--font-display); font-size: 30px; color: var(--ink); }
+.score__time { font-variant-numeric: tabular-nums; }
+.score__record { justify-self: center; margin: 0; padding: 3px 12px; font-family: var(--font-display); font-weight: 700; color: var(--ink); border: 2px solid var(--ink); border-radius: 12px; background: var(--sun); }
+.score__list { margin: 0; padding: 6px 10px; list-style: none; display: grid; grid-template-columns: 1fr 1fr; column-gap: 14px; row-gap: 2px; font-size: 13px; text-align: left; border-radius: 14px; background: color-mix(in srgb, var(--paper) 70%, var(--peach)); }
+.score__row { display: flex; justify-content: space-between; gap: 6px; }
+.score__row strong { font-variant-numeric: tabular-nums; }
+.score__row.is-zero { color: var(--ink-soft); }
 
 /* ─── Efectos (004): esporas que vuelan al contador ───────────────────────── */
 .fx-spore {

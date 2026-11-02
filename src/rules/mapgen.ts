@@ -80,5 +80,5 @@ export function generateMap(seed: number): readonly string[] {
 
 /** Partida nueva sobre un claro generado con la semilla dada. */
 export function newRandomGame(seed: number): GameState {
-  return newGame(generateMap(seed));
+  return newGame(generateMap(seed), `seed-${seed}`);
 }

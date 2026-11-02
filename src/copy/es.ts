@@ -257,6 +257,25 @@ export const es = {
     recruitHint: 'esporas +',
     trees: 'árboles vivos',
     treesShort: 'árboles',
+    time: (t: string) => `Tiempo de juego: ${t}`,
+  },
+
+  scoring: {
+    title: 'Puntaje',
+    total: 'puntos',
+    time: 'tiempo',
+    stars: (n: number) => `${n} de 3 estrellas`,
+    newRecord: 'Nuevo récord',
+    breakdown: {
+      victory: 'Victoria',
+      months: 'Meses de sobra',
+      trees: 'Árboles revividos',
+      reserves: 'Reservas',
+      guild: 'Gremio eficiente',
+      activity: 'Actividad',
+      variety: 'Las 5 especies',
+      time: 'Rapidez',
+    },
   },
 
   dock: {

@@ -50,7 +50,7 @@ El HUD SHALL tener un botón "?" que abre "Cómo jugar" (`title-screens`), y des
 - THEN se abre la Libreta de campo con las 5 especies, qué hace cada una y cuánto cuesta
 
 ### Requirement: Pista y camino sugerido
-El juego SHALL proponer siempre un siguiente paso con `advise(state)`, con esta prioridad: despertar al Árbol Padre > revivir un árbol > hechizo de Maestra Bruma > pasar la voz a una Amanita > reclutar > descomponer > pasar la voz a un Champiñón > tejer > pasar la voz a un Lactarius > terminar el mes. El miembro sugerido SHALL llevar una ★ en el dock; al seleccionarlo, la casilla sugerida SHALL llevar una ★ en el tablero. Tejer SHALL apuntar a la casilla válida más cercana al árbol gris más cercano a la red mientras haya menos de 3 árboles revividos, y al Árbol Padre después. Reclutar sugiere un segundo Lactarius mientras la red no toque al Árbol Padre, después una Gliophorus y después otra Amanita.
+El juego SHALL proponer siempre un siguiente paso con `advise(state)`, con esta prioridad: despertar al Árbol Padre > revivir un árbol > hechizo de Maestra Bruma > pasar la voz a una Amanita > descomponer > pasar la voz a un Champiñón > tejer > pasar la voz a un Lactarius > reclutar > terminar el mes. Reclutar SHALL sugerirse solo en dos casos (ver "Cómo reclutar"): cuando ningún miembro listo tiene una acción útil, o cuando falta el rol que pide el siguiente paso sugerido. El miembro sugerido SHALL llevar una ★ en el dock; al seleccionarlo, la casilla sugerida SHALL llevar una ★ en el tablero. Tejer SHALL apuntar a la casilla válida más cercana al árbol gris más cercano a la red mientras haya menos de 3 árboles revividos, y al Árbol Padre después.
 
 #### Scenario: Primer paso
 - WHEN empieza una partida nueva en el mapa clásico
@@ -66,7 +66,7 @@ El juego SHALL proponer siempre un siguiente paso con `advise(state)`, con esta 
 - THEN la casilla con ★ es la tierra que acerca la red al árbol gris más cercano
 
 #### Scenario: Nadie más puede trabajar
-- WHEN ningún miembro disponible tiene una casilla válida
+- WHEN ningún miembro disponible tiene una casilla válida y no se puede reclutar
 - THEN la pista invita a terminar el mes y recuerda que cada árbol vivo dará 1 espora y 1 nutriente
 
 ### Requirement: Para qué sirve cada hongo
@@ -81,12 +81,20 @@ Cada tarjeta del dock SHALL mostrar el rol y la acción con su costo. Tocar una 
 - THEN la bitácora dice "Tronco caído: el Champiñón lo descompone (+2 nutrientes, 2 veces)."
 
 ### Requirement: Cómo reclutar
-El chip de esporas del HUD SHALL abrir la hoja de reclutar. Cada fila de la hoja SHALL decir para qué sirve la especie. Con esporas suficientes y cupo, la pista SHALL sugerir reclutar y qué especie conviene: un segundo Lactarius mientras la red no toque al Árbol Padre; después, una Gliophorus; después, otra Amanita.
+El chip de esporas del HUD SHALL abrir la hoja de reclutar. Cada fila de la hoja SHALL decir para qué sirve la especie. Con esporas suficientes y cupo, la pista SHALL sugerir reclutar solo en dos casos: (1) ningún miembro listo tiene una acción útil; entonces sugiere un segundo Lactarius mientras la red no toque al Árbol Padre, después una Gliophorus y después otra Amanita; (2) falta el rol que pide el siguiente paso sugerido: un compañero que ya trabajó este mes (Amanita o Champiñón) tendría trabajo útil si le pasaran la voz y el gremio no tiene Gliophorus; entonces sugiere una Gliophorus. Mientras haya miembros listos con acciones útiles y no falte un rol, la pista no SHALL sugerir reclutar.
 
-#### Scenario: Primeras esporas
-- WHEN el jugador tiene 2 esporas, cupo en el gremio y ningún árbol por revivir ni Árbol Padre por despertar
-- THEN la pista dice que puede reclutar y cuál especie conviene
+#### Scenario: Nadie tiene una acción útil
+- WHEN el jugador tiene 2 esporas, cupo en el gremio y ningún miembro listo tiene una casilla válida
+- THEN la pista sugiere reclutar y dice cuál especie conviene
 - AND tocar el chip de esporas abre la hoja de reclutar
+
+#### Scenario: Falta la Mensajera
+- WHEN Rubí ya revivió un árbol este mes y podría revivir otro, hay 2 esporas y cupo, y el gremio no tiene Gliophorus
+- THEN la pista sugiere reclutar una Gliophorus
+
+#### Scenario: Hay trabajo útil
+- WHEN el jugador tiene 2 esporas y cupo, y Bruno puede descomponer un tronco
+- THEN la pista sugiere a Bruno y no sugiere reclutar
 
 ### Requirement: Meta visible
 El Árbol Padre SHALL marcarse como meta en el tablero en todo momento, y las casillas de la red SHALL dibujarse con un contorno de micelio visible.

@@ -7,12 +7,14 @@ import { el, setText } from './dom';
 /**
  * HUD del referente (011): mes y estación en una pastilla verde, pastillas de crema con ícono pintado
  * para nutrientes, esporas (abre reclutar) y árboles vivos (del total del claro), y "?" amarillo (Cómo jugar).
+ * Devuelve `render` (estado) y `setTime` (mm:ss del cronómetro, sin `aria-live`: no se anuncia cada segundo).
  */
 export function mountHud(root: HTMLElement, store: Store) {
   const monthValue = el('strong', { class: 'hud__month-value' });
-  const monthCaption = el('span');
-  const seasonIcon = el('span', { class: 'hud__season', 'aria-hidden': 'true' });
-  const month = el('div', { class: 'hud__month' }, monthValue, el('span', { class: 'hud__month-caption' }, seasonIcon, monthCaption));
+  // Segunda línea (015): ícono de la estación (su nombre como etiqueta accesible) y el cronómetro de juego activo.
+  const seasonIcon = el('span', { class: 'hud__season', role: 'img' });
+  const time = el('span', { class: 'hud__time' }, '00:00');
+  const month = el('div', { class: 'hud__month' }, monthValue, el('span', { class: 'hud__month-caption' }, seasonIcon, time));
 
   const chip = (iconName: string, label: string, tag: 'div' | 'button' = 'div') => {
     const value = el('strong', { class: 'chip__value' });
@@ -34,14 +36,21 @@ export function mountHud(root: HTMLElement, store: Store) {
   spores.node.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'recruit' } }));
   help.addEventListener('click', () => store.dispatch({ type: 'openScreen', screen: { kind: 'howto', step: 0, back: 'game' } }));
 
-  return (state: AppState) => {
+  const setTime = (text: string) => {
+    setText(time, text);
+    time.setAttribute('aria-label', es.hud.time(text));
+  };
+  setTime('00:00');
+
+  const render = (state: AppState) => {
     const g = state.game;
     setText(monthValue, `${es.hud.month} ${g.month}${es.hud.of(MONTHS)}`);
-    setText(monthCaption, season(g.month));
+    seasonIcon.setAttribute('aria-label', season(g.month));
     seasonIcon.dataset.season = SEASON_SLUGS[seasonIndex(g.month)] ?? 'spring';
     setText(nutrients.value, String(g.nutrients));
     setText(spores.value, String(g.spores));
     spores.node.setAttribute('aria-label', es.hud.sporesButton(g.spores));
     setText(trees.value, `${revivedCount(g)}${es.hud.of(treeTotal(g))}`);
   };
+  return { render, setTime };
 }

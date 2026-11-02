@@ -181,6 +181,14 @@ Con las reglas de la prueba de concepto, un jugador atento ganaba hacia el mes 5
 
 Palancas de ajuste: coste de tejer, ganancia por tronco, número de troncos, meses totales y nutriente mensual por árbol.
 
+### Puntaje y estrellas (015)
+Solo la victoria da puntaje; la derrota sigue siendo suave, sin puntaje ni estrellas.
+- **Componentes:** victoria 500 · 80 por mes de sobra · 120 por árbol revivido · reservas (10 por nutriente y 20 por espora) · 60 por cupo libre del gremio · 5 por acción (tope 40) · 150 si las 5 especies actuaron · 1 por segundo por debajo de 8:00. Pesos en `config.ts › SCORE`.
+- **Estrellas por claro:** el bot con criterio juega cada claro al generarlo (25 s por mes); 2 estrellas desde el 90 % de su puntaje y 3 desde el 110 %.
+- **Cronómetro:** cuenta solo el juego activo (se pausa con cualquier hoja o carta) desde la primera acción.
+- **Récord local** por claro y `ScoreResult` con el registro de acciones, para rejugar y verificar.
+- **Hacia un leaderboard:** el "claro del día", una semilla por fecha del calendario igual para todos; un servidor rejugaría el registro antes de aceptar el puntaje. Pesos y 25 s por mes se recalibran con datos de playtest.
+
 ### Ideas del referente visual (sin decidir)
 El referente "Bosque pintado" muestra sistemas que el vertical slice no tiene: misiones con recompensas, estrellas como moneda, enciclopedia del bosque (hongos, plantas, aliados, lugares), logros y potenciadores con cargas (martillo, cambio, bolsa). El cambio 011 solo tomó su lenguaje visual. Si alguno entra al juego, necesita su propio cambio de OpenSpec con reglas y balance.
 

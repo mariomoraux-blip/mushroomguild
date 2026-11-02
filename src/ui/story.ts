@@ -1,5 +1,6 @@
 import { es } from '../copy/es';
-import { revivedCount, seasonIndex, treeTotal, type SpeciesId } from '../rules';
+import { revivedCount, SCORE_KEYS, seasonIndex, treeTotal, type SpeciesId } from '../rules';
+import { formatClock } from '../clock';
 import { INTRO_STEPS, type AppState, type Story, type Store } from '../store';
 import { el, portrait } from './dom';
 
@@ -65,17 +66,35 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
       case 'lost': {
         const won = story.kind === 'won';
         title = won ? es.story.wonTitle : es.story.lostTitle;
-        body.push(el('p', { class: 'story__text' }, won ? es.story.wonText(g.month) : es.story.lostText));
-        if (!won) body.push(el('p', { class: 'story__note' }, es.story.lostTip));
-        const stat = (value: string, label: string) => el('li', { class: 'story__stat' }, el('strong', {}, value), el('span', {}, label));
-        body.push(
-          el('h3', { class: 'story__sub' }, es.story.summary),
-          el('ul', { class: 'story__stats' },
-            stat(String(g.month), es.story.stats.month),
-            stat(`${revivedCount(g)}/${treeTotal(g)}`, es.story.stats.trees),
-            stat(String(g.nutrients), es.story.stats.nutrients),
-            stat(String(g.spores), es.story.stats.spores)),
-        );
+        body.push(el('p', { class: 'story__text' }, won ? es.story.wonText(g.wonMonth ?? g.month) : es.story.lostText));
+        const result = won ? state.ui.result : null;
+        if (result) {
+          // Puntaje (015): estrellas legibles sin color, total, tiempo, desglose y récord.
+          const { score, newRecord } = result;
+          body.push(
+            el('div', { class: 'score__stars', role: 'img', 'aria-label': es.scoring.stars(score.stars) },
+              ...[1, 2, 3].map((n) => el('span', { class: `score__star${n <= score.stars ? ' is-on' : ''}`, 'aria-hidden': 'true' }, '★'))),
+            el('p', { class: 'score__total' },
+              el('strong', {}, String(score.total)), ` ${es.scoring.total}`,
+              el('span', { class: 'score__time' }, ` · ${es.scoring.time} ${formatClock(score.timeMs)}`)),
+            ...(newRecord ? [el('p', { class: 'score__record' }, es.scoring.newRecord)] : []),
+            el('ul', { class: 'score__list', 'aria-label': es.scoring.title },
+              ...SCORE_KEYS.map((k) =>
+                el('li', { class: `score__row${score.breakdown[k] ? '' : ' is-zero'}` },
+                  el('span', {}, es.scoring.breakdown[k]), el('strong', {}, String(score.breakdown[k]))))),
+          );
+        } else {
+          if (!won) body.push(el('p', { class: 'story__note' }, es.story.lostTip));
+          const stat = (value: string, label: string) => el('li', { class: 'story__stat' }, el('strong', {}, value), el('span', {}, label));
+          body.push(
+            el('h3', { class: 'story__sub' }, es.story.summary),
+            el('ul', { class: 'story__stats' },
+              stat(String(g.month), es.story.stats.month),
+              stat(`${revivedCount(g)}/${treeTotal(g)}`, es.story.stats.trees),
+              stat(String(g.nutrients), es.story.stats.nutrients),
+              stat(String(g.spores), es.story.stats.spores)),
+          );
+        }
         actions.push(button('close', es.story.viewBoard), button('again', es.story.again, true));
         break;
       }
@@ -92,7 +111,8 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
 
   return (state: AppState) => {
     const story = state.ui.story;
-    const key = story ? JSON.stringify(story) : '';
+    // El puntaje llega justo después de la carta de victoria: también redibuja.
+    const key = story ? JSON.stringify(story) + (state.ui.result ? `|${state.ui.result.score.total}|${state.ui.result.newRecord}` : '') : '';
     if (key === shown) return;
     if (!shown && story) opener = document.activeElement as HTMLElement | null;
     shown = key;

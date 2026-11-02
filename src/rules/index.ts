@@ -7,3 +7,4 @@ export * from './idle';
 export * from './advice';
 export * from './autoplay';
 export * from './mapgen';
+export * from './scoring';

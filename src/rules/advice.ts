@@ -61,12 +61,38 @@ function callOption(s: GameState, glio: Member): (Advice & { kind: 'call'; rank:
   return best;
 }
 
+const canRecruit = (s: GameState) => s.spores >= COST.recruit && recruitableCount(s) < MAX_GUILD;
+
+/**
+ * Falta el rol del siguiente paso (015): un compañero que ya trabajó este mes (Amanita o Champiñón) tendría
+ * trabajo útil si le pasaran la voz, y el gremio no tiene Gliophorus.
+ */
+export function missingMessenger(s: GameState): boolean {
+  if (s.members.some((m) => m.species === 'gliophorus')) return false;
+  return s.tiles.some((t) => {
+    const w = workerAt(s, t.x, t.y);
+    if (!w || (w.species !== 'amanita' && w.species !== 'champi')) return false;
+    const awake: GameState = { ...s, members: s.members.map((m) => (m.id === w.id ? { ...m, used: false } : m)) };
+    return validTargets(awake, w.id).length > 0;
+  });
+}
+
 /**
  * Siguiente paso sugerido. Prioridad: despertar al Árbol Padre > revivir > hechizo > pasar la voz a una
- * Amanita > reclutar > descomponer > pasar la voz a un Champiñón > tejer > pasar la voz a un Lactarius >
- * terminar el mes.
+ * Amanita > descomponer > pasar la voz a un Champiñón > tejer > pasar la voz a un Lactarius > reclutar >
+ * terminar el mes. Reclutar solo se sugiere si nadie tiene una acción útil, o si falta la Gliophorus que
+ * pide el siguiente paso (player-guidance › Cómo reclutar).
  */
 export function advise(s: GameState): Advice {
+  const work = adviseWork(s);
+  if (work.kind === 'over' || !canRecruit(s)) return work;
+  if (work.kind === 'endMonth') return { kind: 'recruit', species: recruitPick(s) };
+  if (missingMessenger(s)) return { kind: 'recruit', species: 'gliophorus' };
+  return work;
+}
+
+/** Mejor trabajo del mes para los miembros listos, sin contar reclutar. */
+function adviseWork(s: GameState): Advice {
   if (s.status !== 'playing') return { kind: 'over' };
   const ready = s.members.filter((m) => !m.used);
   const targetsOf = (m: Member, spell?: Spell) => validTargets(s, m.id, spell);
@@ -95,7 +121,6 @@ export function advise(s: GameState): Advice {
   };
   const callAmanita = call(0);
   if (callAmanita) return callAmanita;
-  if (s.spores >= COST.recruit && recruitableCount(s) < MAX_GUILD) return { kind: 'recruit', species: recruitPick(s) };
   for (const m of of('champi')) {
     const t = closest(targetsOf(m), mother);
     if (t) return { kind: 'decompose', memberId: m.id, target: t };

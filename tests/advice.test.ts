@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
-import { act, advise, newGame, recruitPick, weaveGoal } from '../src/rules';
+import { act, advise, missingMessenger, newGame, recruitPick, weaveGoal } from '../src/rules';
 import { highlighted, idleHint, initialState, reduce, suggestedMember, suggestedTile } from '../src/store';
 import { ANIL, BRUNO, idOf, RUBI, setup } from './helpers';
 
@@ -69,10 +69,23 @@ describe('Requirement: Para qué sirve cada hongo', () => {
 });
 
 describe('Requirement: Cómo reclutar', () => {
-  it('Scenario: Primeras esporas — la pista sugiere reclutar y qué especie conviene', () => {
-    const s = setup({ spores: 2, used: [BRUNO] });
+  it('Scenario: Nadie tiene una acción útil — la pista sugiere reclutar y qué especie conviene', () => {
+    const s = setup({ spores: 2, used: [ANIL, BRUNO, RUBI] });
     expect(advise(s)).toEqual({ kind: 'recruit', species: 'lactarius' });
     expect(idleHint(s).text).toBe('Pista: tienes 2 esporas. Recluta un Lactarius en «+ Reclutar» o tocando las esporas.');
+  });
+
+  it('Scenario: Falta la Mensajera — Rubí revivió y podría revivir otro: la pista sugiere una Gliophorus', () => {
+    // Red junto a dos árboles grises del mapa clásico: (4,1) y (2,5).
+    const s0 = setup({ spores: 2, nutrients: 10, net: [{ x: 3, y: 1 }, { x: 2, y: 4 }] });
+    const s = act(s0, RUBI, 4, 1).state;
+    expect(missingMessenger(s)).toBe(true);
+    expect(advise(s)).toEqual({ kind: 'recruit', species: 'gliophorus' });
+  });
+
+  it('Scenario: Hay trabajo útil — con esporas y cupo, la pista sugiere a Bruno y no reclutar', () => {
+    const s = setup({ spores: 2 });
+    expect(advise(s)).toMatchObject({ kind: 'decompose', memberId: BRUNO });
   });
 
   it('con dos Lactarius (o la red junto al Árbol Padre) conviene una Gliophorus, y después otra Amanita', () => {

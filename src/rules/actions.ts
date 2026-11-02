@@ -94,6 +94,7 @@ export function act(s: GameState, id: number, x: number, y: number): ActionResul
   const t = n.tiles.find((tt) => tt.x === x && tt.y === y)!;
   m.used = true;
   m.at = { x, y };
+  n.log.push(m.species === 'mago' ? { type: 'act', memberId: id, x, y, spell: spellFor(t) } : { type: 'act', memberId: id, x, y });
 
   switch (m.species) {
     case 'lactarius':
@@ -155,6 +156,7 @@ export function recruit(s: GameState, species: RecruitableSpecies): ActionResult
   if (s.spores < COST.recruit) throw new RuleError(R.recruitCost(COST.recruit));
   const n = cloneState(s);
   n.spores -= COST.recruit;
+  n.log.push({ type: 'recruit', species });
   const m = addMember(n, species);
   m.used = true;
   return { state: n, message: es.log.recruited(m.name, es.species[species].name) };
@@ -164,6 +166,7 @@ export function recruit(s: GameState, species: RecruitableSpecies): ActionResult
 export function endMonth(s: GameState): ActionResult {
   if (s.status !== 'playing') return { state: s, message: '' };
   const n = cloneState(s);
+  n.log.push({ type: 'endMonth' });
   if (n.month >= MONTHS) {
     n.status = 'lost';
     return { state: n, message: es.log.winterEnd };

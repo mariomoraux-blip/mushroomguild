@@ -4,8 +4,8 @@ import type { GameState, Member, Mutable, RecruitableSpecies, Tile } from './typ
 
 export type MutableState = Mutable<GameState> & { tiles: Mutable<Tile>[]; members: Mutable<Member>[] };
 
-/** Partida nueva sobre un mapa (por defecto, el clásico del Capítulo 1). */
-export function newGame(map: readonly string[] = MAP): GameState {
+/** Partida nueva sobre un mapa (por defecto, el clásico del Capítulo 1). `mapId` identifica el claro (015). */
+export function newGame(map: readonly string[] = MAP, mapId: string = map === MAP ? 'clasico' : 'custom'): GameState {
   const tiles: Tile[] = [];
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
@@ -16,6 +16,8 @@ export function newGame(map: readonly string[] = MAP): GameState {
     }
   }
   const s: MutableState = {
+    mapId,
+    log: [],
     tiles,
     month: 1,
     nutrients: START_NUTRIENTS,

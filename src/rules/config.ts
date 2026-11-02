@@ -20,6 +20,28 @@ export const RECRUITABLE: readonly RecruitableSpecies[] = ['champi', 'lactarius'
 export const STARTING_GUILD: readonly RecruitableSpecies[] = ['lactarius', 'champi', 'amanita'];
 
 /**
+ * Puntaje (015 · scoring). Solo con victoria. Pesos y topes del desglose; se recalibran con datos de playtest.
+ */
+export const SCORE = {
+  victory: 500,
+  perMonthLeft: 80, // × (MONTHS − mes de victoria)
+  perTree: 120, // × árboles revividos, sin el Árbol Padre
+  perNutrient: 10,
+  perSpore: 20,
+  perFreeSlot: 60, // × (MAX_GUILD − miembros reclutables)
+  perAction: 5,
+  actionCap: 40,
+  variety: 150, // las 5 especies actuaron al menos una vez
+  timeParS: 480, // 1 punto por segundo por debajo de 8:00
+} as const;
+/** Versión de la fórmula: cambia la clave del récord guardado y el `ScoreResult`. */
+export const SCORE_VERSION = 1;
+/** Estrellas por claro: 2 desde el 90 % y 3 desde el 110 % del puntaje del bot con criterio en ese claro. */
+export const STARS = { two: 0.9, three: 1.1 } as const;
+/** Segundos de juego por mes que se suponen para la partida de referencia del bot. */
+export const REFERENCE_SECONDS_PER_MONTH = 25;
+
+/**
  * Generador de mapas (cada partida nueva es un claro distinto). Un mapa solo se acepta si la
  * política de las pistas (`advise`) lo gana entre `minMonth` y `maxMonth`: ni regalado ni imposible.
  */

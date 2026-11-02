@@ -13,6 +13,7 @@ import {
   RuleError,
   validTargets,
   type GameState,
+  type ScoreResult,
   type RecruitableSpecies,
   type SpeciesId,
   type Spell,
@@ -50,6 +51,8 @@ export interface UiState {
   readonly story: Story | null;
   /** Pantalla abierta sobre la partida (las hojas, como la ficha, van encima). */
   readonly screen: Screen | null;
+  /** Puntaje de la victoria (015), con si supera el récord guardado de su claro. */
+  readonly result: { readonly score: ScoreResult; readonly newRecord: boolean } | null;
   readonly notice: Notice;
   /** Especies cuya ficha ya se mostró al seleccionarlas (se recuerdan entre visitas). */
   readonly seen: readonly SpeciesId[];
@@ -78,7 +81,9 @@ export type Action =
   | { type: 'storyNext' }
   | { type: 'closeStory' }
   /** Partida nueva (la crea quien llama: el store no usa azar). */
-  | { type: 'restart'; game: GameState };
+  | { type: 'restart'; game: GameState }
+  /** Puntaje de la victoria (lo calcula quien tiene el reloj: el store no lee la hora). */
+  | { type: 'scored'; score: ScoreResult; newRecord: boolean };
 
 const info = (text: string): Notice => ({ text, tone: 'info' });
 const warn = (text: string): Notice => ({ text, tone: 'warn' });
@@ -148,10 +153,20 @@ export function initialState(game: GameState = newGame(), seen: readonly Species
       sheet: null,
       story: o.intro && !o.title ? { kind: 'intro', step: 0 } : null,
       screen: o.title ? { kind: 'title' } : null,
+      result: null,
       notice: idleHint(game),
       seen,
     },
   };
+}
+
+/**
+ * ¿Corre el cronómetro? (015 · Cronómetro) Desde la primera acción aceptada, mientras la partida sigue y no hay
+ * hoja, carta ni pantalla encima del tablero. La pestaña oculta la decide quien llama (`visible`).
+ */
+export function clockShouldRun(state: AppState, visible: boolean): boolean {
+  const { game, ui } = state;
+  return visible && game.status === 'playing' && game.log.length > 0 && !ui.sheet && !ui.story && !ui.screen;
 }
 
 /** Pantalla a la que se vuelve al cerrar "Cómo jugar" o "El gremio". */
@@ -281,7 +296,9 @@ export function reduce(state: AppState, action: Action): AppState {
     case 'closeStory':
       return ui.story ? { game, ui: { ...ui, story: null } } : state;
     case 'restart':
-      return { game: action.game, ui: { selected: null, spell: null, sheet: null, story: null, screen: null, notice: idleHint(action.game), seen: ui.seen } };
+      return { game: action.game, ui: { selected: null, spell: null, sheet: null, story: null, screen: null, result: null, notice: idleHint(action.game), seen: ui.seen } };
+    case 'scored':
+      return game.status === 'won' ? { game, ui: { ...ui, result: { score: action.score, newRecord: action.newRecord } } } : state;
   }
 }
 

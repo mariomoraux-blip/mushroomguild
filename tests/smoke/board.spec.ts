@@ -489,3 +489,48 @@ test('Efectos: animaciones al jugar, nada con movimiento reducido, y carga difer
     await ctx.close();
   }
 });
+
+test('Puntaje: cronómetro que se pausa con una carta, carta de victoria con estrellas y almacenamiento que falla', async ({ page, browser }, info) => {
+  test.setTimeout(90_000);
+  const time = () => page.locator('.hud__time').textContent();
+  // Cronómetro: en 00:00 hasta la primera acción; corre; se pausa con la carta de la maga.
+  await page.goto('/?debugState=mageNextMonth');
+  await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
+  await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', 'Primavera');
+  await page.waitForTimeout(1300);
+  expect(await time()).toBe('00:00');
+  await page.locator('.end').click(); // primera acción aceptada: terminar el mes → llega la maga
+  await expect(page.locator('#story')).toContainText('Llegó Maestra Bruma');
+  const paused = await time();
+  await page.waitForTimeout(2200);
+  expect(await time()).toBe(paused);
+  await page.getByRole('button', { name: 'Seguir' }).click();
+  await expect.poll(time, { timeout: 4000 }).not.toBe(paused);
+  // Victoria: estrellas legibles sin color, total, tiempo y desglose.
+  await page.goto('/?debugState=nearWin');
+  await page.locator('.card--amanita').click();
+  await page.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
+  const stars = page.locator('#story .score__stars');
+  await expect(stars).toHaveAttribute('aria-label', /^[123] de 3 estrellas$/);
+  await expect(page.locator('#story .score__row')).toHaveCount(8);
+  await expect(page.locator('#story')).not.toContainText('Nuevo récord');
+  if (info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390') await page.screenshot({ path: `docs/screenshots/015-victoria-${info.project.name}.png` });
+  // localStorage que falla: la carta se muestra completa y no hay errores sin manejar.
+  if (info.project.name !== 'vertical-390x844') return;
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const p2 = await ctx.newPage();
+  const errors: string[] = [];
+  p2.on('pageerror', (e) => errors.push(e.message));
+  await p2.addInitScript(() => {
+    Storage.prototype.getItem = () => { throw new Error('bloqueado'); };
+    Storage.prototype.setItem = () => { throw new Error('lleno'); };
+  });
+  await p2.goto('/?debugState=nearWin');
+  await p2.locator('.card--amanita').click();
+  await p2.keyboard.press('Escape'); // la ficha de primera vez (sin almacenamiento, todas son nuevas)
+  await p2.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
+  await expect(p2.locator('#story .score__stars')).toBeVisible();
+  await expect(p2.locator('#story .score__row')).toHaveCount(8);
+  expect(errors).toEqual([]);
+  await ctx.close();
+});
