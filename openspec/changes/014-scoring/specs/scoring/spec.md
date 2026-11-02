@@ -3,12 +3,21 @@
 ## ADDED Requirements
 
 ### Requirement: Cronómetro
-El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, solo durante el juego activo. SHALL empezar al cerrar la intro (o al empezar la partida si no hay intro), pausarse con cualquier carta abierta (intro, llegada de la maga, final), con la hoja de reclutar abierta y con la pestaña oculta, y detenerse al despertar al Árbol Padre o al terminar el invierno. Los números SHALL ser tabulares y el cronómetro no SHALL anunciarse cada segundo al lector de pantalla.
+El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, solo durante el juego activo. SHALL empezar cuando el tablero acepta la primera acción del jugador (actuar sobre una casilla, reclutar o terminar el día), haya intro o no; pausarse con cualquier hoja o pantalla encima del tablero (cartas de historia, fichas, hechizo, reclutar, Libreta de campo, "Cómo jugar", "El gremio") y con la pestaña oculta; y detenerse al despertar al Árbol Padre o al terminar el invierno. Los números SHALL ser tabulares y el cronómetro no SHALL anunciarse cada segundo al lector de pantalla.
+
+#### Scenario: Antes de la primera acción
+- WHEN el jugador cierra la intro y mira el tablero 20 segundos sin actuar
+- THEN el cronómetro sigue en 00:00
+- AND empieza a correr cuando Bruno descompone el primer tronco
 
 #### Scenario: Carta abierta
 - WHEN llega Maestra Bruna y su carta queda abierta 30 segundos
 - THEN el cronómetro no avanza mientras la carta está abierta
 - AND vuelve a correr al cerrarla
+
+#### Scenario: Hoja abierta
+- WHEN el jugador abre la ficha de un miembro, la hoja de reclutar o "Cómo jugar"
+- THEN el cronómetro no avanza hasta que la cierra
 
 #### Scenario: Fin de la partida
 - WHEN la Amanita despierta al Árbol Padre
@@ -35,18 +44,19 @@ Al ganar, el juego SHALL calcular un puntaje con `score(estadoFinal, timeMs)`, f
 - THEN no se calcula puntaje y la carta de final no muestra puntaje ni estrellas
 
 ### Requirement: Estrellas
-Toda victoria SHALL dar al menos 1 estrella; 2 estrellas con puntaje ≥ `umbral2` y 3 con puntaje ≥ `umbral3`. Los umbrales SHALL vivir en `config.ts` y calibrarse con el bot con criterio a 25 s de juego por día: `umbral2` es la mediana del bot y `umbral3` su percentil 90.
+Toda victoria SHALL dar al menos 1 estrella; 2 estrellas con puntaje ≥ `umbral2` y 3 con puntaje ≥ `umbral3`. Los umbrales SHALL calcularse por claro: al generar el claro, el bot con criterio (la política de las pistas) juega una partida determinista sobre él, modelando 25 s de juego por día, y su puntaje es la referencia; `umbral2` = 90 % y `umbral3` = 110 % de la referencia, redondeados. Los factores (0,9 y 1,1) y los 25 s por día SHALL vivir en `config.ts`. La calibración SHALL tardar menos de 100 ms en un teléfono de gama media.
 
 #### Scenario: Límites exactos
-- WHEN el puntaje es `umbral2 − 1`, `umbral2` y `umbral3`
+- WHEN el puntaje es `umbral2 − 1`, `umbral2` y `umbral3` del claro
 - THEN las estrellas son 1, 2 y 3
 
-#### Scenario: Calibración
-- WHEN `balance.test.ts` juega los 100 claros con el bot con criterio
-- THEN `umbral2` coincide con la mediana redondeada y `umbral3` con el percentil 90
+#### Scenario: Calibración por claro
+- WHEN se genera el claro de la semilla 1
+- THEN la referencia es el puntaje del bot con criterio sobre ese claro, y `umbral2` y `umbral3` son su 90 % y su 110 %
+- AND el bot con criterio, jugando ese claro, obtiene 2 estrellas
 
 ### Requirement: Resultado verificable
-Al ganar, el juego SHALL armar un `ScoreResult` con `{ scoringVersion, mapId, wonDay, timeMs, total, breakdown, stars, actionLog }`. `actionLog` es la lista ordenada de acciones (miembro y casilla, hechizo, reclutar, fin del día). Rejugar el `actionLog` desde el claro de `mapId` SHALL producir el mismo estado final y el mismo total con el mismo `timeMs`.
+Al ganar, el juego SHALL armar un `ScoreResult` con `{ scoringVersion, mapId, wonDay, timeMs, total, breakdown, stars, actionLog }`. `mapId` es `clasico` o `seed-<n>`. `actionLog` es la lista ordenada de acciones (miembro y casilla, hechizo, reclutar, fin del día). Rejugar el `actionLog` desde el claro de `mapId` SHALL producir el mismo estado final y el mismo total con el mismo `timeMs`.
 
 #### Scenario: Rejugar
 - WHEN se rejuega el `actionLog` de una victoria desde su `mapId`
@@ -56,8 +66,16 @@ Al ganar, el juego SHALL armar un `ScoreResult` con `{ scoringVersion, mapId, wo
 El juego SHALL guardar solo el mejor `ScoreResult` de cada claro en `localStorage`, con una clave versionada por `mapId` y `scoringVersion`. Si leer o escribir falla, el juego SHALL seguir sin récord. No hay nombres de jugador, cuentas ni llamadas de red.
 
 #### Scenario: Nuevo récord
-- WHEN una victoria supera el mejor resultado guardado de su claro
+- WHEN una victoria supera el mejor resultado guardado de su mismo `mapId`
 - THEN la carta de victoria dice "Nuevo récord" y se guarda el nuevo resultado
+
+#### Scenario: Primer resultado de un claro
+- WHEN se gana un claro que no tiene resultado guardado
+- THEN se guarda el resultado y la carta no dice "Nuevo récord"
+
+#### Scenario: Estado de depuración
+- WHEN se gana desde `?debugState`
+- THEN no se lee ni se guarda récord
 
 #### Scenario: Almacenamiento que falla
 - WHEN `localStorage` lanza un error al leer o escribir
