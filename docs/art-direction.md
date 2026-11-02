@@ -7,17 +7,22 @@ Estilo **ilustrado con contorno café**, formas redondas y rubor. La **luz cambi
 - Contorno café oscuro (`--ink`), nunca negro. Grosor constante.
 - Cada especie se reconoce por **silueta**, no solo por color:
 
-| Especie | Silueta | Color base | Accesorio de rol |
-| --- | --- | --- | --- |
-| Ostra (Tejedora) | Sombrero en abanico ondulado, tipo chanterelle | Azul grisáceo | Carrete de hilo de micelio |
-| Champiñón (Descompositor) | Domo bajo y ancho | Café claro | Canasta |
-| Amanita (Sanadora) | Domo alto rojo con lunares crema | Rojo | Bolso con hojas que curan |
+| Especie (nombre) | Rol | Silueta | Color | Accesorio | Rasgo especial |
+| --- | --- | --- | --- | --- | --- |
+| Champiñón ("Bruno") | Descompositor | Domo bajo y ancho | Café claro | Canasta | — |
+| *Lactarius indigo* ("Añil") | Tejedora | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Gotitas de látex azul; el micelio que teje tiene destellos índigo |
+| *Amanita muscaria* ("Rubí") | Sanadora | Domo alto con verrugas y falda en el tallo | Rojo y crema | Bolso con hojas que curan | — |
+| *Gliophorus psittacinus* ("Perico") | Mensajera | Campana pequeña, viscosa y brillante | Verde loro | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
+| *Conocybe arcana* ("Maese Bruma") | Mago | Cono alto y puntiagudo, doblado en la punta como sombrero de hechicero; el más alto | Violeta profundo con motas que brillan como estrellas | Bastón de ramita con una espora luminosa | Barba de hilos de micelio; brilla siempre un poco |
+
+Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña y cono alto deben distinguirse en negro sobre blanco a 56 px.
+*Conocybe* es un género real de sombrero cónico; *arcana* es inventado: el mago es el único personaje fantástico.
 
 - Antes de Blender: una hoja de personaje por especie (frente, perfil, ¾ espalda, paleta, escala), formato de `references/mushie-character-sheet.jpg`.
 - Tamaño en pantalla: ~56 px de alto en un teléfono de 390 px. Render a 2× (≈ 128 px).
 
 ## Luz por estación
-Un solo juego de assets; cada estación es una **gradación de color** (filtro de color de Phaser) sobre el escenario. Personajes y UI no se gradúan.
+Un solo juego de assets; cada estación es una **gradación de color** (filtro de color de Phaser) sobre el escenario. Personajes y UI no se gradúan, con una excepción intencional: la Gliophorus cambia de tono con la estación (tinte del sprite).
 
 | Estación | Días | Hora | Gradación | Micelio |
 | --- | --- | --- | --- | --- |

@@ -9,11 +9,18 @@ Una partida nueva SHALL abrir con tres cartas de una frase cada una, que se pued
 - WHEN el jugador pulsa "Saltar" en la primera carta
 - THEN se cierra la intro y la bitácora invita a elegir un miembro del gremio
 
+### Requirement: Llegada del mago
+Cuando Maese Bruma se une al gremio, el juego SHALL mostrar una carta breve que lo presente y explique sus dos hechizos.
+
+#### Scenario: Amanecer con el mago
+- WHEN empieza el día en que llega Maese Bruma
+- THEN aparece la carta "El bosque volvió a hablar, y alguien escuchó." con sus hechizos en una línea cada uno
+
 ### Requirement: Finales
 Al ganar o al terminar el invierno, el juego SHALL mostrar una carta de final con un resumen y la opción de jugar otra vez.
 
 #### Scenario: Victoria
-- WHEN la Amanita despierta al Árbol Madre en el día 8
+- WHEN la Amanita muscaria despierta al Árbol Madre en el día 8
 - THEN la carta dice "El Árbol Madre despertó en el día 8." e indica los árboles revividos
 
 #### Scenario: Fin del invierno
@@ -42,4 +49,4 @@ La gradación del escenario SHALL cambiar con la estación: mañana, mediodía, 
 
 #### Scenario: Personajes y UI
 - WHEN cambia la estación
-- THEN los personajes y los paneles conservan sus colores originales
+- THEN los personajes y los paneles conservan sus colores originales, excepto la Gliophorus psittacinus, que adopta el tono de la estación

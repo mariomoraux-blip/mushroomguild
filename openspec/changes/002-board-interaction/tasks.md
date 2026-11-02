@@ -15,7 +15,9 @@
 - [ ] 3.2 Selección: resaltar solo `validTargets`; tocar casilla resaltada ejecuta `act`
 - [ ] 3.3 Aviso breve de bitácora sobre el dock con el motivo de una acción inválida
 - [ ] 3.4 Reclutar por especie (hoja inferior en móvil), deshabilitado si no alcanza o el gremio está completo
-- [ ] 3.5 Terminar el día; en el día 12 el botón dice "Terminar el invierno"
+- [ ] 3.5 Maese Bruma: al seleccionarlo, elegir hechizo (Brote arcano / Lluvia de esporas) y luego casilla; mostrar si su magia ya se usó esta estación
+- [ ] 3.6 Fichas de criatura: un botón de información por especie abre su ficha (nombre científico, rol, acción)
+- [ ] 3.7 Terminar el día; en el día 12 el botón dice "Terminar el invierno"
 
 ## 4. HUD y accesibilidad
 - [ ] 4.1 HUD compacto: día de 12 y estación, nutrientes, esporas, árboles vivos de 5
@@ -23,5 +25,5 @@
 - [ ] 4.3 Pausar al ocultar la pestaña
 
 ## 5. Verificación
-- [ ] 5.1 Playwright con emulación táctil: elegir Ostra, tejer, terminar día; capturas a 390 × 844, 844 × 390 y 1280 × 800
+- [ ] 5.1 Playwright con emulación táctil: elegir a la Lactarius indigo, tejer, terminar día; capturas a 390 × 844, 844 × 390 y 1280 × 800
 - [ ] 5.2 Pull request con capturas, link de preview y guion de playtest en teléfono real

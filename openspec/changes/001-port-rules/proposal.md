@@ -6,6 +6,7 @@ La prueba de concepto validó el loop y el balance, pero vive en un solo HTML. A
 ## Qué cambia
 - Proyecto Vite + TypeScript + Phaser + Vitest, con scripts `dev`, `build`, `test`.
 - `src/rules/` portado desde `poc/rules.js`, con tipos explícitos y un generador aleatorio con semilla.
+- Las 5 especies del gremio: 3 portadas del PoC y 2 nuevas desde la spec (Gliophorus psittacinus y el mago Conocybe arcana).
 - Pruebas por cada requisito de `game-rules` y una prueba de balance por simulación.
 - Una escena de Phaser vacía que arranca y muestra el título (prueba de humo).
 

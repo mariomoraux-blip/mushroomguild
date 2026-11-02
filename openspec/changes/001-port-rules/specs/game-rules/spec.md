@@ -8,7 +8,8 @@ El juego SHALL crear un tablero vertical de 5 columnas por 8 filas a partir del 
 #### Scenario: Partida nueva
 - WHEN se inicia una partida
 - THEN el día es 1, hay 2 nutrientes y 0 esporas
-- AND el gremio tiene una Ostra, un Champiñón y una Amanita, todos disponibles
+- AND el gremio tiene una Lactarius indigo, un Champiñón y una Amanita muscaria, todos disponibles
+- AND el mago no está en el gremio
 - AND solo la casilla Hogar pertenece a la red
 
 ### Requirement: Alcance de la red
@@ -25,11 +26,11 @@ Cada miembro SHALL actuar como máximo una vez por día.
 - WHEN un miembro que ya actuó hoy intenta actuar de nuevo
 - THEN la acción se rechaza indicando que descansa hasta el amanecer
 
-### Requirement: Tejer micelio (Ostra)
-La Ostra SHALL convertir una tierra adyacente a la red en parte de la red a cambio de 1 nutriente.
+### Requirement: Tejer micelio (Lactarius indigo)
+La Lactarius indigo SHALL convertir una tierra adyacente a la red en parte de la red a cambio de 1 nutriente.
 
 #### Scenario: Tejer con nutrientes
-- WHEN la Ostra teje sobre tierra adyacente y hay al menos 1 nutriente
+- WHEN la Lactarius indigo teje sobre tierra adyacente y hay al menos 1 nutriente
 - THEN la casilla pasa a la red y los nutrientes bajan en 1
 
 #### Scenario: Tejer sin nutrientes
@@ -44,12 +45,51 @@ El Champiñón SHALL obtener 3 nutrientes de un tronco adyacente a la red; el tr
 - THEN se suman 3 nutrientes
 - AND la casilla queda como tierra sin micelio
 
-### Requirement: Revivir árboles (Amanita)
-La Amanita SHALL revivir un árbol gris adyacente a la red por 3 nutrientes; el árbol revivido SHALL entrar a la red.
+### Requirement: Revivir árboles (Amanita muscaria)
+La Amanita muscaria SHALL revivir un árbol gris adyacente a la red por 3 nutrientes; el árbol revivido SHALL entrar a la red.
 
 #### Scenario: Revivir extiende la red
-- WHEN la Amanita revive un árbol con 3 o más nutrientes
+- WHEN la Amanita muscaria revive un árbol con 3 o más nutrientes
 - THEN el árbol queda vivo y en la red, y los nutrientes bajan en 3
+
+### Requirement: Pasar la voz (Gliophorus psittacinus)
+La Gliophorus psittacinus SHALL, sobre un árbol vivo, cambiar 2 esporas por 3 nutrientes.
+
+#### Scenario: Trueque
+- WHEN la Gliophorus actúa sobre un árbol vivo con 2 o más esporas
+- THEN las esporas bajan en 2 y los nutrientes suben en 3
+
+#### Scenario: Sin esporas
+- WHEN hay menos de 2 esporas
+- THEN la acción se rechaza con "Faltan esporas: pasar la voz cuesta 2."
+
+### Requirement: Llegada del mago (Conocybe arcana)
+Maese Bruma SHALL unirse al gremio al amanecer siguiente a revivir el segundo árbol, una sola vez por partida. No se puede reclutar y no cuenta en el límite de 6.
+
+#### Scenario: Segundo árbol revivido
+- WHEN se revive el segundo árbol durante el día 4
+- THEN al empezar el día 5 Maese Bruma está en el gremio y disponible
+
+#### Scenario: Reclutar al mago
+- WHEN el jugador intenta reclutar un Conocybe arcana
+- THEN la acción no está disponible
+
+### Requirement: Hechizos
+Maese Bruma SHALL lanzar como máximo un hechizo por estación, a elegir entre:
+- Brote arcano: convierte una roca adyacente a la red en tierra con micelio.
+- Lluvia de esporas: sobre un árbol vivo, suma de inmediato 1 espora y 1 nutriente por cada árbol vivo.
+
+#### Scenario: Brote arcano
+- WHEN Maese Bruma actúa sobre una roca adyacente a la red
+- THEN la roca pasa a ser tierra con micelio
+
+#### Scenario: Segundo hechizo en la misma estación
+- WHEN Maese Bruma ya lanzó un hechizo en Verano y lo intenta de nuevo en Verano
+- THEN la acción se rechaza indicando que su magia vuelve con la próxima estación
+
+#### Scenario: Nueva estación
+- WHEN empieza Otoño
+- THEN Maese Bruma puede lanzar un hechizo otra vez
 
 ### Requirement: Amanecer
 Al terminar el día, cada árbol vivo SHALL producir 1 espora y 1 nutriente, y todos los miembros SHALL quedar disponibles.
@@ -59,7 +99,7 @@ Al terminar el día, cada árbol vivo SHALL producir 1 espora y 1 nutriente, y t
 - THEN se suman 2 esporas y 2 nutrientes, y el día avanza en 1
 
 ### Requirement: Reclutar
-Con 2 esporas el jugador SHALL poder reclutar un miembro de cualquier especie, hasta un gremio de 6; el recluta SHALL trabajar desde el día siguiente.
+Con 2 esporas el jugador SHALL poder reclutar un Champiñón, una Lactarius indigo, una Amanita muscaria o una Gliophorus psittacinus, hasta 6 miembros reclutables; el recluta SHALL trabajar desde el día siguiente.
 
 #### Scenario: Gremio completo
 - WHEN el gremio tiene 6 miembros
@@ -73,10 +113,10 @@ El juego SHALL tener 12 días agrupados en 4 estaciones de 3 días: Primavera, V
 - THEN el día 4 pertenece a Verano
 
 ### Requirement: Victoria
-La Amanita SHALL despertar al Árbol Madre si este toca la red, hay 6 nutrientes y al menos 2 árboles revividos; eso SHALL terminar la partida con victoria.
+La Amanita muscaria SHALL despertar al Árbol Madre si este toca la red, hay 6 nutrientes y al menos 2 árboles revividos; eso SHALL terminar la partida con victoria.
 
 #### Scenario: Bosque que aún no habla
-- WHEN la Amanita intenta despertar al Árbol Madre con 1 árbol revivido
+- WHEN la Amanita muscaria intenta despertar al Árbol Madre con 1 árbol revivido
 - THEN la acción se rechaza pidiendo revivir al menos 2 árboles
 
 ### Requirement: Final suave
