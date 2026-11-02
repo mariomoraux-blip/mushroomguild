@@ -80,6 +80,8 @@ export type Action =
   | { type: 'play' }
   | { type: 'storyNext' }
   | { type: 'closeStory' }
+  /** "Ver final" tras "Ver el claro": la partida terminada vuelve a su carta de final (017). */
+  | { type: 'showEnd' }
   /** Partida nueva (la crea quien llama: el store no usa azar). */
   | { type: 'restart'; game: GameState }
   /** Puntaje de la victoria (lo calcula quien tiene el reloj: el store no lee la hora). */
@@ -295,6 +297,8 @@ export function reduce(state: AppState, action: Action): AppState {
     }
     case 'closeStory':
       return ui.story ? { game, ui: { ...ui, story: null } } : state;
+    case 'showEnd':
+      return game.status === 'playing' || ui.story ? state : { game, ui: { ...cleared(ui, ui.notice), story: { kind: game.status } } };
     case 'restart':
       return { game: action.game, ui: { selected: null, spell: null, sheet: null, story: null, screen: null, result: null, notice: idleHint(action.game), seen: ui.seen } };
     case 'scored':

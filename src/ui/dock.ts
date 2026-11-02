@@ -41,7 +41,8 @@ export function mountDock(root: HTMLElement, store: Store) {
     if (target.dataset.action === 'recruit') store.dispatch({ type: 'openSheet', sheet: { kind: 'recruit' } });
     else if (target.dataset.id) store.dispatch({ type: 'select', id: Number(target.dataset.id) });
   });
-  end.addEventListener('click', () => store.dispatch({ type: 'endMonth' }));
+  // Con la partida terminada, el mismo botón vuelve a la carta de final (017): nunca queda sin salida.
+  end.addEventListener('click', () => store.dispatch(store.getState().game.status === 'playing' ? { type: 'endMonth' } : { type: 'showEnd' }));
 
   return (state: AppState) => {
     const g = state.game;
@@ -85,8 +86,7 @@ export function mountDock(root: HTMLElement, store: Store) {
     recruit.classList.toggle('is-used', g.spores < COST.recruit || recruitableCount(g) >= MAX_GUILD);
 
     const last = g.month >= MONTHS;
-    setText(endLabel, last ? es.dock.endWinterShort : es.dock.endShort);
-    end.setAttribute('aria-label', last ? es.dock.endWinter : es.dock.endMonth);
-    end.disabled = !playing;
+    setText(endLabel, !playing ? es.dock.showEndShort : last ? es.dock.endWinterShort : es.dock.endShort);
+    end.setAttribute('aria-label', !playing ? es.dock.showEnd : last ? es.dock.endWinter : es.dock.endMonth);
   };
 }

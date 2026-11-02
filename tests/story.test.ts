@@ -78,6 +78,19 @@ describe('Requirement: Finales', () => {
     expect(again.ui.story).toBeNull();
     expect(again.ui.seen).toEqual(['champi']);
   });
+
+  it('Scenario: Volver al final — tras "Ver el claro", "Ver final" reabre la carta', () => {
+    const lost = run(initialState({ ...newGame(), month: 12 }), { type: 'endMonth' }, { type: 'closeStory' });
+    expect(run(lost, { type: 'showEnd' }).ui.story).toEqual({ kind: 'lost' });
+    const g = nearWin();
+    const won = run(initialState(g), { type: 'select', id: RUBI }, { type: 'tapTile', x: mother(g).x, y: mother(g).y }, { type: 'closeStory' });
+    expect(run(won, { type: 'showEnd' }).ui.story).toEqual({ kind: 'won' });
+  });
+
+  it('"Ver final" no hace nada mientras se juega', () => {
+    const s = initialState(newGame());
+    expect(run(s, { type: 'showEnd' })).toBe(s);
+  });
 });
 
 describe('Requirement: El color vuelve', () => {
