@@ -1,4 +1,5 @@
 import { COST, GAIN } from '../rules/config';
+import type { IdleReason } from '../rules/idle';
 import type { RecruitableSpecies, SpeciesId } from '../rules/types';
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
@@ -8,12 +9,32 @@ export const es = {
   title: 'El Gremio de los Hongos',
 
   species: {
-    champi: { name: 'Champiñón', role: 'Descompositor', verb: `Descompone un tronco vecino a la red (+${plural(GAIN.log, 'nutriente')}).` },
-    lactarius: { name: 'Lactarius indigo', role: 'Tejedor', verb: `Teje micelio en tierra vecina a la red (${plural(COST.weave, 'nutriente')}).` },
-    amanita: { name: 'Amanita muscaria', role: 'Sanadora', verb: `Revive un árbol gris vecino a la red (${plural(COST.revive, 'nutriente')}).` },
-    gliophorus: { name: 'Gliophorus psittacinus', role: 'Mensajera', verb: `Pasa la voz desde un árbol vivo (−${plural(COST.message, 'espora')}, +${plural(GAIN.message, 'nutriente')}).` },
-    mago: { name: 'Conocybe arcana', role: 'Mago', verb: 'Lanza un hechizo por estación: Brote arcano o Lluvia de esporas.' },
-  } satisfies Record<SpeciesId, { name: string; role: string; verb: string }>,
+    champi: {
+      name: 'Champiñón', short: 'Champiñón', scientific: 'Agaricus bisporus', role: 'Descompositor',
+      verb: `Descompone un tronco vecino a la red (+${plural(GAIN.log, 'nutriente')}).`,
+      quip: 'Comestible: sí, y lo sabe. Por eso trabaja rápido.',
+    },
+    lactarius: {
+      name: 'Lactarius indigo', short: 'Lactarius', scientific: 'Lactarius indigo', role: 'Tejedor',
+      verb: `Teje micelio en tierra vecina a la red (${plural(COST.weave, 'nutriente')}).`,
+      quip: 'Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.',
+    },
+    amanita: {
+      name: 'Amanita muscaria', short: 'Amanita', scientific: 'Amanita muscaria', role: 'Sanadora',
+      verb: `Revive un árbol gris vecino a la red (${plural(COST.revive, 'nutriente')}).`,
+      quip: 'Comestible: no. Bonita: muchísimo. Úsese solo para curar árboles.',
+    },
+    gliophorus: {
+      name: 'Gliophorus psittacinus', short: 'Gliophorus', scientific: 'Gliophorus psittacinus', role: 'Mensajera',
+      verb: `Pasa la voz desde un árbol vivo (−${plural(COST.message, 'espora')}, +${plural(GAIN.message, 'nutriente')}).`,
+      quip: 'Viscosa como un caramelo y habladora como un loro. Cambia de color con los días.',
+    },
+    mago: {
+      name: 'Conocybe arcana', short: 'Conocybe', scientific: 'Conocybe arcana', role: 'Mago',
+      verb: 'Lanza un hechizo por estación: Brote arcano o Lluvia de esporas.',
+      quip: 'No aparece en ningún libro. Él dice que fueron los libros los que no lo encontraron.',
+    },
+  } satisfies Record<SpeciesId, { name: string; short: string; scientific: string; role: string; verb: string; quip: string }>,
 
   /** Nombres de los miembros, en orden de llegada. */
   memberNames: {
@@ -27,6 +48,10 @@ export const es = {
   spells: {
     sprout: 'Brote arcano',
     rain: 'Lluvia de esporas',
+  },
+  spellHelp: {
+    sprout: 'Convierte una roca vecina a la red en tierra con micelio.',
+    rain: 'Sobre un árbol vivo: 1 espora y 1 nutriente ya, por cada árbol vivo.',
   },
 
   seasons: ['Primavera', 'Verano', 'Otoño', 'Invierno'],
@@ -56,6 +81,76 @@ export const es = {
     rainNeedsTree: 'La Lluvia de esporas se lanza sobre un árbol vivo.',
     guildFull: 'El gremio está completo.',
     recruitCost: (n: number) => `Reclutar cuesta ${n} esporas.`,
+  },
+
+  /** Motivos de inactividad (`idleReason`); la bitácora muestra "Nombre: motivo". */
+  idle: {
+    noLogs: 'no hay troncos junto a la red. Teje hacia uno.',
+    noNutrients: 'faltan nutrientes.',
+    noSoil: 'no hay tierra junto a la red.',
+    noGreyTrees: 'no hay árboles grises junto a la red.',
+    noSpores: `faltan esporas: pasar la voz cuesta ${COST.message}.`,
+    noLiveTrees: 'no hay árboles vivos todavía.',
+    magicSpent: 'su magia vuelve con la próxima estación.',
+  } satisfies Record<IdleReason, string>,
+  idleLine: (name: string, reason: string) => `${name}: ${reason}`,
+
+  /** Pistas de la bitácora (del PoC). */
+  hints: {
+    pickMember: 'Elige a un miembro del gremio.',
+    allWorked: 'Todos trabajaron. Termina el día.',
+    pickTile: (name: string) => `${name}: toca una casilla resaltada.`,
+    pickSpell: (name: string) => `${name}: elige un hechizo.`,
+    won: 'El bosque respira de nuevo.',
+    lost: 'El invierno terminó.',
+  },
+
+  hud: {
+    label: 'Estado del bosque',
+    day: 'Día',
+    of: (n: number) => `/${n}`,
+    nutrients: 'nutrientes',
+    spores: 'esporas',
+    trees: 'árboles vivos',
+  },
+
+  dock: {
+    label: 'Gremio',
+    ready: 'Lista',
+    resting: 'Descansa',
+    magicBack: (season: string) => `Magia: vuelve en ${season.toLowerCase()}`,
+    magicGone: 'Magia: agotada',
+    endDay: 'Terminar el día',
+    endWinter: 'Terminar el invierno',
+    endShort: 'Fin del día',
+    endWinterShort: 'Fin',
+    recruit: 'Reclutar',
+    recruitCost: (n: number) => `${n} esporas`,
+  },
+
+  sheet: {
+    close: 'Cerrar',
+    recruitTitle: 'Reclutar al gremio',
+    recruitHelp: (cost: number, max: number) => `Cuesta ${cost} esporas. Hasta ${max} miembros; el recluta trabaja desde mañana.`,
+    recruitAction: 'Reclutar',
+    info: (name: string) => `Ficha de ${name}`,
+    mageArrives: 'Llega solo, al amanecer siguiente al segundo árbol revivido.',
+    spellTitle: 'Elige un hechizo',
+  },
+
+  tiles: {
+    home: 'Hogar del gremio',
+    mother: 'Árbol Madre',
+    motherAwake: 'Árbol Madre despierto',
+    soil: 'Tierra',
+    log: 'Tronco caído',
+    tree: 'Árbol gris',
+    treeAlive: 'Árbol vivo',
+    rock: 'Roca',
+    inNet: 'en la red',
+    valid: 'disponible',
+    position: (x: number, y: number) => `columna ${x + 1}, fila ${y + 1}`,
+    boardLabel: 'Tablero del claro',
   },
 
   /** Mensajes de bitácora. */
