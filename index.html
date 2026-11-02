@@ -2,16 +2,25 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-    <meta name="theme-color" content="#17150f" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <title>El Gremio de los Hongos</title>
-    <style>
-      html, body { margin: 0; height: 100%; background: #17150f; overflow: hidden; overscroll-behavior: none; touch-action: manipulation; }
-      #game { position: fixed; inset: 0; }
-    </style>
+    <link rel="icon" href="data:," />
   </head>
   <body>
-    <div id="game"></div>
+    <div class="app">
+      <header id="hud" class="hud"></header>
+      <main id="board-area" class="board-area">
+        <div id="board" class="board">
+          <div id="game" class="board__canvas"></div>
+          <div id="overlay" class="board__overlay"></div>
+        </div>
+      </main>
+      <section class="bottom">
+        <p id="notice" class="notice" aria-live="polite"></p>
+        <nav id="dock" class="dock"></nav>
+      </section>
+    </div>
+    <div id="sheet" class="sheet" hidden></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
