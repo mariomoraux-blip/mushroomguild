@@ -5,23 +5,23 @@
 ### Requirement: Selección de miembro
 Al seleccionar un miembro disponible, la interfaz SHALL resaltar solo las casillas donde su acción es válida.
 
-#### Scenario: Tejedora al inicio
-- WHEN el jugador selecciona a la Lactarius indigo en el día 1
+#### Scenario: Tejedor al inicio
+- WHEN el jugador selecciona al Lactarius indigo en el día 1
 - THEN se resaltan las tierras adyacentes al Hogar y ninguna otra casilla
 
 #### Scenario: Deseleccionar
 - WHEN el jugador vuelve a tocar al miembro seleccionado o pulsa Esc
 - THEN no queda ningún miembro seleccionado ni casilla resaltada
 
-### Requirement: Hechizos del mago
-Al seleccionar a Maese Bruma, la interfaz SHALL pedir primero el hechizo y después resaltar solo las casillas válidas para ese hechizo.
+### Requirement: Hechizos dla maga
+Al seleccionar a Maestra Bruna, la interfaz SHALL pedir primero el hechizo y después resaltar solo las casillas válidas para ese hechizo.
 
 #### Scenario: Elegir Brote arcano
-- WHEN el jugador selecciona a Maese Bruma y elige Brote arcano
+- WHEN el jugador selecciona a Maestra Bruna y elige Brote arcano
 - THEN se resaltan solo las rocas adyacentes a la red
 
 #### Scenario: Magia agotada
-- WHEN Maese Bruma ya lanzó un hechizo esta estación
+- WHEN Maestra Bruna ya lanzó un hechizo esta estación
 - THEN su tarjeta en el dock indica que su magia vuelve con la próxima estación
 
 ### Requirement: Feedback de acción inválida
@@ -37,9 +37,9 @@ Cuando el miembro seleccionado no tiene ninguna casilla válida, la bitácora SH
 | Amanita muscaria | No hay árboles grises junto a la red | "no hay árboles grises junto a la red." |
 | Gliophorus psittacinus | Menos esporas que el costo de pasar la voz | "faltan esporas: pasar la voz cuesta 2." |
 | Gliophorus psittacinus | No hay árboles vivos | "no hay árboles vivos todavía." |
-| Maese Bruma | Ya lanzó un hechizo esta estación | "su magia vuelve con la próxima estación." |
+| Maestra Bruna | Ya lanzó un hechizo esta estación | "su magia vuelve con la próxima estación." |
 
-Maese Bruma no tiene otro motivo de inactividad: cuando llega siempre hay árboles vivos.
+Maestra Bruna no tiene otro motivo de inactividad: cuando llega siempre hay árboles vivos.
 
 #### Scenario: Toque en una casilla no válida
 - WHEN hay un miembro seleccionado y el jugador toca una casilla no resaltada
@@ -58,12 +58,12 @@ Maese Bruma no tiene otro motivo de inactividad: cuando llega siempre hay árbol
 - THEN la bitácora dice "Rubí: no hay árboles grises junto a la red."
 
 #### Scenario: Sin trabajo disponible (Gliophorus psittacinus)
-- WHEN se selecciona a Perico con 1 espora y árboles vivos
-- THEN la bitácora dice "Perico: faltan esporas: pasar la voz cuesta 2."
+- WHEN se selecciona a Perica con 1 espora y árboles vivos
+- THEN la bitácora dice "Perica: faltan esporas: pasar la voz cuesta 2."
 
-#### Scenario: Sin trabajo disponible (Maese Bruma)
-- WHEN se selecciona a Maese Bruma después de que ya lanzó un hechizo esta estación
-- THEN la bitácora dice "Maese Bruma: su magia vuelve con la próxima estación."
+#### Scenario: Sin trabajo disponible (Maestra Bruna)
+- WHEN se selecciona a Maestra Bruna después de que ya lanzó un hechizo esta estación
+- THEN la bitácora dice "Maestra Bruna: su magia vuelve con la próxima estación."
 
 ### Requirement: Estado visible
 El HUD SHALL mostrar en todo momento día (de 12), estación, nutrientes, esporas y árboles vivos (de 5).
@@ -102,7 +102,7 @@ El juego SHALL ser jugable de principio a fin en un navegador de teléfono en ve
 - THEN el mismo layout se centra con más espacio, sin estirar las casillas más de 96 px
 
 #### Scenario: Gremio completo en el dock
-- WHEN el gremio tiene 7 miembros (6 reclutables y Maese Bruma) en una ventana de 390 px de ancho
+- WHEN el gremio tiene 7 miembros (6 reclutables y Maestra Bruna) en una ventana de 390 px de ancho
 - THEN las tarjetas se desplazan en horizontal dentro del dock y la tarjeta siguiente asoma cortada
 - AND "Terminar el día" queda fijo fuera de ese desplazamiento
 - AND la página no se mueve

@@ -47,7 +47,7 @@ export function playGame(start: GameState, day: (s: GameState) => GameState): Ga
 
 // ─── Bot al azar (piso de dificultad) ───────────────────────────────────────────
 // Recluta una especie al azar si puede; cada miembro, en orden aleatorio, actúa sobre
-// una casilla válida al azar (el mago, con cualquier hechizo válido).
+// una casilla válida al azar (la maga, con cualquier hechizo válido).
 export function randomDay(rng: Rng) {
   return (start: GameState): GameState => {
     let s = start;
@@ -67,7 +67,7 @@ export function randomDay(rng: Rng) {
 // ─── Bot con criterio (design.md) ───────────────────────────────────────────────
 const dist = (a: Tile, b: Tile) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 
-/** El más cercano al Árbol Madre; empates resueltos con la semilla. */
+/** El más cercano al Árbol Padre; empates resueltos con la semilla. */
 function closestToMother(rng: Rng, s: GameState, tiles: readonly Tile[]): Tile | undefined {
   if (!tiles.length) return undefined;
   const mother = motherTile(s);
@@ -101,9 +101,9 @@ function priority(s: GameState, m: Member, t: Tile): number | null {
 
 /**
  * Política: reclutar (Gliophorus si hay < 3 nutrientes y ningún tronco toca la red; si no, Lactarius
- * mientras la red no toque al Árbol Madre; después Amanita) → Maese Bruma (Brote arcano en la roca
- * válida más cercana al Árbol Madre; si no hay, Lluvia de esporas) → en bucle, la acción de mayor
- * prioridad: Árbol Madre > pasar la voz (< 4 nutrientes) > revivir > descomponer > tejer hacia arriba.
+ * mientras la red no toque al Árbol Padre; después Amanita) → Maestra Bruna (Brote arcano en la roca
+ * válida más cercana al Árbol Padre; si no hay, Lluvia de esporas) → en bucle, la acción de mayor
+ * prioridad: Árbol Padre > pasar la voz (< 4 nutrientes) > revivir > descomponer > tejer hacia arriba.
  */
 export function smartDay(rng: Rng) {
   return (start: GameState): GameState => {

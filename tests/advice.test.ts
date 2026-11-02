@@ -21,7 +21,7 @@ describe('Requirement: Pista y camino sugerido', () => {
     expect(s.ui.notice.text).toBe(es.advice.pickTile('Añil'));
   });
 
-  it('con 2 árboles revividos, tejer apunta al Árbol Madre', () => {
+  it('con 2 árboles revividos, tejer apunta al Árbol Padre', () => {
     const s = setup({ alive: [{ x: 4, y: 6 }, { x: 2, y: 5 }] });
     expect(weaveGoal(s)).toMatchObject({ toward: 'mother', goal: { x: 2, y: 0 } });
   });
@@ -33,14 +33,14 @@ describe('Requirement: Pista y camino sugerido', () => {
     expect(es.advice.endDay).toContain('cada árbol vivo dará 1 espora y 1 nutriente');
   });
 
-  it('prioridad: despertar al Árbol Madre antes que revivir, y revivir antes que reclutar o descomponer', () => {
+  it('prioridad: despertar al Árbol Padre antes que revivir, y revivir antes que reclutar o descomponer', () => {
     const ready = setup({ net: [{ x: 2, y: 1 }], alive: [{ x: 4, y: 6 }, { x: 1, y: 0 }], nutrients: 9, spores: 4 });
     expect(advise(ready)).toMatchObject({ kind: 'awaken', memberId: RUBI, target: { x: 2, y: 0 } });
     const revive = setup({ net: [{ x: 3, y: 6 }], nutrients: 3, spores: 4 });
     expect(advise(revive)).toMatchObject({ kind: 'revive', memberId: RUBI });
   });
 
-  it('pasar la voz solo con pocos nutrientes, y el mago sugiere Brote arcano antes que Lluvia', () => {
+  it('pasar la voz solo con pocos nutrientes, y la maga sugiere Brote arcano antes que Lluvia', () => {
     // Gremio lleno (sin cupo para reclutar), solo la Gliophorus disponible y 1 nutriente: pasa la voz.
     const full = setup({ extraMembers: ['gliophorus', 'champi', 'champi'], alive: [{ x: 4, y: 6 }], used: [ANIL, BRUNO, RUBI, 5, 6], nutrients: 1, spores: 2 });
     expect(advise(full)).toMatchObject({ kind: 'message', memberId: idOf(full, 'gliophorus') });
@@ -50,8 +50,8 @@ describe('Requirement: Pista y camino sugerido', () => {
 });
 
 describe('Requirement: Para qué sirve cada hongo', () => {
-  it('Scenario: Tarjeta de la Tejedora — rol y acción con costo', () => {
-    expect(es.species.lactarius.role).toBe('Tejedora');
+  it('Scenario: Tarjeta de el Tejedor — rol y acción con costo', () => {
+    expect(es.species.lactarius.role).toBe('Tejedor');
     expect(es.species.lactarius.action).toBe('Teje · −1 nutriente');
   });
 
@@ -77,7 +77,7 @@ describe('Requirement: Cómo reclutar', () => {
 });
 
 describe('Requirement: Ficha al seleccionar un hongo', () => {
-  it('Scenario: Primera vez con la Tejedora — se abre su ficha y al cerrarla sigue seleccionada', () => {
+  it('Scenario: Primera vez con el Tejedor — se abre su ficha y al cerrarla sigue seleccionado', () => {
     const s = reduce(initialState(newGame()), { type: 'select', id: ANIL });
     expect(s.ui.sheet).toEqual({ kind: 'member', id: ANIL });
     expect(s.ui.seen).toContain('lactarius');
@@ -107,7 +107,7 @@ describe('Requirement: Ficha al seleccionar un hongo', () => {
     const heals = es.guide.amanita.heals;
     expect(heals).toContain('árboles grises');
     expect(heals).toContain('3 nutrientes');
-    expect(heals).toContain('Árbol Madre');
+    expect(heals).toContain('Árbol Padre');
     expect(heals).toContain('6 nutrientes');
   });
 
@@ -115,7 +115,7 @@ describe('Requirement: Ficha al seleccionar un hongo', () => {
     expect(es.guide.gliophorus.messenger).toContain('Desde cualquier árbol vivo cambia esporas por nutrientes');
   });
 
-  it('Scenario: Poderes de Maese Bruma — explica los dos hechizos y después pide elegir uno', () => {
+  it('Scenario: Poderes de Maestra Bruna — explica los dos hechizos y después pide elegir uno', () => {
     expect(es.guide.mago.powers).toContain('Brote arcano');
     expect(es.guide.mago.powers).toContain('Lluvia de esporas');
     const g = setup({ mage: true, alive: [{ x: 4, y: 6 }] });

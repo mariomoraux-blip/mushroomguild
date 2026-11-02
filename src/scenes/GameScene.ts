@@ -104,7 +104,7 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    // Meta: aro alrededor del Árbol Madre.
+    // Meta: aro alrededor del Árbol Padre.
     const mother = game.tiles.find((t) => t.kind === 'mother');
     if (mother) {
       const { cx, cy } = center(mother);

@@ -68,13 +68,13 @@ test('layout: tablero completo, casillas en rango y controles ≥ 44 px', async 
   await noScrollNoZoom(page);
 });
 
-test('táctil: elegir a la Lactarius, tejer y terminar el día (con captura)', async ({ page }, info) => {
+test('táctil: elegir al Lactarius, tejer y terminar el día (con captura)', async ({ page }, info) => {
   test.skip(!isTouch(info.project.name), 'flujo táctil');
   await page.goto('/');
   await page.locator('[data-id="1"]').tap();
   await expect(valid(page)).toHaveCount(2);
   await expect(page.locator('#notice')).toHaveText('Añil: toca una casilla resaltada.');
-  // Toque en una casilla no válida: motivo exacto y sigue seleccionada.
+  // Toque en una casilla no válida: motivo exacto y sigue seleccionado.
   await cell(page, 0, 0).tap();
   await expect(page.locator('#notice')).toHaveText('Muy lejos: la tierra debe tocar la red.');
   await expect(page.locator('[data-id="1"]')).toHaveAttribute('aria-pressed', 'true');
@@ -86,7 +86,7 @@ test('táctil: elegir a la Lactarius, tejer y terminar el día (con captura)', a
   await cell(page, 2, 3).tap();
   await cell(page, 2, 3).tap();
   await noScrollNoZoom(page);
-  // Captura con Añil seleccionada el día 2.
+  // Captura con Añil seleccionado el día 2.
   await page.locator('[data-id="1"]').tap();
   await page.screenshot({ path: `docs/screenshots/002-${info.project.name}.png` });
 });
@@ -130,7 +130,7 @@ test('teclado: Tab, Enter y Esc bastan para elegir, actuar y terminar el día', 
   await page.screenshot({ path: `docs/screenshots/002-${info.project.name}.png` });
 });
 
-test('Maese Bruma: primero el hechizo, después las casillas', async ({ page }) => {
+test('Maestra Bruna: primero el hechizo, después las casillas', async ({ page }) => {
   await page.goto('/?debugState=fullGuild');
   const mage = page.locator('.card--mago');
   await mage.scrollIntoViewIfNeeded();
@@ -181,7 +181,7 @@ test('Libreta de campo: no se abre sola y se consulta con "?"', async ({ page })
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'Ayuda: Libreta de campo' }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog).toContainText('Despierta al Árbol Madre');
+  await expect(dialog).toContainText('Despierta al Árbol Padre');
   await expect(dialog).toContainText('Gliophorus · Mensajera');
   await page.getByRole('button', { name: '¡A jugar!' }).click();
   await expect(dialog).toHaveCount(0);

@@ -16,7 +16,7 @@ const dist = (a: Tile, b: Tile) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 const closest = (tiles: readonly Tile[], to: Tile) =>
   tiles.reduce<Tile | undefined>((best, t) => (!best || dist(t, to) < dist(best, to) ? t : best), undefined);
 
-/** Meta del tejido: el árbol gris más cercano a la red mientras falten árboles; después, el Árbol Madre. */
+/** Meta del tejido: el árbol gris más cercano a la red mientras falten árboles; después, el Árbol Padre. */
 export function weaveGoal(s: GameState): { goal: Tile; toward: 'tree' | 'mother' } {
   const mother = motherTile(s);
   if (revivedCount(s) >= TREES_FOR_MOTHER) return { goal: mother, toward: 'mother' };
@@ -39,7 +39,7 @@ export function recruitPick(s: GameState): RecruitableSpecies {
 }
 
 /**
- * Siguiente paso sugerido. Prioridad: despertar al Árbol Madre > revivir > reclutar > descomponer >
+ * Siguiente paso sugerido. Prioridad: despertar al Árbol Padre > revivir > reclutar > descomponer >
  * tejer > pasar la voz > hechizo > terminar el día.
  */
 export function advise(s: GameState): Advice {

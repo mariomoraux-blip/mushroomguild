@@ -42,7 +42,7 @@ export function addMember(s: MutableState, species: RecruitableSpecies): Mutable
   return m;
 }
 
-/** Agrega a Maese Bruma a un estado ya copiado (uso interno). */
+/** Agrega a Maestra Bruna a un estado ya copiado (uso interno). */
 export function addMage(s: MutableState): Mutable<Member> {
   const m: Mutable<Member> = { id: s.nextId++, species: 'mago', name: es.mageName, used: false, at: null };
   s.members.push(m);
@@ -77,7 +77,7 @@ export const revivedCount = (s: GameState): number => s.tiles.filter((t) => t.ki
 export const treeTotal = (s: GameState): number => s.tiles.filter((t) => t.kind === 'tree').length;
 export const member = (s: GameState, id: number): Member | undefined => s.members.find((m) => m.id === id);
 export const mage = (s: GameState): Member | undefined => s.members.find((m) => m.species === 'mago');
-/** Miembros que cuentan en el límite del gremio (todos menos el mago). */
+/** Miembros que cuentan en el límite del gremio (todos menos la maga). */
 export const recruitableCount = (s: GameState): number => s.members.filter((m) => m.species !== 'mago').length;
 export const motherTile = (s: GameState): Tile => s.tiles.find((t) => t.kind === 'mother')!;
 
@@ -85,5 +85,5 @@ export const motherTile = (s: GameState): Tile => s.tiles.find((t) => t.kind ===
 export const seasonIndex = (day: number): number =>
   Math.min(Math.ceil(DAYS / DAYS_PER_SEASON) - 1, Math.floor((day - 1) / DAYS_PER_SEASON));
 export const season = (day: number): string => es.seasons[seasonIndex(day)] ?? '';
-/** ¿Maese Bruma ya lanzó un hechizo en la estación actual? */
+/** ¿Maestra Bruna ya lanzó un hechizo en la estación actual? */
 export const magicSpent = (s: GameState): boolean => s.lastSpellSeason === seasonIndex(s.day);

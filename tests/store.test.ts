@@ -13,7 +13,7 @@ const pts = (s: AppState) => highlighted(s).map(({ x, y }) => ({ x, y }));
 const run = (s: AppState, ...actions: Parameters<typeof reduce>[1][]) => actions.reduce(reduce, s);
 
 describe('Requirement: Selección de miembro', () => {
-  it('Scenario: Tejedora al inicio — se resaltan las tierras adyacentes al Hogar y ninguna otra', () => {
+  it('Scenario: Tejedor al inicio — se resaltan las tierras adyacentes al Hogar y ninguna otra', () => {
     const s = run(init(), { type: 'select', id: ANIL });
     expect(pts(s)).toEqual([
       { x: 2, y: 6 },
@@ -39,10 +39,10 @@ describe('Requirement: Selección de miembro', () => {
   });
 });
 
-describe('Requirement: Hechizos del mago', () => {
+describe('Requirement: Hechizos dla maga', () => {
   const withMage = () => init(setup({ mage: true, net: [{ x: 3, y: 6 }], alive: [{ x: 4, y: 6 }] }));
 
-  it('al seleccionar a Maese Bruma se pide primero el hechizo y no se resalta nada', () => {
+  it('al seleccionar a Maestra Bruna se pide primero el hechizo y no se resalta nada', () => {
     const s0 = withMage();
     const s = run(s0, { type: 'select', id: idOf(s0.game, 'mago') });
     expect(s.ui.sheet).toEqual({ kind: 'spell' });
@@ -67,7 +67,7 @@ describe('Requirement: Hechizos del mago', () => {
     const s0 = init(setup({ mage: true, alive: [{ x: 4, y: 6 }], lastSpellSeason: 0 }));
     const s = run(s0, { type: 'select', id: idOf(s0.game, 'mago') });
     expect(s.ui.sheet).toBeNull();
-    expect(s.ui.notice.text).toBe('Maese Bruma: su magia vuelve con la próxima estación.');
+    expect(s.ui.notice.text).toBe('Maestra Bruna: su magia vuelve con la próxima estación.');
   });
 });
 
@@ -101,20 +101,20 @@ describe('Requirement: Feedback de acción inválida', () => {
 
   it('Scenario: Sin trabajo disponible (Gliophorus psittacinus)', () => {
     const g = setup({ spores: 2, alive: [{ x: 4, y: 6 }] });
-    const withPerico = reduce(init(g), { type: 'recruit', species: 'gliophorus' }).game;
-    const rested = { ...withPerico, spores: 1, members: withPerico.members.map((m) => ({ ...m, used: false })) };
+    const withPerica = reduce(init(g), { type: 'recruit', species: 'gliophorus' }).game;
+    const rested = { ...withPerica, spores: 1, members: withPerica.members.map((m) => ({ ...m, used: false })) };
     const s = run(init(rested), { type: 'select', id: idOf(rested, 'gliophorus') });
-    expect(s.ui.notice.text).toBe('Perico: faltan esporas: pasar la voz cuesta 2.');
+    expect(s.ui.notice.text).toBe('Perica: faltan esporas: pasar la voz cuesta 2.');
   });
 
-  it('Scenario: Sin trabajo disponible (Maese Bruma)', () => {
+  it('Scenario: Sin trabajo disponible (Maestra Bruna)', () => {
     const g = setup({ mage: true, alive: [{ x: 4, y: 6 }], lastSpellSeason: 0 });
     const s = run(init(g), { type: 'select', id: idOf(g, 'mago') });
-    expect(s.ui.notice.text).toBe('Maese Bruma: su magia vuelve con la próxima estación.');
+    expect(s.ui.notice.text).toBe('Maestra Bruna: su magia vuelve con la próxima estación.');
   });
 
   it('idleReason cubre las claves restantes de la tabla y devuelve null si hay trabajo', () => {
-    // Toda la tierra convertida en roca: la Lactarius no tiene dónde tejer.
+    // Toda la tierra convertida en roca: el Lactarius no tiene dónde tejer.
     const noSoil = { ...newGame(), tiles: newGame().tiles.map((t) => (t.kind === 'soil' ? { ...t, kind: 'rock' as const } : t)) };
     expect(idleReason(noSoil, ANIL)).toBe('noSoil');
     expect(idleReason(setup({ nutrients: 1 }), RUBI)).toBe('noNutrients');
@@ -139,7 +139,7 @@ describe('Requirement: Estado visible', () => {
 describe('store: reclutar, terminar el día y fin de partida', () => {
   it('reclutar con esporas usa las reglas; sin esporas avisa el motivo', () => {
     const ok = reduce(init(setup({ spores: 2 })), { type: 'recruit', species: 'gliophorus' });
-    expect(ok.game.members.at(-1)?.name).toBe('Perico');
+    expect(ok.game.members.at(-1)?.name).toBe('Perica');
     const no = reduce(init(), { type: 'recruit', species: 'gliophorus' });
     expect(no.ui.notice).toEqual({ text: es.reasons.recruitCost(2), tone: 'warn' });
   });

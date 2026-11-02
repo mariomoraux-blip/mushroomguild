@@ -34,7 +34,7 @@ export const spellFor = (t: Tile): Spell => (t.kind === 'rock' ? 'sprout' : 'rai
 
 /**
  * ¿Puede el miembro `id` actuar sobre (x, y)? No cambia el estado.
- * `spell` solo aplica a Maese Bruma: restringe el hechizo (si se omite, se deduce de la casilla).
+ * `spell` solo aplica a Maestra Bruna: restringe el hechizo (si se omite, se deduce de la casilla).
  */
 export function check(s: GameState, id: number, x: number, y: number, spell?: Spell): CheckResult {
   const m = member(s, id);
@@ -79,7 +79,7 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
   }
 }
 
-/** Casillas donde el miembro `id` puede actuar ahora (para el mago, opcionalmente con un hechizo). */
+/** Casillas donde el miembro `id` puede actuar ahora (para la maga, opcionalmente con un hechizo). */
 export function validTargets(s: GameState, id: number, spell?: Spell): Tile[] {
   return s.tiles.filter((t) => check(s, id, t.x, t.y, spell).ok);
 }
@@ -136,7 +136,7 @@ export function act(s: GameState, id: number, x: number, y: number): ActionResul
       n.nutrients -= COST.revive;
       t.alive = true;
       t.net = true;
-      // Maese Bruma llega al amanecer siguiente al segundo árbol (no hay amanecer después del día 12).
+      // Maestra Bruna llega al amanecer siguiente al segundo árbol (no hay amanecer después del día 12).
       if (!n.mageArrived && !n.mageDue && revivedCount(n) >= TREES_FOR_MAGE && n.day < DAYS) n.mageDue = true;
       return { state: n, message: es.log.revived(m.name) };
   }

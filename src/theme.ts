@@ -6,7 +6,7 @@ export const color = {
   ink: '#3B2A1E', // contornos y texto (nunca negro)
   accent: '#E8A33D', // selección, foco, casillas válidas
   mycelium: '#B9F0D6', // red y líneas de micelio
-  indigo: '#4B5FD6', // destello del micelio tejido por la Lactarius indigo
+  indigo: '#4B5FD6', // destello del micelio tejido por el Lactarius indigo
   soil: '#7A5C3E', // tierra base del tablero (de día)
 } as const;
 

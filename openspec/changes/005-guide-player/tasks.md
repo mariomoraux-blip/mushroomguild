@@ -10,7 +10,7 @@
 - [x] 2.2 ★ en la tarjeta del miembro sugerido y en la casilla sugerida; pista en la bitácora con nada seleccionado
 - [x] 2.3 Tarjetas con rol y acción + costo; tocar una casilla sin selección la explica
 - [x] 2.4 Chip de esporas abre la hoja de reclutar; cada fila dice para qué sirve la especie
-- [x] 2.5 Árbol Madre marcado como meta; red con contorno de micelio
+- [x] 2.5 Árbol Padre marcado como meta; red con contorno de micelio
 
 ## 3. Verificación
 - [x] 3.1 Tests de `advise` y del store para cada escenario

@@ -18,8 +18,8 @@ import pocSource from '../poc/rules.js?raw';
 
 // El PoC es la fuente de las 3 especies portadas: el port debe comportarse igual, con el mapa rotado.
 // Se carga como texto y se evalúa aislado (sin editar poc/).
-// Fuera del PoC: la Gliophorus no se recluta, Maese Bruma nunca actúa y se ignora al comparar,
-// y los nombres/especies se traducen (Ostra → Lactarius, nombres nuevos del GDD).
+// Fuera del PoC: la Gliophorus no se recluta, Maestra Bruna nunca actúa y se ignora al comparar,
+// y los nombres se traducen (Ostra → Lactarius, Árbol Madre → Árbol Padre, nombres nuevos).
 const Poc = new Function(`${pocSource}\nreturn Rules;`)();
 
 const PORTED: readonly RecruitableSpecies[] = ['champi', 'lactarius', 'amanita'];
@@ -64,7 +64,7 @@ describe('paridad con poc/rules.js (especies portadas)', () => {
       const normalize = (msg: string) => {
         // Un solo reemplazo por pasada: los nombres del PoC y los nuevos se cruzan (Gordo/Migas/Trufo).
         const re = new RegExp(`(?<!\\p{L})(${[...names.keys()].join('|')})(?!\\p{L})`, 'gu');
-        return msg.replace('La Ostra', 'La Lactarius').replace(re, (n) => names.get(n) ?? n);
+        return msg.replace('La Ostra', 'El Lactarius').replaceAll('Árbol Madre', 'Árbol Padre').replace(re, (n) => names.get(n) ?? n);
       };
       expect(summary(s)).toEqual(pocSummary(p));
 

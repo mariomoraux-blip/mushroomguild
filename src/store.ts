@@ -35,7 +35,7 @@ export interface Notice {
 export interface UiState {
   /** Miembro seleccionado. */
   readonly selected: number | null;
-  /** Hechizo elegido para Maese Bruma. */
+  /** Hechizo elegido para Maestra Bruna. */
   readonly spell: Spell | null;
   readonly sheet: Sheet | null;
   readonly notice: Notice;
@@ -97,7 +97,7 @@ export function suggestedMember(state: AppState): number | null {
   return 'memberId' in a ? a.memberId : null;
 }
 
-/** Casilla sugerida (★ en el tablero): solo con el miembro sugerido seleccionado (y su hechizo, si es el mago). */
+/** Casilla sugerida (★ en el tablero): solo con el miembro sugerido seleccionado (y su hechizo, si es la maga). */
 export function suggestedTile(state: AppState): Tile | null {
   const a = advise(state.game);
   if (!('memberId' in a) || a.memberId !== state.ui.selected) return null;
@@ -122,7 +122,7 @@ function withFirstCard(next: AppState, id: number, species: SpeciesId): AppState
   return { ...next, ui: { ...next.ui, sheet: { kind: 'member', id }, seen: [...next.ui.seen, species] } };
 }
 
-/** Al cerrar una hoja: la del hechizo cancela la selección; la ficha del mago da paso a elegir el hechizo. */
+/** Al cerrar una hoja: la del hechizo cancela la selección; la ficha dla maga da paso a elegir el hechizo. */
 function afterSheet(state: AppState): AppState {
   const { game, ui } = state;
   const sheet = ui.sheet;
@@ -134,7 +134,7 @@ function afterSheet(state: AppState): AppState {
   return { game, ui: { ...ui, sheet: null } };
 }
 
-/** Casillas a resaltar: las válidas del miembro seleccionado (para el mago, solo con hechizo elegido). */
+/** Casillas a resaltar: las válidas del miembro seleccionado (para la maga, solo con hechizo elegido). */
 export function highlighted(state: AppState): Tile[] {
   const { selected, spell } = state.ui;
   if (selected === null) return [];
