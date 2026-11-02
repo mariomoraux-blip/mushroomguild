@@ -88,7 +88,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
   function helpSheet() {
     const season = currentSeason;
     const h = es.help;
-    const tiles = [es.tileHelp.mother, es.tileHelp.home, es.tileHelp.soil, es.tileHelp.log, es.tileHelp.tree, es.tileHelp.treeAlive, es.tileHelp.rock];
+    const tiles = [es.tileHelp.mother, es.tileHelp.home, es.tileHelp.soil, es.tileHelp.log, es.tileHelp.tree, es.tileHelp.treeFading, es.tileHelp.treeFaded, es.tileHelp.treeAlive, es.tileHelp.rock];
     return panel(
       h.title,
       el('div', { class: 'help' },
@@ -105,6 +105,8 @@ export function mountSheet(root: HTMLElement, store: Store) {
                 el('span', { class: 'row__verb' }, es.species[sp].verb))))),
         el('h3', {}, h.tilesTitle),
         el('ul', { class: 'help__tiles' }, ...tiles.map((t) => el('li', {}, t))),
+        el('h3', {}, h.levelsTitle),
+        el('p', {}, h.levels),
         el('p', { class: 'help__tip' }, h.tip),
         el('button', { class: 'btn btn--wide', type: 'button', 'data-action': 'close' }, h.start)),
     );

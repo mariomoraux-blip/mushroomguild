@@ -1,6 +1,6 @@
 import { validTargets } from './actions';
-import { COST, MAX_GUILD, TREES_FOR_MOTHER } from './config';
-import { magicSpent, motherTile, recruitableCount, revivedCount, touchesNet, workerAt } from './state';
+import { COST, MAX_GUILD, STARTING_GUILD, TREES_FOR_MOTHER } from './config';
+import { magicSpent, motherTile, neighbors, recruitableCount, revivedCount, touchesNet, workerAt } from './state';
 import type { GameState, Member, RecruitableSpecies, Spell, Tile } from './types';
 
 /** Siguiente paso sugerido al jugador (player-guidance). */
@@ -13,18 +13,52 @@ export type Advice =
   | { kind: 'endMonth' }
   | { kind: 'over' };
 
-const dist = (a: Tile, b: Tile) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-const closest = (tiles: readonly Tile[], to: Tile) =>
-  tiles.reduce<Tile | undefined>((best, t) => (!best || dist(t, to) < dist(best, to) ? t : best), undefined);
+/**
+ * Variantes de la política (019). Sin opciones es la de las pistas, tal cual la ve el jugador. El bot experto
+ * mide distancias rodeando rocas (`path`), cambia el orden de reclutar y revive primero el árbol marcado.
+ */
+export interface PolicyOptions {
+  readonly path?: boolean;
+  readonly recruitOrder?: readonly RecruitableSpecies[];
+  readonly saveMarked?: boolean;
+}
+
+const manhattan = (a: Tile, b: Tile) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+
+/** Distancia en pasos sin atravesar rocas desde `to` (la red ni los árboles la bloquean). */
+function pathFrom(s: GameState, to: Tile): (t: Tile) => number {
+  const d = new Map<string, number>([[`${to.x},${to.y}`, 0]]);
+  const queue: Tile[] = [to];
+  for (let i = 0; i < queue.length; i++) {
+    const p = queue[i]!;
+    for (const n of neighbors(s, p.x, p.y)) {
+      const k = `${n.x},${n.y}`;
+      if (n.kind === 'rock' || d.has(k)) continue;
+      d.set(k, d.get(`${p.x},${p.y}`)! + 1);
+      queue.push(n);
+    }
+  }
+  return (t) => d.get(`${t.x},${t.y}`) ?? 99;
+}
+
+const distTo = (s: GameState, to: Tile, o: PolicyOptions) => (o.path ? pathFrom(s, to) : (t: Tile) => manhattan(t, to));
+const closestBy = (tiles: readonly Tile[], d: (t: Tile) => number) =>
+  tiles.reduce<Tile | undefined>((best, t) => (!best || d(t) < d(best) ? t : best), undefined);
+const dist = manhattan;
+const closest = (tiles: readonly Tile[], to: Tile) => closestBy(tiles, (t) => dist(t, to));
 
 /** Meta del tejido: el árbol gris más cercano a la red mientras falten árboles; después, el Árbol Padre. */
-export function weaveGoal(s: GameState): { goal: Tile; toward: 'tree' | 'mother' } {
+export function weaveGoal(s: GameState, o: PolicyOptions = {}): { goal: Tile; toward: 'tree' | 'mother' } {
   const mother = motherTile(s);
   if (revivedCount(s) >= TREES_FOR_MOTHER) return { goal: mother, toward: 'mother' };
   const net = s.tiles.filter((t) => t.net);
-  const grey = s.tiles.filter((t) => t.kind === 'tree' && !t.alive);
+  // El experto prefiere el árbol marcado y evita los apagados (cuestan más).
+  const grey = s.tiles.filter((t) => t.kind === 'tree' && !t.alive && !(o.saveMarked && t.faded));
+  const marked = o.saveMarked ? grey.find((t) => t.fading) : undefined;
+  if (marked) return { goal: marked, toward: 'tree' };
   const nearest = grey.reduce<{ t: Tile; d: number } | undefined>((best, t) => {
-    const d = Math.min(...net.map((n) => dist(n, t)));
+    const from = distTo(s, t, o);
+    const d = Math.min(...net.map((n) => from(n)));
     return !best || d < best.d ? { t, d } : best;
   }, undefined);
   return nearest ? { goal: nearest.t, toward: 'tree' } : { goal: mother, toward: 'mother' };
@@ -34,9 +68,11 @@ export function weaveGoal(s: GameState): { goal: Tile; toward: 'tree' | 'mother'
  * Especie que conviene reclutar: un segundo Lactarius mientras la red no llegue al Árbol Padre;
  * después una Gliophorus (para repetir la mejor jugada del mes); después otra Amanita.
  */
-export function recruitPick(s: GameState): RecruitableSpecies {
+export function recruitPick(s: GameState, o: PolicyOptions = {}): RecruitableSpecies {
   const mother = motherTile(s);
   const count = (sp: string) => s.members.filter((m) => m.species === sp).length;
+  // Orden fijo del experto: el n-ésimo recluta es la n-ésima especie de la lista (y vuelve a empezar).
+  if (o.recruitOrder?.length) return o.recruitOrder[(recruitableCount(s) - STARTING_GUILD.length) % o.recruitOrder.length]!;
   if (!touchesNet(s, mother.x, mother.y) && count('lactarius') < 2) return 'lactarius';
   if (count('gliophorus') === 0) return 'gliophorus';
   return 'amanita';
@@ -83,16 +119,16 @@ export function missingMessenger(s: GameState): boolean {
  * terminar el mes. Reclutar solo se sugiere si nadie tiene una acción útil, o si falta la Gliophorus que
  * pide el siguiente paso (player-guidance › Cómo reclutar).
  */
-export function advise(s: GameState): Advice {
-  const work = adviseWork(s);
+export function advise(s: GameState, o: PolicyOptions = {}): Advice {
+  const work = adviseWork(s, o);
   if (work.kind === 'over' || !canRecruit(s)) return work;
-  if (work.kind === 'endMonth') return { kind: 'recruit', species: recruitPick(s) };
+  if (work.kind === 'endMonth') return { kind: 'recruit', species: recruitPick(s, o) };
   if (missingMessenger(s)) return { kind: 'recruit', species: 'gliophorus' };
   return work;
 }
 
 /** Mejor trabajo del mes para los miembros listos, sin contar reclutar. */
-function adviseWork(s: GameState): Advice {
+function adviseWork(s: GameState, o: PolicyOptions): Advice {
   if (s.status !== 'playing') return { kind: 'over' };
   const ready = s.members.filter((m) => !m.used);
   const targetsOf = (m: Member, spell?: Spell) => validTargets(s, m.id, spell);
@@ -104,7 +140,8 @@ function adviseWork(s: GameState): Advice {
     if (t) return { kind: 'awaken', memberId: m.id, target: t };
   }
   for (const m of of('amanita')) {
-    const t = closest(targetsOf(m), mother);
+    const targets = targetsOf(m);
+    const t = (o.saveMarked && targets.find((tt) => tt.fading)) || closest(targets, mother);
     if (t) return { kind: 'revive', memberId: m.id, target: t };
   }
   for (const m of of('mago')) {
@@ -127,9 +164,10 @@ function adviseWork(s: GameState): Advice {
   }
   const callChampi = call(1);
   if (callChampi) return callChampi;
-  const { goal, toward } = weaveGoal(s);
+  const { goal, toward } = weaveGoal(s, o);
+  const toGoal = distTo(s, goal, o);
   for (const m of of('lactarius')) {
-    const t = closest(targetsOf(m), goal);
+    const t = closestBy(targetsOf(m), toGoal);
     if (t) return { kind: 'weave', memberId: m.id, target: t, toward };
   }
   const callAny = call(2);

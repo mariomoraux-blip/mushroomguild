@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { COST, MONTHS, MAX_GUILD, magicSpent, recruitableCount, season, seasonIndex, MONTHS_PER_SEASON, type Member } from '../rules';
+import { COST, MONTHS, MAX_GUILD, magicSpent, recruitableCount, season, seasonIndex, MONTHS_PER_SEASON, weaveCost, type Member } from '../rules';
 import { suggestedMember, type AppState, type Store } from '../store';
 import { el, portrait, setPortrait, setText } from './dom';
 
@@ -104,7 +104,9 @@ export function mountDock(root: HTMLElement, store: Store) {
       card.badge.dataset.kind = star ? 'star' : st.ready ? 'none' : 'rest';
       card.button.classList.toggle('is-suggested', star);
       setPortrait(card.face, m.species, st.ready && (star || state.ui.selected === m.id) ? 'feliz' : 'reposo', seasonIndex(g.month));
-      card.button.setAttribute('aria-label', `${m.name}, ${sp.name}, ${sp.role}: ${sp.action}. ${st.text}.${star ? ` ★ ${es.advice.star}.` : ''}`);
+      // El Tejedor dice el costo de este mes (con escarcha, 2).
+      const action = m.species === 'lactarius' ? es.weaveAction(weaveCost(g)) : sp.action;
+      card.button.setAttribute('aria-label', `${m.name}, ${sp.name}, ${sp.role}: ${action}. ${st.text}.${star ? ` ★ ${es.advice.star}.` : ''}`);
       card.button.setAttribute('aria-pressed', String(state.ui.selected === m.id));
       card.button.classList.toggle('is-used', !st.ready);
       card.button.disabled = !playing;

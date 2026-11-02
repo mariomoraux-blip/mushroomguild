@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { act, cloneState, newGame } from '../src/rules';
-import { groundKey, objectKey, paintBoard, paintMyceliumGlow } from '../src/scenes/paint';
+import { groundKey, objectKey, paintBoard, paintMarked, paintMyceliumGlow } from '../src/scenes/paint';
 import { MYCELIUM_GLOW } from '../src/theme';
 import { BRUNO } from './helpers';
 
@@ -112,5 +112,25 @@ describe('Requirement: La red alumbra el invierno', () => {
     const s = cloneState(start);
     s.tiles.find((t) => t.x === 2 && t.y === 6)!.net = true;
     expect(paintMyceliumGlow(fakeCtx(), 64, s)).toEqual([{ x: 2, y: 6 }, { x: home.x, y: home.y }]);
+  });
+});
+
+describe('Requirement: Árbol marcado y apagado (019)', () => {
+  const withTree = (patch: { fading?: boolean; faded?: boolean }) => {
+    const s = cloneState(newGame());
+    Object.assign(s.tiles.find((t) => t.x === 1 && t.y === 0)!, patch);
+    return s;
+  };
+
+  it('Scenario: Árbol apagado — lleva el velo fijo (y el copo) en el claro', () => {
+    expect(paint(withTree({ faded: true })).find((p) => p.x === 1 && p.y === 0)).toMatchObject({ object: 'tree', faded: true });
+    expect(paint().some((p) => p.faded)).toBe(false);
+  });
+
+  it('Scenario: Árbol marcado — va en su propia capa (la que late), no en el claro', () => {
+    const s = withTree({ fading: true });
+    expect(paintMarked(fakeCtx(), 64, s)).toEqual([{ x: 1, y: 0 }]);
+    expect(paint(s).some((p) => p.faded)).toBe(false);
+    expect(paintMarked(fakeCtx(), 64, newGame())).toEqual([]);
   });
 });

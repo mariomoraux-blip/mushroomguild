@@ -36,7 +36,8 @@ La red de micelio es a la vez mecánica y progreso visible: define dónde puedes
 
 ### Alcance del vertical slice
 - **Incluye:** 1 capítulo, claros aleatorios de 5×8 (un mapa nuevo en cada partida), 5 especies (4 reclutables y una maga única), 12 meses en 4 estaciones, intro y final. Se juega en navegador de teléfono y de escritorio.
-- **Fuera de alcance:** guardado, varios niveles, IA rival, multijugador, monetización.
+- **Niveles de dificultad (019):** Brote, Bosque y Ancestral, elegidos al empezar (ver «Niveles»).
+- **Fuera de alcance:** guardado, varios capítulos, IA rival, multijugador, monetización.
 
 ### Criterios de éxito
 - Un jugador nuevo gana, o queda cerca, en su primer intento y en menos de 10 minutos.
@@ -180,6 +181,22 @@ Medido por simulación (`tests/balance.test.ts`, 100 claros generados con semill
 Con las reglas de la prueba de concepto, un jugador atento ganaba hacia el mes 5–7 y el playtest lo confirmó: se sentía demasiado fácil. Desde el cambio 006 el Árbol Padre pide 3 árboles revividos y 10 nutrientes, cada tronco da +2 y el generador descarta claros regalados.
 
 Palancas de ajuste: coste de tejer, ganancia por tronco, número de troncos, meses totales y nutriente mensual por árbol.
+
+### Niveles (019)
+Una vez aprendido, Brote ya no era un reto. «Nueva partida» abre «Elige tu claro» con tres niveles; nada quita progreso (ni la red, ni árboles vivos, ni reservas):
+
+| | Brote | Bosque | Ancestral |
+| --- | --- | --- | --- |
+| Rocas | 6 | 8 | 10 |
+| Escarcha (tejer cuesta 2) | — | otoño | otoño e invierno |
+| Árbol que se apaga al final del mes | — | 6 | 3, 6 y 9 |
+| Pistas (★) | sí | sí | no |
+| Puntaje | ×1 | ×1,5 | ×2 |
+
+- **Árbol que se apaga:** al empezar ese mes, el árbol gris más lejano de la red se cubre de escarcha; si nadie lo revive ese mes, se apaga y revivirlo cuesta 7 nutrientes en vez de 3.
+- **Claros justos:** Bosque y Ancestral son el claro de Brote de la misma semilla con rocas extra, y solo se juegan los que un bot experto con búsqueda puede ganar (tabla precalculada de 1000 semillas por nivel).
+- **Medido** (100 claros por nivel): las pistas ganan el 83 % en Bosque y el 50 % en Ancestral (la meta para Ancestral era «el jugador con experiencia pierde seguido, ~50 %»); el bot al azar, 6,9 % y 4,1 %.
+- **Puntaje:** un récord por claro con el total ya multiplicado; las estrellas usan la referencia de Brote, así que en Bosque y Ancestral se consiguen más fácil (premio por el riesgo, a revisar en playtest).
 
 ### Puntaje y estrellas (015)
 Solo la victoria da puntaje; la derrota sigue siendo suave, sin puntaje ni estrellas.

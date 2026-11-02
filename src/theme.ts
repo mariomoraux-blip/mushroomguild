@@ -22,6 +22,7 @@ export const color = {
   peach: '#F6D7B0', // luz cálida del fondo
   glow: '#FFF4C2', // brillos, aura del Árbol Padre, luciérnagas
   stoneDark: '#6F675B', // sombra de rocas y copas dormidas
+  frost: '#CFE8F5', // velo de escarcha: árbol marcado o apagado (019)
   neutral: '#808080', // gris sin tono: solo para desaturar el escenario (003, modo "saturation")
 } as const;
 
@@ -50,6 +51,11 @@ export const SEASON_SLUGS = ['spring', 'summer', 'autumn', 'winter'] as const;
  * primavera a lo más brillante del tablero en invierno (docs/art-direction.md › Luz por estación).
  */
 export const MYCELIUM_GLOW: readonly [number, number, number, number] = [0.2, 0.4, 0.65, 1];
+/** Velo del árbol marcado (019): late entre estos alfas cada `FROST_PULSE_MS`; con movimiento reducido, fijo en `rest`. */
+export const FROST_PULSE = { min: 0.35, max: 0.6, rest: 0.5 } as const;
+export const FROST_PULSE_MS = 1600;
+/** Alfa del velo fijo del árbol apagado. */
+export const FROST_FADED = 0.5;
 /** Duración del cambio de luz al pasar de estación (ms). Con movimiento reducido es inmediato. */
 export const LIGHT_TRANSITION_MS = 600;
 export type SeasonSlug = (typeof SEASON_SLUGS)[number];

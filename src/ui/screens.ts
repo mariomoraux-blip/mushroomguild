@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { RECRUITABLE, seasonIndex, type SpeciesId } from '../rules';
+import { LEVEL_IDS, LEVELS, RECRUITABLE, seasonIndex, type Level, type SpeciesId } from '../rules';
 import { HOWTO_STEPS, type AppState, type Screen, type Store } from '../store';
 import { assetUrl, SCREEN_ART } from '../theme';
 import { el, portrait } from './dom';
@@ -7,21 +7,35 @@ import { el, portrait } from './dom';
 const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
 const img = (key: string, cls: string) => el('img', { class: cls, src: assetUrl(key), alt: '', draggable: 'false', decoding: 'async' });
 const nameOf = (sp: SpeciesId) => (sp === 'mago' ? es.mageName : es.species[sp].short);
+/** Control que recibe el foco al entrar a cada pantalla (en niveles, el último elegido). */
+const FOCUS: Readonly<Record<Screen['kind'], (last: Level) => string>> = {
+  title: () => '.menu-btn--primary',
+  level: (last) => `[data-level="${last}"]`,
+  howto: () => '.round-btn--next',
+  guild: () => '.guild__row',
+};
+
+/** Lo que la pantalla de niveles pide a quien la monta: crear la partida (el store no usa azar) y el último nivel. */
+export interface LevelPicker {
+  pickLevel(level: Level): void;
+  lastLevel(): Level;
+}
 
 /**
- * Pantallas fuera de la partida (012): portada (Nueva partida, Cómo jugar, El gremio), "Cómo jugar"
- * (carrusel de 5 pasos con ‹ ›, puntos y deslizar) y "El gremio" (las cinco especies; abre su ficha).
+ * Pantallas fuera de la partida (012): portada (Nueva partida, Cómo jugar, El gremio), "Elige tu claro" (019),
+ * "Cómo jugar" (carrusel de 5 pasos con ‹ ›, puntos y deslizar) y "El gremio" (las cinco especies; abre su ficha).
  * Solo dibuja `ui.screen` y despacha acciones; Esc vuelve (main.ts › cancel).
  */
-export function mountScreens(root: HTMLElement, store: Store) {
+export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicker) {
   let shown = '';
 
   root.addEventListener('click', (e) => {
     const b = (e.target as HTMLElement).closest('button');
     if (!b) return;
     const screen = store.getState().ui.screen;
-    const { action, step, species } = b.dataset;
+    const { action, step, species, level } = b.dataset;
     if (action === 'play') store.dispatch({ type: 'play' });
+    if (action === 'level') levels.pickLevel(level as Level);
     if (action === 'howto') store.dispatch({ type: 'openScreen', screen: { kind: 'howto', step: 0, back: 'title' } });
     if (action === 'guild') store.dispatch({ type: 'openScreen', screen: { kind: 'guild', back: 'title' } });
     if (action === 'back') store.dispatch({ type: 'closeScreen' });
@@ -63,6 +77,20 @@ export function mountScreens(root: HTMLElement, store: Store) {
         el('button', { class: 'menu-btn menu-btn--primary', type: 'button', 'data-action': 'play' }, el('span', { class: 'menu-btn__icon menu-btn__icon--play', 'aria-hidden': 'true' }), es.titleScreen.play),
         el('button', { class: 'menu-btn', type: 'button', 'data-action': 'howto' }, el('span', { class: 'menu-btn__icon menu-btn__icon--book', 'aria-hidden': 'true' }), es.titleScreen.howto),
         el('button', { class: 'menu-btn', type: 'button', 'data-action': 'guild' }, el('span', { class: 'menu-btn__icon menu-btn__icon--guild', 'aria-hidden': 'true' }), es.titleScreen.guild)));
+  }
+
+  // Elige tu claro (019): tres botones grandes con el nombre, qué cambia y el multiplicador del puntaje.
+  function levelScreen() {
+    return el('div', { class: 'screen__panel' },
+      header(es.levels.title),
+      el('ul', { class: 'levels', 'aria-label': es.levels.label },
+        ...LEVEL_IDS.map((lv) =>
+          el('li', {},
+            el('button', { class: `level level--${lv}`, type: 'button', 'data-action': 'level', 'data-level': lv },
+              el('span', { class: 'level__text' },
+                el('strong', { class: 'level__name' }, es.levels.names[lv]),
+                el('span', { class: 'level__line' }, es.levels.lines[lv])),
+              el('span', { class: 'level__mult' }, es.levels.multiplier(LEVELS[lv].multiplier)))))));
   }
 
   function howto(screen: Extract<Screen, { kind: 'howto' }>) {
@@ -119,11 +147,11 @@ export function mountScreens(root: HTMLElement, store: Store) {
     root.dataset.kind = screen.kind;
     const focused = (document.activeElement as HTMLElement | null)?.dataset;
     const refocus = focused?.action === 'step' ? `[data-action="step"][data-step="${focused.step}"]` : null;
-    root.replaceChildren(screen.kind === 'title' ? title() : screen.kind === 'howto' ? howto(screen) : guild(state));
+    root.replaceChildren(screen.kind === 'title' ? title() : screen.kind === 'level' ? levelScreen() : screen.kind === 'howto' ? howto(screen) : guild(state));
     // Foco: el botón principal al entrar; en el carrusel, se mantiene en el control que se usó.
     const target =
       (!kindChanged && refocus && root.querySelector<HTMLElement>(refocus)) ||
-      (kindChanged && root.querySelector<HTMLElement>(screen.kind === 'title' ? '.menu-btn--primary' : screen.kind === 'howto' ? '.round-btn--next' : '.guild__row')) ||
+      (kindChanged && root.querySelector<HTMLElement>(FOCUS[screen.kind](levels.lastLevel()))) ||
       null;
     target?.focus();
   };

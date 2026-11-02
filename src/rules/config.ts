@@ -1,4 +1,4 @@
-import type { RecruitableSpecies, TileKind } from './types';
+import type { Level, RecruitableSpecies, TileKind } from './types';
 
 // Palancas de balance del GDD. Ninguna otra parte del código repite estos números.
 export const W = 5;
@@ -14,6 +14,31 @@ export const LOG_USES = 2;
 export const TREES_FOR_MOTHER = 3;
 /** Árboles revividos que hacen llegar a Maestra Bruma al empezar el mes siguiente. */
 export const TREES_FOR_MAGE = 2;
+
+/**
+ * Niveles de dificultad (019). `rocks`: rocas del claro; `frost`: estaciones (0 = Primavera … 3 = Invierno)
+ * con escarcha; `fading`: meses que empiezan marcando un árbol gris que se apaga al terminarlos;
+ * `hints`: se muestran las pistas; `multiplier`: del puntaje. Ninguna regla de nivel quita progreso.
+ */
+export interface LevelRules {
+  readonly rocks: number;
+  readonly frost: readonly number[];
+  readonly fading: readonly number[];
+  readonly hints: boolean;
+  readonly multiplier: number;
+}
+export const LEVELS: Readonly<Record<Level, LevelRules>> = {
+  brote: { rocks: 6, frost: [], fading: [], hints: true, multiplier: 1 },
+  bosque: { rocks: 8, frost: [2], fading: [6], hints: true, multiplier: 1.5 },
+  ancestral: { rocks: 10, frost: [2, 3], fading: [3, 6, 9], hints: false, multiplier: 2 },
+};
+export const LEVEL_IDS: readonly Level[] = ['brote', 'bosque', 'ancestral'];
+/** Costo de tejer con escarcha. */
+export const FROST_WEAVE = 2;
+/** Costo de revivir un árbol apagado. */
+export const FADED_REVIVE = 7;
+/** Sal del rng que agrega las rocas de Bosque y Ancestral sobre el claro de Brote de la misma semilla. */
+export const LEVEL_SALT = 0x5eed019;
 
 /** Especies reclutables; la maga no está aquí y no cuenta en `MAX_GUILD`. */
 export const RECRUITABLE: readonly RecruitableSpecies[] = ['champi', 'lactarius', 'amanita', 'gliophorus'];
@@ -35,7 +60,7 @@ export const SCORE = {
   timeParS: 480, // 1 punto por segundo por debajo de 8:00
 } as const;
 /** Versión de la fórmula: cambia la clave del récord guardado y el `ScoreResult`. */
-export const SCORE_VERSION = 1;
+export const SCORE_VERSION = 2;
 /** Estrellas por claro: 2 desde el 90 % y 3 desde el 110 % del puntaje del bot con criterio en ese claro. */
 export const STARS = { two: 0.9, three: 1.1 } as const;
 /** Segundos de juego por mes que se suponen para la partida de referencia del bot. */
@@ -45,7 +70,7 @@ export const REFERENCE_SECONDS_PER_MONTH = 25;
  * Generador de mapas (cada partida nueva es un claro distinto). Un mapa solo se acepta si la
  * política de las pistas (`advise`) lo gana entre `minMonth` y `maxMonth`: ni regalado ni imposible.
  */
-export const MAP_GEN = { trees: 7, logs: 5, rocks: 6, minMonth: 8, maxMonth: 11, attempts: 400 } as const;
+export const MAP_GEN = { trees: 7, logs: 5, rocks: 6, minMonth: 8, maxMonth: 11, attempts: 400, levelAttempts: 20 } as const;
 
 // Capítulo 1 · El Claro Gris (mapa clásico, el del PoC rotado 90°: (x, y) del PoC → (y, 7 - x)).
 // Se usa en las pruebas y como respaldo si el generador no encuentra un mapa válido.

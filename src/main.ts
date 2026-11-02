@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { es } from './copy/es';
 import { tileSize } from './layout';
 import { GameScene } from './scenes/GameScene';
-import { newGame, newRandomGame, scoreResult, thresholds, type SpeciesId } from './rules';
+import { LEVEL_IDS, newRandomGame, randomSeed, scoreResult, thresholds, type Level, type SpeciesId } from './rules';
 import { formatClock, newClock, read, sync } from './clock';
 import { saveIfBest } from './records';
 import { clockShouldRun, createStore, initialState } from './store';
@@ -27,21 +27,38 @@ const storage = {
   get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } },
   set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* sin almacenamiento */ } },
 };
+const readList = <T>(key: string): T[] => { try { return JSON.parse(storage.get(key) ?? '[]') as T[]; } catch { return []; } };
 const SEEN = 'gremio.seenSpecies';
-const seen = (() => { try { return JSON.parse(storage.get(SEEN) ?? '[]') as SpeciesId[]; } catch { return []; } })();
-// Claro de la partida: aleatorio por defecto; `?seed=N` repite un mapa y `?map=clasico` usa el del Capítulo 1.
+const seen = readList<SpeciesId>(SEEN);
+// Niveles (019): el último elegido (foco en "Elige tu claro") y los ya jugados (la intro sale solo la primera vez).
+const LAST_LEVEL = 'gremio.lastLevel';
+const PLAYED_LEVELS = 'gremio.playedLevels';
+const isLevel = (v: string | null): v is Level => LEVEL_IDS.includes(v as Level);
+const lastLevel = (): Level => { const v = storage.get(LAST_LEVEL); return isLevel(v) ? v : 'brote'; };
+// Claro de la partida: aleatorio por defecto; `?seed=N` repite un mapa, `?map=clasico` usa el del Capítulo 1
+// y `?nivel=brote|bosque|ancestral` elige el nivel.
 const params = new URLSearchParams(location.search);
+const levelParam = params.get('nivel');
+const level: Level = isLevel(levelParam) ? levelParam : 'brote';
 const seedParam = Number(params.get('seed'));
-const seed = Number.isFinite(seedParam) && seedParam > 0 ? seedParam : (Date.now() % 2147483647) + 1;
 const clasico = params.get('map') === 'clasico';
+/** Partida nueva en un nivel: el clásico con `?map=clasico`, la semilla de la URL o una al azar. */
+const gameFor = (lv: Level, seed?: number) => newRandomGame(clasico ? 0 : (seed ?? randomSeed(lv, Date.now())), lv);
 const debug = debugGame();
-const firstGame = debug ?? (clasico ? newGame() : newRandomGame(seed));
-// La portada (y tras "Nueva partida", la intro) abre el juego normal; con `?map`, `?seed` o `?debugState`
-// se entra directo al tablero (pruebas y playtests).
-const title = !debug && !params.has('map') && !params.has('seed');
+const firstGame = debug ?? gameFor(level, Number.isFinite(seedParam) && seedParam > 0 ? seedParam : undefined);
+// La portada ("Nueva partida" → "Elige tu claro" → intro) abre el juego normal; con `?map`, `?seed`, `?nivel`
+// o `?debugState` se entra directo al tablero (pruebas y playtests).
+const title = !debug && !params.has('map') && !params.has('seed') && !params.has('nivel');
 const store = createStore(initialState(firstGame, seen, { title }));
-/** "Jugar de nuevo": mismo mapa clásico, o un claro aleatorio nuevo. */
-const restart = () => store.dispatch({ type: 'restart', game: clasico ? newGame() : newRandomGame((Date.now() % 2147483647) + 1) });
+/** "Jugar de nuevo": mismo nivel, con el mapa clásico o un claro aleatorio nuevo. */
+const restart = () => store.dispatch({ type: 'restart', game: gameFor(store.getState().game.level) });
+/** Nivel elegido en "Elige tu claro": se recuerda, y la intro sale solo la primera vez en ese nivel. */
+const startLevel = (lv: Level) => {
+  const played = readList<Level>(PLAYED_LEVELS);
+  storage.set(LAST_LEVEL, lv);
+  if (!played.includes(lv)) storage.set(PLAYED_LEVELS, JSON.stringify([...played, lv]));
+  store.dispatch({ type: 'start', game: gameFor(lv), intro: !played.includes(lv) });
+};
 store.subscribe((state, prev) => {
   if (state.ui.seen !== prev.ui.seen) storage.set(SEEN, JSON.stringify(state.ui.seen));
 });
@@ -52,7 +69,7 @@ let clock = newClock();
 const now = () => performance.now();
 const syncClock = () => (clock = sync(clock, clockShouldRun(store.getState(), !document.hidden), now()));
 store.subscribe((state, prev) => {
-  if (state.game.mapId !== prev.game.mapId || state.game.log.length < prev.game.log.length) {
+  if (state.game !== prev.game && (state.game.mapId !== prev.game.mapId || state.game.level !== prev.game.level || state.game.log.length < prev.game.log.length)) {
     // Partida nueva ("Jugar de nuevo"): cronómetro en cero y umbrales del claro nuevo.
     clock = newClock();
     thresholdsNow = thresholds(state.game);
@@ -72,7 +89,7 @@ const renderDock = mountDock($('dock'), store);
 const overlay = mountBoardOverlay($('overlay'), store);
 const renderSheet = mountSheet($('sheet'), store);
 const renderStory = mountStory($('story'), store, restart);
-const renderScreens = mountScreens($('screen'), store);
+const renderScreens = mountScreens($('screen'), store, { pickLevel: startLevel, lastLevel });
 const notice = $('notice');
 mountAmbient($<HTMLCanvasElement>('ambient'));
 const noticeBar = $('notice-bar');
