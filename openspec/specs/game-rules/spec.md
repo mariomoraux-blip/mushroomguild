@@ -1,6 +1,9 @@
-# Delta · game-rules
+# game-rules
 
-## ADDED Requirements
+## Purpose
+Reglas del juego del Capítulo 1 (El Claro Gris): tablero, especies del gremio, economía, tiempo, hechizos y victoria. Implementadas como lógica pura en `src/rules/`.
+
+## Requirements
 
 ### Requirement: Tablero inicial
 El juego SHALL crear un tablero vertical de 5 columnas por 8 filas a partir del mapa del Capítulo 1 (Hogar en la fila inferior, Árbol Madre en la superior), con el Hogar como única casilla con micelio.
@@ -53,7 +56,7 @@ La Amanita muscaria SHALL revivir un árbol gris adyacente a la red por 3 nutrie
 - THEN el árbol queda vivo y en la red, y los nutrientes bajan en 3
 
 ### Requirement: Pasar la voz (Gliophorus psittacinus)
-La Gliophorus psittacinus SHALL, sobre un árbol vivo, cambiar 2 esporas por 3 nutrientes.
+La Gliophorus psittacinus SHALL, sobre cualquier árbol vivo, cambiar 2 esporas por 3 nutrientes. Todo árbol vivo ya pertenece a la red, así que no se exige otra condición de alcance.
 
 #### Scenario: Trueque
 - WHEN la Gliophorus actúa sobre un árbol vivo con 2 o más esporas
@@ -63,8 +66,16 @@ La Gliophorus psittacinus SHALL, sobre un árbol vivo, cambiar 2 esporas por 3 n
 - WHEN hay menos de 2 esporas
 - THEN la acción se rechaza con "Faltan esporas: pasar la voz cuesta 2."
 
+#### Scenario: Pasar la voz desde cualquier árbol vivo
+- WHEN la Gliophorus actúa sobre un árbol revivido lejos del Hogar, con 2 o más esporas
+- THEN el trueque se aplica igual que en cualquier otro árbol vivo
+
+#### Scenario: Fuera de un árbol vivo
+- WHEN la Gliophorus intenta actuar sobre una casilla que no es un árbol vivo
+- THEN la acción se rechaza con "La Gliophorus solo pasa la voz desde un árbol vivo."
+
 ### Requirement: Llegada del mago (Conocybe arcana)
-Maese Bruma SHALL unirse al gremio al amanecer siguiente a revivir el segundo árbol, una sola vez por partida. No se puede reclutar y no cuenta en el límite de 6.
+Maese Bruma SHALL unirse al gremio al amanecer siguiente a revivir el segundo árbol, una sola vez por partida. No se puede reclutar y no cuenta en el límite de 6. Si el segundo árbol revive el día 12, Maese Bruma no llega.
 
 #### Scenario: Segundo árbol revivido
 - WHEN se revive el segundo árbol durante el día 4
@@ -74,18 +85,46 @@ Maese Bruma SHALL unirse al gremio al amanecer siguiente a revivir el segundo á
 - WHEN el jugador intenta reclutar un Conocybe arcana
 - THEN la acción no está disponible
 
+#### Scenario: Segundo árbol en el último día
+- WHEN se revive el segundo árbol durante el día 12
+- THEN Maese Bruma no se une al gremio y la partida sigue su curso normal
+
 ### Requirement: Hechizos
 Maese Bruma SHALL lanzar como máximo un hechizo por estación, a elegir entre:
-- Brote arcano: convierte una roca adyacente a la red en tierra con micelio.
-- Lluvia de esporas: sobre un árbol vivo, suma de inmediato 1 espora y 1 nutriente por cada árbol vivo.
+- Brote arcano: convierte una roca adyacente a la red en tierra con micelio. Esa casilla es, a todos los efectos, tierra tejida: pertenece a la red y extiende su alcance (por ejemplo, permite revivir árboles vecinos).
+- Lluvia de esporas: sobre cualquier árbol vivo, suma de inmediato 1 espora y 1 nutriente por cada árbol vivo. Es un pago extra: el amanecer siguiente paga normal.
+
+Lanzar un hechizo SHALL gastar la acción del día de Maese Bruma. No tiene otra acción: si ya lanzó en la estación, descansa hasta la próxima.
 
 #### Scenario: Brote arcano
 - WHEN Maese Bruma actúa sobre una roca adyacente a la red
 - THEN la roca pasa a ser tierra con micelio
 
+#### Scenario: Brote arcano extiende la red
+- WHEN un árbol gris solo toca la red a través de una casilla creada por el Brote arcano
+- THEN la Amanita muscaria puede revivirlo
+
+#### Scenario: Roca lejana
+- WHEN Maese Bruma intenta el Brote arcano sobre una roca que no toca la red
+- THEN la acción se rechaza con "El Brote arcano solo despierta rocas que tocan la red."
+
+#### Scenario: Lluvia de esporas es un pago extra
+- WHEN Maese Bruma lanza Lluvia de esporas sobre un árbol vivo con 3 árboles vivos
+- THEN se suman de inmediato 3 esporas y 3 nutrientes
+- AND al terminar ese día el amanecer suma otras 3 esporas y 3 nutrientes
+
+#### Scenario: Lluvia fuera de un árbol vivo
+- WHEN Maese Bruma intenta la Lluvia de esporas sobre una casilla que no es un árbol vivo
+- THEN la acción se rechaza con "La Lluvia de esporas se lanza sobre un árbol vivo."
+
+#### Scenario: El hechizo gasta la acción del día
+- WHEN Maese Bruma lanza un hechizo
+- THEN queda cansado hasta el amanecer, como cualquier miembro que ya actuó
+
 #### Scenario: Segundo hechizo en la misma estación
 - WHEN Maese Bruma ya lanzó un hechizo en Verano y lo intenta de nuevo en Verano
-- THEN la acción se rechaza indicando que su magia vuelve con la próxima estación
+- THEN la acción se rechaza con "Maese Bruma descansa: su magia vuelve con la próxima estación."
+- AND esto ocurre aunque sea un día nuevo de la misma estación
 
 #### Scenario: Nueva estación
 - WHEN empieza Otoño

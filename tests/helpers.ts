@@ -1,4 +1,4 @@
-import { cloneState, newGame, type GameState, type Point, type SpeciesId } from '../src/rules';
+import { addMage, cloneState, newGame, type GameState, type Point, type RecruitableSpecies } from '../src/rules';
 
 export interface Setup {
   day?: number;
@@ -12,8 +12,12 @@ export interface Setup {
   uses?: (Point & { n: number })[];
   /** Ids de miembros que ya actuaron hoy. */
   used?: number[];
-  /** Miembros extra que se agregan al gremio. */
-  extraMembers?: SpeciesId[];
+  /** Miembros reclutables extra que se agregan al gremio (disponibles). */
+  extraMembers?: RecruitableSpecies[];
+  /** Maese Bruma ya está en el gremio (se agrega después de los extra). */
+  mage?: boolean;
+  /** Estación (0–3) del último hechizo de Maese Bruma. */
+  lastSpellSeason?: number;
 }
 
 /** Arma un estado de prueba a partir de una partida nueva. */
@@ -35,10 +39,16 @@ export function setup(o: Setup = {}): GameState {
     const id = s.nextId++;
     s.members.push({ id, species, name: `extra-${id}`, used: false, at: null });
   });
+  if (o.mage) addMage(s);
+  if (o.lastSpellSeason !== undefined) s.lastSpellSeason = o.lastSpellSeason;
   return s;
 }
 
+/** Id del miembro de una especie (el primero, o el n-ésimo). */
+export const idOf = (s: GameState, species: string, nth = 1): number =>
+  s.members.filter((m) => m.species === species)[nth - 1]!.id;
+
 // Ids del gremio inicial.
-export const OLA = 1; // Ostra
+export const ANIL = 1; // Lactarius indigo
 export const BRUNO = 2; // Champiñón
-export const RUBI = 3; // Amanita
+export const RUBI = 3; // Amanita muscaria
