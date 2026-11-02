@@ -17,7 +17,7 @@
 - [ ] 3.2 Pruebas de «Multiplicador del nivel», «Mismos umbrales en todos los niveles», «Récord entre niveles» y «Rejugar» con nivel
 
 ## 4. Interfaz
-- [ ] 4.1 «Elige tu claro» (`screens.ts`, `ui.screen = { kind: 'level' }`): tres botones, foco en el último nivel (en `localStorage`, con try/catch), Esc a la portada, intro solo la primera vez por nivel; `?nivel=`
+- [ ] 4.1 «Elige tu claro» (`screens.ts`, `ui.screen = { kind: 'level' }`): tres botones, foco en el último nivel (en `localStorage`, con try/catch), Esc a la portada, intro solo la primera vez por nivel (niveles vistos en `localStorage`); `?nivel=`
 - [ ] 4.2 Store: sin ★ ni «Pista:» en Ancestral; avisos de la presión en la bitácora; «Jugar de nuevo» conserva el nivel
 - [ ] 4.3 HUD: nivel en la etiqueta accesible; copo con escarcha; tarjeta de Añil con el costo real
 - [ ] 4.4 Tablero: árbol marcado (late suave, quieto con movimiento reducido) y apagado (velo fijo y copo) con `frost` en `theme.ts`; etiquetas accesibles con estado y costo

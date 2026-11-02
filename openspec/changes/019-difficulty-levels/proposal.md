@@ -34,7 +34,7 @@ Sobran 3 o 4 meses. Quien busca un paseo tranquilo debe seguir teniéndolo; quie
 - Menos troncos (decisión del jugador: por ahora no).
 - Reglas que quiten progreso: escarcha que congela micelio, árboles vivos que vuelven a gris, hambre del gremio.
 - Desbloquear niveles o progresión por claro: los tres están disponibles desde el inicio.
-- Arte final para el árbol marcado y el apagado (ver Preguntas abiertas).
+- Una pieza pintada para el árbol marcado y el apagado: se usa un velo de escarcha (ver Decisiones).
 
 ## Impacto
 - `game-rules`: niveles, escarcha, árboles que se apagan; modifica Tablero inicial, Tejer, Revivir y Dificultad medida.
@@ -45,7 +45,8 @@ Sobran 3 o 4 meses. Quien busca un paseo tranquilo debe seguir teniéndolo; quie
 - `GameState` gana `level` y, por árbol, `fading` (marcado) y `faded` (apagado). `?nivel=brote|bosque|ancestral` en la URL.
 - Depende de 017 (#15, salida tras «Ver el claro») y 018 (#16, portada sin personajes): el delta de `title-screens` › Portada parte del texto del 018. Fusionarlos antes de implementar.
 
-## Preguntas abiertas
-1. **Arte del árbol marcado y del apagado:** propuesta, el árbol gris con un velo de escarcha de un color nuevo `frost` en `theme.ts` (marcado: velo que late suave, sin animar con movimiento reducido; apagado: velo fijo y un copo en la esquina). ¿Hace falta una pieza pintada nueva?
-2. **Pistas en Bosque:** propuesta, la misma política que Brote (seguirlas gana ~80 %), más el aviso del árbol marcado. ¿O las pistas de Bosque deberían anticipar la presión y ganar siempre?
-3. **Intro:** propuesta, la intro de 3 cartas se ve solo la primera vez por nivel; las demás veces se entra directo al tablero.
+## Decisiones (2 de noviembre)
+Las tres preguntas abiertas de la propuesta quedaron cerradas así:
+1. **Arte del árbol marcado y del apagado:** sin pieza pintada nueva. El árbol gris lleva un velo de escarcha de un color nuevo `frost` en `theme.ts`. El marcado late suave (quieto con movimiento reducido); el apagado tiene el velo fijo y un copo en la esquina.
+2. **Pistas en Bosque:** la misma política que en Brote (seguirlas gana ~80 %), más los avisos de la presión en la bitácora. Las pistas no anticipan la presión.
+3. **Intro:** la intro de 3 cartas se ve solo la primera vez que se juega cada nivel; las demás veces se entra directo al tablero.

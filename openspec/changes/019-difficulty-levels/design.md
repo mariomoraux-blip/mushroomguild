@@ -29,7 +29,7 @@ export const FADED_REVIVE = 5;  // costo de revivir un árbol apagado
 - `?map=clasico` con `?nivel=` aplica el mismo procedimiento con la semilla fija 0.
 
 ## Bots
-- **Política de las pistas** (`playAdvised`): modela al jugador con experiencia. Sabe jugar Brote, pero no anticipa la presión más allá de lo que avisa la bitácora.
+- **Política de las pistas** (`playAdvised`): modela al jugador con experiencia. Sabe jugar Brote, pero no anticipa la presión más allá de lo que avisa la bitácora. Es también la ★ de Brote y Bosque (decisión 2): en Bosque seguirla gana ~80 %.
 - **Bot experto** (`playExpert`, nuevo, `src/rules/autoplay.ts`): la política de las pistas más tres reglas: revivir primero el árbol marcado si alcanza, tejer antes de la escarcha (guardar 1 nutriente por casilla que falte tejer antes del otoño) y preferir el Brote arcano sobre rocas que acortan el camino. Si no gana, una búsqueda acotada (haz de 32 estados por mes) prueba alternativas. Certifica que el claro es ganable.
 
 ## Metas de balance (`balance.test.ts`)
@@ -47,9 +47,9 @@ Generar un claro de Bosque o Ancestral (con su certificación) SHALL tardar meno
 - `ScoreResult` gana `level`; `replay(mapId, level, log)`. El récord sigue siendo uno por `mapId` (la semilla): el mejor total multiplicado, venga del nivel que venga. `SCORE_VERSION` pasa a 2.
 
 ## Interfaz
-- **«Elige tu claro»** (`src/ui/screens.ts`, `ui.screen = { kind: 'level' }`): tres tarjetas grandes (≥ 44 px) con nombre, una línea de qué cambia y el multiplicador; el foco va al último nivel elegido (recordado en `localStorage`, con try/catch). Esc vuelve a la portada. Elegir abre la intro (primera vez por nivel) o el tablero.
+- **«Elige tu claro»** (`src/ui/screens.ts`, `ui.screen = { kind: 'level' }`): tres tarjetas grandes (≥ 44 px) con nombre, una línea de qué cambia y el multiplicador; el foco va al último nivel elegido (recordado en `localStorage`, con try/catch). Esc vuelve a la portada. Elegir abre la intro la primera vez que se juega ese nivel (los niveles ya vistos se recuerdan en `localStorage`, como las fichas) o el tablero.
 - **HUD:** el nivel va en la etiqueta accesible de la pastilla del mes («Mes 7 de 12, Otoño, Bosque»). Con escarcha activa, un copo junto al ícono de la estación. La tarjeta de Añil dice «Teje · −2 nutrientes».
-- **Tablero:** árbol marcado y apagado según la pregunta abierta 1; colores en `theme.ts`.
+- **Tablero:** sin pieza nueva. `paint.ts` dibuja sobre el árbol gris un velo de escarcha con el color nuevo `frost` de `theme.ts`: el marcado late suave (alfa entre 0,35 y 0,6 cada 1,6 s; fijo en 0,5 con movimiento reducido) y el apagado lleva el velo fijo y un copo en la esquina superior.
 - **Bitácora:** al empezar la estación con escarcha, «Llegó la escarcha: tejer cuesta 2 nutrientes.»; al marcar un árbol, «Este árbol se apagará al terminar el mes si nadie lo revive.»; al apagarse, «Un árbol se apagó: revivirlo ahora cuesta 5 nutrientes.» Textos finales en `es.ts`.
 - **Ancestral:** `advise` sigue corriendo (lo usan los bots), pero el store no muestra la ★ ni «Pista:»; la bitácora queda con los mensajes de acción y los avisos.
 
