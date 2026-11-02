@@ -105,8 +105,8 @@ FICHA                          EL GREMIO                      INTRO / VICTORIA
 - **Cómo jugar:** carrusel de 5 pasos en pergamino, con ‹ › y puntos. Reemplaza a la Libreta de campo como ayuda principal.
 - **Ficha:** retrato grande, nombre, nombre científico y rol, contexto, frase entre comillas y secciones con etiqueta verde (Habilidad, Movimiento, Nutrientes…), como la ficha actual.
 - **El gremio:** lista de las cinco especies, cada fila con retrato, nombre, rol y una línea; abre la ficha.
-- **Intro (003):** fondo `backgrounds/intro` (bosque lila apagado), letrero "El bosque se apaga", texto y "Comenzar".
-- **Victoria (003):** fondo `backgrounds/victory`, letrero "¡El bosque despertó!", texto y resumen (días, árboles, nutrientes, esporas); "Ver resumen" y "Jugar de nuevo". El fin del invierno usa el mismo layout con `backgrounds/intro`.
+- **Intro (003, hecho):** fondo `backgrounds/intro` (bosque lila apagado), tres cartas de pergamino con letrero de madera ("El bosque se apaga", "Un gremio despierta", "Antes del invierno"), puntos de progreso, "Saltar" y "Siguiente"/"Comenzar". La llegada de Maestra Bruna usa la misma carta con su retrato.
+- **Victoria (003, hecho):** fondo `backgrounds/victory`, letrero "¡El bosque despertó!", texto y resumen (día, árboles, nutrientes, esporas); "Ver el claro" y "Jugar de nuevo" ("Ver resumen" se descartó: el resumen ya está en la carta). El fin del invierno usa el mismo layout con `backgrounds/intro`. En apaisado, las panorámicas `*-wide`.
 
 ## Personajes
 - Cuerpo-tallo redondo, sombrero ≈ 55 % de la altura, cara mínima (ojos de punto, rubor, boca pequeña).
@@ -133,7 +133,7 @@ Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña y co
 - Los sprites de Blender (`rest`, `work`, `happy`) salieron de `public/assets/` y quedan como fuente en `assets/sprites/webp/`.
 
 ## Luz por estación
-**Decisión del 010:** cada estación usa sus **variantes pintadas** donde existen (pasto, rocas, árboles vivos) y la pieza de primavera donde no. Reemplaza el principio anterior de "un solo juego de assets + gradación". La gradación de la tabla queda como luz ambiental opcional encima (cambio 003), suave, para no ensuciar las piezas pintadas. Personajes y UI no cambian, salvo Chispa (corona de la estación).
+**Decisión del 010:** cada estación usa sus **variantes pintadas** donde existen (pasto, rocas, árboles vivos) y la pieza de primavera donde no. Reemplaza el principio anterior de "un solo juego de assets + gradación". Personajes y UI no cambian, salvo Chispa (corona de la estación). **Decisión del 003:** la gradación de color de la tabla se descartó; queda como referencia del ánimo de cada estación para futuras piezas pintadas.
 
 | Estación | Días | Hora | Gradación | Micelio |
 | --- | --- | --- | --- | --- |
@@ -142,7 +142,7 @@ Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña y co
 | Otoño | 7–9 | Atardecer | Naranja, sombras largas | Se nota |
 | Invierno | 10–12 | Anochecer | Azul frío, nieve ligera | Brilla y alumbra el claro |
 
-La saturación del progreso (gris → color según árboles revividos) se aplica además de la gradación.
+La saturación del progreso (003, hecho) va de apagado (40 % de color) a color pleno según los árboles revividos; solo afecta al claro pintado.
 - Íconos de estación: `ui/icons/season-spring` (flor rosa), `-verano` (flor amarilla), `-otono` (hoja naranja), `-invierno` (copo). Van en la pastilla del día.
 
 ## Producción y entrega
@@ -152,7 +152,7 @@ La saturación del progreso (gris → color según árboles revividos) se aplica
 - **Estados por separado:** los brillos de casilla válida y seleccionada, y la ★, van como capas transparentes del mismo tamaño que la casilla.
 - **Sin texto horneado** (salvo el logo).
 - **Presupuesto:** `public/assets/` ≤ **4 MB** (decisión del 2 de noviembre; antes 2 MB). Hoy hay 2.19 MB. El JavaScript del juego no cuenta en este límite. Los fondos y piezas de portada, intro y victoria se cargan de forma diferida, cuando se muestra esa pantalla; la primera carga solo trae lo del tablero, los personajes y el HUD.
-- **Estaciones (010):** variantes pintadas por estación; la gradación del 003, si se hace, es solo una luz suave encima del escenario.
+- **Estaciones (010):** variantes pintadas por estación, sin gradación de color (descartada en el 003).
 
 ## Organización de assets
 Lo que se publica vive en `public/assets/` (WebP). La fuente (Blender, renders a tamaño completo, hojas originales) vive en `assets/`; las hojas pintadas están en `assets/ui/source/`. Nombres en inglés, minúscula y guiones, como el código.

@@ -10,6 +10,22 @@ const presets: Record<string, () => GameState> = {
     (['lactarius', 'champi', 'gliophorus'] as RecruitableSpecies[]).forEach((sp) => (s = recruit(s, sp).state));
     return endDay(s).state;
   },
+  /** Maestra Bruna llega al terminar el día (carta de su llegada). */
+  mageTomorrow: () => ({ ...newGame(), tiles: newGame().tiles.map((t) => (t.kind === 'tree' && (t.x + t.y) % 2 === 0 ? { ...t, alive: true, net: true } : t)), mageDue: true }),
+  /** A un toque de ganar: 3 árboles vivos, 10 nutrientes y la red tocando al Árbol Padre (carta de victoria). */
+  nearWin: () => {
+    const s = newGame();
+    const mother = s.tiles.find((t) => t.kind === 'mother')!;
+    let alive = 0;
+    const tiles = s.tiles.map((t) => {
+      if (t.kind === 'tree' && alive < 3) return (alive++, { ...t, alive: true, net: true });
+      const near = Math.abs(t.x - mother.x) + Math.abs(t.y - mother.y) === 1;
+      return near && t.kind === 'soil' ? { ...t, net: true } : t;
+    });
+    return { ...s, tiles, nutrients: 10 };
+  },
+  /** Último día (carta del fin del invierno al terminarlo). */
+  lastDay: () => ({ ...newGame(), day: 12 }),
   /** Otoño e invierno con árboles vivos, red y troncos usados (para ver las piezas por estación). */
   autumn: () => seasonPreview(7),
   winter: () => seasonPreview(10),

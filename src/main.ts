@@ -11,6 +11,7 @@ import { mountBoardOverlay } from './ui/board';
 import { mountDock } from './ui/dock';
 import { mountHud } from './ui/hud';
 import { mountSheet } from './ui/sheet';
+import { mountStory } from './ui/story';
 import { debugGame } from './debug';
 import './styles.css';
 
@@ -29,8 +30,14 @@ const seen = (() => { try { return JSON.parse(storage.get(SEEN) ?? '[]') as Spec
 const params = new URLSearchParams(location.search);
 const seedParam = Number(params.get('seed'));
 const seed = Number.isFinite(seedParam) && seedParam > 0 ? seedParam : (Date.now() % 2147483647) + 1;
-const firstGame = debugGame() ?? (params.get('map') === 'clasico' ? newGame() : newRandomGame(seed));
-const store = createStore(initialState(firstGame, seen));
+const clasico = params.get('map') === 'clasico';
+const debug = debugGame();
+const firstGame = debug ?? (clasico ? newGame() : newRandomGame(seed));
+// La intro abre la partida normal; con `?map`, `?seed` o `?debugState` se entra directo al tablero (pruebas y playtests).
+const intro = !debug && !params.has('map') && !params.has('seed');
+const store = createStore(initialState(firstGame, seen, intro));
+/** "Jugar de nuevo": mismo mapa clásico, o un claro aleatorio nuevo. */
+const restart = () => store.dispatch({ type: 'restart', game: clasico ? newGame() : newRandomGame((Date.now() % 2147483647) + 1) });
 store.subscribe((state, prev) => {
   if (state.ui.seen !== prev.ui.seen) storage.set(SEEN, JSON.stringify(state.ui.seen));
 });
@@ -39,6 +46,7 @@ const renderHud = mountHud($('hud'), store);
 const renderDock = mountDock($('dock'), store);
 const overlay = mountBoardOverlay($('overlay'), store);
 const renderSheet = mountSheet($('sheet'), store);
+const renderStory = mountStory($('story'), store, restart);
 const notice = $('notice');
 mountAmbient($<HTMLCanvasElement>('ambient'));
 $('notice-bar').prepend(tornPaper());
@@ -56,6 +64,7 @@ const renderDom = () => {
   renderDock(state);
   overlay.render(state);
   renderSheet(state);
+  renderStory(state);
   notice.textContent = state.ui.notice.text;
   noticeBar.dataset.tone = state.ui.notice.tone;
   // Botón "Ficha" del miembro seleccionado.

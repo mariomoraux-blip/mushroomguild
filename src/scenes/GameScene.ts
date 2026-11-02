@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import { H, W } from '../rules';
-import { paintBoard } from './paint';
+import { paintBoard, progressSaturation } from './paint';
 import { highlighted, suggestedTile, type AppState, type Store } from '../store';
 import { BOARD_HEADROOM, boardArtKeys, boardArtUrl, FATHER_SCALE, fatherKey, portraitKey, renderResolution, SPRITE_SPECIES, spriteUrl } from '../theme';
 const BOARD_KEY = 'claro';
@@ -71,6 +71,7 @@ export class GameScene extends Phaser.Scene {
       star: star ? { x: star.x, y: star.y } : null,
       occupied,
       fatherSprite: this.textures.exists(fatherKey(false)) && this.textures.exists(fatherKey(true)),
+      saturation: progressSaturation(state.game),
       art: (key) => (this.textures.exists(key) ? (this.textures.get(key).getSourceImage() as CanvasImageSource) : undefined),
     });
     tex.refresh();

@@ -357,3 +357,46 @@ test('Bosque pintado: el tablero usa las piezas de cada estación', async ({ pag
     await page.screenshot({ path: `docs/screenshots/010-${season === 'autumn' ? 'otono' : 'invierno'}-390x844.png` });
   }
 });
+
+test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page }, info) => {
+  test.setTimeout(90_000);
+  const shot = (name: string) => (info.project.name === 'vertical-390x844' ? page.screenshot({ path: `docs/screenshots/003-${name}-390x844.png` }) : undefined);
+  const card = page.locator('#story [role="dialog"]');
+  // Intro: abre sola sin ?map/?seed; el foco va al botón principal; "Saltar" la cierra.
+  await page.goto('/');
+  await expect(card).toBeVisible();
+  await expect(card).toContainText('El bosque se apaga');
+  await expect(page.locator('#story .story__btn--primary')).toBeFocused();
+  await shot('intro');
+  await page.getByRole('button', { name: 'Siguiente' }).click();
+  await expect(card).toContainText('Un gremio despierta');
+  await page.getByRole('button', { name: 'Saltar' }).click();
+  await expect(card).toHaveCount(0);
+  // Esc también la cierra.
+  await page.goto('/');
+  await page.keyboard.press('Escape');
+  await expect(card).toHaveCount(0);
+  // Llegada de Maestra Bruna al terminar el día.
+  await page.goto('/?debugState=mageTomorrow');
+  await page.locator('.end').click();
+  await expect(card).toContainText('El bosque volvió a hablar, y alguien escuchó.');
+  await shot('maga');
+  await page.getByRole('button', { name: 'Seguir' }).click();
+  await expect(card).toHaveCount(0);
+  // Victoria: Rubí despierta al Árbol Padre.
+  await page.goto('/?debugState=nearWin');
+  await page.locator('.card--amanita').click();
+  await page.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
+  await expect(card).toContainText('¡El bosque despertó!');
+  await shot('victoria');
+  await page.getByRole('button', { name: 'Ver el claro' }).click();
+  await expect(card).toHaveCount(0);
+  // Fin del invierno y "Jugar de nuevo".
+  await page.goto('/?debugState=lastDay');
+  await page.locator('.end').click();
+  await expect(card).toContainText('El bosque esperará la próxima primavera.');
+  await shot('invierno');
+  await page.getByRole('button', { name: 'Jugar de nuevo' }).click();
+  await expect(card).toHaveCount(0);
+  await expect(page.locator('.hud__day-value')).toHaveText('Día 1/12');
+});

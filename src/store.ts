@@ -27,6 +27,10 @@ export type Sheet =
   | { kind: 'spell' }
   | { kind: 'help' };
 
+/** Carta de historia (003): intro de 3 pasos, llegada de Maestra Bruna o final. */
+export type Story = { kind: 'intro'; step: number } | { kind: 'mage' } | { kind: 'won' } | { kind: 'lost' };
+export const INTRO_STEPS = 3;
+
 export interface Notice {
   readonly text: string;
   readonly tone: 'info' | 'warn';
@@ -38,6 +42,8 @@ export interface UiState {
   /** Hechizo elegido para Maestra Bruna. */
   readonly spell: Spell | null;
   readonly sheet: Sheet | null;
+  /** Carta de historia abierta sobre todo lo demás. */
+  readonly story: Story | null;
   readonly notice: Notice;
   /** Especies cuya ficha ya se mostró al seleccionarlas (se recuerdan entre visitas). */
   readonly seen: readonly SpeciesId[];
@@ -56,7 +62,11 @@ export type Action =
   | { type: 'endDay' }
   | { type: 'cancel' }
   | { type: 'openSheet'; sheet: Sheet }
-  | { type: 'closeSheet' };
+  | { type: 'closeSheet' }
+  | { type: 'storyNext' }
+  | { type: 'closeStory' }
+  /** Partida nueva (la crea quien llama: el store no usa azar). */
+  | { type: 'restart'; game: GameState };
 
 const info = (text: string): Notice => ({ text, tone: 'info' });
 const warn = (text: string): Notice => ({ text, tone: 'warn' });
@@ -112,8 +122,23 @@ function tileHelp(t: Tile): string {
   return es.tileHelp[t.kind];
 }
 
-export function initialState(game: GameState = newGame(), seen: readonly SpeciesId[] = []): AppState {
-  return { game, ui: { selected: null, spell: null, sheet: null, notice: idleHint(game), seen } };
+export function initialState(game: GameState = newGame(), seen: readonly SpeciesId[] = [], intro = false): AppState {
+  return { game, ui: { selected: null, spell: null, sheet: null, story: intro ? { kind: 'intro', step: 0 } : null, notice: idleHint(game), seen } };
+}
+
+/** Carta que abre un cambio del juego: final al ganar o al acabar el invierno; presentación al llegar la maga. */
+function storyFor(prev: GameState, next: GameState): Story | null {
+  if (prev.status === 'playing' && next.status === 'won') return { kind: 'won' };
+  if (prev.status === 'playing' && next.status === 'lost') return { kind: 'lost' };
+  const mages = (g: GameState) => g.members.filter((m) => m.species === 'mago').length;
+  if (next.status === 'playing' && mages(next) > mages(prev)) return { kind: 'mage' };
+  return null;
+}
+
+/** Aplica un nuevo estado del juego y abre la carta de historia que corresponda. */
+function advance(game: GameState, next: GameState, ui: UiState): UiState {
+  const story = storyFor(game, next);
+  return story ? { ...ui, story } : ui;
 }
 
 /** Si es la primera vez que se selecciona esta especie, abre su ficha (y la marca como vista). */
@@ -182,7 +207,7 @@ export function reduce(state: AppState, action: Action): AppState {
       const c = check(game, m.id, action.x, action.y, ui.spell ?? undefined);
       if (!c.ok) return { game, ui: { ...ui, notice: warn(c.reason) } };
       const r = act(game, m.id, action.x, action.y);
-      return { game: r.state, ui: cleared(ui, info(r.message)) };
+      return { game: r.state, ui: advance(game, r.state, cleared(ui, info(r.message))) };
     }
     case 'recruit': {
       try {
@@ -196,15 +221,25 @@ export function reduce(state: AppState, action: Action): AppState {
     case 'endDay': {
       const r = endDay(game);
       if (r.state === game) return state;
-      return { game: r.state, ui: cleared(ui, info(r.message)) };
+      return { game: r.state, ui: advance(game, r.state, cleared(ui, info(r.message))) };
     }
     case 'cancel':
+      if (ui.story) return { game, ui: { ...ui, story: null } };
       if (ui.sheet) return afterSheet(state);
       return { game, ui: cleared(ui, ui.selected === null ? ui.notice : idleHint(game)) };
     case 'openSheet':
       return { game, ui: { ...ui, sheet: action.sheet } };
     case 'closeSheet':
       return afterSheet(state);
+    case 'storyNext': {
+      const st = ui.story;
+      if (st?.kind !== 'intro' || st.step + 1 >= INTRO_STEPS) return { game, ui: { ...ui, story: null } };
+      return { game, ui: { ...ui, story: { kind: 'intro', step: st.step + 1 } } };
+    }
+    case 'closeStory':
+      return ui.story ? { game, ui: { ...ui, story: null } } : state;
+    case 'restart':
+      return { game: action.game, ui: { selected: null, spell: null, sheet: null, story: null, notice: idleHint(action.game), seen: ui.seen } };
   }
 }
 

@@ -241,6 +241,32 @@ export const es = {
     recruitCost: (n: number) => `${n} esporas`,
   },
 
+  story: {
+    label: 'Historia',
+    intro: [
+      { title: 'El bosque se apaga', text: 'Los árboles del claro se durmieron y el color se fue con ellos.' },
+      { title: 'Un gremio despierta', text: 'Tres hongos se asoman bajo la casa-hongo, con ganas de trabajar.' },
+      { title: 'Antes del invierno', text: 'Lleva la red de micelio hasta el Árbol Padre y despiértalo antes de que termine el invierno.' },
+    ],
+    step: (n: number, total: number) => `Carta ${n} de ${total}`,
+    next: 'Siguiente',
+    start: 'Comenzar',
+    skip: 'Saltar',
+    mageTitle: 'Llegó Maestra Bruna',
+    mageText: 'El bosque volvió a hablar, y alguien escuchó.',
+    mageSpells: 'Una vez por estación lanza uno de sus hechizos:',
+    mageOk: 'Seguir',
+    wonTitle: '¡El bosque despertó!',
+    wonText: (day: number) => `El Árbol Padre despertó en el día ${day}.`,
+    lostTitle: 'Llegó el invierno',
+    lostText: 'El bosque esperará la próxima primavera.',
+    lostTip: 'Consejo: revive árboles temprano. Cada árbol vivo da esporas cada mañana.',
+    summary: 'Resumen',
+    stats: { day: 'día', trees: 'árboles', nutrients: 'nutrientes', spores: 'esporas' },
+    viewBoard: 'Ver el claro',
+    again: 'Jugar de nuevo',
+  },
+
   sheet: {
     close: 'Cerrar',
     recruitTitle: 'Reclutar al gremio',

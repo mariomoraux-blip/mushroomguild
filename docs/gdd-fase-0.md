@@ -123,7 +123,7 @@ Cada especie se reconoce por su silueta, sin depender del color: domo bajo, embu
 | Otoño | Atardecer | Naranjas, sombras largas | Se nota |
 | Invierno | Anochecer | Azul frío, nieve ligera | Brilla: la red que construiste ilumina el claro |
 
-El invierno es el clímax emocional: cuando la luz se va, la red que tejiste es lo que alumbra. Se produce un solo juego de assets y cada estación es una gradación de color encima, no cuatro versiones del arte. La saturación del progreso (gris a color) se suma a esa gradación.
+El invierno es el clímax emocional: cuando la luz se va, la red que tejiste es lo que alumbra. Cada estación usa sus piezas pintadas (pasto, rocas y árboles cambian; decisiones del 010 y del 003, que reemplazan la idea original de una gradación de color). La saturación del progreso (de apagado a color pleno) va encima.
 
 #### Interfaz
 - **Libreta de campo:** paneles de papel crema con bordes suaves, botones y marcos de madera, etiquetas tipo cinta.

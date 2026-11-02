@@ -19,6 +19,21 @@ export interface PaintInput {
   readonly fatherSprite?: boolean;
   /** Piezas pintadas del tablero (cambio 010). Sin ellas, o si falta una, se usa el dibujo vectorial. */
   readonly art?: ArtLookup;
+  /** Saturación del escenario, 0–1 (003 · el color vuelve). Sin valor: color pleno. */
+  readonly saturation?: number;
+}
+
+/**
+ * Saturación del claro según el progreso (003): apagado al empezar y color pleno al despertar al Árbol Padre.
+ * FLOOR + (1 − FLOOR) × (árboles vivos + Árbol Padre × 2) / (árboles del claro + 2). El piso subió de 0,15
+ * a 0,4 con las piezas pintadas (010): casi gris, el claro perdía el arte.
+ */
+export const SATURATION_FLOOR = 0.4;
+export function progressSaturation(game: GameState): number {
+  const trees = game.tiles.filter((t) => t.kind === 'tree');
+  const alive = trees.filter((t) => t.alive).length;
+  const father = game.tiles.some((t) => t.kind === 'mother' && t.alive) ? 2 : 0;
+  return Math.min(1, SATURATION_FLOOR + ((1 - SATURATION_FLOOR) * (alive + father)) / (trees.length + 2));
 }
 
 /** Lo que se pintó en cada casilla (para pruebas). */
@@ -628,6 +643,15 @@ export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
     else if (t.kind === 'tree' || t.kind === 'mother') paintTree(ctx, T, t);
     else if (t.kind === 'home') paintHome(ctx, T, t);
     painted.push({ x: t.x, y: t.y, object: t.kind });
+  }
+  // El color vuelve: mezcla con gris en modo "saturation" (los resaltes y la ★ van después, a color).
+  const sat = input.saturation ?? 1;
+  if (sat < 1) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'saturation';
+    ctx.fillStyle = rgba('neutral', 1 - sat);
+    ctx.fillRect(0, 0, W * T, H * T);
+    ctx.restore();
   }
   for (const key of valid) {
     const [x, y] = key.split(',').map(Number) as [number, number];

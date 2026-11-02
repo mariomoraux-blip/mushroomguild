@@ -22,6 +22,7 @@ export const color = {
   peach: '#F6D7B0', // luz cálida del fondo
   glow: '#FFF4C2', // brillos, aura del Árbol Padre, luciérnagas
   stoneDark: '#6F675B', // sombra de rocas y copas dormidas
+  neutral: '#808080', // gris sin tono: solo para desaturar el escenario (003, modo "saturation")
 } as const;
 
 export type ColorToken = keyof typeof color;
@@ -117,6 +118,11 @@ const UI_ART: Record<string, string> = {
   // Fondo de la partida (011): el del menú hasta que haya uno propio.
   'bg-game': 'backgrounds/menu',
   'bg-game-wide': 'backgrounds/menu-landscape',
+  // Cartas de historia (003): solo se descargan cuando se muestra la carta.
+  'bg-intro': 'backgrounds/intro',
+  'bg-victory': 'backgrounds/victory',
+  'bg-intro-wide': 'backgrounds/intro-wide',
+  'bg-victory-wide': 'backgrounds/victory-wide',
   moon: 'ui/icons/moon',
   recruit: 'ui/icons/recruit',
   sign: 'ui/panels/sign',

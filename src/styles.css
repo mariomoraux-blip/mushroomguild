@@ -484,6 +484,80 @@ button { font: inherit; color: inherit; }
 .help ol, .help__tiles { padding-left: 20px; display: grid; gap: 4px; }
 .help__tip { margin-top: 14px !important; padding: 10px 12px; background: var(--mycelium); border: 2px dashed var(--moss); border-radius: 16px; }
 
+/* ─── Cartas de historia (003): fondo pintado, letrero de madera y pergamino ─ */
+.story {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  background: var(--leafDark) center / cover no-repeat;
+  overflow-y: auto;
+}
+.story[hidden] { display: none; }
+.story[data-bg='intro'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 45%, transparent)), var(--art-bg-intro); }
+.story[data-bg='victory'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 35%, transparent)), var(--art-bg-victory); }
+/* Los finales dejan ver el claro: fondo pintado arriba, la carta abajo. */
+.story[data-kind='won'], .story[data-kind='lost'] { align-items: flex-end; }
+.story__card {
+  position: relative;
+  width: min(400px, 100%);
+  margin-top: 28px;
+  padding: 34px 18px 18px;
+  display: grid;
+  gap: 10px;
+  text-align: center;
+  border: 2px solid var(--ink);
+  border-radius: 22px;
+  background: var(--grain), linear-gradient(var(--cream), var(--paper) 65%, var(--peach));
+  box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--wood) 30%, transparent), 0 10px 24px color-mix(in srgb, var(--ink) 50%, transparent);
+}
+.story__title {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% -50%;
+  max-width: calc(100% - 16px);
+  margin: 0;
+  padding: 7px 22px 9px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1.1;
+  white-space: nowrap;
+  color: var(--paper);
+  text-shadow: 0 2px 0 var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  background: linear-gradient(var(--wood), var(--bark));
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--peach) 40%, transparent), 0 4px 0 var(--ink);
+}
+.story__body { display: grid; gap: 8px; }
+.story__text { margin: 0; font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.3; }
+.story__note { margin: 0; font-size: 14px; color: var(--ink-soft); }
+.story__sub { margin: 4px 0 0; font-family: var(--font-display); font-size: 15px; }
+.story__spells { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; text-align: left; font-size: 14px; }
+.story__spells li { padding: 6px 10px; border-radius: 12px; background: color-mix(in srgb, var(--mycelium) 45%, transparent); }
+.story__spells strong { color: var(--moss); }
+.story__stats { margin: 0; padding: 6px; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; border-radius: 14px; background: color-mix(in srgb, var(--paper) 70%, var(--peach)); }
+.story__stat { display: grid; }
+.story__stat strong { font-family: var(--font-display); font-size: 20px; }
+.story__stat span { font-size: 11px; font-weight: 800; color: var(--ink-soft); }
+.story__cast { display: flex; justify-content: center; align-items: flex-end; gap: 4px; margin: -4px 0 -2px; }
+.story__cast .portrait--md { width: 80px; }
+.story__dots { display: flex; justify-content: center; gap: 8px; }
+.story__dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--ink); background: var(--paper); }
+.story__dot.is-active { background: var(--sun); }
+.story__actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+.story__btn { flex: 1 1 120px; max-width: 200px; height: 48px; font-size: 16px; font-family: var(--font-display); font-weight: 700; border-radius: 24px; }
+.story__btn--primary {
+  color: var(--ink);
+  background: linear-gradient(var(--glow), var(--sun) 45%, var(--accent));
+  box-shadow: inset 0 -4px 0 color-mix(in srgb, var(--wood) 45%, transparent), 0 4px 0 var(--ink);
+}
+
 /* ─── Horizontal en teléfono: tablero a la izquierda, HUD y dock a la derecha ─ */
 @media (orientation: landscape) and (max-height: 540px) {
   .app {
@@ -503,6 +577,8 @@ button { font: inherit; color: inherit; }
 
 /* Pantallas apaisadas (horizontal y escritorio): fondo 16:9. */
 @media (orientation: landscape) {
+  .story[data-bg='intro'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 45%, transparent)), var(--art-bg-intro-wide); }
+  .story[data-bg='victory'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 35%, transparent)), var(--art-bg-victory-wide); }
   body {
     background:
       linear-gradient(color-mix(in srgb, var(--ink) 30%, transparent), transparent 25%, transparent 70%, color-mix(in srgb, var(--ink) 40%, transparent)),
