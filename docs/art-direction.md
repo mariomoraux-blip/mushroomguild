@@ -81,10 +81,10 @@ Valores de día; la gradación por estación (003) los oscurece hacia el inviern
 - Escritorio: el mismo layout centrado, con más aire; casillas ≤ 96 px.
 
 ## Sprites en el juego
-- Los renders de Blender viven en `assets/sprites/` (fuente) y se copian a `public/assets/characters/` (lo que se publica): `<especie>-<pose>.png` con poses `reposo`, `trabajando` y `feliz`, a 176 × 128. La Gliophorus tiene una variante por estación (`gliophorus-<pose>-<estación>.png`).
+- Los renders de Blender viven en `assets/sprites/` (fuente) y se copian a `public/assets/characters/` (lo que se publica): `<especie>-<pose>.png` con poses `reposo`, `trabajando` y `feliz`, a 176 × 128. Maestra Bruna, la más alta, va a 176 × 160 con la misma escala y el mismo suelo; su render `hechizo` se publica como `mago-trabajando.png`. La Gliophorus tiene una variante por estación (`gliophorus-<pose>-<estación>.png`).
 - Uso: retrato en reposo en el dock (feliz cuando está seleccionado o sugerido), pose feliz grande en la ficha y pose de trabajo en el tablero, sobre la casilla donde ese miembro trabajó hoy.
-- Maestra Bruna aún no tiene modelo: usa la silueta de cono como placeholder.
-- Presupuesto: los 21 sprites publicados pesan ≈ 300 KB (límite total de assets: 2 MB).
+- La silueta de cono de cada especie (`.hat--*` en `styles.css`) queda solo como respaldo si un sprite faltara.
+- Presupuesto: los 24 sprites publicados pesan ≈ 400 KB (límite total de assets: 2 MB).
 
 ## Referencias (`references/`)
 | Archivo | Tomamos | Dejamos |

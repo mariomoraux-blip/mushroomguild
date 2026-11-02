@@ -153,6 +153,27 @@ test('Maestra Bruna: primero el hechizo, después las casillas', async ({ page }
   await expect(valid(page).first()).toHaveAttribute('aria-label', /Árbol vivo/);
 });
 
+test('Maestra Bruna: retrato propio en el dock y más alta en el tablero', async ({ page }, info) => {
+  await page.goto('/?debugState=fullGuild');
+  const img = page.locator('.card--mago .portrait img');
+  await expect(img).toHaveAttribute('src', /mago-(reposo|feliz)\.png$/); // feliz si es la sugerida
+  await expect.poll(() => img.evaluate((i: HTMLImageElement) => (i.complete ? i.naturalHeight : 0))).toBe(160);
+  const mage = page.locator('.card--mago');
+  await mage.scrollIntoViewIfNeeded();
+  await mage.click();
+  await page.getByRole('button', { name: /Lluvia de esporas/ }).click();
+  await valid(page).first().click();
+  // Su sprite de trabajo (176 × 160) conserva la proporción: más alto que los de 176 × 128.
+  const ratio = () =>
+    page.evaluate(() => {
+      const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: { type: string; visible: boolean; texture: { key: string }; displayWidth: number; displayHeight: number }[] } } } } };
+      const s = w.game.scene.getScene('Game').children.list.find((o) => o.type === 'Image' && o.visible && o.texture.key === 'mago-trabajando');
+      return s ? s.displayHeight / s.displayWidth : 0;
+    });
+  await expect.poll(ratio).toBeCloseTo(160 / 176, 2);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/007-maga-390x844.png' });
+});
+
 test('gremio completo: el dock se desplaza por dentro y la página no se mueve', async ({ page }, info) => {
   test.skip(info.project.name !== 'vertical-390x844', 'solo a 390 px de ancho');
   await page.goto('/?debugState=fullGuild');

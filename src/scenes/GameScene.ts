@@ -1,7 +1,7 @@
 import * as Phaser from 'phaser';
 import { neighbors, seasonIndex, W, type Tile } from '../rules';
 import { highlighted, suggestedTile, type AppState, type Store } from '../store';
-import { hex, renderResolution, SEASON_SLUGS, SPRITE_ASPECT, SPRITE_SPECIES, spriteKey, spriteUrl, type Pose } from '../theme';
+import { hex, renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteKey, spriteUrl, type Pose } from '../theme';
 
 const POSES: Pose[] = ['reposo', 'trabajando', 'feliz'];
 
@@ -201,8 +201,10 @@ export class GameScene extends Phaser.Scene {
         img = this.add.image(0, 0, key).setOrigin(0.5, 1).setDepth(5);
         this.sprites.set(m.id, img);
       }
+      // Mismo ancho para todos; el alto sale de cada sprite, así Maestra Bruna se ve más alta sin deformarse.
       const w = T * 1.05;
-      img.setTexture(key).setDisplaySize(w, w * SPRITE_ASPECT).setPosition((m.at.x + 0.5) * T, (m.at.y + 1) * T - T * 0.04).setVisible(true);
+      const frame = this.textures.getFrame(key);
+      img.setTexture(key).setDisplaySize(w, (w * frame.height) / frame.width).setPosition((m.at.x + 0.5) * T, (m.at.y + 1) * T - T * 0.04).setVisible(true);
     }
     for (const [id, img] of this.sprites) if (!seen.has(id)) img.setVisible(false);
   }

@@ -24,7 +24,7 @@ export function setText(node: Element, text: string): void {
 export const hat = (species: string) => el('span', { class: `hat hat--${species}`, 'aria-hidden': 'true' });
 
 /**
- * Retrato de un miembro: sprite de Blender si existe (todas menos Maestra Bruna), si no la silueta.
+ * Retrato de un miembro: su sprite de Blender o, si una especie no lo tuviera, la silueta.
  * Devuelve un contenedor estable; `setPortrait` cambia la pose sin recrearlo.
  */
 export function portrait(species: string, pose: Pose = 'reposo', seasonIndex = 0, size: 'sm' | 'md' | 'lg' = 'sm'): HTMLElement {

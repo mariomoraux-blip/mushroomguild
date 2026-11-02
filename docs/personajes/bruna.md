@@ -4,7 +4,7 @@
 
 Hoja previa a Blender, según [Dirección de arte](../art-direction.md). *Conocybe* es un género real de sombrero cónico; *arcana* es inventado: es el único personaje fantástico del gremio.
 
-**Género:** femenino. El rol es "Maga". El nombre es "Maestra Bruna" (antes "Maestra Bruna").
+**Género:** femenino. El rol es "Maga". El nombre es "Maestra Bruna" (antes "Maese Bruma").
 
 ## Carácter
 Sabia y amable, nunca amenazante:
@@ -82,3 +82,10 @@ Para la ficha de criatura: "habla poco, sonríe mucho y siempre sabe qué estaci
 - Sombrero: rampa de color por altura (coordenada Z del objeto) del borde al arranque de la punta, interpolación lineal de rojo a blanco, alimentando las entradas Base y Sombra de `Toon3` (dos rampas: una con las bases y otra con las sombras). La punta naranja, material aparte.
 - Estrellas y espora: material de emisión plano, sin `Toon3`.
 - Lienzo de 176 × 160 para este personaje.
+
+## Modelo y sprites
+- `assets/blender/mago-bruma.blend`: modelo y poses en `poses_bruma.py` (reposo; hechizo, con el bastón en alto, la espora y el halo más grandes y chispas; feliz, con ojos en arco y el sombrero rebotando). Parte de `gremio-base.blend` con el lienzo de 176 × 160 (`shift_y` de la cámara para conservar el suelo).
+- Sombrero: degradado continuo por altura (rampa en las entradas de `Toon3`), echado 10° atrás para que la cara se vea desde la cámara a ¾. Rizo naranja como tubo de curva que se afina, en el plano que mira a la cámara.
+- Motas: 13 estrellas doradas con núcleo claro, en emisión plana y sin contorno.
+- Sprites: `assets/sprites/mago-{reposo,hechizo,feliz}.png` (176 × 160) y copias `-56.png` (77 × 70, misma escala que el resto). En el juego: `public/assets/characters/mago-{reposo,trabajando,feliz}.png`.
+- Escala: ≈ 1,3 m frente a 0,76 m de Rubí; 11–14 px de margen arriba en el lienzo de 160 px.

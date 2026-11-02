@@ -27,14 +27,13 @@ export const font = {
 /** Sprites de Blender (public/assets/characters). La Gliophorus tiene una variante por estación. */
 export type Pose = 'reposo' | 'trabajando' | 'feliz';
 export const SEASON_SLUGS = ['primavera', 'verano', 'otono', 'invierno'] as const;
-export const SPRITE_SPECIES = ['champi', 'lactarius', 'amanita', 'gliophorus'] as const;
+export const SPRITE_SPECIES = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'] as const;
 export function spriteKey(species: string, pose: Pose, seasonIndex = 0): string | null {
-  if (!(SPRITE_SPECIES as readonly string[]).includes(species)) return null; // Maestra Bruna: sin modelo aún
+  if (!(SPRITE_SPECIES as readonly string[]).includes(species)) return null;
   return species === 'gliophorus' ? `${species}-${pose}-${SEASON_SLUGS[seasonIndex] ?? 'primavera'}` : `${species}-${pose}`;
 }
+/** Todos miden 176 px de ancho a la misma escala (100 px/m); el alto es 128 px, o 160 px para Maestra Bruna, la más alta. */
 export const spriteUrl = (key: string) => `${import.meta.env.BASE_URL}assets/characters/${key}.png`;
-/** Proporción de los sprites (176 × 128). */
-export const SPRITE_ASPECT = 128 / 176;
 
 /** Color de la paleta como número para Phaser (0xRRGGBB). */
 export const hex = (token: ColorToken): number => parseInt(color[token].slice(1), 16);

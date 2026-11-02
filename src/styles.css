@@ -239,7 +239,9 @@ button { font: inherit; color: inherit; }
 /* ─── Retratos (sprites de Blender) y siluetas de respaldo ───────────────── */
 .portrait { flex: 0 0 auto; display: inline-flex; align-items: flex-end; justify-content: center; }
 .portrait img { width: 100%; height: auto; display: block; pointer-events: none; }
-.portrait--sm { width: 58px; }
+/* En el dock la altura es fija: Maestra Bruna (sprite más alto) se ajusta a la tarjeta en vez de agrandarla. */
+.portrait--sm { width: 58px; height: 42px; }
+.portrait--sm img { width: auto; height: 100%; }
 .portrait--md { width: 88px; }
 .portrait--lg { width: 132px; }
 .hat { flex: 0 0 auto; width: 30px; height: 30px; position: relative; display: inline-block; }
