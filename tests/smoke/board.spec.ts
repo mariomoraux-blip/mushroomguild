@@ -600,3 +600,36 @@ test('Puntaje: cronómetro que se pausa con una carta, carta de victoria con est
   expect(errors).toEqual([]);
   await ctx.close();
 });
+
+test('Portada: crédito del autor en letra pequeña, con contraste ≥ 4,5:1 y sin tapar el menú', async ({ page }, info) => {
+  await page.goto('/');
+  const credit = page.locator('#screen .title__credit');
+  await expect(credit).toHaveText('By Mario Mora for BerryLab');
+  await expect(credit).toBeVisible();
+  // Contraste WCAG entre el color del texto y el fondo sólido de la pastilla.
+  const ratio = await credit.evaluate((n) => {
+    const rgb = (c: string) => c.match(/[\d.]+/g)!.slice(0, 3).map(Number);
+    const lum = ([r, g, b]: number[]) => {
+      const f = (v: number) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+      return 0.2126 * f(r!) + 0.7152 * f(g!) + 0.0722 * f(b!);
+    };
+    const st = getComputedStyle(n);
+    const [a, b] = [lum(rgb(st.color)), lum(rgb(st.backgroundColor))].sort((x, y) => y - x);
+    // El fondo debe ser sólido: con transparencia, el contraste dependería del fondo pintado.
+    return { ratio: (a! + 0.05) / (b! + 0.05), size: parseFloat(st.fontSize), opaque: !st.backgroundColor.startsWith('rgba') };
+  });
+  expect(ratio.ratio).toBeGreaterThanOrEqual(4.5);
+  expect(ratio.size).toBeLessThanOrEqual(12);
+  expect(ratio.opaque).toBe(true);
+  // No se superpone al menú ni al logo, y entra en la ventana.
+  const box = (await credit.boundingBox())!;
+  const vp = page.viewportSize()!;
+  expect(box.y + box.height).toBeLessThanOrEqual(vp.height);
+  for (const sel of ['.title__menu', '.title__logo']) {
+    const o = (await page.locator(`#screen ${sel}`).boundingBox())!;
+    const overlap = box.x < o.x + o.width && o.x < box.x + box.width && box.y < o.y + o.height && o.y < box.y + box.height;
+    expect(overlap, sel).toBe(false);
+  }
+  await noScrollNoZoom(page);
+  if (info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390') await page.screenshot({ path: `docs/screenshots/020-credito-${info.project.name}.png` });
+});
