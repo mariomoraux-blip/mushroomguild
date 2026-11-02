@@ -3,7 +3,7 @@
 ## ADDED Requirements
 
 ### Requirement: Cronómetro
-El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, solo durante el juego activo. SHALL empezar cuando el tablero acepta la primera acción del jugador (actuar sobre una casilla, reclutar o terminar el día), haya intro o no; pausarse con cualquier hoja o pantalla encima del tablero (cartas de historia, fichas, hechizo, reclutar, Libreta de campo, "Cómo jugar", "El gremio") y con la pestaña oculta; y detenerse al despertar al Árbol Padre o al terminar el invierno. Los números SHALL ser tabulares y el cronómetro no SHALL anunciarse cada segundo al lector de pantalla.
+El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, solo durante el juego activo. SHALL empezar cuando el tablero acepta la primera acción del jugador (actuar sobre una casilla, reclutar o terminar el mes), haya intro o no; pausarse con cualquier hoja o pantalla encima del tablero (cartas de historia, fichas, hechizo, reclutar, Libreta de campo, "Cómo jugar", "El gremio") y con la pestaña oculta; y detenerse al despertar al Árbol Padre o al terminar el invierno. Los números SHALL ser tabulares y el cronómetro no SHALL anunciarse cada segundo al lector de pantalla.
 
 #### Scenario: Antes de la primera acción
 - WHEN el jugador cierra la intro y mira el tablero 20 segundos sin actuar
@@ -11,7 +11,7 @@ El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, 
 - AND empieza a correr cuando Bruno descompone el primer tronco
 
 #### Scenario: Carta abierta
-- WHEN llega Maestra Bruna y su carta queda abierta 30 segundos
+- WHEN llega Maestra Bruma y su carta queda abierta 30 segundos
 - THEN el cronómetro no avanza mientras la carta está abierta
 - AND vuelve a correr al cerrarla
 
@@ -24,11 +24,11 @@ El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, 
 - THEN el cronómetro se detiene y la carta de victoria muestra ese tiempo
 
 ### Requirement: Puntaje
-Al ganar, el juego SHALL calcular un puntaje con `score(estadoFinal, timeMs)`, función pura que devuelve el total y el desglose: victoria 500; días 80 × (12 − día de victoria); árboles 120 × árboles revividos sin contar el Árbol Padre; reservas 10 × nutrientes + 20 × esporas; gremio eficiente 60 × (6 − miembros reclutables); actividad 5 × acciones con tope de 40 acciones; variedad 150 si las 5 especies actuaron al menos una vez (Maestra Bruna cuenta con un hechizo); tiempo 1 punto por segundo por debajo de 8:00, con máximo de 480. Los pesos y topes SHALL vivir en `config.ts › SCORE`.
+Al ganar, el juego SHALL calcular un puntaje con `score(estadoFinal, timeMs)`, función pura que devuelve el total y el desglose: victoria 500; meses 80 × (12 − mes de victoria); árboles 120 × árboles revividos sin contar el Árbol Padre; reservas 10 × nutrientes + 20 × esporas; gremio eficiente 60 × (6 − miembros reclutables); actividad 5 × acciones con tope de 40 acciones; variedad 150 si las 5 especies actuaron al menos una vez (Maestra Bruma cuenta con un hechizo); tiempo 1 punto por segundo por debajo de 8:00, con máximo de 480. Los pesos y topes SHALL vivir en `config.ts › SCORE`.
 
 #### Scenario: Victoria conocida
-- WHEN se gana en el día 8 con 5 árboles revividos, 4 nutrientes, 3 esporas, 5 miembros reclutables, 30 acciones, las 5 especies y 3:20 de juego
-- THEN el desglose es victoria 500, días 320, árboles 600, reservas 100, gremio 60, actividad 150, variedad 150 y tiempo 280
+- WHEN se gana en el mes 8 con 5 árboles revividos, 4 nutrientes, 3 esporas, 5 miembros reclutables, 30 acciones, las 5 especies y 3:20 de juego
+- THEN el desglose es victoria 500, meses 320, árboles 600, reservas 100, gremio 60, actividad 150, variedad 150 y tiempo 280
 - AND el total es 2160
 
 #### Scenario: Tope de actividad
@@ -44,7 +44,7 @@ Al ganar, el juego SHALL calcular un puntaje con `score(estadoFinal, timeMs)`, f
 - THEN no se calcula puntaje y la carta de final no muestra puntaje ni estrellas
 
 ### Requirement: Estrellas
-Toda victoria SHALL dar al menos 1 estrella; 2 estrellas con puntaje ≥ `umbral2` y 3 con puntaje ≥ `umbral3`. Los umbrales SHALL calcularse por claro: al generar el claro, el bot con criterio (la política de las pistas) juega una partida determinista sobre él, modelando 25 s de juego por día, y su puntaje es la referencia; `umbral2` = 90 % y `umbral3` = 110 % de la referencia, redondeados. Los factores (0,9 y 1,1) y los 25 s por día SHALL vivir en `config.ts`. La calibración SHALL tardar menos de 100 ms en un teléfono de gama media.
+Toda victoria SHALL dar al menos 1 estrella; 2 estrellas con puntaje ≥ `umbral2` y 3 con puntaje ≥ `umbral3`. Los umbrales SHALL calcularse por claro: al generar el claro, el bot con criterio (la política de las pistas) juega una partida determinista sobre él, modelando 25 s de juego por mes, y su puntaje es la referencia; `umbral2` = 90 % y `umbral3` = 110 % de la referencia, redondeados. Los factores (0,9 y 1,1) y los 25 s por mes SHALL vivir en `config.ts`. La calibración SHALL tardar menos de 100 ms en un teléfono de gama media.
 
 #### Scenario: Límites exactos
 - WHEN el puntaje es `umbral2 − 1`, `umbral2` y `umbral3` del claro
@@ -56,7 +56,7 @@ Toda victoria SHALL dar al menos 1 estrella; 2 estrellas con puntaje ≥ `umbral
 - AND el bot con criterio, jugando ese claro, obtiene 2 estrellas
 
 ### Requirement: Resultado verificable
-Al ganar, el juego SHALL armar un `ScoreResult` con `{ scoringVersion, mapId, wonDay, timeMs, total, breakdown, stars, actionLog }`. `mapId` es `clasico` o `seed-<n>`. `actionLog` es la lista ordenada de acciones (miembro y casilla, hechizo, reclutar, fin del día). Rejugar el `actionLog` desde el claro de `mapId` SHALL producir el mismo estado final y el mismo total con el mismo `timeMs`.
+Al ganar, el juego SHALL armar un `ScoreResult` con `{ scoringVersion, mapId, wonMonth, timeMs, total, breakdown, stars, actionLog }`. `mapId` es `clasico` o `seed-<n>`. `actionLog` es la lista ordenada de acciones (miembro y casilla, hechizo, reclutar, fin del mes). Rejugar el `actionLog` desde el claro de `mapId` SHALL producir el mismo estado final y el mismo total con el mismo `timeMs`.
 
 #### Scenario: Rejugar
 - WHEN se rejuega el `actionLog` de una victoria desde su `mapId`
