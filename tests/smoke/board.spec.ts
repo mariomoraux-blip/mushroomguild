@@ -363,6 +363,30 @@ test('Bosque pintado: el tablero usa las piezas de cada estación', async ({ pag
   }
 });
 
+test('La red alumbra el invierno: luz aditiva que crece con la estación, debajo del Árbol Padre', async ({ page }, info) => {
+  const glow = () =>
+    page.evaluate(() => {
+      type Obj = { type: string; visible: boolean; texture?: { key: string }; alpha: number; depth: number; blendMode: number };
+      const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: Obj[] } } } } };
+      const list = w.game.scene.getScene('Game').children.list;
+      const light = list.find((o) => o.texture?.key === 'micelio');
+      const father = list.find((o) => o.visible && o.texture?.key.startsWith('board/father-tree/'));
+      // Phaser.BlendModes.ADD = 1; el Árbol Padre (4) y los retratos (5) van encima.
+      return light ? { alpha: Math.round(light.alpha * 100) / 100, add: light.blendMode === 1, below: father ? light.depth < father.depth && light.depth < 5 : null } : null;
+    });
+  const shot = (name: string) => page.screenshot({ path: `docs/screenshots/016-${name}.png` });
+  await page.goto('/?map=clasico');
+  await expect.poll(glow).toEqual({ alpha: 0.2, add: true, below: true });
+  if (info.project.name === 'vertical-390x844') await shot('primavera-390x844');
+  await page.goto('/?map=clasico&debugState=autumn');
+  await expect.poll(glow).toEqual({ alpha: 0.65, add: true, below: true });
+  if (info.project.name === 'vertical-390x844') await shot('otono-390x844');
+  await page.goto('/?map=clasico&debugState=winter');
+  await expect.poll(glow).toEqual({ alpha: 1, add: true, below: true });
+  if (info.project.name === 'vertical-390x844') await shot('invierno-390x844');
+  if (info.project.name === 'horizontal-844x390') await shot('invierno-844x390');
+});
+
 test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page }, info) => {
   test.setTimeout(90_000);
   const shot = (name: string) => (info.project.name === 'vertical-390x844' ? page.screenshot({ path: `docs/screenshots/003-${name}-390x844.png` }) : undefined);

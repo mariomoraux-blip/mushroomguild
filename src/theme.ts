@@ -45,6 +45,13 @@ export const assetUrl = (path: string) => `${import.meta.env.BASE_URL}assets/${p
  */
 export type Pose = 'reposo' | 'trabajando' | 'feliz';
 export const SEASON_SLUGS = ['spring', 'summer', 'autumn', 'winter'] as const;
+/**
+ * Luz propia de la red de micelio por estación (016): alfa de su capa aditiva, de apenas visible en
+ * primavera a lo más brillante del tablero en invierno (docs/art-direction.md › Luz por estación).
+ */
+export const MYCELIUM_GLOW: readonly [number, number, number, number] = [0.2, 0.4, 0.65, 1];
+/** Duración del cambio de luz al pasar de estación (ms). Con movimiento reducido es inmediato. */
+export const LIGHT_TRANSITION_MS = 600;
 export type SeasonSlug = (typeof SEASON_SLUGS)[number];
 export const SPRITE_SPECIES = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'] as const;
 export const CHARACTER_DIR: Readonly<Record<string, string>> = {

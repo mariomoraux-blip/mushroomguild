@@ -16,7 +16,7 @@ Vertical slice jugable (Capítulo 1: El Claro Gris) para la sección Lab del por
 | `player-guidance` | Pistas con ★, fichas, Libreta de campo, reclutamiento visible |
 | `story-presentation` | Cartas de intro, llegada de la maga y finales; el color que vuelve |
 | `title-screens` | Portada, "Cómo jugar" y "El gremio" |
-| `visual-feedback` | Animaciones, partículas, movimiento reducido, peso de la página |
+| `visual-feedback` | Animaciones, partículas, luz de la red por estación, movimiento reducido, peso de la página |
 | `scoring` | Cronómetro, puntaje, estrellas por claro, resultado verificable y récord local |
 
 ## Convenciones

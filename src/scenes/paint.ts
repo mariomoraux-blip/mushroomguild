@@ -598,6 +598,58 @@ function paintGroundArt(ctx: Ctx, T: number, game: GameState, art: Art, occupied
   return true;
 }
 
+/**
+ * Luz propia de la red (016): un halo amplio en cada casilla de la red, un núcleo pequeño y el
+ * resplandor de los hilos. Va en una capa aparte con mezcla aditiva; su intensidad (la de la
+ * estación) es el alfa de esa capa. Devuelve las casillas que alumbró.
+ */
+export function paintMyceliumGlow(ctx: Ctx, T: number, game: GameState): { x: number; y: number }[] {
+  ctx.clearRect(0, 0, W * T, H * T);
+  ctx.save();
+  roundRect(ctx, 0, 0, W * T, H * T, T * 0.16);
+  ctx.clip();
+  const lit: { x: number; y: number }[] = [];
+  for (const t of game.tiles) {
+    if (!t.net) continue;
+    lit.push({ x: t.x, y: t.y });
+    const cx = (t.x + 0.5) * T;
+    const cy = (t.y + 0.5) * T;
+    // Sobre un objeto (árbol, tronco, casa) la luz lo rodea sin taparlo: el centro queda limpio.
+    const ring = t.kind !== 'soil';
+    ctx.fillStyle = radial(ctx, cx, cy, T * 1.05, [
+      [0, 'mycelium', ring ? 0 : 0.32],
+      [ring ? 0.42 : 0.35, 'mycelium', 0.26],
+      [1, 'mycelium', 0],
+    ]);
+    ctx.fillRect(cx - T * 1.05, cy - T * 1.05, T * 2.1, T * 2.1);
+    if (ring) continue;
+    ctx.fillStyle = radial(ctx, cx, cy, T * 0.22, [
+      [0, 'glow', 0.45],
+      [1, 'glow', 0],
+    ]);
+    ctx.fillRect(cx - T * 0.22, cy - T * 0.22, T * 0.44, T * 0.44);
+  }
+  ctx.strokeStyle = rgba('mycelium', 0.55);
+  ctx.lineWidth = T * 0.05;
+  ctx.lineCap = 'round';
+  ctx.shadowColor = rgba('mycelium');
+  ctx.shadowBlur = T * 0.3;
+  for (const t of game.tiles) {
+    if (!t.net) continue;
+    for (const n of neighbors(game, t.x, t.y)) {
+      if (!n.net || n.y * W + n.x < t.y * W + t.x) continue;
+      const w = hash(t.x + n.x, t.y + n.y, 5) - 0.5; // la misma curva que paintNet
+      const [x0, y0, x1, y1] = [(t.x + 0.5) * T, (t.y + 0.5) * T, (n.x + 0.5) * T, (n.y + 0.5) * T];
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.quadraticCurveTo((x0 + x1) / 2 + (y1 - y0) * w * 0.35, (y0 + y1) / 2 + (x0 - x1) * w * 0.35, x1, y1);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+  return lit;
+}
+
 /** Pinta el claro completo. Devuelve qué objeto se pintó en cada casilla. */
 export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
   const { game, valid, star, occupied, fatherSprite = false } = input;
