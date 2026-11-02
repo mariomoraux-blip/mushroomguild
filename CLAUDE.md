@@ -1,7 +1,7 @@
 # El Gremio de los Hongos — instrucciones para el agente
 
 Juego cozy de colocación de trabajadores para navegador. Vertical slice de 5–10 minutos.
-Concept doc y GDD: documento "El Gremio de los Hongos · Fase 0" (Claude Docs). Este repo contiene la versión ejecutable de esas decisiones.
+Concept doc y GDD: documento "El Gremio de los Hongos · Fase 0" (Claude Docs), con copia en `docs/gdd-fase-0.md`. Este repo contiene la versión ejecutable de esas decisiones; si el GDD y una spec no coinciden, manda la spec hasta que un cambio de OpenSpec las alinee.
 
 ## Cómo trabajamos (SDD con OpenSpec)
 - Todo trabajo nace de un cambio en `openspec/changes/<id>/`. Si no hay cambio, no hay código.
