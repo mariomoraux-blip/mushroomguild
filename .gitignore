@@ -12,3 +12,6 @@ playwright-report/
 # (ver docs/art-direction.md › Referencias)
 docs/references/*
 !docs/references/.gitkeep
+
+# Blender: copias de respaldo automáticas
+*.blend1
