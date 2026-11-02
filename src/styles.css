@@ -690,12 +690,28 @@ button { font: inherit; color: inherit; }
 .menu-btn__icon--book { background-image: var(--art-book); }
 .menu-btn__icon--guild { background-image: var(--art-recruit); flex-basis: 36px; }
 /* Portada */
-.title { width: min(420px, 100%); min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 12px; }
+.title { width: min(420px, 100%); min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: var(--credit-room); }
 .title__logo { margin: 4px 0 0; width: min(330px, 86%); }
 .title__logo-img { width: 100%; height: auto; display: block; filter: drop-shadow(0 6px 8px color-mix(in srgb, var(--ink) 45%, transparent)); }
 .title__menu { width: min(300px, 100%); display: grid; gap: 12px; margin-bottom: 8px; }
-/* Firma (020): letra pequeña sobre pergamino sólido, así el contraste no depende del fondo pintado (Tinta/Pergamino ≈ 11:1). */
-.title__credit { margin: -4px 0 4px; padding: 3px 10px; font-size: 12px; font-weight: 700; line-height: 1.3; color: var(--ink); background: var(--paper); border-radius: 10px; }
+/* Firma (020): letra pequeña sobre pergamino sólido, así el contraste no depende del fondo pintado (Tinta/Pergamino ≈ 11:1).
+   Fija abajo y centrada con un margen pequeño (021); la portada le reserva `--credit-room` para que no tape el menú. */
+.screen { --credit-room: 28px; }
+.title__credit {
+  position: fixed;
+  left: 50%;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--ink);
+  background: var(--paper);
+  border-radius: 10px;
+}
 /* Cómo jugar */
 .howto { display: grid; gap: 14px; }
 .howto__card {
@@ -824,7 +840,6 @@ button { font: inherit; color: inherit; }
   .title { display: grid; grid-template-columns: 1fr minmax(240px, 300px); grid-template-rows: auto; align-content: center; align-items: center; column-gap: 24px; row-gap: 4px; width: min(760px, 100%); }
   .title__logo { grid-column: 1; width: min(300px, 100%); justify-self: center; }
   .title__menu { grid-column: 2; margin: 0; }
-  .title__credit { grid-column: 2; justify-self: center; margin: 4px 0 0; }
   .screen__panel { width: min(760px, 100%); gap: 8px; }
   .screen__head { min-height: 48px; }
   .howto { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-rows: 1fr auto; column-gap: 16px; row-gap: 10px; align-items: center; }

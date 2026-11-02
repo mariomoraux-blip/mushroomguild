@@ -607,7 +607,7 @@ test('Puntaje: cronómetro que se pausa con una carta, carta de victoria con est
   await ctx.close();
 });
 
-test('Portada: crédito del autor en letra pequeña, con contraste ≥ 4,5:1 y sin tapar el menú', async ({ page }, info) => {
+test('Portada: crédito del autor fijo abajo, en letra pequeña, con contraste ≥ 4,5:1 y sin tapar el menú', async ({ page }, info) => {
   await page.goto('/');
   const credit = page.locator('#screen .title__credit');
   await expect(credit).toHaveText('By Mario Mora for BerryLab');
@@ -627,17 +627,21 @@ test('Portada: crédito del autor en letra pequeña, con contraste ≥ 4,5:1 y s
   expect(ratio.ratio).toBeGreaterThanOrEqual(4.5);
   expect(ratio.size).toBeLessThanOrEqual(12);
   expect(ratio.opaque).toBe(true);
-  // No se superpone al menú ni al logo, y entra en la ventana.
+  // Fija abajo y centrada, con un margen pequeño (021); no se superpone al menú ni al logo.
   const box = (await credit.boundingBox())!;
   const vp = page.viewportSize()!;
-  expect(box.y + box.height).toBeLessThanOrEqual(vp.height);
+  const gap = vp.height - (box.y + box.height);
+  expect(gap).toBeGreaterThanOrEqual(8);
+  expect(gap).toBeLessThanOrEqual(12);
+  expect(Math.abs(box.x + box.width / 2 - vp.width / 2)).toBeLessThanOrEqual(2);
+  expect(await page.locator('#screen').evaluate((n) => n.scrollHeight - n.clientHeight)).toBeLessThanOrEqual(0);
   for (const sel of ['.title__menu', '.title__logo']) {
     const o = (await page.locator(`#screen ${sel}`).boundingBox())!;
     const overlap = box.x < o.x + o.width && o.x < box.x + box.width && box.y < o.y + o.height && o.y < box.y + box.height;
     expect(overlap, sel).toBe(false);
   }
   await noScrollNoZoom(page);
-  if (info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390') await page.screenshot({ path: `docs/screenshots/020-credito-${info.project.name}.png` });
+  if (info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390') await page.screenshot({ path: `docs/screenshots/021-credito-fijo-${info.project.name}.png` });
 });
 
 test('Niveles: Elige tu claro con teclado, Ancestral sin ★, árbol marcado, escarcha y Jugar de nuevo con el mismo nivel', async ({ page }, info) => {
