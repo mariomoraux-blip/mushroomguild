@@ -1,0 +1,44 @@
+import { cloneState, newGame, type GameState, type Point, type SpeciesId } from '../src/rules';
+
+export interface Setup {
+  day?: number;
+  nutrients?: number;
+  spores?: number;
+  /** Casillas que se agregan a la red. */
+  net?: Point[];
+  /** Árboles revividos (también entran a la red). */
+  alive?: Point[];
+  /** Usos ya hechos de un tronco. */
+  uses?: (Point & { n: number })[];
+  /** Ids de miembros que ya actuaron hoy. */
+  used?: number[];
+  /** Miembros extra que se agregan al gremio. */
+  extraMembers?: SpeciesId[];
+}
+
+/** Arma un estado de prueba a partir de una partida nueva. */
+export function setup(o: Setup = {}): GameState {
+  const s = cloneState(newGame());
+  const at = (p: Point) => s.tiles.find((t) => t.x === p.x && t.y === p.y)!;
+  if (o.day !== undefined) s.day = o.day;
+  if (o.nutrients !== undefined) s.nutrients = o.nutrients;
+  if (o.spores !== undefined) s.spores = o.spores;
+  o.net?.forEach((p) => (at(p).net = true));
+  o.alive?.forEach((p) => {
+    const t = at(p);
+    t.alive = true;
+    t.net = true;
+  });
+  o.uses?.forEach((p) => (at(p).uses = p.n));
+  o.used?.forEach((id) => (s.members.find((m) => m.id === id)!.used = true));
+  o.extraMembers?.forEach((species) => {
+    const id = s.nextId++;
+    s.members.push({ id, species, name: `extra-${id}`, used: false, at: null });
+  });
+  return s;
+}
+
+// Ids del gremio inicial.
+export const OLA = 1; // Ostra
+export const BRUNO = 2; // Champiñón
+export const RUBI = 3; // Amanita
