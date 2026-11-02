@@ -193,7 +193,7 @@ El mayor riesgo no es técnico: es que la regla de adyacencia no se entienda sin
 | Claude Code en la nube no ve ni juega el juego | Tests de reglas en Node y capturas automáticas con navegador sin interfaz | Tú haces el playtest manual al cerrar cada tarea |
 | El balance se rompe al agregar contenido | La simulación queda como test de regresión: bot al azar ≥ 20 % de victorias, partida guiada gana antes del día 9 | Ajustar las palancas del GDD, no reescribir reglas |
 | Un mapa fijo no invita a repetir | Resuelto en 006: cada partida es un claro aleatorio y justo | Ajustar `MAP_GEN` (árboles, troncos, rocas, días) |
-| La página pesa demasiado para el portafolio | Presupuesto de assets ≤ 2 MB y carga < 3 s | Comprimir sprites o bajar resolución |
+| La página pesa demasiado para el portafolio | Presupuesto de assets ≤ 4 MB (desde el 2 de noviembre; antes 2 MB), carga diferida de portada, intro y victoria, y carga < 3 s | Comprimir sprites o bajar resolución |
 
 ## Decisiones técnicas
 

@@ -6,5 +6,5 @@
 - [ ] 1.4 Rama de movimiento reducido según `prefers-reduced-motion`
 - [ ] 2.1 Cargar atlas de sprites si existe; si no, usar placeholders sin errores
 - [ ] 2.2 Personajes colocados sobre la casilla donde trabajaron hoy
-- [ ] 3.1 Verificar presupuesto de assets ≤ 2 MB y carga < 3 s
+- [ ] 3.1 Verificar presupuesto de `public/assets/` ≤ 4 MB, carga diferida de portada, intro y victoria, y carga < 3 s
 - [ ] 3.2 Pull request con un GIF corto o capturas antes y después

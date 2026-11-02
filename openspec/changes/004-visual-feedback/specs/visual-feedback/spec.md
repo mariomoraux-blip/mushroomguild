@@ -20,12 +20,12 @@ Con `prefers-reduced-motion: reduce`, el juego SHALL omitir desplazamientos y pa
 El juego SHALL funcionar con o sin el atlas de sprites.
 
 #### Scenario: Atlas ausente
-- WHEN `public/assets/guild.json` no existe
+- WHEN el atlas de `public/assets/atlas/` no existe
 - THEN los personajes se dibujan con formas y no hay errores en consola
 
 ### Requirement: Peso de la página
-El total de assets SHALL ser de 2 MB o menos.
+El total de assets publicados (`public/assets/`) SHALL ser de 4 MB o menos, sin contar el JavaScript del juego, y las piezas de portada, intro y victoria SHALL cargarse solo al mostrarse esas pantallas.
 
 #### Scenario: Build de producción
 - WHEN se ejecuta `npm run build`
-- THEN la suma de `dist/assets` no supera 2 MB
+- THEN la suma de `public/assets/` no supera 4 MB

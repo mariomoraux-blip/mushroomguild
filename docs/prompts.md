@@ -176,7 +176,7 @@ Detente y espera mi aprobación.
 ```
 Aprobado. Implementa 004 siguiendo tasks.md y márcalas al terminar.
 - Primero las animaciones de las 3 acciones; después amanecer; al final partículas.
-- El juego debe verse y funcionar igual sin public/assets/guild.json.
+- El juego debe verse y funcionar igual sin el atlas de public/assets/atlas/.
 - Al final: tests, build, tamaño total de dist/assets y una captura antes/después.
 ```
 
@@ -186,7 +186,7 @@ Revisa 004:
 - ¿Alguna animación supera 400 ms o bloquea la siguiente acción?
 - ¿Con movimiento reducido no hay desplazamientos ni partículas?
 - ¿Hay errores en consola sin el atlas?
-- ¿dist/assets pesa 2 MB o menos?
+- ¿public/assets pesa 4 MB o menos y la primera carga baja en menos de 3 s?
 Corrige y reporta los números.
 ```
 
