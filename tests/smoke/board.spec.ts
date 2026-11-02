@@ -277,18 +277,17 @@ test('claros aleatorios: cada partida cambia y ?seed= repite el mismo mapa', asy
   expect(a.split('|').filter((n) => n === 'Árbol gris')).toHaveLength(7);
 });
 
-test('estilo cozy: retratos pintados, tablón, pastillas, luna pintada, marco de raíces y fondo vivo', async ({ page }, info) => {
+test('estilo cozy: bosque de fondo, pastillas, medallones, luna pintada, marco de raíces y fondo vivo', async ({ page }, info) => {
   await page.goto('/?seed=7');
   const imgs = page.locator('.dock__item .portrait img');
   await expect(imgs).toHaveCount(3);
   for (const img of await imgs.all()) expect(await img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
-  // Piezas SVG que se conservan del 008.
-  for (const sel of ['.hud .art--sign svg', '.hud__day .art--tag svg', '.notice .art--torn svg', '.card .art--mound svg']) {
-    await expect(page.locator(sel).first()).toBeAttached();
-  }
-  // Piezas pintadas (010) como fondos CSS.
+  // Piezas pintadas (010–011) como fondos CSS.
   const bg = (sel: string, prop = 'background-image') => page.locator(sel).first().evaluate((n, p) => getComputedStyle(n).getPropertyValue(p), prop);
-  expect(await bg('.chip--nutrients')).toContain('ui/hud/pill-nutrients.webp');
+  expect(await bg('.chip--nutrients .chip__icon')).toContain('ui/icons/nutrients.webp');
+  expect(await bg('body')).toMatch(/backgrounds\/menu(-landscape)?\.webp/);
+  await expect(page.locator('.dock__item .card__medal').first()).toBeVisible();
+  if (info.project.name !== 'safari-390x664') await page.screenshot({ path: `docs/screenshots/011-${info.project.name}.png` });
   expect(await bg('.hud__help')).toContain('ui/buttons/help.webp');
   expect(await bg('.end__moon')).toContain('ui/icons/moon.webp');
   expect(await bg('.board', 'border-image-source')).toContain('ui/frames/roots.webp');

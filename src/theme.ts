@@ -110,6 +110,13 @@ const UI_ART: Record<string, string> = {
   'btn-help': 'ui/buttons/help',
   'btn-close': 'ui/buttons/close',
   calendar: 'ui/icons/calendar',
+  nutrients: 'ui/icons/nutrients',
+  spores: 'ui/icons/spores',
+  trees: 'ui/icons/trees',
+  book: 'ui/icons/book',
+  // Fondo de la partida (011): el del menú hasta que haya uno propio.
+  'bg-game': 'backgrounds/menu',
+  'bg-game-wide': 'backgrounds/menu-landscape',
   moon: 'ui/icons/moon',
   recruit: 'ui/icons/recruit',
   sign: 'ui/panels/sign',

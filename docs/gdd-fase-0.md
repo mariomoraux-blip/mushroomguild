@@ -181,6 +181,9 @@ Con las reglas de la prueba de concepto, un jugador atento ganaba hacia el día 
 
 Palancas de ajuste: coste de tejer, ganancia por tronco, número de troncos, días totales y nutriente diario por árbol.
 
+### Ideas del referente visual (sin decidir)
+El referente "Bosque pintado" muestra sistemas que el vertical slice no tiene: misiones con recompensas, estrellas como moneda, enciclopedia del bosque (hongos, plantas, aliados, lugares), logros y potenciadores con cargas (martillo, cambio, bolsa). El cambio 011 solo tomó su lenguaje visual. Si alguno entra al juego, necesita su propio cambio de OpenSpec con reglas y balance.
+
 ## Supuestos y riesgos
 
 El mayor riesgo no es técnico: es que la regla de adyacencia no se entienda sin explicación. Se valida con personas antes de invertir en arte.

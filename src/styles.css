@@ -1,10 +1,10 @@
-/* Bosque ilustrado (008): madera, papel rasgado, cera y hojas en SVG sobre un fondo vivo (shader).
+/* Bosque pintado (010–011): piezas pintadas y pastillas del referente sobre el fondo del bosque y un shader de esporas.
    Colores y tipografías: solo variables que define applyTheme() desde src/theme.ts. */
 :root {
   --gap: 6px;
   --hud-h: 56px;
-  --notice-h: 44px;
-  --dock-h: 62px;
+  --notice-h: 48px;
+  --dock-h: 70px;
   --touch: 44px;
   --radius: 18px;
   --ink-soft: color-mix(in srgb, var(--ink) 64%, transparent);
@@ -37,7 +37,11 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 15px;
-  background: linear-gradient(var(--peach), var(--cream));
+  /* Bosque pintado detrás de todo (011); el velo oscurece arriba y abajo para que el HUD y el dock destaquen. */
+  background:
+    linear-gradient(color-mix(in srgb, var(--ink) 35%, transparent), transparent 22%, transparent 70%, color-mix(in srgb, var(--ink) 45%, transparent)),
+    var(--art-bg-game) center / cover no-repeat,
+    var(--leafDark);
 }
 
 /* Fondo vivo (src/ui/ambient.ts). */
@@ -66,66 +70,72 @@ button { font: inherit; color: inherit; }
     max(var(--gap), env(safe-area-inset-bottom)) max(var(--gap), env(safe-area-inset-left));
 }
 
-/* ─── HUD: tablón de madera colgante ──────────────────────────────────────── */
+/* ─── HUD (011): pastilla verde del día, pastillas de crema con ícono pintado y "?" amarillo ── */
 .hud {
   grid-area: hud;
   position: relative;
   display: grid;
-  grid-template-columns: 72px repeat(3, minmax(0, 1fr)) 28px;
+  grid-template-columns: minmax(74px, 0.95fr) repeat(3, minmax(0, 1fr)) var(--touch);
   align-items: center;
-  gap: 4px 8px;
-  padding: 7px 8px 5px 10px;
-  filter: var(--drop);
+  gap: 4px;
+  padding: 4px;
+  border-radius: 20px;
+  background: linear-gradient(color-mix(in srgb, var(--bark) 62%, transparent), color-mix(in srgb, var(--ink) 70%, transparent));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--glow) 25%, transparent), 0 4px 10px color-mix(in srgb, var(--ink) 35%, transparent);
 }
-.hud > .art--sign { z-index: 0; }
-.hud > :not(.art) { position: relative; z-index: 1; }
+.hud__day,
+.chip {
+  height: 48px;
+  min-width: 0;
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--ink) 18%, transparent), inset 0 2px 0 color-mix(in srgb, var(--glow) 55%, transparent);
+  line-height: 1.05;
+}
 .hud__day {
-  height: 44px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 2px 2px 15px;
-  min-width: 0;
-  line-height: 1.02;
-  transform: rotate(-2deg);
+  padding: 0 6px;
+  color: var(--paper);
+  background: linear-gradient(var(--leaf), var(--moss) 55%, var(--mossDark));
 }
-.hud__day > :not(.art) { position: relative; }
-.hud__day-value { font-family: var(--font-display); font-weight: 700; font-size: 14px; white-space: nowrap; letter-spacing: -0.2px; }
-.hud__day-caption { font-size: 11px; font-weight: 800; color: var(--moss); }
+.hud__day-value { font-family: var(--font-display); font-weight: 700; font-size: 16px; white-space: nowrap; letter-spacing: -0.3px; text-shadow: 0 1.5px 0 var(--mossDark); }
+.hud__day-caption { display: flex; align-items: center; gap: 2px; font-size: 11px; font-weight: 800; white-space: nowrap; color: var(--glow); }
+.hud__season { flex: 0 0 13px; height: 13px; background: var(--art-season-spring) center / contain no-repeat; }
+.hud__season[data-season='summer'] { background-image: var(--art-season-summer); }
+.hud__season[data-season='autumn'] { background-image: var(--art-season-autumn); }
+.hud__season[data-season='winter'] { background-image: var(--art-season-winter); }
 .chip {
-  height: var(--touch);
-  min-width: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1px;
-  padding: 0 4px 0 0;
-  border: 0;
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--paper) 92%, transparent);
-  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--bark) 25%, transparent);
-  line-height: 1;
+  padding: 0 2px;
+  background: var(--grain), linear-gradient(var(--cream), var(--paper) 60%, var(--peach));
 }
-.chip__medal { position: relative; flex: 0 0 32px; height: 32px; margin-left: -12px; filter: var(--drop); }
-.chip__medal .art--icon { inset: 6px; }
-.chip__text { display: flex; flex-direction: column; min-width: 0; }
-.chip__value { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--ink); }
-.chip__label { font-size: 9.5px; letter-spacing: -0.1px; font-weight: 800; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip__row { display: flex; align-items: center; gap: 3px; }
+.chip__icon { flex: 0 0 20px; height: 20px; background: center / contain no-repeat; }
+.chip--nutrients .chip__icon { background-image: var(--art-nutrients); }
+.chip--spores .chip__icon { background-image: var(--art-spores); }
+.chip--trees .chip__icon { background-image: var(--art-trees); }
+.chip__value { font-family: var(--font-display); font-weight: 700; font-size: 19px; color: var(--ink); }
+.chip__label { max-width: 100%; font-size: 10px; font-weight: 800; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chip--button { cursor: pointer; }
 .chip--button .chip__label { color: var(--berry); }
+.chip--button:active { transform: translateY(1px); }
 .hud__help {
   width: var(--touch);
   height: var(--touch);
-  margin-right: -10px; /* el sello sobresale del tablón */
-  justify-self: end;
   border: 0;
   padding: 0;
-  background: transparent;
   cursor: pointer;
-  transform: rotate(8deg);
+  background: var(--art-btn-help) center / 44px auto no-repeat;
+  filter: drop-shadow(0 2px 0 color-mix(in srgb, var(--ink) 45%, transparent));
 }
-.hud__help-mark { position: relative; font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--paper); }
 
-/* ─── Tablero: marco de madera con enredaderas ────────────────────────────── */
+/* ─── Tablero: marco de raíces trenzadas (ui/frames/roots), 12 px por lado = BOARD_BORDER / 2 ── */
 .board-area {
   grid-area: board;
   min-height: 0;
@@ -135,19 +145,17 @@ button { font: inherit; color: inherit; }
 }
 .board {
   position: relative;
-  border: 2px solid var(--ink);
-  outline: 4px solid var(--wood);
-  border-radius: 14px;
+  border: 12px solid transparent;
+  border-image: var(--art-frame) 40 / 12px / 3px stretch;
+  border-radius: 18px;
   box-sizing: content-box;
-  box-shadow: 0 0 0 6px var(--ink), 0 9px 0 0 color-mix(in srgb, var(--bark) 35%, transparent);
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--sun) 45%, transparent)) drop-shadow(0 8px 10px color-mix(in srgb, var(--ink) 55%, transparent));
   touch-action: none;
 }
-.board__overlay { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; }
+.board__overlay { position: absolute; inset: 0; border-radius: 10px; overflow: hidden; }
 /* El canvas sube un poco por encima del claro: la copa del Árbol Padre sobresale del marco. Las esquinas redondeadas las pinta paint.ts. */
 .board__canvas { position: absolute; inset: calc(-1 * var(--headroom, 0px)) 0 0 0; pointer-events: none; }
 .board__canvas canvas { display: block; }
-.board > .art--vine { inset: auto; top: -20px; left: -16px; width: 78px; height: 40px; z-index: 2; }
-.board > .art--vine-flip { left: auto; right: -16px; }
 .cell {
   position: absolute;
   margin: 0;
@@ -159,45 +167,49 @@ button { font: inherit; color: inherit; }
 }
 .cell:focus-visible { outline-offset: -4px; }
 
-/* ─── Bitácora: papel rasgado con cinta ───────────────────────────────────── */
+/* ─── Bitácora (011): pergamino con el libro de campo pintado ─────────────── */
 .bottom { grid-area: bottom; display: grid; gap: var(--gap); min-width: 0; }
 .notice {
   position: relative;
   margin: 0;
-  height: var(--notice-h);
+  min-height: var(--notice-h);
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 0 0 16px;
+  padding: 4px 4px 4px 48px;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.2;
-  filter: var(--drop);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  background: var(--grain), linear-gradient(var(--cream), var(--paper) 70%, var(--peach));
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--wood) 35%, transparent), 0 4px 10px color-mix(in srgb, var(--ink) 35%, transparent);
 }
-.notice > .art--torn { z-index: 0; }
-.notice > :not(.art) { position: relative; z-index: 1; }
+.notice > .art--torn { display: none; }
 .notice::before {
   content: '';
-  position: relative;
-  z-index: 1;
-  flex: 0 0 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--leaf);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--leaf) 30%, transparent);
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  width: 34px;
+  height: 30px;
+  translate: 0 -50%;
+  background: var(--art-book) center / contain no-repeat;
 }
-.notice[data-tone='warn']::before { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent); }
+.notice[data-tone='warn'] { box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--accent) 60%, transparent), 0 4px 10px color-mix(in srgb, var(--ink) 35%, transparent); }
 .notice__text { margin: 0; flex: 1; min-width: 0; }
-.notice__btn { flex: 0 0 auto; min-height: var(--touch); height: var(--touch); margin-right: 2px; border-radius: 22px; font-size: 13px; }
+.notice__btn { flex: 0 0 auto; min-height: var(--touch); height: var(--touch); border-radius: 22px; font-size: 13px; }
 
-/* ─── Dock: tarjetas de criatura ──────────────────────────────────────────── */
-.dock { height: var(--dock-h); display: flex; gap: var(--gap); min-width: 0; align-items: stretch; }
+/* ─── Dock (011): medallones de madera con retrato, cinta con el nombre e insignia ── */
+.dock { height: var(--dock-h); display: flex; gap: var(--gap); min-width: 0; align-items: center; }
 .dock__cards {
   flex: 1;
   min-width: 0;
+  height: 100%;
   display: flex;
-  gap: 8px;
-  padding: 4px 3px 6px;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 2px 0;
   overflow-x: auto;
   overscroll-behavior-x: contain; /* el scroll del dock no mueve la página */
   scroll-snap-type: x proximity;
@@ -209,89 +221,110 @@ button { font: inherit; color: inherit; }
 
 .card {
   position: relative;
-  height: 100%;
-  min-width: 112px;
-  min-height: var(--touch);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 12px 2px 4px;
-  background: var(--grain), linear-gradient(170deg, var(--paper), color-mix(in srgb, var(--peach) 55%, var(--paper)));
-  border: 2px solid var(--ink);
-  border-radius: 20px 20px 20px 8px;
-  box-shadow: var(--shadow-sm);
-  text-align: left;
-  cursor: pointer;
-}
-/* Costura de libreta. */
-.card::after {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border: 1.5px dashed color-mix(in srgb, var(--wood) 55%, transparent);
-  border-radius: 15px 15px 15px 5px;
-  pointer-events: none;
-}
-.card[aria-pressed='true'] { box-shadow: 0 0 0 4px var(--sun), var(--shadow-sm); transform: translateY(-2px) rotate(-1deg); }
-.card.is-used { filter: saturate(0.35); opacity: 0.78; }
-.card:disabled { cursor: default; }
-.card__stage { position: relative; flex: 0 0 auto; display: flex; align-items: flex-end; justify-content: center; }
-.card__stage .art--mound { inset: auto 0 -2px 0; height: 14px; }
-.card__stage .portrait { position: relative; }
-.card__star { display: none; position: absolute; top: -10px; right: 4px; z-index: 2; color: var(--sun); font-size: 20px; -webkit-text-stroke: 1.2px var(--ink); filter: drop-shadow(0 0 4px var(--glow)); }
-.card.is-suggested .card__star { display: block; }
-.card.is-suggested:not([aria-pressed='true']) { box-shadow: 0 0 0 3px color-mix(in srgb, var(--sun) 75%, transparent), var(--shadow-sm); }
-.card__text { position: relative; display: flex; flex-direction: column; line-height: 1.12; min-width: 0; }
-.card__name { font-family: var(--font-display); font-weight: 700; font-size: 15px; white-space: nowrap; }
-.card__species { font-family: var(--font-body); font-weight: 700; font-style: italic; font-size: 10px; color: var(--ink-soft); }
-.card__meta { font-size: 11px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; }
-.card__status { font-size: 11px; font-weight: 800; color: var(--moss); white-space: nowrap; }
-.card.is-used .card__status { color: var(--ink-soft); }
-.card--recruit {
-  flex: 0 0 auto;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 2px 12px 2px 52px;
-  background: var(--grain), linear-gradient(170deg, var(--mycelium), color-mix(in srgb, var(--leaf) 30%, var(--mycelium)));
-}
-.card--recruit > .art--packet { inset: 6px auto 6px 8px; width: 38px; }
-
-.end {
-  position: relative;
-  flex: 0 0 74px;
-  min-height: var(--touch);
+  width: 60px;
+  height: calc(var(--dock-h) - 2px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding: 0 0 2px;
+  justify-content: flex-start;
+  padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
-  filter: var(--drop);
 }
-.end > .art--moon { inset: -2px 9px 16px; }
-.end__label {
+.card__medal {
   position: relative;
-  padding: 2px 9px 3px;
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.05;
-  white-space: nowrap;
-  color: var(--paper);
-  background: var(--moss);
-  clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%);
+  width: 54px;
+  height: 54px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--leaf) 55%, var(--glow)), var(--leafDark) 75%);
+  box-shadow: 0 0 0 4px var(--wood), 0 0 0 6px var(--ink), inset 0 -4px 0 color-mix(in srgb, var(--ink) 20%, transparent), 0 6px 6px color-mix(in srgb, var(--ink) 45%, transparent);
+  margin-top: 6px;
 }
-.end:active { transform: translateY(2px); }
+.card__medal .portrait { width: 48px; height: 45px; }
+.card__name {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  translate: -50% 0;
+  max-width: 70px;
+  padding: 0 6px 1px;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  background: linear-gradient(var(--wood), var(--bark));
+}
+.card__badge {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  min-width: 22px;
+  height: 22px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  border: 2px solid var(--ink);
+  border-radius: 11px;
+}
+.card__badge[data-kind='star'] { display: flex; color: var(--ink); background: var(--sun); }
+.card__badge[data-kind='rest'] { display: flex; font-size: 10px; color: var(--paper); background: var(--indigo); }
+.card__badge--plus { display: flex; font-size: 17px; color: var(--ink); background: var(--sun); }
+.card[aria-pressed='true'] .card__medal { box-shadow: 0 0 0 4px var(--sun), 0 0 0 6px var(--ink), 0 0 16px 6px color-mix(in srgb, var(--glow) 85%, transparent); }
+.card[aria-pressed='true'] { transform: translateY(-3px); }
+.card.is-used .card__medal { filter: saturate(0.3) brightness(0.85); }
+.card:disabled { cursor: default; }
+.card:focus-visible { outline: 0; }
+.card:focus-visible .card__medal { outline: 3px solid var(--accent); outline-offset: 7px; }
+.card--recruit .card__medal { background: radial-gradient(circle at 50% 38%, var(--glow), var(--mycelium) 80%); align-items: center; }
+.card__icon--recruit { width: 46px; height: 32px; background: var(--art-recruit) center / contain no-repeat; }
+.card--recruit.is-used .card__medal { filter: saturate(0.4); opacity: 0.8; }
+
+/* "Fin del día": píldora amarilla con la luna pintada. */
+.end {
+  position: relative;
+  flex: 0 0 auto;
+  min-width: 0;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 12px 3px 7px;
+  border: 2px solid var(--ink);
+  border-radius: 26px;
+  background: linear-gradient(var(--glow), var(--sun) 45%, var(--accent));
+  box-shadow: inset 0 -4px 0 color-mix(in srgb, var(--wood) 45%, transparent), inset 0 2px 0 color-mix(in srgb, var(--paper) 80%, transparent), 0 4px 0 var(--ink), 0 8px 12px color-mix(in srgb, var(--ink) 40%, transparent);
+  cursor: pointer;
+}
+.end__moon { flex: 0 0 22px; height: 22px; background: var(--art-moon) center / contain no-repeat; }
+.end__label { font-family: var(--font-display); font-size: 15px; font-weight: 700; line-height: 1; white-space: nowrap; color: var(--ink); }
+.end:active { transform: translateY(3px); box-shadow: inset 0 -4px 0 color-mix(in srgb, var(--wood) 45%, transparent), 0 1px 0 var(--ink); }
 .end:disabled { opacity: 0.55; }
 
-/* ─── Retratos (sprites de Blender) y siluetas de respaldo ───────────────── */
+/* ─── Retratos pintados y siluetas de respaldo ───────────────── */
 .portrait { flex: 0 0 auto; display: inline-flex; align-items: flex-end; justify-content: center; }
-.portrait img { width: 100%; height: auto; display: block; pointer-events: none; }
-/* En el dock la altura es fija: Maestra Bruna (sprite más alto) se ajusta a la tarjeta en vez de agrandarla. */
-.portrait--sm { width: 58px; height: 46px; }
+.portrait img { width: 100%; height: auto; display: block; pointer-events: none; transition: transform 0.2s ease-out; transform-origin: 50% 100%; }
+.portrait[data-pose='happy'] img { transform: translateY(-2px) scale(1.06); }
+/* En el dock la altura es fija: Maestra Bruna (retrato más alto) se ajusta al medallón en vez de agrandarlo. */
+.portrait--sm { width: 52px; height: 48px; }
 .portrait--sm img { width: auto; height: 100%; }
 .portrait--md { width: 88px; }
 .portrait--lg { width: 140px; }
@@ -452,70 +485,6 @@ button { font: inherit; color: inherit; }
 .help__tip { margin-top: 14px !important; padding: 10px 12px; background: var(--mycelium); border: 2px dashed var(--moss); border-radius: 16px; }
 
 /* ─── Horizontal en teléfono: tablero a la izquierda, HUD y dock a la derecha ─ */
-/* ─── 010 · Bosque pintado: piezas pintadas en HUD, tablero y dock ────────── */
-/* Marco de raíces trenzadas (ui/frames/roots) en lugar del marco de madera. 12 px por lado = BOARD_BORDER / 2. */
-.board {
-  border: 12px solid transparent;
-  border-image: var(--art-frame) 40 / 12px / 3px stretch;
-  outline: 0;
-  border-radius: 18px;
-  box-shadow: 0 8px 14px -6px color-mix(in srgb, var(--bark) 55%, transparent);
-}
-.board__overlay { border-radius: 10px; }
-
-/* Pastillas pintadas del HUD: el ícono viene en la imagen, el texto a la derecha. */
-.chip {
-  padding: 0 2px 0 46%;
-  border-radius: 0;
-  background: transparent center / 100% 100% no-repeat;
-  box-shadow: none;
-}
-.chip--nutrients { background-image: var(--art-pill-nutrients); }
-.chip--spores { background-image: var(--art-pill-spores); }
-.chip--trees { background-image: var(--art-pill-trees); }
-.chip__value { font-size: 16px; }
-.chip__label { font-size: 8.5px; letter-spacing: -0.3px; }
-.hud__day-caption { display: flex; align-items: center; gap: 1px; font-size: 10px; letter-spacing: -0.2px; white-space: nowrap; }
-.hud__season {
-  flex: 0 0 12px;
-  height: 12px;
-  background: var(--art-season-spring) center / contain no-repeat;
-}
-.hud__season[data-season='summer'] { background-image: var(--art-season-summer); }
-.hud__season[data-season='autumn'] { background-image: var(--art-season-autumn); }
-.hud__season[data-season='winter'] { background-image: var(--art-season-winter); }
-.hud { gap: 4px 5px; }
-.hud__day-value { font-size: 13px; }
-.hud__help {
-  margin-right: -6px;
-  transform: none;
-  background: var(--art-btn-help) center / 40px auto no-repeat;
-}
-
-/* Retratos pintados: la pose se marca con un gesto, no con otra imagen. */
-.portrait img { transition: transform 0.2s ease-out; transform-origin: 50% 100%; }
-.portrait[data-pose='happy'] img { transform: translateY(-2px) scale(1.06); }
-.portrait--sm { width: 52px; height: 48px; }
-
-/* Reclutar: sobre y mochila pintados. */
-.card--recruit { padding-left: 64px; }
-.card__icon--recruit {
-  position: absolute;
-  left: 6px;
-  top: 50%;
-  width: 54px;
-  height: 38px;
-  translate: 0 -50%;
-  background: var(--art-recruit) center / contain no-repeat;
-}
-
-/* Terminar el día: luna pintada sobre la cinta. */
-.end__moon {
-  position: absolute;
-  inset: 0 0 16px;
-  background: var(--art-moon) center / contain no-repeat;
-}
-
 @media (orientation: landscape) and (max-height: 540px) {
   .app {
     max-width: none;
@@ -525,6 +494,16 @@ button { font: inherit; color: inherit; }
   }
   .board-area { width: calc((100dvh - 2 * var(--gap) - 24px) * 5 / 8 + 24px); }
   }
+
+/* Pantallas apaisadas (horizontal y escritorio): fondo 16:9. */
+@media (orientation: landscape) {
+  body {
+    background:
+      linear-gradient(color-mix(in srgb, var(--ink) 30%, transparent), transparent 25%, transparent 70%, color-mix(in srgb, var(--ink) 40%, transparent)),
+      var(--art-bg-game-wide) center / cover no-repeat,
+      var(--leafDark);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }

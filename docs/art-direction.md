@@ -50,16 +50,18 @@ Contraste mínimo de texto: Tinta sobre Pergamino, Crema o Sol (todos ≥ 7:1). 
 ## Componentes
 | Componente | Pieza | Estados / notas |
 | --- | --- | --- |
-| Logo | `ui/hud/logo`, `ui/hud/logo-small` | Portada grande; mini en la esquina del juego |
+| Logo | `ui/hud/logo`, `ui/hud/logo-small` | Solo en la portada (decisión del 011: no va en el HUD de la partida) |
 | Letrero colgante | `ui/panels/sign` | Títulos de hoja ("Cómo jugar", "El gremio"); 3 partes para estirarse |
 | Pergamino | `ui/panels/parchment` | Cuerpo de las hojas y cartas; 9 partes (esquinas fijas, centro repetible) |
-| Cinta de pista | `ui/panels/ribbon-hint` | Encabeza la bitácora ("Pista del día"); 3 partes, texto en vivo |
+| Bitácora | CSS + `ui/icons/book` | Pergamino con el libro de campo a la izquierda y texto en vivo (011) |
 | Botón principal | `ui/buttons/primary` | Pastilla amarilla con ícono: normal, pulsado (baja 2 px y pierde la sombra) y desactivado (60 % de opacidad) |
 | Botón secundario | `ui/buttons/secondary` | Pastilla crema con ícono a la izquierda |
 | Botón redondo | `ui/buttons/prev`, `-siguiente`, `-cerrar`, `-ayuda` | 44 × 44 mínimo; madera con contorno |
 | Paginación | `ui/buttons/page-dots` | 5 puntos del carrusel "Cómo jugar"; el activo en Sol |
-| Tarjeta de personaje | `characters/<personaje>/card` | Retrato sobre hojas + placa de nombre y rol. Dock: tarjeta vertical con acción y costo abajo; seleccionada con borde Sol; sugerida con ★; descansando desaturada |
-| Pastilla de recurso | `ui/icons/nutrients`, `-esporas`, `-arbol` | Pergamino con ícono + número + etiqueta (HUD) |
+| Medallón del gremio | CSS + `characters/<personaje>/portrait` | Dock (011): aro de madera con el retrato, cinta con el nombre e insignia (★ sugerido, Zz descansa); seleccionado con aro Sol y halo; descansando desaturado. La acción se lee en la bitácora |
+| Pastilla de recurso | CSS + `ui/icons/nutrients`, `spores`, `trees` | Crema con contorno café: ícono + número arriba y etiqueta abajo (HUD, 011). El día va en una pastilla verde con el ícono de la estación |
+| Fin del día | CSS + `ui/icons/moon` | Píldora amarilla con la luna, a la derecha del dock (011) |
+| Fondo de la partida | `backgrounds/menu`, `menu-landscape` | Bosque pintado detrás del tablero con un velo arriba y abajo (011); se cambiará por un fondo de partida propio, sin camino al centro y a ≥ 860 px de ancho |
 | Íconos | `ui/icons/*` | Pintados, con contorno café |
 | Marco de bosque | `ui/frames/forest` | Envuelve todas las pantallas; 9 partes |
 | Marco de raíces | `ui/frames/roots-pieces` | Envuelve el tablero; 9 partes |
