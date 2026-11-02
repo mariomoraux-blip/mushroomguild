@@ -38,5 +38,8 @@ Concept doc y GDD: documento "El Gremio de los Hongos · Fase 0" (Claude Docs). 
 - Respeta `prefers-reduced-motion`.
 - El pull request incluye una captura y una línea de qué probar en el playtest.
 
+## Prompts
+`docs/prompts.md` tiene los prompts de cada cambio (planear, implementar, revisar, cerrar) y los transversales.
+
 ## Referencia
 `poc/` contiene la prueba de concepto (HTML + SVG + JS). Sus reglas (`poc/rules.js`) son la fuente para portar `src/rules/`. No edites `poc/`.

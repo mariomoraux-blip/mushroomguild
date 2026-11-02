@@ -5,13 +5,24 @@
 ### Requirement: Selección de miembro
 Al seleccionar un miembro disponible, la interfaz SHALL resaltar solo las casillas donde su acción es válida.
 
-#### Scenario: Ostra al inicio
-- WHEN el jugador selecciona a la Ostra en el día 1
+#### Scenario: Tejedora al inicio
+- WHEN el jugador selecciona a la Lactarius indigo en el día 1
 - THEN se resaltan las tierras adyacentes al Hogar y ninguna otra casilla
 
 #### Scenario: Deseleccionar
 - WHEN el jugador vuelve a tocar al miembro seleccionado o pulsa Esc
 - THEN no queda ningún miembro seleccionado ni casilla resaltada
+
+### Requirement: Hechizos del mago
+Al seleccionar a Maese Bruma, la interfaz SHALL pedir primero el hechizo y después resaltar solo las casillas válidas para ese hechizo.
+
+#### Scenario: Elegir Brote arcano
+- WHEN el jugador selecciona a Maese Bruma y elige Brote arcano
+- THEN se resaltan solo las rocas adyacentes a la red
+
+#### Scenario: Magia agotada
+- WHEN Maese Bruma ya lanzó un hechizo esta estación
+- THEN su tarjeta en el dock indica que su magia vuelve con la próxima estación
 
 ### Requirement: Feedback de acción inválida
 La interfaz SHALL mostrar en la bitácora el motivo exacto que devuelve `check()` cuando una acción no es posible.

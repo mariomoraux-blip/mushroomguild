@@ -42,8 +42,14 @@ export const MAP = [
 La partida guiada de `balance.test.ts` se traduce con la misma rotación: `(x, y)` del PoC → `(y, 7 - x)`.
 
 ## Balance como test
-`balance.test.ts` juega 2.000 partidas con un bot aleatorio sembrado y una partida guiada fija (la del PoC). Umbrales:
-- Bot aleatorio: tasa de victoria ≥ 20 % y ≤ 60 %.
-- Partida guiada: gana en el día 9 o antes.
+`balance.test.ts` usa dos bots sembrados y una partida guiada fija (la del PoC, rotada). Umbrales:
+- **Bot con criterio** (prioriza Árbol Madre > revivir > descomponer > tejer hacia arriba; usa la Mensajera solo con < 4 nutrientes y el Brote arcano sobre rocas): gana ≥ 95 % y en promedio antes del día 9.
+- **Bot al azar** (piso de dificultad): gana entre 15 % y 60 %.
+- **Partida guiada:** gana en el día 9 o antes.
+
+Referencia medida en Fase 0 con 5 especies: bot con criterio 100 % (día 7); bot al azar 19 % (día 11). El bot al azar baja frente a 3 especies (27 %) porque desperdicia esporas; por eso el umbral principal es el del bot con criterio.
+
+## Especies nuevas frente al PoC
+El PoC solo tiene 3 especies (la Tejedora se llamaba Ostra). `Gliophorus psittacinus` y `Conocybe arcana` se implementan desde la spec, no desde `poc/rules.js`. Claves internas sugeridas: `champi`, `lactarius`, `amanita`, `gliophorus`, `mago`.
 
 Si un cambio futuro rompe estos umbrales, el test falla y el cambio debe justificar el ajuste.
