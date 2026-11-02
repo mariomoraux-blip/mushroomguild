@@ -105,8 +105,8 @@ FICHA                          EL GREMIO                      INTRO / VICTORIA
 - **Cómo jugar (012, hecho):** carrusel de 5 pasos en pergamino, cada uno con una ilustración de piezas publicadas, ‹ › (`ui/buttons/prev`, `next`), puntos y deslizar. Es la ayuda principal (el "?" la abre); la Libreta de campo queda como detalle.
 - **Ficha:** retrato grande, nombre, nombre científico y rol, contexto, frase entre comillas y secciones con etiqueta verde (Habilidad, Movimiento, Nutrientes…), como la ficha actual.
 - **El gremio (012, hecho):** lista de las cinco especies, cada fila con su medallón, nombre, rol y una línea; abre la ficha encima.
-- **Intro (003, hecho):** fondo `backgrounds/intro` (bosque lila apagado), tres cartas de pergamino con letrero de madera ("El bosque se apaga", "Un gremio despierta", "Antes del invierno"), puntos de progreso, "Saltar" y "Siguiente"/"Comenzar". La llegada de Maestra Bruma usa la misma carta con su retrato.
-- **Victoria (003, hecho):** fondo `backgrounds/victory`, letrero "¡El bosque despertó!", texto y resumen (mes, árboles, nutrientes, esporas); "Ver el claro" y "Jugar de nuevo" ("Ver resumen" se descartó: el resumen ya está en la carta). El fin del invierno usa el mismo layout con `backgrounds/intro`. En apaisado, el intro usa la panorámica `intro-wide`; la victoria usa `victory-landscape` (hoja `fondo-victoria-v2`: Árbol Padre dorado en el claro) con la carta a un costado para que el árbol se vea entero.
+- **Intro (003, hecho):** fondo `backgrounds/intro` (hoja `fondo-intro-v2`: camino del bosque al atardecer lila, con hongos de colores), tres cartas de pergamino con letrero de madera ("El bosque se apaga", "Un gremio despierta", "Antes del invierno"), puntos de progreso, "Saltar" y "Siguiente"/"Comenzar". La llegada de Maestra Bruma usa la misma carta con su retrato.
+- **Victoria (003, hecho):** fondo `backgrounds/victory`, letrero "¡El bosque despertó!", texto y resumen (mes, árboles, nutrientes, esporas); "Ver el claro" y "Jugar de nuevo" ("Ver resumen" se descartó: el resumen ya está en la carta). El fin del invierno usa el mismo layout con `backgrounds/intro`. En apaisado, el intro usa `intro-landscape` (la misma hoja completa, 16:9); la victoria usa `victory-landscape` (hoja `fondo-victoria-v2`: Árbol Padre dorado en el claro) con la carta a un costado para que el árbol se vea entero.
 
 ## Personajes
 - Cuerpo-tallo redondo, sombrero ≈ 55 % de la altura, cara mínima (ojos de punto, rubor, boca pequeña).
@@ -157,7 +157,7 @@ La saturación del progreso (003, hecho) va de apagado (40 % de color) a color p
 - **Piezas estirables:** marcos, pergamino, letrero, cinta y botones se entregan **en partes** (9 o 3 partes, con márgenes indicados) para que se estiren sin deformarse. Se usan con `border-image` o como capas.
 - **Estados por separado:** los brillos de casilla válida y seleccionada, y la ★, van como capas transparentes del mismo tamaño que la casilla.
 - **Sin texto horneado** (salvo el logo).
-- **Presupuesto:** `public/assets/` ≤ **4 MB** (decisión del 2 de noviembre; antes 2 MB). Hoy hay 2.49 MB. El JavaScript del juego no cuenta en este límite. Los fondos y piezas de portada, intro y victoria se cargan de forma diferida, cuando se muestra esa pantalla; la primera carga solo trae lo del tablero, los personajes y el HUD.
+- **Presupuesto:** `public/assets/` ≤ **4 MB** (decisión del 2 de noviembre; antes 2 MB). Hoy hay 2.79 MB. El JavaScript del juego no cuenta en este límite. Los fondos y piezas de portada, intro y victoria se cargan de forma diferida, cuando se muestra esa pantalla; la primera carga solo trae lo del tablero, los personajes y el HUD.
 - **Estaciones (010):** variantes pintadas por estación, sin gradación de color (descartada en el 003).
 
 ## Organización de assets
@@ -165,8 +165,8 @@ Lo que se publica vive en `public/assets/` (WebP). La fuente (Blender, renders a
 
 ```
 public/assets/
-├── backgrounds/        menu, intro, victory (verticales) · menu-landscape, victory-landscape (16:9) ·
-│                       menu-wide, intro-wide (panorámicas ≈ 5,4:1)
+├── backgrounds/        menu, intro, victory (verticales) · menu-landscape, intro-landscape,
+│                       victory-landscape (16:9) · menu-wide (panorámica ≈ 5,4:1)
 ├── board/
 │   ├── terrain/        grass, grass-b, grass-c, grass-autumn, grass-winter, dirt, sprout, sprout-seedling,
 │   │                   blocked, home, state-valid, state-selected
@@ -191,20 +191,20 @@ public/assets/
 - **Personajes:** la carpeta lleva el nombre del primer miembro de la especie (Añil = *Lactarius indigo*, Bruno = Champiñón, Rubí = *Amanita*, Chispa = *Gliophorus*, Maestra Bruma = *Conocybe arcana*); los reclutas de la misma especie usan el mismo arte. `portrait` es el retrato pintado para tablero, dock, fichas y "El gremio"; los sprites de Blender son fuente (`assets/sprites/webp/`).
 - **Micelio:** se dibuja con el tile completo `net`/`net-b` (decisión del 010). Los conectores (`straight-h`, `straight-v`, `corner`, `cross`…) sobre `dirt` quedan publicados para un efecto futuro (p. ej. el hilo que se teje); falta la pieza en T.
 - **Estaciones:** pasto (`grass-autumn`, `grass-winter`), rocas (`rock-winter`) y árboles (`autumn`, `winter`) cambian por estación (010). El Árbol Padre por estación (`spring-`…`winter-painted`) muestra un árbol vivo y verde, que se confunde con "despierto": por ahora el Padre usa solo `asleep-painted` y `awake-painted`.
-- **Fondos por orientación:** vertical en el teléfono (`menu`, `intro`, `victory`); en horizontal y escritorio, `menu-landscape` (16:9) para la portada y las panorámicas `*-wide` como franja superior o inferior detrás del tablero, la intro y la victoria. Las panorámicas solo tienen 310 px de alto: estiradas a pantalla completa se ven borrosas, así que van como franja y no como fondo completo.
+- **Fondos por orientación:** vertical en el teléfono (`menu`, `intro`, `victory`); en horizontal y escritorio, los 16:9 a pantalla completa (`menu-landscape` en la portada y la partida, `intro-landscape` en la intro, `victory-landscape` en la victoria). La panorámica `menu-wide` solo tiene 310 px de alto: estirada a pantalla completa se ve borrosa, así que solo sirve como franja.
 - **Fuera del árbol propuesto:** el Hogar, los estados de casilla y `blocked` van en `board/terrain/`, y los logos y pastillas en `ui/hud/`.
 - **Código:** `src/theme.ts` arma las rutas (`assetUrl`, `portraitKey`, `uiPortraitKey`, `CHARACTER_DIR`, `fatherKey`, `BOARD_ART`, y las variables CSS `--art-*` de la interfaz); ningún otro archivo escribe rutas de assets a mano.
 
 ## Inventario de piezas
-93 archivos publicados, 2.49 MB en total (el 010 sacó los sprites de Blender a `assets/sprites/webp/`). "Listo" significa que el ancho alcanza para 2× a 390 px; los demás sirven para maquetar y hay que reexportarlos. Retirados en la v2 por traer texto horneado o baja resolución: las tarjetas con placa (`card`), `ribbon-hint`, `page-dots` y `rock-dark`.
+94 archivos publicados, 2.79 MB en total (el 010 sacó los sprites de Blender a `assets/sprites/webp/`). "Listo" significa que el ancho alcanza para 2× a 390 px; los demás sirven para maquetar y hay que reexportarlos. Retirados en la v2 por traer texto horneado o baja resolución: las tarjetas con placa (`card`), `ribbon-hint`, `page-dots` y `rock-dark`.
 
 | Archivo | Origen | Tamaño | Peso | Estado |
 | --- | --- | --- | --- | --- |
 | `backgrounds/menu-landscape.webp` | fondo-claro-v2 | 1671 × 941 | 406 KB | Listo |
 | `backgrounds/victory-landscape.webp` | fondo-victoria-v2 | 1672 × 941 | 407 KB | Listo |
 | `backgrounds/menu-wide.webp` | panorámicas | 1670 × 310 | 162 KB | Listo como franja (310 px de alto); para pantalla completa haría falta ≥ 1080 px de alto |
-| `backgrounds/intro-wide.webp` | panorámicas | 1670 × 307 | 124 KB | Listo como franja (310 px de alto); para pantalla completa haría falta ≥ 1080 px de alto |
-| `backgrounds/intro.webp` | logo y fondos | 465 × 631 | 55 KB | Baja resolución (objetivo 860 px de ancho) |
+| `backgrounds/intro-landscape.webp` | fondo-intro-v2 | 1672 × 941 | 386 KB | Listo |
+| `backgrounds/intro.webp` | fondo-intro-v2 (corte vertical, hacia los hongos) | 527 × 941 | 89 KB | Usable; para 2× a 390 px haría falta ≥ 780 px de ancho |
 | `backgrounds/menu.webp` | fondo-claro-v2 (corte vertical) | 527 × 941 | 110 KB | Usable; para 2× a 390 px haría falta ≥ 780 px de ancho |
 | `backgrounds/victory.webp` | fondo-victoria-v2 (corte vertical) | 527 × 941 | 119 KB | Usable; para 2× a 390 px haría falta ≥ 780 px de ancho |
 | `board/father-tree/asleep-painted.webp` | tablero HD | 590 × 450 | 79 KB | Listo |
@@ -306,7 +306,7 @@ public/assets/
 - Los renders de Blender viven en `assets/sprites/` (PNG) y sus WebP de 176 × 128 (Maestra Bruma 176 × 160) en `assets/sprites/webp/`, como fuente.
 - **Árbol Padre:** desde el 010 el tablero usa `asleep-painted` / `awake-painted` a 1,35 casillas de ancho (`FATHER_SCALE`). El de Blender, `assets/blender/arbol-padre.blend` (estados en `estados_arbol.py`), queda como fuente en `assets/sprites/webp/board/father-tree/{asleep,awake}.webp` (176 × 192). Dormido: tronco retorcido gris, raíces largas y ramas desnudas. Despierto: corteza cálida y copa dorada en paraguas (hojas `#F2BC45`, sombra `#C98A2B`, luz `#FFE08A`) con borde que brilla `#FFE27A`, aura `#FFF4C2`, luces cálidas y destellos. En el tablero mide 1,2 casillas de ancho y su copa asoma por encima del marco. Sustituye en el tablero a los recortes `public/assets/ui/arbol-padre-*.webp` (placeholders de baja resolución). La v2 plantea dibujarlo de unas 3 casillas de ancho; este mes mide 1,2 (`FATHER_SCALE` en `theme.ts`) y queda pendiente decidir el tamaño final.
 - La silueta de cono de cada especie (`.hat--*` en `styles.css`) queda solo como respaldo si un retrato faltara.
-- Peso: todo `public/assets/` suma 2.49 MB en WebP (límite 4 MB).
+- Peso: todo `public/assets/` suma 2.79 MB en WebP (límite 4 MB).
 
 ## Referencias (`references/`)
 | Archivo | Tomamos | Dejamos |

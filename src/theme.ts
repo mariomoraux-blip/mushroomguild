@@ -138,7 +138,7 @@ const UI_ART: Record<string, string> = {
   // Cartas de historia (003): solo se descargan cuando se muestra la carta.
   'bg-intro': 'backgrounds/intro',
   'bg-victory': 'backgrounds/victory',
-  'bg-intro-wide': 'backgrounds/intro-wide',
+  'bg-intro-wide': 'backgrounds/intro-landscape',
   'bg-victory-wide': 'backgrounds/victory-landscape',
   moon: 'ui/icons/moon',
   recruit: 'ui/icons/recruit',
