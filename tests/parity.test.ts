@@ -9,15 +9,21 @@ import {
   mulberry32,
   newGame,
   recruit,
-  SPECIES_IDS,
+  recruitableCount,
   validTargets,
   type GameState,
+  type RecruitableSpecies,
 } from '../src/rules';
 import pocSource from '../poc/rules.js?raw';
 
-// El PoC es la fuente de verdad: el port debe comportarse igual, con el mapa rotado.
+// El PoC es la fuente de las 3 especies portadas: el port debe comportarse igual, con el mapa rotado.
 // Se carga como texto y se evalúa aislado (sin editar poc/).
+// Fuera del PoC: la Gliophorus no se recluta, Maese Bruma nunca actúa y se ignora al comparar,
+// y los nombres/especies se traducen (Ostra → Lactarius, nombres nuevos del GDD).
 const Poc = new Function(`${pocSource}\nreturn Rules;`)();
+
+const PORTED: readonly RecruitableSpecies[] = ['champi', 'lactarius', 'amanita'];
+const toPocSpecies = (sp: string) => (sp === 'lactarius' ? 'ostra' : sp);
 
 /** Vertical (x, y) → PoC (7 - y, x). Inversa de la rotación de design.md. */
 const toPoc = (x: number, y: number) => ({ x: H - 1 - y, y: x });
@@ -28,7 +34,7 @@ function summary(s: GameState) {
     nutrients: s.nutrients,
     spores: s.spores,
     status: s.status,
-    members: s.members.map((m) => [m.id, m.species, m.name, m.used]),
+    members: s.members.filter((m) => m.species !== 'mago').map((m) => [toPocSpecies(m.species), m.used]),
     tiles: s.tiles
       .map((t) => ({ ...toPoc(t.x, t.y), kind: t.kind, net: t.net, uses: t.uses, alive: t.alive }))
       .sort((a, b) => a.y - b.y || a.x - b.x),
@@ -41,42 +47,57 @@ function pocSummary(p: any) {
     nutrients: p.nutrients,
     spores: p.spores,
     status: p.status,
-    members: p.members.map((m: any) => [m.id, m.sp, m.name, m.used]),
+    members: p.members.map((m: any) => [m.sp, m.used]),
     tiles: p.tiles.map((t: any) => ({ x: t.x, y: t.y, kind: t.t, net: t.net, uses: t.uses, alive: t.alive })),
   };
 }
 
-describe('paridad con poc/rules.js', () => {
-  it('300 partidas al azar producen el mismo estado y los mismos mensajes en cada paso', () => {
+describe('paridad con poc/rules.js (especies portadas)', () => {
+  it('300 partidas al azar producen el mismo estado y los mismos motivos en cada paso', () => {
     const rng = mulberry32(7);
     for (let g = 0; g < 300; g++) {
       let s = newGame();
       const p = Poc.newGame();
+      // Pares [id del port, id del PoC] de los miembros portados, en orden de llegada.
+      const pairs: [number, number][] = s.members.map((m, i) => [m.id, p.members[i].id]);
+      const names = new Map<string, string>(s.members.map((m, i) => [p.members[i].name, m.name]));
+      const normalize = (msg: string) => {
+        // Un solo reemplazo por pasada: los nombres del PoC y los nuevos se cruzan (Gordo/Migas/Trufo).
+        const re = new RegExp(`(?<!\\p{L})(${[...names.keys()].join('|')})(?!\\p{L})`, 'gu');
+        return msg.replace('La Ostra', 'La Lactarius').replace(re, (n) => names.get(n) ?? n);
+      };
       expect(summary(s)).toEqual(pocSummary(p));
+
       while (s.status === 'playing') {
-        if (s.spores >= COST.recruit && s.members.length < MAX_GUILD && rng() < 0.7) {
-          const sp = SPECIES_IDS[Math.floor(rng() * 3)]!;
-          const r = recruit(s, sp);
-          expect(r.message).toBe(Poc.recruit(p, sp));
-          s = r.state;
+        if (s.spores >= COST.recruit && recruitableCount(s) < MAX_GUILD && rng() < 0.7) {
+          const sp = PORTED[Math.floor(rng() * 3)]!;
+          s = recruit(s, sp).state;
+          Poc.recruit(p, toPocSpecies(sp));
+          const ours = s.members.at(-1)!;
+          const theirs = p.members.at(-1);
+          pairs.push([ours.id, theirs.id]);
+          names.set(theirs.name, ours.name);
         }
-        for (const m of s.members) {
+        for (const [id, pocId] of pairs) {
           if (s.status !== 'playing' || rng() < 0.15) continue;
           // Probar también una casilla cualquiera: el motivo de rechazo debe coincidir.
           const any = s.tiles[Math.floor(rng() * s.tiles.length)]!;
           const q = toPoc(any.x, any.y);
-          expect(check(s, m.id, any.x, any.y)).toEqual(Poc.check(p, m.id, q.x, q.y));
-          const targets = validTargets(s, m.id);
-          expect(targets.length).toBe(Poc.validTargets(p, m.id).length);
+          const ours = check(s, id, any.x, any.y);
+          const theirs = Poc.check(p, pocId, q.x, q.y);
+          expect(ours.ok).toBe(theirs.ok);
+          if (!ours.ok) expect(ours.reason).toBe(normalize(theirs.reason));
+          const targets = validTargets(s, id);
+          expect(targets.length).toBe(Poc.validTargets(p, pocId).length);
           if (!targets.length) continue;
           const t = targets[Math.floor(rng() * targets.length)]!;
           const pt = toPoc(t.x, t.y);
-          const r = act(s, m.id, t.x, t.y);
-          expect(r.message).toBe(Poc.act(p, m.id, pt.x, pt.y));
+          const r = act(s, id, t.x, t.y);
+          expect(r.message).toBe(normalize(Poc.act(p, pocId, pt.x, pt.y)));
           s = r.state;
         }
         const r = endDay(s);
-        expect(r.message).toBe(Poc.endDay(p));
+        Poc.endDay(p);
         s = r.state;
         expect(summary(s)).toEqual(pocSummary(p));
       }

@@ -1,73 +1,48 @@
 import { describe, expect, it } from 'vitest';
-import {
-  act,
-  COST,
-  endDay,
-  MAX_GUILD,
-  mulberry32,
-  newGame,
-  recruit,
-  SPECIES_IDS,
-  validTargets,
-  H,
-  type GameState,
-  type Point,
-  type SpeciesId,
-} from '../src/rules';
+import { act, endDay, H, mulberry32, newGame, recruit, type GameState, type Point, type RecruitableSpecies, type SpeciesId } from '../src/rules';
+import { playGame, randomDay, smartDay } from './bots';
 
-// ─── Bot aleatorio sembrado ────────────────────────────────────────────────────
-// Política (propuesta, pendiente de aprobación):
-//   1. Si hay esporas para reclutar y cabe alguien, recluta una especie al azar (una vez al día).
-//   2. Cada miembro, en orden aleatorio, actúa sobre una casilla válida al azar (si la hay).
-//   3. Termina el día.
 const SEED = 2026;
 const GAMES = 2000;
 
-function pick<T>(rng: () => number, list: readonly T[]): T {
-  return list[Math.floor(rng() * list.length)]!;
-}
-
-function shuffle<T>(rng: () => number, list: readonly T[]): T[] {
-  const a = [...list];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j]!, a[i]!];
-  }
-  return a;
-}
-
-function playRandom(rng: () => number): GameState {
-  let s = newGame();
-  while (s.status === 'playing') {
-    if (s.spores >= COST.recruit && s.members.length < MAX_GUILD) s = recruit(s, pick(rng, SPECIES_IDS)).state;
-    for (const m of shuffle(rng, s.members)) {
-      if (s.status !== 'playing') break;
-      const targets = validTargets(s, m.id);
-      if (targets.length) {
-        const t = pick(rng, targets);
-        s = act(s, m.id, t.x, t.y).state;
-      }
+function simulate(day: (rng: () => number) => (s: GameState) => GameState) {
+  const rng = mulberry32(SEED);
+  let wins = 0;
+  let winDays = 0;
+  for (let i = 0; i < GAMES; i++) {
+    const s = playGame(newGame(), day(rng));
+    if (s.status === 'won') {
+      wins++;
+      winDays += s.wonDay!;
     }
-    if (s.status === 'playing') s = endDay(s).state;
   }
-  return s;
+  return { rate: wins / GAMES, avgDay: wins ? winDays / wins : Infinity };
 }
+
+const report = (name: string, r: { rate: number; avgDay: number }) =>
+  console.info(`[balance] ${name}: victorias ${(r.rate * 100).toFixed(1)} % · día medio ${r.avgDay.toFixed(1)}`);
 
 // ─── Partida guiada ────────────────────────────────────────────────────────────
 // Escrita en coordenadas del PoC (mapa horizontal 8×5) y traducida al mapa vertical
 // con la rotación de design.md: (x, y) del PoC → (y, 7 - x).
-// Ids: 1 Ola (Ostra) · 2 Bruno (Champiñón) · 3 Rubí (Amanita) · 4 Nube (Ostra, reclutada el día 3).
+// Los miembros se nombran por especie y orden de llegada (Maese Bruma llega el día 3 y corre los ids).
 const rotate = ({ x, y }: Point): Point => ({ x: y, y: H - 1 - x });
 
-type Step = readonly [memberId: number, x: number, y: number] | readonly ['recruit', SpeciesId];
+type Who = readonly [species: SpeciesId, nth: number];
+type Step = readonly [who: Who, x: number, y: number] | readonly ['recruit', RecruitableSpecies];
+const ANIL: Who = ['lactarius', 1];
+const OLA: Who = ['lactarius', 2];
+const BRUNO: Who = ['champi', 1];
+const RUBI: Who = ['amanita', 1];
+
 const GUIDED: readonly (readonly Step[])[] = [
-  /* día 1 */ [[2, 0, 1], [1, 1, 2], [3, 2, 2]], // tronco junto al Hogar, tejer, revivir el árbol cercano
-  /* día 2 */ [[2, 0, 1], [1, 1, 3], [3, 1, 4]], // terminar el tronco, tejer, segundo árbol
-  /* día 3 */ [['recruit', 'ostra'], [1, 3, 2]], // reclutar una segunda Ostra, tejer hacia el este
-  /* día 4 */ [[1, 4, 2], [4, 4, 1], [2, 4, 3], [3, 4, 0]], // tejer ×2, tronco, tercer árbol
-  /* día 5 */ [[1, 5, 1], [4, 5, 0], [2, 4, 3]], // tejer ×2, terminar el tronco
-  /* día 6 */ [[1, 6, 0], [4, 7, 0], [3, 7, 1]], // la red llega al cuarto árbol, vecino del Árbol Madre
-  /* día 7 */ [[3, 7, 2]], // despertar al Árbol Madre
+  /* día 1 */ [[BRUNO, 0, 1], [ANIL, 1, 2], [RUBI, 2, 2]], // tronco junto al Hogar, tejer, revivir el árbol cercano
+  /* día 2 */ [[BRUNO, 0, 1], [ANIL, 1, 3], [RUBI, 1, 4]], // terminar el tronco, tejer, segundo árbol
+  /* día 3 */ [['recruit', 'lactarius'], [ANIL, 3, 2]], // llega Maese Bruma; reclutar a Ola, tejer hacia el este
+  /* día 4 */ [[ANIL, 4, 2], [OLA, 4, 1], [BRUNO, 4, 3], [RUBI, 4, 0]], // tejer ×2, tronco, tercer árbol
+  /* día 5 */ [[ANIL, 5, 1], [OLA, 5, 0], [BRUNO, 4, 3]], // tejer ×2, terminar el tronco
+  /* día 6 */ [[ANIL, 6, 0], [OLA, 7, 0], [RUBI, 7, 1]], // la red llega al cuarto árbol, vecino del Árbol Madre
+  /* día 7 */ [[RUBI, 7, 2]], // despertar al Árbol Madre
 ];
 
 function playGuided(): GameState {
@@ -77,7 +52,8 @@ function playGuided(): GameState {
       if (step[0] === 'recruit') {
         s = recruit(s, step[1]).state;
       } else {
-        const [id, x, y] = step;
+        const [[species, nth], x, y] = step;
+        const id = s.members.filter((m) => m.species === species)[nth - 1]!.id;
         const p = rotate({ x, y });
         s = act(s, id, p.x, p.y).state;
       }
@@ -89,22 +65,19 @@ function playGuided(): GameState {
 }
 
 describe('balance', () => {
-  it(`bot aleatorio (semilla ${SEED}, ${GAMES} partidas): gana entre 20 % y 60 %`, () => {
-    const rng = mulberry32(SEED);
-    let wins = 0;
-    let winDays = 0;
-    for (let i = 0; i < GAMES; i++) {
-      const s = playRandom(rng);
-      if (s.status === 'won') {
-        wins++;
-        winDays += s.wonDay!;
-      }
-    }
-    const rate = wins / GAMES;
-    console.info(`[balance] victorias ${(rate * 100).toFixed(1)} % · día medio de victoria ${(winDays / wins).toFixed(1)}`);
-    expect(rate).toBeGreaterThanOrEqual(0.2);
-    expect(rate).toBeLessThanOrEqual(0.6);
-  }, 60_000);
+  it(`bot con criterio (semilla ${SEED}, ${GAMES} partidas): gana ≥ 95 % y en promedio antes del día 9`, () => {
+    const r = simulate(smartDay);
+    report('bot con criterio', r);
+    expect(r.rate).toBeGreaterThanOrEqual(0.95);
+    expect(r.avgDay).toBeLessThan(9);
+  }, 120_000);
+
+  it(`bot al azar (semilla ${SEED}, ${GAMES} partidas): gana entre 15 % y 60 %`, () => {
+    const r = simulate(randomDay);
+    report('bot al azar', r);
+    expect(r.rate).toBeGreaterThanOrEqual(0.15);
+    expect(r.rate).toBeLessThanOrEqual(0.6);
+  }, 120_000);
 
   it('partida guiada: gana en el día 9 o antes', () => {
     const s = playGuided();

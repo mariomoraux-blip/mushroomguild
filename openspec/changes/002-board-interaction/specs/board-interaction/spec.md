@@ -26,10 +26,44 @@ Al seleccionar a Maese Bruma, la interfaz SHALL pedir primero el hechizo y despu
 
 ### Requirement: Feedback de acción inválida
 La interfaz SHALL mostrar en la bitácora el motivo exacto que devuelve `check()` cuando una acción no es posible.
+Cuando el miembro seleccionado no tiene ninguna casilla válida, la bitácora SHALL mostrar "Nombre: motivo", donde el motivo sale de `idleReason(state, memberId)` (lógica en `src/rules`, devuelve una clave) y su texto vive en `src/copy/es.ts`:
 
-#### Scenario: Sin trabajo disponible
-- WHEN se selecciona un Champiñón y no hay troncos junto a la red
-- THEN la bitácora dice que no hay troncos junto a la red y sugiere tejer hacia uno
+| Especie | Condición | Texto |
+| --- | --- | --- |
+| Champiñón | No hay troncos junto a la red | "no hay troncos junto a la red. Teje hacia uno." |
+| Lactarius indigo | Menos nutrientes que el costo de tejer | "faltan nutrientes." |
+| Lactarius indigo | No hay tierra libre junto a la red | "no hay tierra junto a la red." |
+| Amanita muscaria | Menos nutrientes que el costo de revivir | "faltan nutrientes." |
+| Amanita muscaria | No hay árboles grises junto a la red | "no hay árboles grises junto a la red." |
+| Gliophorus psittacinus | Menos esporas que el costo de pasar la voz | "faltan esporas: pasar la voz cuesta 2." |
+| Gliophorus psittacinus | No hay árboles vivos | "no hay árboles vivos todavía." |
+| Maese Bruma | Ya lanzó un hechizo esta estación | "su magia vuelve con la próxima estación." |
+
+Maese Bruma no tiene otro motivo de inactividad: cuando llega siempre hay árboles vivos.
+
+#### Scenario: Toque en una casilla no válida
+- WHEN hay un miembro seleccionado y el jugador toca una casilla no resaltada
+- THEN la bitácora muestra el motivo exacto de `check()` para esa casilla y el miembro sigue seleccionado
+
+#### Scenario: Sin trabajo disponible (Champiñón)
+- WHEN se selecciona a Bruno y no hay troncos junto a la red
+- THEN la bitácora dice "Bruno: no hay troncos junto a la red. Teje hacia uno."
+
+#### Scenario: Sin trabajo disponible (Lactarius indigo)
+- WHEN se selecciona a Añil con 0 nutrientes
+- THEN la bitácora dice "Añil: faltan nutrientes."
+
+#### Scenario: Sin trabajo disponible (Amanita muscaria)
+- WHEN se selecciona a Rubí con nutrientes suficientes y ningún árbol gris junto a la red
+- THEN la bitácora dice "Rubí: no hay árboles grises junto a la red."
+
+#### Scenario: Sin trabajo disponible (Gliophorus psittacinus)
+- WHEN se selecciona a Perico con 1 espora y árboles vivos
+- THEN la bitácora dice "Perico: faltan esporas: pasar la voz cuesta 2."
+
+#### Scenario: Sin trabajo disponible (Maese Bruma)
+- WHEN se selecciona a Maese Bruma después de que ya lanzó un hechizo esta estación
+- THEN la bitácora dice "Maese Bruma: su magia vuelve con la próxima estación."
 
 ### Requirement: Estado visible
 El HUD SHALL mostrar en todo momento día (de 12), estación, nutrientes, esporas y árboles vivos (de 5).
@@ -46,20 +80,33 @@ Todo lo que se hace con el puntero SHALL poder hacerse con teclado, y el foco SH
 - THEN puede seleccionar un miembro, actuar sobre una casilla y terminar el día
 
 ### Requirement: Móvil primero
-El juego SHALL ser jugable de principio a fin en un navegador de teléfono en vertical, con el tablero completo visible y sin scroll de página.
+El juego SHALL ser jugable de principio a fin en un navegador de teléfono en vertical, con el tablero completo visible y sin scroll de página. En vertical las casillas SHALL medir al menos 48 px en cualquier tamaño de ventana soportado. No hay dock plegable.
 
 #### Scenario: Teléfono en vertical
 - WHEN la ventana mide 390 × 844
 - THEN el HUD está arriba, el tablero de 5×8 completo al centro con casillas de al menos 64 px, y el dock del gremio abajo
 - AND la página no se desplaza al tocar el tablero
 
+#### Scenario: Safari con barras
+- WHEN la ventana mide 390 × 664 (iPhone con las barras del navegador visibles)
+- THEN el HUD, el tablero completo y el dock caben sin scroll, con casillas de al menos 56 px
+- AND "Terminar el día" está en la misma fila que las tarjetas del gremio
+
 #### Scenario: Teléfono en horizontal
 - WHEN la ventana mide 844 × 390
 - THEN el tablero queda a la izquierda y el dock a la derecha, ambos completos
+- AND las casillas miden al menos 44 px
 
 #### Scenario: Escritorio
 - WHEN la ventana mide 1280 × 800
 - THEN el mismo layout se centra con más espacio, sin estirar las casillas más de 96 px
+
+#### Scenario: Gremio completo en el dock
+- WHEN el gremio tiene 7 miembros (6 reclutables y Maese Bruma) en una ventana de 390 px de ancho
+- THEN las tarjetas se desplazan en horizontal dentro del dock y la tarjeta siguiente asoma cortada
+- AND "Terminar el día" queda fijo fuera de ese desplazamiento
+- AND la página no se mueve
+- AND las tarjetas mantienen siempre el mismo orden (orden de llegada al gremio)
 
 ### Requirement: Objetivos táctiles
 Todo control interactivo SHALL medir al menos 44 × 44 px y no SHALL depender de hover ni de gestos largos.
