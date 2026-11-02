@@ -23,7 +23,7 @@ Sobran 3 o 4 meses. Quien busca un paseo tranquilo debe seguir teniéndolo; quie
   | Jugador con experiencia | gana siempre | pierde ~20 % | pierde ~50 % |
 
 - **Escarcha:** en las estaciones frías del nivel, tejer cuesta 2 nutrientes en vez de 1. Los árboles producen igual. Se anuncia al empezar la estación.
-- **Árboles que se apagan:** al empezar el último mes de la estación, el árbol gris más lejano de la red queda marcado. Si al terminar ese mes sigue gris, se apaga: revivirlo cuesta 5 nutrientes en vez de 3. Revivirlo ese mes lo salva.
+- **Árboles que se apagan:** al empezar el último mes de la estación, el árbol gris más lejano de la red queda marcado. Si al terminar ese mes sigue gris, se apaga: revivirlo cuesta 7 nutrientes en vez de 3 (empezó en 5; el balance lo subió, ver `design.md`). Revivirlo ese mes lo salva.
 - **Nunca se pierde lo logrado** (decisión del jugador): ninguna regla nueva toca la red, los árboles vivos, los nutrientes ni las esporas. La presión solo encarece lo que todavía no se reclamó.
 - **Claros justos:** en todos los niveles el generador acepta solo claros que un bot experto gana; si se pierde, es por cómo se jugó, no por el mapa.
 - **Más rocas, mismo claro:** la semilla fija el claro de Brote; Bosque y Ancestral le agregan rocas sobre la tierra, también según la semilla. El Brote arcano de Maestra Bruma (roca a micelio) gana valor.

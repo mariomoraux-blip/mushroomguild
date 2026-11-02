@@ -114,12 +114,24 @@ describe('Requirement: El color vuelve', () => {
 describe('Requirement: Portada y pantallas (012)', () => {
   const title = () => initialState(newGame(), [], { title: true });
 
-  it('empieza en la portada y "Nueva partida" abre la intro', () => {
+  it('empieza en la portada y "Nueva partida" abre "Elige tu claro" (019); elegir un nivel abre la intro la primera vez', () => {
     expect(title().ui.screen).toEqual({ kind: 'title' });
     expect(title().ui.story).toBeNull();
     const played = run(title(), { type: 'play' });
-    expect(played.ui.screen).toBeNull();
-    expect(played.ui.story).toEqual({ kind: 'intro', step: 0 });
+    expect(played.ui.screen).toEqual({ kind: 'level' });
+    expect(played.ui.story).toBeNull();
+    const game = { ...newGame(), level: 'ancestral' as const };
+    const first = run(played, { type: 'start', game, intro: true });
+    expect(first.game.level).toBe('ancestral');
+    expect(first.ui.screen).toBeNull();
+    expect(first.ui.story).toEqual({ kind: 'intro', step: 0 });
+    expect(run(played, { type: 'start', game, intro: false }).ui.story).toBeNull();
+  });
+
+  it('Scenario: Volver a la portada — Esc en "Elige tu claro" vuelve a la portada', () => {
+    const levels = run(title(), { type: 'play' });
+    expect(run(levels, { type: 'cancel' }).ui.screen).toEqual({ kind: 'title' });
+    expect(run(levels, { type: 'closeScreen' }).ui.screen).toEqual({ kind: 'title' });
   });
 
   it('Cómo jugar avanza entre 5 pasos sin salirse del rango y vuelve a donde se abrió', () => {

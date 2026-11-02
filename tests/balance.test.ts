@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { generateMap, MAP, MAP_GEN, mulberry32, newGame, newRandomGame, playAdvised, stars, thresholds, TREES_FOR_MOTHER } from '../src/rules';
+import { certify, generateMap, LEVELS, levelMap, MAP, MAP_GEN, mulberry32, newGame, newRandomGame, playAdvised, stars, thresholds, TREES_FOR_MOTHER } from '../src/rules';
+import { LEVEL_SEEDS } from '../src/rules/level-seeds';
 import { playGame, randomMonth } from './bots';
 
 // Balance como test (game-rules › Dificultad medida). Semillas fijas: resultados reproducibles.
@@ -59,4 +60,57 @@ describe('estrellas por claro (015)', () => {
     console.info(`[balance] calibración por claro: máx ${slowest.toFixed(1)} ms (Node)`);
     expect(slowest).toBeLessThan(100);
   }, 120_000);
+});
+
+// 019 · Dificultad por nivel, sobre las semillas 1 a 100 de la tabla certificada (`level-seeds.ts`).
+const TARGETS = {
+  bosque: { hints: [0.75, 0.9], random: 0.1 },
+  ancestral: { hints: [0.4, 0.6], random: 0.05 },
+} as const;
+
+describe.each(['bosque', 'ancestral'] as const)('balance en %s', (level) => {
+  const seeds = Array.from({ length: MAPS }, (_, i) => i + 1).filter((seed) => LEVEL_SEEDS[level][seed] !== '-');
+  const starts = seeds.map((seed) => newRandomGame(seed, level));
+
+  it('el bot experto gana todos los claros aceptados', () => {
+    expect(seeds.length).toBeGreaterThanOrEqual(95);
+    for (const start of starts) expect(certify(start)?.status).toBe('won');
+  }, 120_000);
+
+  it(`la política de las pistas gana entre el ${TARGETS[level].hints[0] * 100} % y el ${TARGETS[level].hints[1] * 100} %`, () => {
+    const rate = starts.filter((s) => playAdvised(s).status === 'won').length / starts.length;
+    console.info(`[balance] ${level} · pistas: ${(rate * 100).toFixed(0)} %`);
+    expect(rate).toBeGreaterThanOrEqual(TARGETS[level].hints[0]);
+    expect(rate).toBeLessThanOrEqual(TARGETS[level].hints[1]);
+  }, 120_000);
+
+  it(`el bot al azar gana como máximo el ${TARGETS[level].random * 100} %`, () => {
+    const rng = mulberry32(2026);
+    let wins = 0;
+    for (const s of starts) for (let k = 0; k < RANDOM_GAMES_PER_MAP; k++) if (playGame(s, randomMonth(rng)).status === 'won') wins++;
+    const rate = wins / (starts.length * RANDOM_GAMES_PER_MAP);
+    console.info(`[balance] ${level} · bot al azar: ${(rate * 100).toFixed(1)} %`);
+    expect(rate).toBeLessThanOrEqual(TARGETS[level].random);
+  }, 120_000);
+
+  it('generar un claro tarda menos de 75 ms en Node (300 ms con la CPU ×4), dentro y fuera de la tabla', () => {
+    let slowest = 0;
+    for (const seed of [...seeds.slice(0, 30), 5001, 5002, 5003, 5004, 5005]) {
+      const t0 = performance.now();
+      newRandomGame(seed, level);
+      slowest = Math.max(slowest, performance.now() - t0);
+    }
+    console.info(`[balance] ${level} · generar un claro: máx ${slowest.toFixed(1)} ms (Node)`);
+    expect(slowest).toBeLessThan(75);
+  });
+
+  it('el claro es el de Brote con las rocas del nivel sobre casillas de tierra', () => {
+    for (const seed of seeds.slice(0, 20)) {
+      const brote = generateMap(seed);
+      const lv = levelMap(seed, level);
+      const diff = lv.flatMap((row, y) => [...row].map((c, x) => [c, brote[y]![x]!] as const)).filter(([a, b]) => a !== b);
+      expect(diff).toHaveLength(LEVELS[level].rocks - MAP_GEN.rocks);
+      expect(diff.every(([a, b]) => a === 'R' && b === '.')).toBe(true);
+    }
+  });
 });

@@ -2,7 +2,7 @@
 // Solo dibuja a partir de datos; los colores salen de theme.ts. Es determinista (sin Math.random):
 // la variación sale de un hash de la casilla.
 import { H, neighbors, seasonIndex, W, type GameState, type Tile } from '../rules';
-import { BOARD_ART, rgba, SEASON_SLUGS, type ColorToken, type SeasonSlug } from '../theme';
+import { BOARD_ART, FROST_FADED, rgba, SEASON_SLUGS, type ColorToken, type SeasonSlug } from '../theme';
 
 /** Busca una pieza pintada ya cargada (clave = ruta bajo `public/assets/`). */
 export type ArtLookup = (key: string) => CanvasImageSource | undefined;
@@ -43,6 +43,8 @@ export interface Painted {
   readonly object: Tile['kind'] | 'none';
   /** Pieza pintada usada para el objeto (si hubo arte). */
   readonly art?: string;
+  /** Árbol apagado: lleva el velo fijo y el copo (019). */
+  readonly faded?: boolean;
 }
 
 type Ctx = CanvasRenderingContext2D;
@@ -517,6 +519,79 @@ function paintValid(ctx: Ctx, T: number, x: number, y: number) {
   ctx.restore();
 }
 
+/** Velo de escarcha (019): la casilla del árbol cubierta de color `frost`. */
+function frostVeil(ctx: Ctx, T: number, x: number, y: number, alpha: number) {
+  const inset = T * 0.05;
+  ctx.save();
+  roundRect(ctx, x * T + inset, y * T + inset, T - 2 * inset, T - 2 * inset, T * 0.2);
+  ctx.fillStyle = radial(ctx, (x + 0.5) * T, (y + 0.45) * T, T * 0.6, [
+    [0, 'frost', alpha * 0.7],
+    [1, 'frost', alpha],
+  ]);
+  ctx.fill();
+  ctx.restore();
+}
+
+/** Copo de seis brazos con contorno de tinta: que el estado no dependa solo del color. */
+function snowflake(ctx: Ctx, cx: number, cy: number, r: number) {
+  ctx.save();
+  ctx.lineCap = 'round';
+  const arms = () => {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * TAU - Math.PI / 2;
+      const [dx, dy] = [Math.cos(a), Math.sin(a)];
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + dx * r, cy + dy * r);
+      // Ramitas a dos tercios del brazo.
+      const bx = cx + dx * r * 0.6;
+      const by = cy + dy * r * 0.6;
+      for (const s of [-1, 1]) {
+        const b = a + s * 0.7;
+        ctx.moveTo(bx, by);
+        ctx.lineTo(bx + Math.cos(b) * r * 0.35, by + Math.sin(b) * r * 0.35);
+      }
+    }
+  };
+  arms();
+  ctx.strokeStyle = rgba('ink');
+  ctx.lineWidth = r * 0.42;
+  ctx.stroke();
+  arms();
+  ctx.strokeStyle = rgba('frost');
+  ctx.lineWidth = r * 0.2;
+  ctx.stroke();
+  ctx.restore();
+}
+
+/** Árbol apagado (019): velo fijo y un copo en la esquina superior. */
+function paintFaded(ctx: Ctx, T: number, x: number, y: number) {
+  frostVeil(ctx, T, x, y, FROST_FADED);
+  snowflake(ctx, (x + 0.8) * T, (y + 0.2) * T, T * 0.13);
+}
+
+/**
+ * Capa del árbol marcado (019): velo pleno, contorno punteado y un copo chico; la escena le pone el alfa
+ * que late (`FROST_PULSE`). Devuelve las casillas pintadas.
+ */
+export function paintMarked(ctx: Ctx, T: number, game: GameState): { x: number; y: number }[] {
+  ctx.clearRect(0, 0, W * T, H * T);
+  const marked = game.tiles.filter((t) => t.kind === 'tree' && t.fading && !t.alive);
+  for (const t of marked) {
+    frostVeil(ctx, T, t.x, t.y, 1);
+    const inset = T * 0.08;
+    ctx.save();
+    roundRect(ctx, t.x * T + inset, t.y * T + inset, T - 2 * inset, T - 2 * inset, T * 0.18);
+    ctx.strokeStyle = rgba('ink');
+    ctx.lineWidth = T * 0.04;
+    ctx.setLineDash([T * 0.1, T * 0.08]);
+    ctx.stroke();
+    ctx.restore();
+    snowflake(ctx, (t.x + 0.8) * T, (t.y + 0.2) * T, T * 0.09);
+  }
+  return marked.map(({ x, y }) => ({ x, y }));
+}
+
 function paintStar(ctx: Ctx, T: number, x: number, y: number) {
   const cx = (x + 0.5) * T;
   const cy = (y + 0.32) * T;
@@ -705,6 +780,12 @@ export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
     ctx.fillRect(0, 0, W * T, H * T);
     ctx.restore();
   }
+  // Árboles apagados (019): el velo va sobre la saturación para que la escarcha siempre se lea.
+  game.tiles.forEach((t, i) => {
+    if (t.kind !== 'tree' || !t.faded || t.alive) return;
+    paintFaded(ctx, T, t.x, t.y);
+    painted[i] = { ...painted[i]!, faded: true };
+  });
   for (const key of valid) {
     const [x, y] = key.split(',').map(Number) as [number, number];
     paintValid(ctx, T, x, y);

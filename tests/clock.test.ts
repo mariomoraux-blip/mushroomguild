@@ -43,8 +43,8 @@ describe('Requirement: Cronómetro', () => {
 });
 
 describe('Requirement: Mejor resultado local', () => {
-  const result = (total: number, mapId = 'seed-7'): ScoreResult => ({
-    scoringVersion: SCORE_VERSION, mapId, wonMonth: 9, timeMs: 200_000, total, stars: 2,
+  const result = (total: number, mapId = 'seed-7', level: ScoreResult['level'] = 'brote'): ScoreResult => ({
+    scoringVersion: SCORE_VERSION, mapId, level, wonMonth: 9, timeMs: 200_000, total, stars: 2,
     breakdown: { victory: 500, months: 0, trees: 0, reserves: 0, guild: 0, activity: 0, variety: 0, time: 0 }, actionLog: [],
   });
   const memory = () => {
@@ -67,6 +67,13 @@ describe('Requirement: Mejor resultado local', () => {
     expect(saveIfBest(result(2100), st)).toEqual({ newRecord: true });
     expect(readBest('seed-7', st)?.total).toBe(2100);
     expect(saveIfBest(result(9999, 'seed-8'), st)).toEqual({ newRecord: false }); // otro claro
+  });
+
+  it('Scenario: Récord entre niveles — un solo récord por claro, con el total ya multiplicado', () => {
+    const st = memory();
+    saveIfBest(result(2000, 'seed-1', 'brote'), st);
+    expect(saveIfBest(result(4000, 'seed-1', 'ancestral'), st)).toEqual({ newRecord: true });
+    expect(readBest('seed-1', st)).toMatchObject({ total: 4000, level: 'ancestral' });
   });
 
   it('Scenario: Almacenamiento que falla — no lanza y no hay récord', () => {

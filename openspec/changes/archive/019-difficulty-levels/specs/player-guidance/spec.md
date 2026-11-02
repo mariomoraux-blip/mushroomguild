@@ -3,7 +3,7 @@
 ## ADDED Requirements
 
 ### Requirement: Avisos de la presión
-En los niveles con escarcha o árboles que se apagan, la bitácora SHALL avisar, en todos esos niveles (también en Ancestral, porque no son pistas): al empezar una estación con escarcha, que tejer cuesta 2 nutrientes; al marcar un árbol, que se apagará al terminar el mes si nadie lo revive; y al apagarse, que revivirlo cuesta 5. Tocar un árbol marcado o apagado sin miembro seleccionado SHALL explicar su estado y su costo.
+En los niveles con escarcha o árboles que se apagan, la bitácora SHALL avisar, en todos esos niveles (también en Ancestral, porque no son pistas): al empezar una estación con escarcha, que tejer cuesta 2 nutrientes; al marcar un árbol, que se apagará al terminar el mes si nadie lo revive; y al apagarse, que revivirlo cuesta 7. Tocar un árbol marcado o apagado sin miembro seleccionado SHALL explicar su estado y su costo.
 
 #### Scenario: Aviso del árbol marcado
 - WHEN empieza el mes 6 en Bosque

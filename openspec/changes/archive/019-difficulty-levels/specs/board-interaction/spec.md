@@ -11,7 +11,7 @@ El tablero SHALL distinguir el árbol marcado (se apagará al terminar el mes) y
 
 #### Scenario: Árbol apagado
 - WHEN un árbol se apagó
-- THEN se ve con el velo fijo y un copo, y su etiqueta dice que revivirlo cuesta 5 nutrientes
+- THEN se ve con el velo fijo y un copo, y su etiqueta dice que revivirlo cuesta 7 nutrientes
 
 ## MODIFIED Requirements
 

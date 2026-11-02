@@ -73,9 +73,11 @@ Contraste mínimo de texto: Tinta sobre Pergamino, Crema o Sol (todos ≥ 7:1). 
 - **Objetos:** `board/trees/grey` (dormido) → `board/trees/waking` cuando la red lo alcanza → `alive` al revivir (`autumn` y `winter` en esas estaciones); `board/logs/log` → `board/logs/log-used` tras el primer uso; `board/rocks/rock` (`rock-winter` en invierno); `board/terrain/home` es la casilla del Hogar (con alguien encima queda la red). `board/terrain/sprout` para la tierra creada por el Brote arcano queda pendiente.
 - **Árbol Padre:** se dibuja grande (`board/father-tree/asleep-painted` / `awake-painted`, desde el 010) y **sobresale por encima del tablero**, saliendo de su casilla en la fila superior. La regla no cambia: sigue siendo una casilla del tablero; solo su dibujo desborda. Las raíces bajan hacia la casilla.
 - **Casilla ocupada (se mantiene del 008):** si un hongo trabajó este mes en una casilla, su retrato la ocupa y el objeto de abajo no se pinta.
+- **Árbol marcado y apagado (019):** sin pieza nueva. Un velo de escarcha del token `frost` (`#CFE8F5`) sobre la casilla del árbol gris: el marcado lleva además un contorno punteado de tinta y un copo chico, y late suave (alfa 0,35–0,6 cada 1,6 s; fijo en 0,5 con movimiento reducido); el apagado lleva el velo fijo y un copo con contorno en la esquina superior. La pastilla del mes muestra un copo `frost` junto a la estación mientras hay escarcha.
 - **Marco:** raíces trenzadas con hojas (`ui/frames/roots`, como `border-image` de 12 px por lado, en uso), y el marco de bosque alrededor de la pantalla (pendiente).
 
 ## Pantallas (390 × 844)
+- **Elige tu claro (019):** tres tarjetas de pergamino como las filas de «El gremio» (≥ 76 px de alto), con el nombre del nivel en Fredoka musgo, una línea de qué cambia y el multiplicador en una pastilla Sol. Bosque tiñe el degradé con pradera y Ancestral con escarcha. Capturas en `docs/screenshots/019-*`.
 ```
 JUEGO                          PORTADA                        CÓMO JUGAR (carrusel de 5)
 ┌────────────────────────┐     ┌────────────────────────┐     ┌────────────────────────┐

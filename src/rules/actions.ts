@@ -1,17 +1,21 @@
 import { es } from '../copy/es';
-import { COST, MONTHS, GAIN, LOG_USES, MAX_GUILD, RECRUITABLE, TREES_FOR_MAGE, TREES_FOR_MOTHER } from './config';
+import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MONTHS, GAIN, LOG_USES, MAX_GUILD, RECRUITABLE, TREES_FOR_MAGE, TREES_FOR_MOTHER } from './config';
 import {
   addMage,
   addMember,
   cloneState,
+  farthestGreyTree,
+  hasFrost,
   magicSpent,
   member,
   recruitableCount,
+  reviveCost,
   revivedCount,
   season,
   seasonIndex,
   tile,
   touchesNet,
+  weaveCost,
   workerAt,
 } from './state';
 import {
@@ -49,7 +53,7 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
       if (t.kind !== 'soil') return no(R.lactariusNeedsSoil);
       if (t.net) return no(R.alreadyNet);
       if (!near) return no(R.farSoil);
-      if (s.nutrients < COST.weave) return no(R.noNutrientWeave(COST.weave));
+      if (s.nutrients < weaveCost(s)) return no(hasFrost(s) ? R.noNutrientWeaveFrost(weaveCost(s)) : R.noNutrientWeave(weaveCost(s)));
       return yes;
     case 'champi':
       if (t.kind !== 'log') return no(R.champiNeedsLog);
@@ -65,7 +69,7 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
       if (t.kind !== 'tree') return no(R.amanitaNeedsTree);
       if (t.alive) return no(R.treeAlive);
       if (!near) return no(R.farTree);
-      if (s.nutrients < COST.revive) return no(R.reviveCost(COST.revive));
+      if (s.nutrients < reviveCost(t)) return no(R.reviveCost(reviveCost(t)));
       return yes;
     case 'gliophorus':
       if (!workerAt(s, x, y)) return no(R.gliophorusNeedsWorker);
@@ -98,7 +102,7 @@ export function act(s: GameState, id: number, x: number, y: number): ActionResul
 
   switch (m.species) {
     case 'lactarius':
-      n.nutrients -= COST.weave;
+      n.nutrients -= weaveCost(s);
       t.net = true;
       return { state: n, message: es.log.wove(m.name) };
     case 'champi':
@@ -139,9 +143,11 @@ export function act(s: GameState, id: number, x: number, y: number): ActionResul
         n.wonMonth = n.month;
         return { state: n, message: es.log.motherAwake(m.name) };
       }
-      n.nutrients -= COST.revive;
+      n.nutrients -= reviveCost(t);
       t.alive = true;
       t.net = true;
+      t.fading = false; // revivirlo el mes en que está marcado lo salva (019)
+      t.faded = false;
       // Maestra Bruma llega al empezar el mes siguiente al segundo árbol (no hay cambio de mes después del mes 12).
       if (!n.mageArrived && !n.mageDue && revivedCount(n) >= TREES_FOR_MAGE && n.month < MONTHS) n.mageDue = true;
       return { state: n, message: es.log.revived(m.name) };
@@ -172,6 +178,16 @@ export function endMonth(s: GameState): ActionResult {
     return { state: n, message: es.log.winterEnd };
   }
   const before = season(n.month);
+  const parts: string[] = [];
+  // Árbol marcado que sigue gris: se apaga al terminar su mes (019). Nunca toca la red ni árboles vivos.
+  const marked = n.tiles.find((t) => t.fading);
+  if (marked) {
+    marked.fading = false;
+    if (!marked.alive) {
+      marked.faded = true;
+      parts.push(es.log.treeFaded(FADED_REVIVE));
+    }
+  }
   n.month++;
   const trees = revivedCount(n);
   n.spores += trees * GAIN.treeSpores;
@@ -181,9 +197,17 @@ export function endMonth(s: GameState): ActionResult {
     m.at = null;
   });
   const now = season(n.month);
-  const parts: string[] = [es.log.newMonth(n.month)];
+  parts.unshift(es.log.newMonth(n.month));
   if (trees) parts.push(es.log.treesGave(trees * GAIN.treeSpores, trees * GAIN.treeNutrients));
   if (now !== before) parts.push(es.log.seasonStart(now));
+  if (hasFrost(n) && !hasFrost(s)) parts.push(es.log.frostStart(FROST_WEAVE));
+  if (LEVELS[n.level].fading.includes(n.month)) {
+    const next = farthestGreyTree(n);
+    if (next) {
+      n.tiles.find((t) => t === next)!.fading = true;
+      parts.push(es.log.treeFading);
+    }
+  }
   if (n.mageDue) {
     addMage(n);
     parts.push(es.log.mageArrives);

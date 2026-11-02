@@ -50,6 +50,8 @@ export function mountBoardOverlay(root: HTMLElement, store: Store) {
       const ok = valid.has(`${t.x},${t.y}`);
       const parts = [tileName(t), es.tiles.position(t.x, t.y)];
       if (t.kind === 'mother') parts.push(es.tiles.goal);
+      if (t.kind === 'tree' && !t.alive && t.faded) parts.push(es.tiles.faded);
+      else if (t.kind === 'tree' && !t.alive && t.fading) parts.push(es.tiles.fading);
       if (t.net && t.kind !== 'home') parts.push(es.tiles.inNet);
       if (ok) parts.push(es.tiles.valid);
       if (ok && star && star.x === t.x && star.y === t.y) parts.push(`★ ${es.advice.star}`);

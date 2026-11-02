@@ -26,6 +26,16 @@ describe('Requirement: Puntaje', () => {
     const sc = score(s, 200_000);
     expect(sc.breakdown).toEqual({ victory: 500, months: 320, trees: 600, reserves: 100, guild: 60, activity: 150, variety: 150, time: 280 });
     expect(sc.total).toBe(2160);
+    expect(sc.multiplier).toBe(1);
+  });
+
+  it('Scenario: Multiplicador del nivel — la misma partida en Bosque vale 3240 y en Ancestral 4320', () => {
+    const s = victory({ month: 8, trees: 5, nutrients: 4, spores: 3, extra: ['gliophorus', 'champi'], actions: 30, species: FIVE });
+    const bosque = score({ ...s, level: 'bosque' }, 200_000);
+    expect(Object.values(bosque.breakdown).reduce((a, b) => a + b, 0)).toBe(2160);
+    expect(bosque.multiplier).toBe(1.5);
+    expect(bosque.total).toBe(3240);
+    expect(score({ ...s, level: 'ancestral' }, 200_000).total).toBe(4320);
   });
 
   it('Scenario: Tope de actividad — 47 acciones valen lo mismo que 40', () => {
@@ -81,19 +91,38 @@ describe('Requirement: Estrellas', () => {
   });
 });
 
+describe('Requirement: Estrellas entre niveles', () => {
+  it('Scenario: Mismos umbrales en todos los niveles — la referencia es el claro de Brote de la semilla', () => {
+    const brote = thresholds(newRandomGame(1));
+    expect(thresholds(newRandomGame(1, 'bosque'))).toEqual(brote);
+    expect(thresholds(newRandomGame(1, 'ancestral'))).toEqual(brote);
+    expect(thresholds(newRandomGame(0, 'ancestral'))).toEqual(thresholds(newGame()));
+  });
+});
+
 describe('Requirement: Resultado verificable', () => {
   it('Scenario: Rejugar — el actionLog reproduce el estado final y el total', () => {
     const final = playAdvised(newRandomGame(3));
     expect(final.status).toBe('won');
     const r = scoreResult(final, 212_000, thresholds(newRandomGame(3)));
     expect(r).toMatchObject({ scoringVersion: SCORE_VERSION, mapId: 'seed-3', wonMonth: final.wonMonth, timeMs: 212_000 });
-    const again = replay(r.mapId, r.actionLog);
+    const again = replay(r.mapId, r.level, r.actionLog);
     expect(again).toEqual(final);
     expect(score(again, r.timeMs).total).toBe(r.total);
   });
 
   it('el mapa clásico también se rejuega', () => {
     const final = playAdvised(newGame());
-    expect(replay('clasico', final.log)).toEqual(final);
+    expect(replay('clasico', 'brote', final.log)).toEqual(final);
+  });
+
+  it('Scenario: Rejugar con nivel — una victoria de Bosque se rejuega en Bosque', () => {
+    const final = playAdvised(newRandomGame(3, 'bosque'));
+    expect(final.status).toBe('won');
+    const r = scoreResult(final, 300_000, thresholds(newRandomGame(3, 'bosque')));
+    expect(r).toMatchObject({ mapId: 'seed-3', level: 'bosque' });
+    const again = replay(r.mapId, r.level, r.actionLog);
+    expect(again).toEqual(final);
+    expect(score(again, r.timeMs).total).toBe(r.total);
   });
 });

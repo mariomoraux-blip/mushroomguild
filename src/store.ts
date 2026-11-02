@@ -7,6 +7,7 @@ import {
   check,
   endMonth,
   idleReason,
+  LEVELS,
   member,
   newGame,
   recruit,
@@ -32,8 +33,11 @@ export type Sheet =
 export type Story = { kind: 'intro'; step: number } | { kind: 'mage' } | { kind: 'won' } | { kind: 'lost' };
 export const INTRO_STEPS = 3;
 
-/** Pantallas fuera de la partida (012): portada, "Cómo jugar" (carrusel) y "El gremio". `back` dice a dónde vuelven. */
-export type Screen = { kind: 'title' } | { kind: 'howto'; step: number; back: 'title' | 'game' } | { kind: 'guild'; back: 'title' | 'game' };
+/**
+ * Pantallas fuera de la partida (012): portada, "Elige tu claro" (019), "Cómo jugar" (carrusel) y "El gremio".
+ * `back` dice a dónde vuelven; "Elige tu claro" siempre vuelve a la portada.
+ */
+export type Screen = { kind: 'title' } | { kind: 'level' } | { kind: 'howto'; step: number; back: 'title' | 'game' } | { kind: 'guild'; back: 'title' | 'game' };
 export const HOWTO_STEPS = 5;
 
 export interface Notice {
@@ -76,8 +80,10 @@ export type Action =
   | { type: 'howtoStep'; step: number }
   /** Vuelve de "Cómo jugar" o "El gremio" a donde se abrieron. */
   | { type: 'closeScreen' }
-  /** "Nueva partida" en la portada: cierra la portada y abre la intro. */
+  /** "Nueva partida" en la portada: abre "Elige tu claro" (019). */
   | { type: 'play' }
+  /** Nivel elegido: partida nueva (la crea quien llama), con la intro si es la primera vez en ese nivel. */
+  | { type: 'start'; game: GameState; intro: boolean }
   | { type: 'storyNext' }
   | { type: 'closeStory' }
   /** "Ver final" tras "Ver el claro": la partida terminada vuelve a su carta de final (017). */
@@ -115,19 +121,25 @@ export function adviceText(game: GameState, a: Advice): string {
   }
 }
 
-/** Pista de la bitácora cuando no hay nada seleccionado: el siguiente paso sugerido. */
+/** ¿El nivel de la partida muestra pistas? En Ancestral no hay ★ ni «Pista:» (019). */
+const hintsOn = (game: GameState): boolean => LEVELS[game.level].hints;
+
+/** Pista de la bitácora cuando no hay nada seleccionado: el siguiente paso sugerido (en Ancestral, solo elegir). */
 export function idleHint(game: GameState): Notice {
+  if (!hintsOn(game)) return info(game.status === 'playing' ? es.hints.pickMember : adviceText(game, { kind: 'over' }));
   return info(adviceText(game, advise(game)));
 }
 
 /** Miembro sugerido (★ en el dock), si el consejo es de un miembro. */
 export function suggestedMember(state: AppState): number | null {
+  if (!hintsOn(state.game)) return null;
   const a = advise(state.game);
   return 'memberId' in a ? a.memberId : null;
 }
 
 /** Casilla sugerida (★ en el tablero): solo con el miembro sugerido seleccionado (y su hechizo, si es la maga). */
 export function suggestedTile(state: AppState): Tile | null {
+  if (!hintsOn(state.game)) return null;
   const a = advise(state.game);
   if (!('memberId' in a) || a.memberId !== state.ui.selected) return null;
   if (a.kind === 'spell' && a.spell !== state.ui.spell) return null;
@@ -136,7 +148,7 @@ export function suggestedTile(state: AppState): Tile | null {
 
 function tileHelp(t: Tile): string {
   if (t.kind === 'mother') return t.alive ? es.tileHelp.motherAwake : es.tileHelp.mother;
-  if (t.kind === 'tree') return t.alive ? es.tileHelp.treeAlive : es.tileHelp.tree;
+  if (t.kind === 'tree') return t.alive ? es.tileHelp.treeAlive : t.faded ? es.tileHelp.treeFaded : t.fading ? es.tileHelp.treeFading : es.tileHelp.tree;
   if (t.kind === 'soil') return t.net ? es.tileHelp.soilNet : es.tileHelp.soil;
   return es.tileHelp[t.kind];
 }
@@ -172,7 +184,8 @@ export function clockShouldRun(state: AppState, visible: boolean): boolean {
 }
 
 /** Pantalla a la que se vuelve al cerrar "Cómo jugar" o "El gremio". */
-const backFrom = (screen: Screen | null): Screen | null => (screen && screen.kind !== 'title' && screen.back === 'title' ? { kind: 'title' } : null);
+const backFrom = (screen: Screen | null): Screen | null =>
+  screen && (screen.kind === 'level' || (screen.kind !== 'title' && screen.back === 'title')) ? { kind: 'title' } : null;
 
 /** Carta que abre un cambio del juego: final al ganar o al acabar el invierno; presentación al llegar la maga. */
 function storyFor(prev: GameState, next: GameState): Story | null {
@@ -217,6 +230,8 @@ export function highlighted(state: AppState): Tile[] {
 }
 
 const cleared = (ui: UiState, notice: Notice): UiState => ({ ...ui, selected: null, spell: null, sheet: null, notice });
+/** Interfaz de una partida nueva: sin selección, hojas, cartas ni pantallas (se conservan las fichas vistas). */
+const fresh = (ui: UiState, game: GameState): UiState => ({ selected: null, spell: null, sheet: null, story: null, screen: null, result: null, notice: idleHint(game), seen: ui.seen });
 
 export function reduce(state: AppState, action: Action): AppState {
   const { game, ui } = state;
@@ -289,7 +304,9 @@ export function reduce(state: AppState, action: Action): AppState {
     case 'closeScreen':
       return ui.screen ? { game, ui: { ...ui, sheet: null, screen: backFrom(ui.screen) } } : state;
     case 'play':
-      return { game, ui: { ...ui, sheet: null, screen: null, story: { kind: 'intro', step: 0 } } };
+      return { game, ui: { ...ui, sheet: null, screen: { kind: 'level' } } };
+    case 'start':
+      return { game: action.game, ui: { ...fresh(ui, action.game), story: action.intro ? { kind: 'intro', step: 0 } : null } };
     case 'storyNext': {
       const st = ui.story;
       if (st?.kind !== 'intro' || st.step + 1 >= INTRO_STEPS) return { game, ui: { ...ui, story: null } };
@@ -300,7 +317,7 @@ export function reduce(state: AppState, action: Action): AppState {
     case 'showEnd':
       return game.status === 'playing' || ui.story ? state : { game, ui: { ...cleared(ui, ui.notice), story: { kind: game.status } } };
     case 'restart':
-      return { game: action.game, ui: { selected: null, spell: null, sheet: null, story: null, screen: null, result: null, notice: idleHint(action.game), seen: ui.seen } };
+      return { game: action.game, ui: fresh(ui, action.game) };
     case 'scored':
       return game.status === 'won' ? { game, ui: { ...ui, result: { score: action.score, newRecord: action.newRecord } } } : state;
   }

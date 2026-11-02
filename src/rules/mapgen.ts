@@ -1,8 +1,9 @@
-import { playAdvised } from './autoplay';
-import { H, MAP, MAP_GEN, TREES_FOR_MOTHER, W } from './config';
+import { playAdvised, playExpert } from './autoplay';
+import { H, LEVEL_SALT, LEVELS, MAP, MAP_GEN, TREES_FOR_MOTHER, W } from './config';
+import { LEVEL_SEEDS } from './level-seeds';
 import { mulberry32 } from './rng';
 import { newGame } from './state';
-import type { GameState } from './types';
+import type { GameState, Level } from './types';
 
 type Rng = () => number;
 const int = (rng: Rng, n: number) => Math.floor(rng() * n);
@@ -43,7 +44,18 @@ export function roughMap(rng: Rng): string[] | null {
   place('R', (_x, y) => y > 0 && y < H - 1, MAP_GEN.rocks);
   place('L', () => true, MAP_GEN.logs - 1);
 
-  // Alcance: todo lo que no es roca es transitable para la red (troncos y árboles acaban en ella).
+  const rows = g.map((row) => row.join(''));
+  return reachable(rows) ? rows : null;
+}
+
+/** ¿La red puede llegar desde el Hogar al Árbol Padre y a todos los árboles? Todo lo que no es roca es transitable. */
+export function reachable(map: readonly string[]): boolean {
+  const find = (ch: string) => {
+    const y = map.findIndex((row) => row.includes(ch));
+    return { x: map[y]!.indexOf(ch), y };
+  };
+  const home = find('H');
+  const mother = find('M');
   const seen = new Set<string>([`${home.x},${home.y}`]);
   const queue = [home];
   while (queue.length) {
@@ -51,15 +63,14 @@ export function roughMap(rng: Rng): string[] | null {
     for (const [ddx, ddy] of DIRS) {
       const x = p.x + ddx;
       const y = p.y + ddy;
-      if (x < 0 || y < 0 || x >= W || y >= H || seen.has(`${x},${y}`) || g[y]![x] === 'R') continue;
+      if (x < 0 || y < 0 || x >= W || y >= H || seen.has(`${x},${y}`) || map[y]![x] === 'R') continue;
       seen.add(`${x},${y}`);
       queue.push({ x, y });
     }
   }
-  if (!seen.has(`${mother.x},${mother.y}`)) return null;
-  const trees = g.flatMap((row, y) => row.map((c, x) => (c === 'T' ? `${x},${y}` : null))).filter(Boolean);
-  if (trees.length < TREES_FOR_MOTHER + 2 || trees.some((t) => !seen.has(t!))) return null;
-  return g.map((row) => row.join(''));
+  if (!seen.has(`${mother.x},${mother.y}`)) return false;
+  const trees = map.flatMap((row, y) => [...row].map((c, x) => (c === 'T' ? `${x},${y}` : null))).filter(Boolean);
+  return trees.length >= TREES_FOR_MOTHER + 2 && trees.every((t) => seen.has(t!));
 }
 
 /** ¿El mapa se gana siguiendo las pistas, ni muy pronto ni muy tarde? */
@@ -78,7 +89,64 @@ export function generateMap(seed: number): readonly string[] {
   return MAP;
 }
 
-/** Partida nueva sobre un claro generado con la semilla dada. */
-export function newRandomGame(seed: number): GameState {
-  return newGame(generateMap(seed), `seed-${seed}`);
+/** Claro de Brote de una semilla: el clásico con la semilla 0. */
+const broteMap = (seed: number): readonly string[] => (seed === 0 ? MAP : generateMap(seed));
+
+/**
+ * Intentos de rocas extra de un nivel sobre el claro de Brote (019): cada intento elige `rocks − 6` casillas de
+ * tierra libres (nunca el Hogar, sus vecinas ni las vecinas del Árbol Padre) con `mulberry32(seed ^ LEVEL_SALT)`.
+ * Devuelve el primer intento que `accept` acepta, con su número, o `null`.
+ */
+export function levelAttempt(seed: number, level: Exclude<Level, 'brote'>, accept: (map: readonly string[], i: number) => boolean): { map: readonly string[]; index: number } | null {
+  const base = broteMap(seed);
+  const find = (ch: string) => {
+    const y = base.findIndex((row) => row.includes(ch));
+    return { x: base[y]!.indexOf(ch), y };
+  };
+  const home = find('H');
+  const mother = find('M');
+  const near = (p: { x: number; y: number }, x: number, y: number) => Math.abs(p.x - x) + Math.abs(p.y - y) <= 1;
+  const free: { x: number; y: number }[] = [];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (base[y]![x] === '.' && !near(home, x, y) && !near(mother, x, y)) free.push({ x, y });
+  const rng = mulberry32((seed ^ LEVEL_SALT) >>> 0);
+  for (let i = 0; i < MAP_GEN.levelAttempts; i++) {
+    const pool = [...free];
+    const g = base.map((row) => [...row]);
+    for (let k = 0; k < LEVELS[level].rocks - MAP_GEN.rocks && pool.length; k++) {
+      const p = pool.splice(int(rng, pool.length), 1)[0]!;
+      g[p.y]![p.x] = 'R';
+    }
+    const map = g.map((row) => row.join(''));
+    if (accept(map, i)) return { map, index: i };
+  }
+  return null;
+}
+
+/**
+ * Claro de una semilla en un nivel. En Brote, el de siempre. En Bosque y Ancestral, el de Brote con más rocas,
+ * aceptado si la red llega a todo y el bot experto lo gana: para las semillas de `LEVEL_SEEDS` la aceptación ya
+ * está calculada (con `certify`, que en el teléfono sería lenta); para las demás se juega `playExpert`. Si ningún
+ * intento sirve, el clásico con las rocas del nivel (semilla 0).
+ */
+export function levelMap(seed: number, level: Level): readonly string[] {
+  if (level === 'brote') return broteMap(seed);
+  const known = LEVEL_SEEDS[level].charAt(seed);
+  if (known === '-') return seed === 0 ? MAP : levelMap(0, level);
+  const accept = known
+    ? (_map: readonly string[], i: number) => i === parseInt(known, 36)
+    : (map: readonly string[]) => reachable(map) && playExpert(newGame(map, 'custom', level)).status === 'won';
+  return levelAttempt(seed, level, accept)?.map ?? (seed === 0 ? MAP : levelMap(0, level));
+}
+
+/** Semilla para una partida nueva: en Brote cualquiera; en Bosque y Ancestral, una de la tabla certificada. */
+export function randomSeed(level: Level, now: number): number {
+  if (level === 'brote') return (now % 2147483647) + 1;
+  const table = LEVEL_SEEDS[level];
+  const seeds = [...table].flatMap((c, i) => (i > 0 && c !== '-' ? [i] : []));
+  return seeds[now % seeds.length]!;
+}
+
+/** Partida nueva sobre un claro generado con la semilla dada (la 0 es el clásico). */
+export function newRandomGame(seed: number, level: Level = 'brote'): GameState {
+  return newGame(levelMap(seed, level), seed === 0 ? 'clasico' : `seed-${seed}`, level);
 }

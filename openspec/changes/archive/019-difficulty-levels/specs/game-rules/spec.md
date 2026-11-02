@@ -40,7 +40,7 @@ En las estaciones con escarcha del nivel, tejer SHALL costar 2 nutrientes en vez
 - THEN tejer vuelve a costar 1 nutriente
 
 ### Requirement: Árboles que se apagan
-Al empezar un mes en el que el nivel apaga un árbol, el juego SHALL marcar el árbol gris (ni vivo ni apagado) más lejano de la red: el de mayor distancia en pasos ortogonales desde la red sin atravesar rocas; si hay empate, el de la fila más alta y después el de la columna menor. Si al terminar ese mes el árbol marcado sigue gris, SHALL apagarse. Revivirlo durante ese mes lo salva. Revivir un árbol apagado SHALL costar 5 nutrientes. Si no queda ningún árbol gris sin apagar, no se marca ninguno.
+Al empezar un mes en el que el nivel apaga un árbol, el juego SHALL marcar el árbol gris (ni vivo ni apagado) más lejano de la red: el de mayor distancia en pasos ortogonales desde la red sin atravesar rocas; si hay empate, el de la fila más alta y después el de la columna menor. Si al terminar ese mes el árbol marcado sigue gris, SHALL apagarse. Revivirlo durante ese mes lo salva. Revivir un árbol apagado SHALL costar 7 nutrientes. Si no queda ningún árbol gris sin apagar, no se marca ninguno.
 
 #### Scenario: Se marca el más lejano
 - WHEN empieza el mes 6 en Bosque
@@ -48,7 +48,7 @@ Al empezar un mes en el que el nivel apaga un árbol, el juego SHALL marcar el �
 
 #### Scenario: Se apaga
 - WHEN termina el mes 6 en Bosque y el árbol marcado sigue gris
-- THEN el árbol queda apagado y revivirlo cuesta 5 nutrientes
+- THEN el árbol queda apagado y revivirlo cuesta 7 nutrientes
 
 #### Scenario: Se salva
 - WHEN la Amanita revive el árbol marcado durante el mes 6
@@ -61,7 +61,7 @@ Al empezar un mes en el que el nivel apaga un árbol, el juego SHALL marcar el �
 ## MODIFIED Requirements
 
 ### Requirement: Tablero inicial
-Cada partida nueva del juego SHALL generar un tablero vertical de 5 columnas por 8 filas con `newRandomGame(seed, level)`: el Hogar en la fila inferior y el Árbol Padre en la superior (columnas 2 a 4), un tronco junto al Hogar, 7 árboles grises a 2 o más casillas del Hogar, 5 troncos y las rocas del nivel (6 en Brote) en las filas intermedias. El Hogar es la única casilla con micelio. La semilla SHALL fijar el claro de Brote; Bosque y Ancestral le agregan rocas sobre casillas de tierra libres (nunca el Hogar, sus vecinas ni las vecinas del Árbol Padre), también según la semilla. En Brote, un mapa solo se acepta si la red puede llegar al Árbol Padre y a todos los árboles y si la política de las pistas lo gana entre el mes 8 y el 11; en Bosque y Ancestral, si la red puede llegar al Árbol Padre y a todos los árboles y si el bot experto lo gana con las reglas del nivel. Si no aparece ninguno, se usa el mapa clásico del Capítulo 1 (con las rocas del nivel). La misma semilla y el mismo nivel SHALL producir el mismo mapa.
+Cada partida nueva del juego SHALL generar un tablero vertical de 5 columnas por 8 filas con `newRandomGame(seed, level)`: el Hogar en la fila inferior y el Árbol Padre en la superior (columnas 2 a 4), un tronco junto al Hogar, 7 árboles grises a 2 o más casillas del Hogar, 5 troncos y las rocas del nivel (6 en Brote) en las filas intermedias. El Hogar es la única casilla con micelio. La semilla SHALL fijar el claro de Brote; Bosque y Ancestral le agregan rocas sobre casillas de tierra libres (nunca el Hogar, sus vecinas ni las vecinas del Árbol Padre), también según la semilla. En Brote, un mapa solo se acepta si la red puede llegar al Árbol Padre y a todos los árboles y si la política de las pistas lo gana entre el mes 8 y el 11; en Bosque y Ancestral, si la red puede llegar al Árbol Padre y a todos los árboles y si el bot experto (con su búsqueda) lo gana con las reglas del nivel; esa aceptación se precalcula para las semillas 0 a 1000 y las partidas nuevas de esos niveles eligen entre las aceptadas. Si no aparece ninguno, se usa el mapa clásico del Capítulo 1 (con las rocas del nivel). La misma semilla y el mismo nivel SHALL producir el mismo mapa.
 
 #### Scenario: Partida nueva
 - WHEN se inicia una partida
@@ -98,21 +98,21 @@ El Lactarius indigo SHALL convertir una tierra adyacente a la red en parte de la
 - THEN la casilla pasa a la red y los nutrientes bajan en 2
 
 ### Requirement: Revivir árboles (Amanita muscaria)
-La Amanita muscaria SHALL revivir un árbol gris adyacente a la red por 3 nutrientes, o por 5 si el árbol está apagado; el árbol revivido SHALL entrar a la red.
+La Amanita muscaria SHALL revivir un árbol gris adyacente a la red por 3 nutrientes, o por 7 si el árbol está apagado; el árbol revivido SHALL entrar a la red.
 
 #### Scenario: Revivir extiende la red
 - WHEN la Amanita muscaria revive un árbol con 3 o más nutrientes
 - THEN el árbol queda vivo y en la red, y los nutrientes bajan en 3
 
 #### Scenario: Revivir un árbol apagado
-- WHEN la Amanita muscaria revive un árbol apagado con 5 o más nutrientes
-- THEN el árbol queda vivo y en la red, y los nutrientes bajan en 5
+- WHEN la Amanita muscaria revive un árbol apagado con 7 o más nutrientes
+- THEN el árbol queda vivo y en la red, y los nutrientes bajan en 7
 
 ### Requirement: Dificultad medida
-El balance SHALL verificarse por simulación en 100 mapas generados por nivel, con semillas fijas:
+El balance SHALL verificarse por simulación en 100 mapas generados por nivel, con semillas fijas (en Bosque y Ancestral, las certificadas de la tabla precalculada):
 - **Brote:** la política de las pistas gana el 100 % de los mapas aceptados con un mes medio entre 8 y 10, y un bot que juega al azar gana entre el 5 % y el 30 %.
 - **Bosque:** el bot experto gana el 100 % de los mapas aceptados, la política de las pistas gana entre el 75 % y el 90 %, y el bot al azar gana como máximo el 10 %.
-- **Ancestral:** el bot experto gana el 100 % de los mapas aceptados, la política de las pistas gana entre el 40 % y el 60 %, y el bot al azar gana como máximo el 3 %.
+- **Ancestral:** el bot experto gana el 100 % de los mapas aceptados, la política de las pistas gana entre el 40 % y el 60 %, y el bot al azar gana como máximo el 5 %.
 
 Generar un claro de Bosque o Ancestral SHALL tardar menos de 300 ms en un teléfono de gama media.
 

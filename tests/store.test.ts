@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
 import { idleReason, newGame, tile } from '../src/rules';
-import { createStore, highlighted, initialState, reduce, type AppState } from '../src/store';
+import { createStore, highlighted, initialState, reduce, suggestedMember, suggestedTile, type AppState } from '../src/store';
 import type { GameState, SpeciesId } from '../src/rules';
 
 // Fichas ya vistas: estos escenarios (002) no prueban la ficha al seleccionar (005).
@@ -161,5 +161,38 @@ describe('store: reclutar, terminar el mes y fin de partida', () => {
     const s = run(init(setup({ used: [ANIL] })), { type: 'select', id: ANIL });
     expect(s.ui.selected).toBeNull();
     expect(s.ui.notice).toEqual({ text: es.reasons.tired('Añil'), tone: 'warn' });
+  });
+});
+
+describe('Requirement: Pista y camino sugerido · Ancestral sin pistas (019)', () => {
+  const ancestral = (): AppState => initialState({ ...newGame(), level: 'ancestral' });
+
+  it('Scenario: Ancestral sin pistas — sin ★ en el dock ni en el tablero, y la bitácora no dice «Pista:»', () => {
+    const s = ancestral();
+    expect(suggestedMember(s)).toBeNull();
+    expect(s.ui.notice.text).not.toMatch(/Pista/);
+    const picked = reduce(s, { type: 'select', id: BRUNO });
+    expect(suggestedTile(picked)).toBeNull();
+    expect(picked.ui.notice.text).not.toMatch(/★/);
+    expect(highlighted(picked).length).toBeGreaterThan(0);
+  });
+
+  it('en Bosque las pistas siguen', () => {
+    const s = initialState({ ...newGame(), level: 'bosque' });
+    expect(suggestedMember(s)).toBe(BRUNO);
+    expect(s.ui.notice.text).toMatch(/^Pista:/);
+  });
+
+  it('Scenario: Aviso del árbol marcado — al empezar el mes 6 en Bosque la bitácora lo dice, y tocarlo explica su estado', () => {
+    let s = initialState({ ...setup({ month: 5 }), level: 'bosque' });
+    s = reduce(s, { type: 'endMonth' });
+    expect(s.ui.notice.text).toContain(es.log.treeFading);
+    const marked = s.game.tiles.find((t) => t.fading)!;
+    expect(reduce(s, { type: 'tapTile', x: marked.x, y: marked.y }).ui.notice.text).toBe(es.tileHelp.treeFading);
+  });
+
+  it('Scenario: Aviso de escarcha — al empezar el mes 7 en Ancestral (sin pistas) la bitácora avisa', () => {
+    const s = reduce(initialState({ ...setup({ month: 6 }), level: 'ancestral' }), { type: 'endMonth' });
+    expect(s.ui.notice.text).toContain('Llegó la escarcha: tejer cuesta 2 nutrientes.');
   });
 });

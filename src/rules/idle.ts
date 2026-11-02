@@ -1,6 +1,6 @@
 import { validTargets } from './actions';
 import { COST } from './config';
-import { magicSpent, member, workerAt } from './state';
+import { magicSpent, member, touchesNet, weaveCost, workerAt } from './state';
 import type { GameState } from './types';
 
 /** Motivo por el que un miembro no tiene ninguna casilla válida (clave; el texto vive en es.ts). */
@@ -18,9 +18,10 @@ export function idleReason(s: GameState, id: number): IdleReason | null {
     case 'champi':
       return 'noLogs';
     case 'lactarius':
-      return s.nutrients < COST.weave ? 'noNutrients' : 'noSoil';
+      return s.nutrients < weaveCost(s) ? 'noNutrients' : 'noSoil';
     case 'amanita':
-      return s.nutrients < COST.revive ? 'noNutrients' : 'noGreyTrees';
+      // Un árbol gris junto a la red que no alcanza (p. ej., apagado, 019) es falta de nutrientes.
+      return s.nutrients < COST.revive || s.tiles.some((t) => t.kind === 'tree' && !t.alive && touchesNet(s, t.x, t.y)) ? 'noNutrients' : 'noGreyTrees';
     case 'gliophorus':
       return s.members.some((w) => workerAt(s, w.at?.x ?? -1, w.at?.y ?? -1)) ? 'noSpores' : 'noWorkers';
     case 'mago':
