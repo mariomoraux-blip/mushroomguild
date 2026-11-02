@@ -1,6 +1,6 @@
 import { es } from '../copy/es';
 import { COST, DAYS, MAX_GUILD, magicSpent, recruitableCount, season, seasonIndex, DAYS_PER_SEASON, type Member } from '../rules';
-import type { AppState, Store } from '../store';
+import { suggestedMember, type AppState, type Store } from '../store';
 import { el, hat, setText } from './dom';
 
 /** Estado de la tarjeta: lista, descansa o (Maese Bruma) cuándo vuelve su magia. */
@@ -40,6 +40,7 @@ export function mountDock(root: HTMLElement, store: Store) {
   return (state: AppState) => {
     const g = state.game;
     const playing = g.status === 'playing';
+    const suggested = suggestedMember(state);
     // Orden estable: orden de llegada al gremio. Las tarjetas existentes se reutilizan (no se pierde el foco).
     g.members.forEach((m, i) => {
       let card = byId.get(m.id);
@@ -50,9 +51,10 @@ export function mountDock(root: HTMLElement, store: Store) {
           'button',
           { class: `card card--${m.species}`, type: 'button', 'data-id': m.id },
           hat(m.species),
+          el('span', { class: 'card__star', 'aria-hidden': 'true' }, '★'),
           el('span', { class: 'card__text' },
-            el('span', { class: 'card__name' }, m.name),
-            el('span', { class: 'card__meta' }, sp.short),
+            el('span', { class: 'card__name' }, m.name, ' ', el('em', { class: 'card__species' }, sp.short)),
+            el('span', { class: 'card__meta' }, sp.role),
             statusNode),
         );
         const item = el('div', { role: 'listitem', class: 'dock__item' }, button);
@@ -60,11 +62,13 @@ export function mountDock(root: HTMLElement, store: Store) {
         byId.set(m.id, card);
       }
       if (cards.children[i] !== card.item) cards.insertBefore(card.item, cards.children[i] ?? null);
-      // Tercera línea: el rol si está lista; si no, por qué descansa (o cuándo vuelve la magia).
+      // Tercera línea: la acción y su costo si está lista; si no, por qué descansa (o cuándo vuelve la magia).
       const st = status(state, m);
       const sp = es.species[m.species];
-      setText(card.status, st.ready ? sp.role : st.text);
-      card.button.setAttribute('aria-label', `${m.name}, ${sp.name}, ${sp.role}. ${st.text}.`);
+      const star = suggested === m.id;
+      setText(card.status, st.ready ? sp.action : st.text);
+      card.button.classList.toggle('is-suggested', star);
+      card.button.setAttribute('aria-label', `${m.name}, ${sp.name}, ${sp.role}: ${sp.action}. ${st.text}.${star ? ` ★ ${es.advice.star}.` : ''}`);
       card.button.setAttribute('aria-pressed', String(state.ui.selected === m.id));
       card.button.classList.toggle('is-used', !st.ready);
       card.button.disabled = !playing;

@@ -34,12 +34,12 @@ export function setup(o: Setup = {}): GameState {
     t.net = true;
   });
   o.uses?.forEach((p) => (at(p).uses = p.n));
-  o.used?.forEach((id) => (s.members.find((m) => m.id === id)!.used = true));
   o.extraMembers?.forEach((species) => {
     const id = s.nextId++;
     s.members.push({ id, species, name: `extra-${id}`, used: false, at: null });
   });
   if (o.mage) addMage(s);
+  o.used?.forEach((id) => (s.members.find((m) => m.id === id)!.used = true));
   if (o.lastSpellSeason !== undefined) s.lastSpellSeason = o.lastSpellSeason;
   return s;
 }

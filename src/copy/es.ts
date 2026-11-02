@@ -1,4 +1,4 @@
-import { COST, GAIN } from '../rules/config';
+import { COST, GAIN, LOG_USES, TREES_FOR_MOTHER } from '../rules/config';
 import type { IdleReason } from '../rules/idle';
 import type { RecruitableSpecies, SpeciesId } from '../rules/types';
 
@@ -13,28 +13,33 @@ export const es = {
       name: 'Champiñón', short: 'Champiñón', scientific: 'Agaricus bisporus', role: 'Descompositor',
       verb: `Descompone un tronco vecino a la red (+${plural(GAIN.log, 'nutriente')}).`,
       quip: 'Comestible: sí, y lo sabe. Por eso trabaja rápido.',
+      action: `Descompone · +${GAIN.log} nutrientes`,
     },
     lactarius: {
       name: 'Lactarius indigo', short: 'Lactarius', scientific: 'Lactarius indigo', role: 'Tejedora',
       verb: `Teje micelio en tierra vecina a la red (${plural(COST.weave, 'nutriente')}).`,
       quip: 'Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.',
+      action: `Teje · −${plural(COST.weave, 'nutriente')}`,
     },
     amanita: {
       name: 'Amanita muscaria', short: 'Amanita', scientific: 'Amanita muscaria', role: 'Sanadora',
       verb: `Revive un árbol gris vecino a la red (${plural(COST.revive, 'nutriente')}).`,
       quip: 'Comestible: no. Bonita: muchísimo. Úsese solo para curar árboles.',
+      action: `Revive · −${plural(COST.revive, 'nutriente')}`,
     },
     gliophorus: {
       name: 'Gliophorus psittacinus', short: 'Gliophorus', scientific: 'Gliophorus psittacinus', role: 'Mensajera',
       verb: `Pasa la voz desde un árbol vivo (−${plural(COST.message, 'espora')}, +${plural(GAIN.message, 'nutriente')}).`,
       quip: 'Viscosa como un caramelo y habladora como un loro. Cambia de color con los días.',
+      action: `Pasa la voz · −${plural(COST.message, 'espora')}`,
     },
     mago: {
       name: 'Conocybe arcana', short: 'Conocybe', scientific: 'Conocybe arcana', role: 'Mago',
       verb: 'Lanza un hechizo por estación: Brote arcano o Lluvia de esporas.',
       quip: 'No aparece en ningún libro. Él dice que fueron los libros los que no lo encontraron.',
+      action: '1 hechizo por estación',
     },
-  } satisfies Record<SpeciesId, { name: string; short: string; scientific: string; role: string; verb: string; quip: string }>,
+  } satisfies Record<SpeciesId, { name: string; short: string; scientific: string; role: string; verb: string; quip: string; action: string }>,
 
   /** Nombres de los miembros, en orden de llegada. */
   memberNames: {
@@ -95,6 +100,53 @@ export const es = {
   } satisfies Record<IdleReason, string>,
   idleLine: (name: string, reason: string) => `${name}: ${reason}`,
 
+  /** Pistas del siguiente paso (`advise`). */
+  advice: {
+    awaken: (n: string) => `Pista: ${n} puede despertar al Árbol Madre. ¡Es la meta!`,
+    revive: (n: string) => `Pista: ${n} puede revivir un árbol gris. Cada árbol vivo da esporas y nutrientes.`,
+    recruit: (spores: number, species: string) => `Pista: tienes ${plural(spores, 'espora')}. Recluta un ${species} en «+ Reclutar» o tocando las esporas.`,
+    decompose: (n: string) => `Pista: ${n} puede descomponer un tronco junto a la red (+${GAIN.log} nutrientes).`,
+    weaveTree: (n: string) => `Pista: ${n} puede tejer la red hacia un árbol gris (★).`,
+    weaveMother: (n: string) => `Pista: ${n} puede tejer la red hacia el Árbol Madre (★).`,
+    message: (n: string) => `Pista: ${n} puede pasar la voz: ${plural(COST.message, 'espora')} por ${plural(GAIN.message, 'nutriente')}.`,
+    spell: (n: string, spell: string) => `Pista: ${n} puede lanzar ${spell}.`,
+    endDay: `Nadie más puede trabajar hoy. Pulsa «Fin del día»: cada árbol vivo dará ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}.`,
+    pickTile: (n: string) => `${n}: toca una casilla resaltada. La ★ acerca la red a tu meta.`,
+    star: 'sugerido',
+  },
+
+  /** Qué es cada casilla (al tocarla sin miembro elegido). */
+  tileHelp: {
+    home: 'Hogar del gremio: aquí empieza la red de micelio.',
+    mother: `Árbol Madre: la meta. Llévale la red y despiértalo con la Amanita (${TREES_FOR_MOTHER} árboles vivos y ${COST.mother} nutrientes).`,
+    motherAwake: 'Árbol Madre: despierto. ¡El bosque respira!',
+    soil: 'Tierra: la Lactarius teje micelio aquí para extender la red.',
+    soilNet: 'Tierra tejida: ya es parte de la red. Se trabaja en las casillas vecinas.',
+    log: `Tronco caído: el Champiñón lo descompone (+${GAIN.log} nutrientes, ${LOG_USES} veces).`,
+    tree: `Árbol gris: la Amanita lo revive si toca la red (${plural(COST.revive, 'nutriente')}).`,
+    treeAlive: `Árbol vivo: cada amanecer da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}.`,
+    rock: 'Roca: bloquea la red. Maese Bruma puede convertirla en tierra.',
+  },
+
+  /** Libreta de campo (ayuda). */
+  help: {
+    button: 'Ayuda: Libreta de campo',
+    title: 'Libreta de campo',
+    goalTitle: 'La meta',
+    goal: `Despierta al Árbol Madre (arriba) antes de que acabe el invierno. Necesitas que la red lo toque, ${TREES_FOR_MOTHER} árboles revividos y ${COST.mother} nutrientes.`,
+    howTitle: 'Cómo se juega',
+    how: [
+      'Toca un hongo del gremio: se resaltan las casillas donde puede trabajar.',
+      'Toca una casilla resaltada. Solo se trabaja junto a la red de micelio.',
+      'Cada hongo trabaja una vez por día. Después pulsa «Fin del día».',
+      `Al amanecer, cada árbol vivo da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. Con ${COST.recruit} esporas reclutas otro hongo.`,
+    ],
+    guildTitle: 'El gremio',
+    tilesTitle: 'Las casillas',
+    tip: 'Si no sabes qué hacer, sigue la ★: marca el hongo sugerido y la casilla que acerca la red a tu meta.',
+    start: '¡A jugar!',
+  },
+
   /** Pistas de la bitácora (del PoC). */
   hints: {
     pickMember: 'Elige a un miembro del gremio.',
@@ -111,6 +163,8 @@ export const es = {
     of: (n: number) => `/${n}`,
     nutrients: 'nutrientes',
     spores: 'esporas',
+    sporesButton: (n: number) => `Esporas: ${n}. Abrir reclutar.`,
+    recruitHint: '+ reclutar',
     trees: 'árboles vivos',
   },
 
@@ -149,6 +203,7 @@ export const es = {
     rock: 'Roca',
     inNet: 'en la red',
     valid: 'disponible',
+    goal: 'la meta',
     position: (x: number, y: number) => `columna ${x + 1}, fila ${y + 1}`,
     boardLabel: 'Tablero del claro',
   },

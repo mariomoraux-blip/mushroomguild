@@ -47,7 +47,9 @@ export function mountSheet(root: HTMLElement, store: Store) {
         'li',
         { class: 'row' },
         hat(sp),
-        el('span', { class: 'row__text' }, el('strong', {}, info.name), el('span', {}, ` · ${info.role}`)),
+        el('span', { class: 'row__text' },
+          el('strong', {}, info.name), el('span', {}, ` · ${info.role}`),
+          el('span', { class: 'row__verb' }, info.verb)),
         el('button', { class: 'btn btn--icon', type: 'button', 'data-action': 'info', 'data-species': sp, 'aria-label': es.sheet.info(info.name) }, 'i'),
         action,
       );
@@ -65,6 +67,30 @@ export function mountSheet(root: HTMLElement, store: Store) {
         el('p', {}, el('em', {}, info.scientific), ` · ${info.role}`),
         el('p', {}, info.verb),
         el('p', { class: 'creature__quip' }, info.quip)),
+    );
+  }
+
+  function helpSheet() {
+    const h = es.help;
+    const tiles = [es.tileHelp.mother, es.tileHelp.home, es.tileHelp.soil, es.tileHelp.log, es.tileHelp.tree, es.tileHelp.treeAlive, es.tileHelp.rock];
+    return panel(
+      h.title,
+      el('div', { class: 'help' },
+        el('h3', {}, h.goalTitle),
+        el('p', {}, h.goal),
+        el('h3', {}, h.howTitle),
+        el('ol', {}, ...h.how.map((step) => el('li', {}, step))),
+        el('h3', {}, h.guildTitle),
+        el('ul', { class: 'rows' },
+          ...SPECIES.map((sp) =>
+            el('li', { class: 'row' }, hat(sp),
+              el('span', { class: 'row__text' },
+                el('strong', {}, sp === 'mago' ? es.mageName : es.species[sp].short), el('span', {}, ` · ${es.species[sp].role}`),
+                el('span', { class: 'row__verb' }, es.species[sp].verb))))),
+        el('h3', {}, h.tilesTitle),
+        el('ul', { class: 'help__tiles' }, ...tiles.map((t) => el('li', {}, t))),
+        el('p', { class: 'help__tip' }, h.tip),
+        el('button', { class: 'btn btn--wide', type: 'button', 'data-action': 'close' }, h.start)),
     );
   }
 
@@ -93,7 +119,13 @@ export function mountSheet(root: HTMLElement, store: Store) {
       return;
     }
     if (!wasOpen) opener = document.activeElement as HTMLElement | null;
-    root.replaceChildren(sheet.kind === 'recruit' ? recruitSheet(state) : sheet.kind === 'creature' ? creatureSheet(sheet.species) : spellSheet(state));
+    const views = {
+      recruit: () => recruitSheet(state),
+      creature: () => creatureSheet((sheet as { species: SpeciesId }).species),
+      spell: () => spellSheet(state),
+      help: () => helpSheet(),
+    };
+    root.replaceChildren(views[sheet.kind]());
     root.hidden = false;
     root.querySelector<HTMLElement>('.sheet__panel button:not([disabled])')?.focus();
   };

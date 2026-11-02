@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import { neighbors, W, type Tile } from '../rules';
-import { highlighted, type AppState, type Store } from '../store';
+import { highlighted, suggestedTile, type AppState, type Store } from '../store';
 import { hex, renderResolution } from '../theme';
 
 /**
@@ -43,8 +43,12 @@ export class GameScene extends Phaser.Scene {
     g.lineStyle(Math.max(1, T * 0.02), hex('ink'), 0.18);
     for (const t of game.tiles) g.strokeRect(t.x * T, t.y * T, T, T);
 
-    // Red de micelio: tinte en las casillas de la red y líneas entre vecinas.
-    for (const t of game.tiles) if (t.net) g.fillStyle(hex('mycelium'), 0.2).fillRect(t.x * T, t.y * T, T, T);
+    // Red de micelio: tinte y contorno en las casillas de la red, y líneas entre vecinas.
+    for (const t of game.tiles) {
+      if (!t.net) continue;
+      g.fillStyle(hex('mycelium'), 0.25).fillRect(t.x * T, t.y * T, T, T);
+      g.lineStyle(T * 0.04, hex('mycelium'), 0.9).strokeRect(t.x * T + T * 0.02, t.y * T + T * 0.02, T * 0.96, T * 0.96);
+    }
     g.lineStyle(T * 0.07, hex('mycelium'), 0.9);
     for (const t of game.tiles) {
       if (!t.net) continue;
@@ -100,6 +104,13 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
+    // Meta: aro alrededor del Árbol Madre.
+    const mother = game.tiles.find((t) => t.kind === 'mother');
+    if (mother) {
+      const { cx, cy } = center(mother);
+      g.lineStyle(T * 0.05, hex('accent'), 1).strokeCircle(cx, cy - T * 0.06, T * 0.47);
+    }
+
     // Casillas válidas del miembro seleccionado.
     const inset = T * 0.06;
     for (const t of game.tiles) {
@@ -109,6 +120,20 @@ export class GameScene extends Phaser.Scene {
       const s = T - 2 * inset;
       g.fillStyle(hex('accent'), 0.28).fillRoundedRect(x, y, s, s, T * 0.12);
       g.lineStyle(T * 0.06, hex('accent'), 1).strokeRoundedRect(x, y, s, s, T * 0.12);
+    }
+
+    // ★ en la casilla sugerida.
+    const star = suggestedTile(state);
+    if (star && valid.has(`${star.x},${star.y}`)) {
+      const { cx, cy } = center(star);
+      const pts: Phaser.Math.Vector2[] = [];
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 ? T * 0.1 : T * 0.24;
+        const a = -Math.PI / 2 + (i * Math.PI) / 5;
+        pts.push(new Phaser.Math.Vector2(cx + r * Math.cos(a), cy + r * Math.sin(a)));
+      }
+      g.fillStyle(hex('accent'), 1).fillPoints(pts, true);
+      g.lineStyle(T * 0.03, hex('ink'), 1).strokePoints(pts, true);
     }
   }
 }

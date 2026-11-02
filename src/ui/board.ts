@@ -1,7 +1,7 @@
 import { es } from '../copy/es';
 import { tileToScreen } from '../layout';
 import { H, W, type Tile } from '../rules';
-import { highlighted, type AppState, type Store } from '../store';
+import { highlighted, suggestedTile, type AppState, type Store } from '../store';
 import { el } from './dom';
 
 function tileName(t: Tile): string {
@@ -44,12 +44,15 @@ export function mountBoardOverlay(root: HTMLElement, store: Store) {
 
   const render = (state: AppState) => {
     const valid = new Set(highlighted(state).map((t) => `${t.x},${t.y}`));
+    const star = suggestedTile(state);
     state.game.tiles.forEach((t, i) => {
       const b = buttons[i]!;
       const ok = valid.has(`${t.x},${t.y}`);
       const parts = [tileName(t), es.tiles.position(t.x, t.y)];
+      if (t.kind === 'mother') parts.push(es.tiles.goal);
       if (t.net && t.kind !== 'home') parts.push(es.tiles.inNet);
       if (ok) parts.push(es.tiles.valid);
+      if (ok && star && star.x === t.x && star.y === t.y) parts.push(`★ ${es.advice.star}`);
       b.setAttribute('aria-label', parts.join(', '));
       b.dataset.valid = String(ok);
       b.tabIndex = ok ? 0 : -1;
