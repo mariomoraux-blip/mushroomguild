@@ -2,17 +2,19 @@ import * as Phaser from 'phaser';
 import { diffEffects } from '../effects';
 import { H, seasonIndex, W } from '../rules';
 import { BoardFx } from './fx';
-import { paintBoard, progressSaturation } from './paint';
+import { paintBoard, paintMyceliumGlow, progressSaturation } from './paint';
 import { highlighted, suggestedTile, type AppState, type Store } from '../store';
-import { BOARD_HEADROOM, boardArtKeys, boardArtUrl, FATHER_SCALE, fatherKey, hex, portraitKey, renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteUrl, type ColorToken } from '../theme';
+import { BOARD_HEADROOM, boardArtKeys, boardArtUrl, FATHER_SCALE, fatherKey, hex, LIGHT_TRANSITION_MS, MYCELIUM_GLOW, portraitKey, renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteUrl, type ColorToken } from '../theme';
 
 /** Color de la silueta de respaldo si falta el retrato de una especie. */
 const SILHOUETTE: Readonly<Record<string, ColorToken>> = { champi: 'wood', lactarius: 'indigo', amanita: 'berry', gliophorus: 'leaf', mago: 'peach' };
 const BOARD_KEY = 'claro';
+const GLOW_KEY = 'micelio';
 
 /**
  * Dibuja el claro 5×8 (pintado en Canvas2D por `paint.ts` con las piezas pintadas por estación),
  * el Árbol Padre y a los miembros que trabajaron este mes (su retrato sobre la casilla, que tapa el objeto de abajo).
+ * Entre el claro y lo demás va la luz de la red (016): una capa aditiva cuya intensidad sigue a la estación.
  * Solo lee el estado del store; nunca lo cambia. La entrada la recibe la capa DOM de `ui/board.ts`.
  */
 export class GameScene extends Phaser.Scene {
@@ -22,6 +24,13 @@ export class GameScene extends Phaser.Scene {
   private silhouettes = new Map<number, Phaser.GameObjects.Graphics>();
   private fx: BoardFx | null = null;
   private father: Phaser.GameObjects.Image | null = null;
+  private glowTex: Phaser.Textures.CanvasTexture | null = null;
+  private glowImage: Phaser.GameObjects.Image | null = null;
+  /** Red y tamaño de casilla con que se pintó la luz (se repinta solo si cambian). */
+  private glowPainted = '';
+  private glowTarget: number | null = null;
+  private glowTween: Phaser.Tweens.Tween | null = null;
+  private readonly reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   private tile = 0;
   private created = false;
 
@@ -87,9 +96,44 @@ export class GameScene extends Phaser.Scene {
     });
     tex.refresh();
     this.boardImage?.setTexture(BOARD_KEY).setDisplaySize(T * W, T * H);
+    this.drawGlow(state, T);
     this.drawFather(state, T);
     this.drawWorkers(state, T);
     this.fx?.update(state.game, T);
+  }
+
+  /** Luz de la red: se repinta si cambia la red o la casilla; su alfa va a la intensidad de la estación. */
+  private drawGlow(state: AppState, T: number): void {
+    const w = T * W;
+    const h = T * H;
+    if (!this.glowTex) {
+      this.glowTex = this.textures.createCanvas(GLOW_KEY, w, h);
+      if (!this.glowTex) return;
+      // Encima del claro (0) y debajo de la animación de tejer (1), el Árbol Padre (4) y los retratos (5).
+      this.glowImage = this.add.image(0, 0, GLOW_KEY).setOrigin(0, 0).setDepth(0.5).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0);
+    } else if (this.glowTex.width !== w || this.glowTex.height !== h) {
+      this.glowTex.setSize(w, h);
+    }
+    const net = state.game.tiles.filter((t) => t.net).map((t) => `${t.x},${t.y}`).join(' ');
+    const painted = `${T}|${net}`;
+    if (painted !== this.glowPainted) {
+      this.glowPainted = painted;
+      paintMyceliumGlow(this.glowTex.getContext(), T, state.game);
+      this.glowTex.refresh();
+      this.glowImage?.setTexture(GLOW_KEY).setDisplaySize(w, h);
+    }
+    const target = MYCELIUM_GLOW[seasonIndex(state.game.month)] ?? MYCELIUM_GLOW[0];
+    if (target === this.glowTarget || !this.glowImage) return;
+    const first = this.glowTarget === null;
+    this.glowTarget = target;
+    this.glowTween?.remove();
+    this.glowTween = null;
+    // Al cargar o con movimiento reducido, de inmediato; al pasar de estación, en 600 ms.
+    if (first || this.reduceMotion.matches) {
+      this.glowImage.setAlpha(target);
+      return;
+    }
+    this.glowTween = this.tweens.add({ targets: this.glowImage, alpha: target, duration: LIGHT_TRANSITION_MS, ease: 'Sine.easeInOut' });
   }
 
   /** Árbol Padre: dormido o despierto, apoyado en el borde inferior de su casilla y sobresaliendo hacia arriba. */

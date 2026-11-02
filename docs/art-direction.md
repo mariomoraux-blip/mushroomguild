@@ -143,6 +143,8 @@ Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña y co
 | Invierno | 10–12 | Anochecer | Azul frío, nieve ligera | Brilla y alumbra el claro |
 
 La saturación del progreso (003, hecho) va de apagado (40 % de color) a color pleno según los árboles revividos; solo afecta al claro pintado.
+
+**Luz de la red (016, hecho):** la columna Micelio se cumple con una capa aditiva propia, encima del claro y debajo del Árbol Padre y los retratos, que no recibe la saturación. Intensidad 0,2 / 0,4 / 0,65 / 1,0 (`theme.ts` › `MYCELIUM_GLOW`), con 600 ms de transición entre estaciones. Sobre árboles, troncos y la casa la luz los rodea sin taparlos. El fondo vivo no se oscurece en invierno (pregunta abierta del 016).
 - Íconos de estación: `ui/icons/season-spring` (flor rosa), `-verano` (flor amarilla), `-otono` (hoja naranja), `-invierno` (copo). Van en la pastilla del mes.
 
 ## Movimiento (004)
@@ -159,6 +161,7 @@ La saturación del progreso (003, hecho) va de apagado (40 % de color) a color p
 - **Sin texto horneado** (salvo el logo).
 - **Presupuesto:** `public/assets/` ≤ **4 MB** (decisión del 2 de noviembre; antes 2 MB). Hoy hay 2.49 MB. El JavaScript del juego no cuenta en este límite. Los fondos y piezas de portada, intro y victoria se cargan de forma diferida, cuando se muestra esa pantalla; la primera carga solo trae lo del tablero, los personajes y el HUD.
 - **Estaciones (010):** variantes pintadas por estación, sin gradación de color (descartada en el 003).
+- **Luz de la red (016):** capa aditiva del micelio que crece con la estación; en invierno es lo más brillante del tablero.
 
 ## Organización de assets
 Lo que se publica vive en `public/assets/` (WebP). La fuente (Blender, renders a tamaño completo, hojas originales) vive en `assets/`; las hojas pintadas están en `assets/ui/source/`. Nombres en inglés, minúscula y guiones, como el código.

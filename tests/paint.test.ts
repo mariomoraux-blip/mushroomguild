@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { act, newGame } from '../src/rules';
-import { groundKey, objectKey, paintBoard } from '../src/scenes/paint';
+import { act, cloneState, newGame } from '../src/rules';
+import { groundKey, objectKey, paintBoard, paintMyceliumGlow } from '../src/scenes/paint';
+import { MYCELIUM_GLOW } from '../src/theme';
 import { BRUNO } from './helpers';
 
 /** Contexto 2D de mentira: acepta cualquier llamada y devuelve gradientes vacíos. */
@@ -95,5 +96,21 @@ describe('Requirement: Tablero pintado por estación', () => {
   it('con arte, un objeto bajo un hongo sigue sin pintarse', () => {
     const worked = act(newGame(), BRUNO, 1, 7).state;
     expect(paintArt(worked).find((p) => p.x === 1 && p.y === 7)?.object).toBe('none');
+  });
+});
+
+describe('Requirement: La red alumbra el invierno', () => {
+  it('la luz de la red crece con las estaciones y el invierno es el máximo', () => {
+    for (let i = 1; i < MYCELIUM_GLOW.length; i++) expect(MYCELIUM_GLOW[i]!).toBeGreaterThan(MYCELIUM_GLOW[i - 1]!);
+    expect(MYCELIUM_GLOW).toEqual([0.2, 0.4, 0.65, 1]);
+  });
+
+  it('solo alumbra las casillas de la red', () => {
+    const start = newGame();
+    const home = start.tiles.find((t) => t.kind === 'home')!;
+    expect(paintMyceliumGlow(fakeCtx(), 64, start)).toEqual([{ x: home.x, y: home.y }]);
+    const s = cloneState(start);
+    s.tiles.find((t) => t.x === 2 && t.y === 6)!.net = true;
+    expect(paintMyceliumGlow(fakeCtx(), 64, s)).toEqual([{ x: 2, y: 6 }, { x: home.x, y: home.y }]);
   });
 });
