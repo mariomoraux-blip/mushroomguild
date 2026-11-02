@@ -285,6 +285,9 @@ test('estilo cozy: bosque de fondo, pastillas, medallones, luna pintada, marco d
   // Piezas pintadas (010–011) como fondos CSS.
   const bg = (sel: string, prop = 'background-image') => page.locator(sel).first().evaluate((n, p) => getComputedStyle(n).getPropertyValue(p), prop);
   expect(await bg('.chip--nutrients .chip__icon')).toContain('ui/icons/nutrients.webp');
+  // Las variables --art-* llevan URL absoluta: una relativa se resuelve contra el CSS del build y en producción no carga.
+  const frameVar = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--art-frame'));
+  expect(frameVar).toMatch(/url\("https?:\/\//);
   expect(await bg('body')).toMatch(/backgrounds\/menu(-landscape)?\.webp/);
   await expect(page.locator('.dock__item .card__medal').first()).toBeVisible();
   if (info.project.name !== 'safari-390x664') await page.screenshot({ path: `docs/screenshots/011-${info.project.name}.png` });

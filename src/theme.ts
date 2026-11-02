@@ -148,5 +148,7 @@ export function applyTheme(root: HTMLElement = document.documentElement): void {
   for (const [k, v] of Object.entries(color)) root.style.setProperty(`--${k}`, v);
   root.style.setProperty('--font-display', font.display);
   root.style.setProperty('--font-body', font.body);
-  for (const [k, v] of Object.entries(UI_ART)) root.style.setProperty(`--art-${k}`, `url("${assetUrl(v)}")`);
+  // URL absoluta: una url() relativa dentro de una variable CSS se resuelve contra la hoja de estilos
+  // que la usa (en producción, `assets/index-*.css`), no contra la página, y la pieza no carga.
+  for (const [k, v] of Object.entries(UI_ART)) root.style.setProperty(`--art-${k}`, `url("${new URL(assetUrl(v), document.baseURI).href}")`);
 }
