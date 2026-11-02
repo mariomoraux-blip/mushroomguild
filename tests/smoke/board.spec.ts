@@ -292,8 +292,10 @@ test('estilo cozy: retratos en el dock, tablón de madera, sello, botón de luna
     page.evaluate(() => {
       type Obj = { type: string; visible: boolean; texture?: { key: string } };
       const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: Obj[] } } } } };
-      // Sprites de miembros: imágenes visibles que no son el claro pintado (textura "claro").
-      return w.game.scene.getScene('Game').children.list.filter((o) => o.type === 'Image' && o.visible && o.texture?.key !== 'claro').length;
+      // Sprites de miembros: imágenes visibles que no son el claro pintado ("claro") ni el Árbol Padre.
+      return w.game.scene
+        .getScene('Game')
+        .children.list.filter((o) => o.type === 'Image' && o.visible && o.texture?.key !== 'claro' && !o.texture?.key.startsWith('arbol-padre')).length;
     });
   expect(await visibleSprites()).toBe(0);
   await page.locator('[data-id="2"]').click();
@@ -316,4 +318,19 @@ test('fondo vivo: con movimiento reducido el shader pinta un solo cuadro', async
   await page.waitForTimeout(400);
   expect(await frame()).toBe(a);
   await ctx.close();
+});
+
+test('Árbol Padre: sprite de Blender dormido y despierto, sobresaliendo de su casilla', async ({ page }, info) => {
+  const father = () =>
+    page.evaluate(() => {
+      const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: { type: string; visible: boolean; texture: { key: string }; displayWidth: number; displayHeight: number }[] } } } } };
+      const s = w.game.scene.getScene('Game').children.list.find((o) => o.type === 'Image' && o.visible && o.texture.key.startsWith('arbol-padre'));
+      return s ? { key: s.texture.key, ratio: s.displayHeight / s.displayWidth } : null;
+    });
+  await page.goto('/?seed=7');
+  await expect.poll(father).toEqual({ key: 'arbol-padre-dormido', ratio: expect.closeTo(192 / 176, 2) });
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/009-arbol-dormido-390x844.png' });
+  await page.goto('/?debugState=fatherAwake');
+  await expect.poll(async () => (await father())?.key).toBe('arbol-padre-despierto');
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/009-arbol-despierto-390x844.png' });
 });

@@ -89,7 +89,7 @@ Valores de día; la gradación por estación (003) los oscurece hacia el inviern
 
 ## Bosque ilustrado (008)
 Nada de cajas planas: cada pieza parece hecha a mano.
-- **Tablero (Canvas2D, `src/scenes/paint.ts`):** pradera con luz desde arriba a la izquierda, motas, briznas curvas y florecitas; micelio como hilos luminosos ondulados con nudos y destellos índigo; árboles de copa en capas (gris dormido con hojas que caen, verde con flores al revivir); troncos con corteza, corte con anillos y un hongo diminuto (agrietados tras el primer uso); rocas con musgo y brillo; casa-hongo de sombrero rojo con puerta y ventana encendida; Árbol Padre con aura dorada, aro de meta punteado (sólido al despertar) y destellos. La variación sale de un hash de la casilla: el mismo claro siempre se ve igual.
+- **Tablero (Canvas2D, `src/scenes/paint.ts`):** pradera con luz desde arriba a la izquierda, motas, briznas curvas y florecitas; micelio como hilos luminosos ondulados con nudos y destellos índigo; árboles de copa en capas (gris dormido con hojas que caen, verde con flores al revivir); troncos con corteza, corte con anillos y un hongo diminuto (agrietados tras el primer uso); rocas con musgo y brillo; casa-hongo de sombrero rojo con puerta y ventana encendida; Árbol Padre: el pintor solo pone su aura dorada, el aro de meta punteado (sólido al despertar) y los destellos; el árbol es un sprite de Blender (ver *Sprites en el juego*). La variación sale de un hash de la casilla: el mismo claro siempre se ve igual.
 - **Casilla ocupada:** si un hongo trabajó hoy en una casilla, su sprite la ocupa y el objeto de abajo no se pinta.
 - **Fondo vivo (shader WebGL, `src/ui/ambient.ts`):** copas arriba, haces de luz, pasto lejano, esporas y luciérnagas que suben, grano de papel. Quieto con movimiento reducido.
 - **Piezas SVG (`src/ui/art.ts`):** tablón de madera con cuerdas y clavos (HUD), etiqueta de papel (día), medallones festoneados con íconos a color (recursos), sello de cera (ayuda), papel rasgado con cinta (bitácora), fichas de criatura con costura y montículo de pasto (dock), sobre de semillas (reclutar), botón redondo de madera con luna (fin del día), enredaderas con hongo en el marco, pergamino con borde rasgado y cintas de puntas cortadas (hojas). Grano de papel con `feTurbulence`.
@@ -98,8 +98,9 @@ Nada de cajas planas: cada pieza parece hecha a mano.
 ## Sprites en el juego
 - Los renders de Blender viven en `assets/sprites/` (fuente) y se copian a `public/assets/characters/` (lo que se publica): `<especie>-<pose>.png` con poses `reposo`, `trabajando` y `feliz`, a 176 × 128. Maestra Bruna, la más alta, va a 176 × 160 con la misma escala y el mismo suelo; su render `hechizo` se publica como `mago-trabajando.png`. La Gliophorus tiene una variante por estación (`gliophorus-<pose>-<estación>.png`).
 - Uso: retrato en reposo en el dock (feliz cuando está seleccionado o sugerido), pose feliz grande en la ficha y pose de trabajo en el tablero, sobre la casilla donde ese miembro trabajó hoy.
+- **Árbol Padre:** `assets/blender/arbol-padre.blend` (estados en `estados_arbol.py`), publicado en `public/assets/board/arbol-padre-{dormido,despierto}.png` a 176 × 192 con la misma escala. Dormido: tronco retorcido gris, raíces largas y ramas desnudas. Despierto: corteza cálida y copa dorada en paraguas (hojas `#F2BC45`, sombra `#C98A2B`, luz `#FFE08A`) con borde que brilla `#FFE27A`, aura `#FFF4C2`, luces cálidas y destellos. En el tablero mide 1,2 casillas de ancho y su copa asoma por encima del marco.
 - La silueta de cono de cada especie (`.hat--*` en `styles.css`) queda solo como respaldo si un sprite faltara.
-- Presupuesto: los 24 sprites publicados pesan ≈ 400 KB (límite total de assets: 2 MB).
+- Presupuesto: los 24 sprites de personajes y los 2 del Árbol Padre pesan ≈ 470 KB (límite total de assets: 2 MB).
 
 ## Referencias (`references/`)
 | Archivo | Tomamos | Dejamos |

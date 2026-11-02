@@ -4,7 +4,7 @@ import { tileSize } from './layout';
 import { GameScene } from './scenes/GameScene';
 import { newGame, newRandomGame, type SpeciesId } from './rules';
 import { createStore, initialState } from './store';
-import { applyTheme, color, renderResolution } from './theme';
+import { applyTheme, BOARD_HEADROOM, renderResolution } from './theme';
 import { mountAmbient } from './ui/ambient';
 import { tornPaper, vine } from './ui/art';
 import { mountBoardOverlay } from './ui/board';
@@ -77,7 +77,7 @@ const scene = new GameScene(store);
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
-  backgroundColor: color.soil,
+  transparent: true, // el claro se pinta entero; el margen de arriba (copa del Árbol Padre) deja ver el marco
   width: 1,
   height: 1,
   scale: { mode: Phaser.Scale.NONE },
@@ -96,8 +96,10 @@ function resize() {
   board.style.width = `${w}px`;
   board.style.height = `${h}px`;
   document.documentElement.style.setProperty('--tile', `${tile}px`);
+  const headroom = Math.round(BOARD_HEADROOM * tile);
+  document.documentElement.style.setProperty('--headroom', `${headroom}px`);
   const r = renderResolution();
-  game.scale.resize(w * r, h * r);
+  game.scale.resize(w * r, (h + headroom) * r);
   game.scale.setZoom(1 / r);
   overlay.place(tile);
   scene.setTile(tile);

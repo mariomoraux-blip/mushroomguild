@@ -12,6 +12,8 @@ export interface PaintInput {
   readonly star: { x: number; y: number } | null;
   /** Casillas con un miembro trabajando encima ("x,y"): su objeto no se pinta. */
   readonly occupied: ReadonlySet<string>;
+  /** El Árbol Padre se dibuja aparte con su sprite de Blender: aquí solo su aura y su aro. */
+  readonly fatherSprite?: boolean;
 }
 
 /** Lo que se pintó en cada casilla (para pruebas). */
@@ -520,13 +522,22 @@ function paintStar(ctx: Ctx, T: number, x: number, y: number) {
 
 /** Pinta el claro completo. Devuelve qué objeto se pintó en cada casilla. */
 export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
-  const { game, valid, star, occupied } = input;
+  const { game, valid, star, occupied, fatherSprite = false } = input;
   ctx.clearRect(0, 0, W * T, H * T);
+  // Esquinas redondeadas como el marco (el canvas ya no las recorta: sobresale por arriba).
+  ctx.save();
+  roundRect(ctx, 0, 0, W * T, H * T, T * 0.16);
+  ctx.clip();
   paintGround(ctx, T, game);
   paintNet(ctx, T, game);
   const painted: Painted[] = [];
   for (const t of game.tiles) {
     if (t.kind === 'mother') paintMotherAura(ctx, T, t);
+    // Con sprite, el Árbol Padre se ve siempre (quien trabaje encima se dibuja delante).
+    if (t.kind === 'mother' && fatherSprite) {
+      painted.push({ x: t.x, y: t.y, object: 'mother' });
+      continue;
+    }
     // Si un miembro trabaja encima, su sprite ocupa la casilla: el objeto de abajo no se pinta.
     if (occupied.has(`${t.x},${t.y}`) || t.kind === 'soil') {
       painted.push({ x: t.x, y: t.y, object: 'none' });
@@ -543,5 +554,6 @@ export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
     paintValid(ctx, T, x, y);
   }
   if (star && valid.has(`${star.x},${star.y}`)) paintStar(ctx, T, star.x, star.y);
+  ctx.restore();
   return painted;
 }
