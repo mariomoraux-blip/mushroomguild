@@ -1,0 +1,703 @@
+<title>El Gremio de los Hongos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@500;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: el claro (tablero) domina; el gremio vive en una libreta lateral que baja bajo el tablero en móvil.
+   Look único y deliberado: suelo del bosque al anochecer, con micelio bioluminiscente. */
+:root {
+  color-scheme: dark;
+  --dusk: #17150f;          /* fondo: tierra de noche */
+  --bark: #24211a;          /* paneles */
+  --bark-line: #3a352a;
+  --spore: #ece4cb;         /* texto principal, color de espora */
+  --lichen: #a7a088;        /* texto secundario */
+  --glow: #b9f0d6;          /* micelio */
+  --amber: #f0aa4c;         /* acento: luz de linterna */
+  --cap-red: #cf4d3c;
+  --cap-brown: #b98a5e;
+  --cap-blue: #9cb4c3;
+  --canopy: #7cc36a;        /* cambia con la estación */
+  --font-display: "Grandstander", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --step--1: .8125rem; --step-0: .9375rem; --step-1: 1.125rem; --step-2: 1.5rem; --step-3: 2.25rem;
+}
+html, body { min-height: 100%; }
+body {
+  background: radial-gradient(120% 80% at 50% 0%, #22281c 0%, var(--dusk) 60%) fixed, var(--dusk);
+  color: var(--spore); font-family: var(--font-body); font-size: var(--step-0); line-height: 1.5;
+}
+.wrap {
+  max-width: 1180px; margin: 0 auto;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 18px;
+}
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+.brand { min-width: 0; }
+.eyebrow { font-size: var(--step--1); letter-spacing: .12em; text-transform: uppercase; color: var(--lichen); }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: var(--step-3); line-height: 1.05; margin: 2px 0 0; text-wrap: balance; }
+h1 span { color: var(--amber); }
+.hud { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: flex; align-items: baseline; gap: 6px; padding: 6px 12px; border: 1px solid var(--bark-line); border-radius: 999px; background: var(--bark); font-variant-numeric: tabular-nums; }
+.chip b { font-family: var(--font-display); font-size: var(--step-1); }
+.chip small { color: var(--lichen); font-size: var(--step--1); }
+
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
+@media (max-width: 880px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+
+.board-wrap { position: relative; min-width: 0; }
+.hint { font-family: var(--font-display); font-size: var(--step-1); margin: 0 0 8px; min-height: 1.6em; color: var(--spore); }
+.hint em { font-style: normal; color: var(--amber); }
+svg.board { width: 100%; height: auto; display: block; border-radius: 22px; background: #1f1c15; border: 1px solid var(--bark-line); touch-action: manipulation; }
+
+/* Casillas */
+.ground { fill: #2b261d; }
+.ground[data-net="true"] { fill: #2c3326; }
+.tile:focus { outline: none; }
+.tile:focus-visible .ring, .tile.valid .ring { opacity: 1; }
+.tile .ring { opacity: 0; fill: none; stroke: var(--amber); stroke-width: 3; stroke-dasharray: 10 7; transition: opacity .15s; }
+.tile.valid { cursor: pointer; }
+.tile.valid .ring { animation: march 1.2s linear infinite; }
+.tile.valid:hover .hit { fill: rgba(240,170,76,.14); }
+.tile:focus-visible .ring { stroke: var(--spore); stroke-dasharray: none; }
+@keyframes march { to { stroke-dashoffset: -34; } }
+.myc { stroke: var(--glow); stroke-width: 4; stroke-linecap: round; fill: none; filter: url(#glow); opacity: .85; }
+.myc-dot { fill: var(--glow); filter: url(#glow); }
+.breath { animation: breath 3.2s ease-in-out infinite; }
+@keyframes breath { 50% { opacity: .45; } }
+.canopy { fill: var(--canopy); transition: fill .6s; }
+.flash { animation: pop .5s ease-out; transform-box: fill-box; transform-origin: center; }
+@keyframes pop { from { transform: scale(.6); opacity: .2; } }
+.spore-float { fill: var(--glow); opacity: .0; animation: drift 7s ease-in-out infinite; }
+@keyframes drift { 0% { transform: translateY(0); opacity: 0; } 30% { opacity: .7; } 100% { transform: translateY(-60px); opacity: 0; } }
+
+/* Libreta del gremio */
+.notebook { display: grid; gap: 14px; min-width: 0; }
+.panel { background: var(--bark); border: 1px solid var(--bark-line); border-radius: 18px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.panel h2 { font-family: var(--font-display); font-weight: 700; font-size: var(--step-1); margin: 0; display: flex; justify-content: space-between; align-items: baseline; }
+.panel h2 small { font-family: var(--font-body); font-weight: 400; color: var(--lichen); font-size: var(--step--1); }
+.guild { display: grid; gap: 8px; }
+.member {
+  display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 10px; align-items: center; text-align: left;
+  width: 100%; padding: 6px 10px 6px 6px; border-radius: 14px; border: 1.5px solid transparent;
+  background: #2d2920; color: inherit; font: inherit; cursor: pointer;
+}
+.member:hover:not(:disabled) { background: #353026; }
+.member:focus-visible { outline: 2px solid var(--spore); outline-offset: 2px; }
+.member[aria-pressed="true"] { border-color: var(--amber); background: #3a3121; }
+.member:disabled { cursor: default; opacity: .5; }
+.member svg { width: 48px; height: 48px; }
+.member .who { min-width: 0; }
+.member .who b { font-family: var(--font-display); font-size: var(--step-1); display: block; line-height: 1.1; }
+.member .who small { color: var(--lichen); font-size: var(--step--1); }
+.state { font-size: var(--step--1); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.state.ready { background: rgba(185,240,214,.14); color: var(--glow); }
+.state.rest { background: rgba(167,160,136,.14); color: var(--lichen); }
+
+.btn {
+  font: 700 var(--step-0)/1 var(--font-display); color: var(--dusk); background: var(--amber);
+  border: 0; border-radius: 12px; padding: 12px 16px; cursor: pointer; letter-spacing: .01em;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:focus-visible { outline: 2px solid var(--spore); outline-offset: 2px; }
+.btn.ghost { background: transparent; color: var(--spore); border: 1.5px solid var(--bark-line); }
+.btn:disabled { opacity: .4; cursor: default; filter: none; }
+.recruit { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.recruit .btn { padding: 10px 6px; font-size: var(--step--1); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row .btn { flex: 1 1 auto; }
+
+.log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: var(--step--1); color: var(--lichen); }
+.log li:first-child { color: var(--spore); }
+.log li.warn { color: var(--amber); }
+details summary { cursor: pointer; font-family: var(--font-display); font-weight: 700; }
+details p { margin: 6px 0 0; color: var(--lichen); font-size: var(--step--1); }
+details p b { color: var(--spore); }
+
+/* Cartas de historia */
+.overlay {
+  position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
+  background: rgba(10, 9, 6, .72); backdrop-filter: blur(4px);
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.overlay[hidden] { display: none; }
+.card {
+  width: min(460px, 100%); background: var(--bark); border: 1px solid var(--bark-line); border-radius: 24px;
+  padding: 28px 24px 22px; display: grid; gap: 16px; text-align: center; justify-items: center;
+}
+.card svg { width: 180px; max-width: 100%; height: auto; }
+.card p.line { font-family: var(--font-display); font-size: var(--step-2); line-height: 1.2; margin: 0; text-wrap: balance; }
+.card p.sub { color: var(--lichen); margin: 0; max-width: 34ch; }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--bark-line); }
+.dots i.on { background: var(--amber); }
+.card .row { width: 100%; }
+
+footer { color: var(--lichen); font-size: var(--step--1); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="eyebrow">Capítulo 1 · El Claro Gris</div>
+      <h1>El Gremio de los <span>Hongos</span></h1>
+    </div>
+    <div class="hud" id="hud" aria-live="polite"></div>
+  </header>
+
+  <div class="stage">
+    <div class="board-wrap">
+      <p class="hint" id="hint"></p>
+      <svg class="board" id="board" viewBox="0 0 800 500" role="group" aria-label="El claro del bosque"></svg>
+    </div>
+
+    <aside class="notebook">
+      <section class="panel">
+        <h2>El gremio <small id="guildCount"></small></h2>
+        <div class="guild" id="guild"></div>
+      </section>
+      <section class="panel">
+        <h2>Reclutar <small>2 esporas</small></h2>
+        <div class="recruit" id="recruit"></div>
+      </section>
+      <section class="panel">
+        <div class="row">
+          <button class="btn" id="endDay" type="button">Terminar el día</button>
+        </div>
+        <ul class="log" id="log" aria-live="polite"></ul>
+      </section>
+      <section class="panel">
+        <details>
+          <summary>Cómo se juega</summary>
+          <p>Toca un miembro del gremio y luego una casilla resaltada. Cada uno trabaja una vez al día. Solo puedes actuar en casillas que <b>tocan la red de micelio</b>.</p>
+          <p><b>Ostra:</b> teje micelio en tierra (1 nutriente).<br><b>Champiñón:</b> descompone troncos (+3 nutrientes; aguantan 2 usos y dejan tierra libre).<br><b>Amanita:</b> revive árboles grises (3 nutrientes).</p>
+          <p>Cada árbol vivo da <b>1 espora y 1 nutriente</b> al amanecer. Con 2 esporas reclutas a alguien nuevo.</p>
+          <p><b>Meta:</b> antes de que termine el invierno, lleva la red al Árbol Madre y despiértalo con una Amanita (6 nutrientes y al menos 2 árboles revividos).</p>
+        </details>
+      </section>
+    </aside>
+  </div>
+  <footer>Prototipo de laboratorio · vertical slice v0.1</footer>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="cardLine">
+    <svg id="cardArt" viewBox="0 0 200 120" aria-hidden="true"></svg>
+    <p class="line" id="cardLine"></p>
+    <p class="sub" id="cardSub"></p>
+    <div class="dots" id="cardDots"></div>
+    <div class="row" id="cardActions"></div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="halo" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <radialGradient id="lantern" cx="50%" cy="60%" r="50%">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Personajes: 60×60 -->
+    <symbol id="sp-champi" viewBox="0 0 60 60">
+      <ellipse cx="30" cy="55" rx="15" ry="3" fill="#000" opacity=".35"/>
+      <path d="M22 30 Q20 52 24 54 L36 54 Q40 52 38 30 Z" fill="#efe6d2"/>
+      <path d="M5 33 Q7 9 30 8 Q53 9 55 33 Q30 39 5 33 Z" fill="#b98a5e"/>
+      <ellipse cx="20" cy="18" rx="7" ry="3" fill="#dbb68b" opacity=".75" transform="rotate(-20 20 18)"/>
+      <circle cx="26.5" cy="42" r="1.9" fill="#2a2018"/><circle cx="33.5" cy="42" r="1.9" fill="#2a2018"/>
+      <ellipse cx="24" cy="46" rx="2.2" ry="1.2" fill="#e8a19a" opacity=".8"/><ellipse cx="36" cy="46" rx="2.2" ry="1.2" fill="#e8a19a" opacity=".8"/>
+      <path d="M28 46 Q30 48 32 46" stroke="#2a2018" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="sp-ostra" viewBox="0 0 60 60">
+      <ellipse cx="30" cy="55" rx="15" ry="3" fill="#000" opacity=".35"/>
+      <path d="M38 14 Q56 12 57 24 Q50 30 38 28 Z" fill="#7f97a6"/>
+      <path d="M25 30 Q23 51 27 54 L35 54 Q38 51 36 30 Z" fill="#e7e3d6"/>
+      <path d="M4 30 Q6 10 30 10 Q48 11 50 26 Q30 36 4 30 Z" fill="#9cb4c3"/>
+      <path d="M12 27 Q20 18 30 15 M20 30 Q26 22 36 18 M30 31 Q36 25 44 22" stroke="#7b93a2" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      <circle cx="28" cy="42" r="1.9" fill="#232a2f"/><circle cx="34" cy="42" r="1.9" fill="#232a2f"/>
+      <ellipse cx="26" cy="46" rx="2" ry="1.1" fill="#e8a19a" opacity=".8"/><ellipse cx="36" cy="46" rx="2" ry="1.1" fill="#e8a19a" opacity=".8"/>
+      <path d="M29.5 46 Q31 47.5 32.5 46" stroke="#232a2f" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="sp-amanita" viewBox="0 0 60 60">
+      <ellipse cx="30" cy="55" rx="15" ry="3" fill="#000" opacity=".35"/>
+      <path d="M23 28 Q21 52 25 54 L35 54 Q39 52 37 28 Z" fill="#f4efe2"/>
+      <path d="M21 37 Q30 42 39 37 L40 41 Q30 46 20 41 Z" fill="#e2dccb"/>
+      <path d="M4 31 Q6 6 30 5 Q54 6 56 31 Q30 37 4 31 Z" fill="#cf4d3c"/>
+      <circle cx="17" cy="18" r="3.2" fill="#f7efe0"/><circle cx="31" cy="12" r="2.6" fill="#f7efe0"/><circle cx="43" cy="20" r="3.6" fill="#f7efe0"/><circle cx="26" cy="25" r="2.2" fill="#f7efe0"/><circle cx="48" cy="28" r="1.8" fill="#f7efe0"/>
+      <circle cx="27" cy="47" r="1.9" fill="#2c1b18"/><circle cx="33" cy="47" r="1.9" fill="#2c1b18"/>
+      <ellipse cx="25" cy="50.5" rx="2" ry="1.1" fill="#e8a19a" opacity=".8"/><ellipse cx="35" cy="50.5" rx="2" ry="1.1" fill="#e8a19a" opacity=".8"/>
+    </symbol>
+
+    <!-- Escenario: 100×100 -->
+    <symbol id="t-rock" viewBox="0 0 100 100">
+      <ellipse cx="50" cy="78" rx="34" ry="6" fill="#000" opacity=".3"/>
+      <path d="M18 74 Q14 50 34 40 Q48 28 66 38 Q86 46 82 72 Q50 82 18 74 Z" fill="#5f5a51"/>
+      <path d="M30 48 Q42 38 56 40" stroke="#7d776c" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="68" cy="62" r="4" fill="#6f8a5a" opacity=".7"/><circle cx="74" cy="58" r="2.6" fill="#6f8a5a" opacity=".7"/>
+    </symbol>
+    <symbol id="t-log" viewBox="0 0 100 100">
+      <ellipse cx="50" cy="74" rx="38" ry="6" fill="#000" opacity=".3"/>
+      <rect x="14" y="48" width="66" height="24" rx="12" fill="#6b4a30"/>
+      <path d="M20 56 H62 M26 64 H70" stroke="#57391f" stroke-width="2.5" stroke-linecap="round"/>
+      <ellipse cx="80" cy="60" rx="9" ry="12" fill="#c69a6a"/>
+      <ellipse cx="80" cy="60" rx="5" ry="7" fill="none" stroke="#9c7247" stroke-width="2"/>
+      <circle cx="32" cy="46" r="3" fill="#7da35f"/><circle cx="38" cy="45" r="2" fill="#7da35f"/>
+    </symbol>
+    <symbol id="t-tree-grey" viewBox="0 0 100 100">
+      <ellipse cx="50" cy="84" rx="26" ry="5" fill="#000" opacity=".3"/>
+      <path d="M45 84 L47 46 L53 46 L55 84 Z" fill="#6c665d"/>
+      <path d="M50 52 L34 34 M50 48 L64 30 M41 41 L36 26 M58 37 L70 34 M50 46 L50 22" stroke="#6c665d" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <circle cx="35" cy="26" r="3" fill="#8a8478"/><circle cx="70" cy="33" r="2.5" fill="#8a8478"/>
+    </symbol>
+    <symbol id="t-tree-alive" viewBox="0 0 100 100">
+      <ellipse cx="50" cy="84" rx="28" ry="5" fill="#000" opacity=".3"/>
+      <path d="M45 84 L47 50 L53 50 L55 84 Z" fill="#7a5536"/>
+      <circle class="canopy" cx="50" cy="34" r="22"/>
+      <circle class="canopy" cx="34" cy="44" r="15"/>
+      <circle class="canopy" cx="66" cy="44" r="15"/>
+      <circle cx="42" cy="28" r="6" fill="#fff" opacity=".18"/>
+      <circle cx="60" cy="40" r="2.2" fill="#b9f0d6"/><circle cx="38" cy="46" r="1.8" fill="#b9f0d6"/>
+    </symbol>
+    <symbol id="t-home" viewBox="0 0 100 100">
+      <ellipse cx="50" cy="80" rx="36" ry="6" fill="#000" opacity=".35"/>
+      <path d="M16 80 Q16 40 50 38 Q84 40 84 80 Z" fill="#3e3424"/>
+      <circle cx="50" cy="66" r="26" fill="url(#lantern)"/>
+      <path d="M38 80 L38 64 Q38 52 50 52 Q62 52 62 64 L62 80 Z" fill="#f0aa4c"/>
+      <path d="M50 54 V80" stroke="#c57f2a" stroke-width="2"/>
+      <circle cx="56" cy="68" r="1.8" fill="#7a4a12"/>
+      <path d="M22 44 Q26 32 34 34 Q36 40 28 44 Z" fill="#cf4d3c"/><rect x="27" y="42" width="3" height="8" fill="#eee5d0"/>
+      <path d="M68 40 Q74 30 80 36 Q78 42 70 42 Z" fill="#b98a5e"/><rect x="73" y="40" width="3" height="9" fill="#eee5d0"/>
+    </symbol>
+  </defs>
+</svg>
+
+<script>
+// El Gremio de los Hongos — reglas puras (sin DOM). Se prueban en Node y se inyectan en la página.
+const Rules = (() => {
+  const W = 8, H = 5, DAYS = 12, MAX_GUILD = 6;
+  const COST = { weave: 1, revive: 3, mother: 6, recruit: 2 };
+  const GAIN = { log: 3 };
+  const TREES_FOR_MOTHER = 2;
+
+  const SPECIES = {
+    ostra:   { name: 'Ostra',     role: 'Tejedora',      verb: 'Teje micelio en tierra vecina a la red (1 nutriente).' },
+    champi:  { name: 'Champiñón', role: 'Descompositor', verb: 'Descompone un tronco vecino a la red (+3 nutrientes).' },
+    amanita: { name: 'Amanita',   role: 'Sanadora',      verb: 'Revive un árbol gris vecino a la red (3 nutrientes).' },
+  };
+  const NAMES = {
+    ostra: ['Ola', 'Nube', 'Brisa', 'Perla'],
+    champi: ['Bruno', 'Tomillo', 'Gordo', 'Migas'],
+    amanita: ['Rubí', 'Cereza', 'Lunar', 'Pimienta'],
+  };
+  const SEASONS = ['Primavera', 'Verano', 'Otoño', 'Invierno'];
+
+  // H hogar · M Árbol Madre · . tierra · L tronco · T árbol gris · R roca
+  const MAP = [
+    '.L.RT...',
+    'L..R..LT',
+    'H.T..R.M',
+    '..R.L...',
+    '.T...RT.',
+  ];
+  const KIND = { H: 'home', M: 'mother', '.': 'soil', L: 'log', T: 'tree', R: 'rock' };
+
+  function newGame() {
+    const tiles = [];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const t = KIND[MAP[y][x]];
+      tiles.push({ x, y, t, net: t === 'home', uses: 0, alive: false });
+    }
+    const s = {
+      tiles, day: 1, nutrients: 2, spores: 0, status: 'playing', wonDay: null,
+      members: [], nameIdx: { ostra: 0, champi: 0, amanita: 0 }, nextId: 1,
+    };
+    ['ostra', 'champi', 'amanita'].forEach(sp => addMember(s, sp));
+    return s;
+  }
+
+  function addMember(s, sp) {
+    const list = NAMES[sp];
+    const name = list[s.nameIdx[sp] % list.length];
+    s.nameIdx[sp]++;
+    s.members.push({ id: s.nextId++, sp, name, used: false, at: null });
+  }
+
+  const tile = (s, x, y) => (x < 0 || y < 0 || x >= W || y >= H) ? null : s.tiles[y * W + x];
+  const neighbors = (s, x, y) => [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => tile(s, x + dx, y + dy)).filter(Boolean);
+  const touchesNet = (s, x, y) => neighbors(s, x, y).some(n => n.net);
+  const revivedCount = s => s.tiles.filter(t => t.t === 'tree' && t.alive).length;
+  const treeTotal = s => s.tiles.filter(t => t.t === 'tree').length;
+  const season = day => SEASONS[Math.min(3, Math.floor((day - 1) / 3))];
+  const member = (s, id) => s.members.find(m => m.id === id);
+
+  // Devuelve { ok, reason }. reason es texto para el jugador.
+  function check(s, id, x, y) {
+    const m = member(s, id), t = tile(s, x, y);
+    if (s.status !== 'playing') return { ok: false, reason: 'La partida terminó.' };
+    if (!m || !t) return { ok: false, reason: '' };
+    if (m.used) return { ok: false, reason: `${m.name} ya trabajó hoy. Descansa hasta el amanecer.` };
+    const near = touchesNet(s, x, y);
+    if (m.sp === 'ostra') {
+      if (t.t !== 'soil') return { ok: false, reason: 'La Ostra solo teje sobre tierra libre.' };
+      if (t.net) return { ok: false, reason: 'Aquí ya hay micelio.' };
+      if (!near) return { ok: false, reason: 'Muy lejos: la tierra debe tocar la red.' };
+      if (s.nutrients < COST.weave) return { ok: false, reason: 'Falta 1 nutriente para tejer.' };
+      return { ok: true };
+    }
+    if (m.sp === 'champi') {
+      if (t.t !== 'log') return { ok: false, reason: 'El Champiñón necesita un tronco caído.' };
+      if (!near) return { ok: false, reason: 'Muy lejos: el tronco debe tocar la red.' };
+      return { ok: true };
+    }
+    if (m.sp === 'amanita') {
+      if (t.t === 'mother') {
+        if (!near) return { ok: false, reason: 'La red todavía no llega al Árbol Madre.' };
+        if (revivedCount(s) < TREES_FOR_MOTHER) return { ok: false, reason: `El bosque aún no habla: revive al menos ${TREES_FOR_MOTHER} árboles primero.` };
+        if (s.nutrients < COST.mother) return { ok: false, reason: `El Árbol Madre necesita ${COST.mother} nutrientes.` };
+        return { ok: true };
+      }
+      if (t.t !== 'tree') return { ok: false, reason: 'La Amanita solo cura árboles.' };
+      if (t.alive) return { ok: false, reason: 'Este árbol ya respira.' };
+      if (!near) return { ok: false, reason: 'Muy lejos: el árbol debe tocar la red.' };
+      if (s.nutrients < COST.revive) return { ok: false, reason: `Faltan nutrientes: revivir cuesta ${COST.revive}.` };
+      return { ok: true };
+    }
+    return { ok: false, reason: '' };
+  }
+
+  function validTargets(s, id) {
+    return s.tiles.filter(t => check(s, id, t.x, t.y).ok);
+  }
+
+  // Ejecuta la acción. Devuelve texto para la bitácora o lanza error si no es válida.
+  function act(s, id, x, y) {
+    const c = check(s, id, x, y);
+    if (!c.ok) throw new Error(c.reason);
+    const m = member(s, id), t = tile(s, x, y);
+    m.used = true; m.at = { x, y };
+    if (m.sp === 'ostra') {
+      s.nutrients -= COST.weave; t.net = true;
+      return `${m.name} tejió micelio. La red crece.`;
+    }
+    if (m.sp === 'champi') {
+      s.nutrients += GAIN.log; t.uses++;
+      if (t.uses >= 2) { t.t = 'soil'; t.uses = 0; return `${m.name} terminó el tronco: +${GAIN.log} nutrientes y queda tierra fértil.`; }
+      return `${m.name} descompuso el tronco: +${GAIN.log} nutrientes.`;
+    }
+    if (t.t === 'mother') {
+      s.nutrients -= COST.mother; t.alive = true; t.net = true;
+      s.status = 'won'; s.wonDay = s.day;
+      return `${m.name} despertó al Árbol Madre.`;
+    }
+    s.nutrients -= COST.revive; t.alive = true; t.net = true;
+    return `${m.name} revivió un árbol. Cada amanecer dará una espora y un nutriente.`;
+  }
+
+  function recruit(s, sp) {
+    if (s.status !== 'playing') throw new Error('La partida terminó.');
+    if (s.members.length >= MAX_GUILD) throw new Error('El gremio está completo.');
+    if (s.spores < COST.recruit) throw new Error(`Reclutar cuesta ${COST.recruit} esporas.`);
+    s.spores -= COST.recruit; addMember(s, sp);
+    const m = s.members[s.members.length - 1];
+    m.used = true; // llega cansado: trabaja desde mañana
+    return `${m.name} (${SPECIES[sp].name}) se unió al gremio. Trabajará desde mañana.`;
+  }
+
+  function endDay(s) {
+    if (s.status !== 'playing') return '';
+    if (s.day >= DAYS) { s.status = 'lost'; return 'Llegó el final del invierno.'; }
+    const before = season(s.day);
+    s.day++;
+    const gained = revivedCount(s);
+    s.spores += gained;
+    s.nutrients += gained; // hojarasca: cada árbol vivo también deja 1 nutriente
+    s.members.forEach(m => { m.used = false; m.at = null; });
+    const now = season(s.day);
+    const parts = [`Amanece el día ${s.day}.`];
+    if (gained) parts.push(`Los árboles dieron ${gained} espora${gained > 1 ? 's' : ''} y ${gained} nutriente${gained > 1 ? 's' : ''}.`);
+    if (now !== before) parts.push(`Comienza ${now.toLowerCase()}.`);
+    return parts.join(' ');
+  }
+
+  return {
+    W, H, DAYS, MAX_GUILD, COST, GAIN, TREES_FOR_MOTHER, SPECIES, SEASONS,
+    newGame, tile, neighbors, touchesNet, revivedCount, treeTotal, season, member,
+    check, validTargets, act, recruit, endDay,
+  };
+})();
+if (typeof module !== 'undefined') module.exports = Rules;
+
+
+(() => {
+  const R = Rules;
+  const $ = id => document.getElementById(id);
+  const SEASON_CANOPY = { 'Primavera': '#7cc36a', 'Verano': '#4f9d49', 'Otoño': '#e08a36', 'Invierno': '#a9cfd3' };
+  const SEASON_TINT = { 'Primavera': 'rgba(124,195,106,.05)', 'Verano': 'rgba(240,200,90,.06)', 'Otoño': 'rgba(224,138,54,.09)', 'Invierno': 'rgba(150,190,220,.12)' };
+
+  let s, selected = null, log = [], fresh = null;
+
+  function start(saved) {
+    s = saved && saved.s ? saved.s : R.newGame();
+    log = saved && saved.log ? saved.log : [];
+    selected = null;
+    render();
+    if (!saved || !saved.s) showIntro(0);
+  }
+
+  function say(text, warn) {
+    if (!text) return;
+    log.unshift({ text, warn: !!warn });
+    log = log.slice(0, 6);
+  }
+
+  /* ---------- Tablero ---------- */
+  function boardSVG() {
+    const valid = selected ? new Set(R.validTargets(s, selected).map(t => t.y * R.W + t.x)) : new Set();
+    const progress = (R.revivedCount(s) + (s.status === 'won' ? 2 : 0)) / (R.treeTotal(s) + 2);
+    const sat = (0.15 + 0.85 * progress).toFixed(2);
+    const seasonName = R.season(s.day);
+    let ground = '', myc = '', props = '', workers = '', rings = '';
+
+    for (const t of s.tiles) {
+      const px = t.x * 100, py = t.y * 100, i = t.y * R.W + t.x;
+      ground += `<rect class="ground" x="${px + 3}" y="${py + 3}" width="94" height="94" rx="16" data-net="${t.net}"/>`;
+      // Micelio hacia la derecha y abajo
+      if (t.net) {
+        const r = R.tile(s, t.x + 1, t.y), d = R.tile(s, t.x, t.y + 1);
+        if (r && r.net) myc += `<path class="myc" d="M${px + 50} ${py + 70} Q${px + 100} ${py + 60} ${px + 150} ${py + 70}"/>`;
+        if (d && d.net) myc += `<path class="myc" d="M${px + 50} ${py + 70} Q${px + 40} ${py + 120} ${px + 50} ${py + 170}"/>`;
+        myc += `<circle class="myc-dot breath" cx="${px + 50}" cy="${py + 70}" r="4"/>`;
+      }
+      const isFresh = fresh === i ? ' flash' : '';
+      if (t.t === 'rock') props += `<use href="#t-rock" x="${px}" y="${py}" width="100" height="100"/>`;
+      if (t.t === 'log') props += `<g class="${isFresh}"><use href="#t-log" x="${px}" y="${py}" width="100" height="100" opacity="${t.uses ? .65 : 1}"/></g>`;
+      if (t.t === 'tree') props += `<g class="${isFresh}"><use href="#${t.alive ? 't-tree-alive' : 't-tree-grey'}" x="${px}" y="${py}" width="100" height="100"/></g>`;
+      if (t.t === 'home') props += `<use href="#t-home" x="${px}" y="${py}" width="100" height="100"/>`;
+      if (t.t === 'mother') props += motherSVG(px, py, t.alive);
+      rings += `<g class="tile${t.net ? ' net' : ''}${valid.has(i) ? ' valid' : ''}" data-i="${i}" tabindex="${valid.has(i) ? 0 : -1}" role="button" aria-label="${tileLabel(t)}">
+        <rect class="hit" x="${px + 3}" y="${py + 3}" width="94" height="94" rx="16" fill="transparent"/>
+        <rect class="ring" x="${px + 6}" y="${py + 6}" width="88" height="88" rx="14"/></g>`;
+    }
+    // Trabajadores colocados hoy
+    for (const m of s.members) if (m.at) {
+      workers += `<use href="#sp-${m.sp}" x="${m.at.x * 100 + 52}" y="${m.at.y * 100 + 46}" width="44" height="44"/>`;
+    }
+    // Esporas flotando sobre árboles vivos (ambiente)
+    let spores = '';
+    s.tiles.filter(t => (t.t === 'tree' || t.t === 'mother') && t.alive).forEach((t, k) => {
+      for (let j = 0; j < 3; j++) spores += `<circle class="spore-float" cx="${t.x * 100 + 30 + j * 20}" cy="${t.y * 100 + 40}" r="2" style="animation-delay:${(k * 1.3 + j * 2.1) % 7}s"/>`;
+    });
+
+    return `
+      <g style="filter:saturate(${sat})">
+        <g>${ground}</g>
+        ${myc}
+        ${props}
+      </g>
+      <rect width="800" height="500" fill="${SEASON_TINT[seasonName]}" pointer-events="none"/>
+      ${spores}
+      ${workers}
+      ${rings}`;
+  }
+
+  function motherSVG(px, py, alive) {
+    const trunk = alive ? '#8a5f3a' : '#6c665d';
+    const crown = alive
+      ? `<circle cx="${px + 40}" cy="${py + 22}" r="30" fill="url(#lantern)" filter="url(#halo)"/>
+         <circle class="canopy" cx="${px + 40}" cy="${py + 22}" r="28"/><circle class="canopy" cx="${px + 16}" cy="${py + 36}" r="18"/><circle class="canopy" cx="${px + 66}" cy="${py + 34}" r="18"/>
+         <circle cx="${px + 30}" cy="${py + 14}" r="3" fill="#ffd27a"/><circle cx="${px + 54}" cy="${py + 28}" r="2.5" fill="#ffd27a"/><circle cx="${px + 22}" cy="${py + 38}" r="2" fill="#ffd27a"/>`
+      : `<path d="M${px + 46} ${py + 40} L${px + 18} ${py + 8} M${px + 52} ${py + 36} L${px + 72} ${py + 2} M${px + 34} ${py + 22} L${px + 24} ${py + 0} M${px + 60} ${py + 18} L${px + 84} ${py + 14}" stroke="${trunk}" stroke-width="6" stroke-linecap="round"/>`;
+    return `<g class="${fresh === 'mother' ? 'flash' : ''}">
+      <ellipse cx="${px + 48}" cy="${py + 88}" rx="34" ry="6" fill="#000" opacity=".35"/>
+      <path d="M${px + 30} ${py + 88} Q${px + 38} ${py + 60} ${px + 40} ${py + 30} L${px + 58} ${py + 30} Q${px + 60} ${py + 60} ${px + 70} ${py + 88} Z" fill="${trunk}"/>
+      <path d="M${px + 24} ${py + 90} Q${px + 34} ${py + 84} ${px + 40} ${py + 80} M${px + 76} ${py + 90} Q${px + 66} ${py + 84} ${px + 60} ${py + 80}" stroke="${trunk}" stroke-width="5" stroke-linecap="round" fill="none"/>
+      ${crown}
+      ${alive ? '' : `<text x="${px + 50}" y="${py + 72}" text-anchor="middle" font-family="Grandstander, sans-serif" font-size="11" fill="#cfc7ad" opacity=".8">Árbol Madre</text>`}
+    </g>`;
+  }
+
+  function tileLabel(t) {
+    const base = { home: 'Hogar del gremio', mother: t.alive ? 'Árbol Madre despierto' : 'Árbol Madre dormido', soil: 'Tierra', log: 'Tronco caído', tree: t.alive ? 'Árbol vivo' : 'Árbol gris', rock: 'Roca' }[t.t];
+    return `${base}${t.net && t.t !== 'home' ? ', con micelio' : ''}, columna ${t.x + 1}, fila ${t.y + 1}`;
+  }
+
+  /* ---------- Paneles ---------- */
+  function hudHTML() {
+    const season = R.season(s.day);
+    return [
+      ['Día', `${s.day}<small>/${R.DAYS}</small>`, season],
+      ['', s.nutrients, 'nutrientes'],
+      ['', s.spores, 'esporas'],
+      ['', `${R.revivedCount(s)}<small>/${R.treeTotal(s)}</small>`, 'árboles vivos'],
+    ].map(([pre, v, post]) => `<div class="chip">${pre ? `<small>${pre}</small>` : ''}<b>${v}</b><small>${post}</small></div>`).join('');
+  }
+
+  function guildHTML() {
+    return s.members.map(m => {
+      const sp = R.SPECIES[m.sp];
+      const disabled = m.used || s.status !== 'playing';
+      return `<button class="member" type="button" data-id="${m.id}" aria-pressed="${selected === m.id}" ${disabled ? 'disabled' : ''}>
+        <svg viewBox="0 0 60 60" aria-hidden="true"><use href="#sp-${m.sp}"/></svg>
+        <span class="who"><b>${m.name}</b><small>${sp.name} · ${sp.role}</small></span>
+        <span class="state ${m.used ? 'rest' : 'ready'}">${m.used ? 'descansa' : 'lista'}</span>
+      </button>`;
+    }).join('');
+  }
+
+  function recruitHTML() {
+    const can = s.spores >= R.COST.recruit && s.members.length < R.MAX_GUILD && s.status === 'playing';
+    return Object.entries(R.SPECIES).map(([k, sp]) =>
+      `<button class="btn ghost" type="button" data-sp="${k}" ${can ? '' : 'disabled'}>${sp.name}</button>`).join('');
+  }
+
+  function hintHTML() {
+    if (s.status !== 'playing') return s.status === 'won' ? 'El bosque <em>respira</em> de nuevo.' : 'El invierno terminó.';
+    if (selected) {
+      const m = R.member(s, selected);
+      const n = R.validTargets(s, selected).length;
+      return n ? `${m.name}: toca una casilla <em>resaltada</em>.` : `${m.name} no tiene dónde trabajar ahora.`;
+    }
+    const ready = s.members.filter(m => !m.used).length;
+    return ready ? 'Elige a un miembro del <em>gremio</em>.' : 'Todos trabajaron. <em>Termina el día</em>.';
+  }
+
+  function render() {
+    $('hud').innerHTML = hudHTML();
+    $('hint').innerHTML = hintHTML();
+    const board = $('board');
+    board.style.setProperty('--canopy', SEASON_CANOPY[R.season(s.day)]);
+    board.innerHTML = boardSVG();
+    $('guild').innerHTML = guildHTML();
+    $('guildCount').textContent = `${s.members.length}/${R.MAX_GUILD}`;
+    $('recruit').innerHTML = recruitHTML();
+    $('endDay').disabled = s.status !== 'playing';
+    $('endDay').textContent = s.day >= R.DAYS ? 'Terminar el invierno' : 'Terminar el día';
+    $('log').innerHTML = log.map(l => `<li class="${l.warn ? 'warn' : ''}">${l.text}</li>`).join('');
+    fresh = null;
+  }
+
+  /* ---------- Interacción ---------- */
+  $('guild').addEventListener('click', e => {
+    const b = e.target.closest('.member'); if (!b || b.disabled) return;
+    const id = +b.dataset.id;
+    selected = selected === id ? null : id;
+    if (selected && !R.validTargets(s, selected).length) {
+      const m = R.member(s, selected);
+      say(`${m.name} no encuentra trabajo: ${idleReason(m)}`, true);
+    }
+    render();
+  });
+
+  function idleReason(m) {
+    if (m.sp === 'ostra') return s.nutrients < R.COST.weave ? 'faltan nutrientes.' : 'no hay tierra junto a la red.';
+    if (m.sp === 'champi') return 'no hay troncos junto a la red. Teje hacia uno.';
+    return s.nutrients < R.COST.revive ? 'faltan nutrientes.' : 'no hay árboles grises junto a la red.';
+  }
+
+  function tryTile(i) {
+    if (!selected || s.status !== 'playing') return;
+    const t = s.tiles[i];
+    const c = R.check(s, selected, t.x, t.y);
+    if (!c.ok) { say(c.reason, true); render(); return; }
+    const msg = R.act(s, selected, t.x, t.y);
+    fresh = t.t === 'mother' ? 'mother' : i;
+    say(msg);
+    selected = null;
+    render();
+    if (s.status === 'won') setTimeout(showEnd, 900);
+  }
+
+  $('board').addEventListener('click', e => {
+    const g = e.target.closest('.tile[data-i]');
+    if (g) tryTile(+g.dataset.i);
+  });
+  $('board').addEventListener('keydown', e => {
+    const g = e.target.closest('.tile[data-i]');
+    if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tryTile(+g.dataset.i); }
+  });
+
+  $('recruit').addEventListener('click', e => {
+    const b = e.target.closest('[data-sp]'); if (!b || b.disabled) return;
+    try { say(R.recruit(s, b.dataset.sp)); } catch (err) { say(err.message, true); }
+    render();
+  });
+
+  $('endDay').addEventListener('click', () => {
+    selected = null;
+    say(R.endDay(s));
+    render();
+    if (s.status === 'lost') setTimeout(showEnd, 400);
+  });
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && selected) { selected = null; render(); } });
+
+  /* ---------- Cartas ---------- */
+  const INTRO = [
+    { line: 'El bosque se está apagando.', sub: 'Los árboles ya no se hablan.', art: 'grey' },
+    { line: 'Bajo la tierra, un pequeño gremio despierta.', sub: 'Una tejedora, un descompositor y una sanadora.', art: 'guild' },
+    { line: 'Lleva la red hasta el Árbol Madre antes del invierno.', sub: 'Si despierta, el bosque volverá a respirar.', art: 'mother' },
+  ];
+
+  function art(kind) {
+    if (kind === 'grey') return `<use href="#t-tree-grey" x="10" y="10" width="80" height="80"/><use href="#t-tree-grey" x="60" y="0" width="100" height="100"/><use href="#t-tree-grey" x="130" y="20" width="70" height="70"/>`;
+    if (kind === 'guild') return `<path d="M20 100 Q100 80 180 100" stroke="#b9f0d6" stroke-width="3" fill="none" filter="url(#glow)"/><use href="#sp-ostra" x="22" y="40" width="56" height="56"/><use href="#sp-champi" x="72" y="34" width="60" height="60"/><use href="#sp-amanita" x="124" y="40" width="56" height="56"/>`;
+    if (kind === 'win') return `<circle cx="100" cy="50" r="50" fill="url(#lantern)"/><g style="--canopy:#7cc36a"><use href="#t-tree-alive" x="50" y="0" width="100" height="100"/></g><use href="#sp-amanita" x="20" y="64" width="40" height="40"/><use href="#sp-champi" x="140" y="64" width="40" height="40"/>`;
+    if (kind === 'lost') return `<g style="--canopy:#a9cfd3"><use href="#t-tree-alive" x="30" y="10" width="80" height="80"/></g><use href="#t-tree-grey" x="100" y="6" width="84" height="84"/><use href="#sp-ostra" x="80" y="70" width="40" height="40"/>`;
+    return `<circle cx="100" cy="50" r="46" fill="url(#lantern)" opacity=".5"/><use href="#t-tree-grey" x="40" y="0" width="120" height="120"/>`;
+  }
+
+  function showCard({ line, sub, artKind, dots, actions }) {
+    $('cardArt').innerHTML = art(artKind);
+    $('cardLine').textContent = line;
+    $('cardSub').textContent = sub;
+    $('cardDots').innerHTML = dots ? Array.from({ length: dots[1] }, (_, i) => `<i class="${i === dots[0] ? 'on' : ''}"></i>`).join('') : '';
+    $('cardActions').innerHTML = actions.map((a, i) => `<button class="btn ${a.ghost ? 'ghost' : ''}" type="button" data-a="${i}">${a.label}</button>`).join('');
+    $('cardActions').onclick = e => { const b = e.target.closest('[data-a]'); if (b) actions[+b.dataset.a].run(); };
+    $('overlay').hidden = false;
+    $('cardActions').querySelector('.btn:last-child').focus();
+  }
+  const hideCard = () => { $('overlay').hidden = true; };
+
+  function showIntro(n) {
+    const c = INTRO[n], last = n === INTRO.length - 1;
+    showCard({
+      line: c.line, sub: c.sub, artKind: c.art, dots: [n, INTRO.length],
+      actions: [
+        ...(n === 0 ? [{ label: 'Saltar', ghost: true, run: () => { hideCard(); say('Elige a un miembro del gremio para empezar.'); render(); } }] : []),
+        { label: last ? 'Despertar al gremio' : 'Siguiente', run: () => last ? (hideCard(), say('El gremio despertó. Empieza por tejer hacia el tronco cercano.'), render()) : showIntro(n + 1) },
+      ],
+    });
+  }
+
+  function showEnd() {
+    const won = s.status === 'won';
+    showCard({
+      line: won ? `El Árbol Madre despertó en el día ${s.wonDay}.` : 'El bosque esperará la próxima primavera.',
+      sub: won
+        ? `Revividos: ${R.revivedCount(s)} de ${R.treeTotal(s)} árboles · Gremio de ${s.members.length}. El claro vuelve a tener color.`
+        : `La red llegó lejos: ${R.revivedCount(s)} árboles respiran. Prueba a revivir árboles temprano: dan esporas y nutrientes cada amanecer.`,
+      artKind: won ? 'win' : 'lost',
+      actions: [
+        { label: 'Ver el claro', ghost: true, run: hideCard },
+        { label: 'Jugar otra vez', run: () => { hideCard(); start(null); } },
+      ],
+    });
+  }
+
+  // Conserva la partida si la página se actualiza mientras alguien juega.
+  window.claude?.hot?.snapshot?.(() => ({ s, log }));
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? null);
+})();
+</script>

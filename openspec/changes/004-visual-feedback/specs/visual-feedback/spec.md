@@ -1,0 +1,31 @@
+# Delta · visual-feedback
+
+## ADDED Requirements
+
+### Requirement: Respuesta a cada acción
+Cada acción válida SHALL tener una animación de 400 ms o menos que muestre su efecto en el tablero.
+
+#### Scenario: Tejer
+- WHEN la Ostra teje micelio
+- THEN la línea de micelio crece desde la casilla vecina hacia la nueva
+
+### Requirement: Movimiento reducido
+Con `prefers-reduced-motion: reduce`, el juego SHALL omitir desplazamientos y partículas y mostrar solo el estado final.
+
+#### Scenario: Usuario con movimiento reducido
+- WHEN el sistema pide movimiento reducido y la Amanita revive un árbol
+- THEN el árbol aparece vivo sin animación de brote
+
+### Requirement: Sprites opcionales
+El juego SHALL funcionar con o sin el atlas de sprites.
+
+#### Scenario: Atlas ausente
+- WHEN `public/assets/guild.json` no existe
+- THEN los personajes se dibujan con formas y no hay errores en consola
+
+### Requirement: Peso de la página
+El total de assets SHALL ser de 2 MB o menos.
+
+#### Scenario: Build de producción
+- WHEN se ejecuta `npm run build`
+- THEN la suma de `dist/assets` no supera 2 MB

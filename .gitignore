@@ -1,0 +1,14 @@
+# Node / Vite
+node_modules/
+dist/
+.env*
+!.env.example
+
+# Playwright
+test-results/
+playwright-report/
+
+# Referencias de terceros: solo inspiración interna, no se publican en un repo público
+# (ver docs/art-direction.md › Referencias)
+docs/references/*
+!docs/references/.gitkeep
