@@ -27,6 +27,10 @@ export type Sheet =
   | { kind: 'spell' }
   | { kind: 'help' };
 
+/** Carta de historia abierta (003): intro en tres páginas, llegada de la maga o un final. */
+export type Story = { kind: 'intro'; page: number } | { kind: 'mage' } | { kind: 'won' } | { kind: 'lost' };
+export const INTRO_PAGES = 3;
+
 export interface Notice {
   readonly text: string;
   readonly tone: 'info' | 'warn';
@@ -41,6 +45,8 @@ export interface UiState {
   readonly notice: Notice;
   /** Especies cuya ficha ya se mostró al seleccionarlas (se recuerdan entre visitas). */
   readonly seen: readonly SpeciesId[];
+  /** Carta de historia abierta; mientras está, el resto del juego espera. */
+  readonly story: Story | null;
 }
 
 export interface AppState {
@@ -56,7 +62,11 @@ export type Action =
   | { type: 'endDay' }
   | { type: 'cancel' }
   | { type: 'openSheet'; sheet: Sheet }
-  | { type: 'closeSheet' };
+  | { type: 'closeSheet' }
+  | { type: 'storyNext' }
+  | { type: 'storyClose' }
+  /** Partida nueva (el claro lo elige main.ts: aleatorio, o el mismo con `?seed=` / `?map=`). */
+  | { type: 'playAgain'; game: GameState };
 
 const info = (text: string): Notice => ({ text, tone: 'info' });
 const warn = (text: string): Notice => ({ text, tone: 'warn' });
@@ -112,8 +122,29 @@ function tileHelp(t: Tile): string {
   return es.tileHelp[t.kind];
 }
 
-export function initialState(game: GameState = newGame(), seen: readonly SpeciesId[] = []): AppState {
-  return { game, ui: { selected: null, spell: null, sheet: null, notice: idleHint(game), seen } };
+/** Estado inicial. Con `intro`, la partida abre con las tres cartas de la intro. */
+export function initialState(game: GameState = newGame(), seen: readonly SpeciesId[] = [], intro = false): AppState {
+  const story: Story | null = intro ? { kind: 'intro', page: 0 } : null;
+  return { game, ui: { selected: null, spell: null, sheet: null, notice: idleHint(game), seen, story } };
+}
+
+/** Cierra la carta abierta. Al cerrar la intro, la bitácora invita a elegir un miembro. */
+function closeStory(state: AppState): AppState {
+  const { game, ui } = state;
+  const notice = ui.story?.kind === 'intro' ? info(es.hints.pickMember) : ui.notice;
+  return { game, ui: { ...ui, story: null, notice } };
+}
+
+/** Abre la carta que toque tras una jugada: un final, o la llegada de la maga. */
+function withStory(prev: AppState, next: AppState): AppState {
+  if (next === prev) return next;
+  const was = prev.game;
+  const now = next.game;
+  let story: Story | null = null;
+  if (was.status === 'playing' && now.status === 'won') story = { kind: 'won' };
+  else if (was.status === 'playing' && now.status === 'lost') story = { kind: 'lost' };
+  else if (!was.mageArrived && now.mageArrived) story = { kind: 'mage' };
+  return story ? { game: now, ui: { ...next.ui, selected: null, spell: null, sheet: null, story } } : next;
 }
 
 /** Si es la primera vez que se selecciona esta especie, abre su ficha (y la marca como vista). */
@@ -146,7 +177,22 @@ export function highlighted(state: AppState): Tile[] {
 const cleared = (ui: UiState, notice: Notice): UiState => ({ ...ui, selected: null, spell: null, sheet: null, notice });
 
 export function reduce(state: AppState, action: Action): AppState {
+  return withStory(state, reduceAction(state, action));
+}
+
+function reduceAction(state: AppState, action: Action): AppState {
   const { game, ui } = state;
+  // Con una carta abierta solo cuentan sus botones (Esc la cierra como «Saltar» o «Ver el claro»).
+  if (ui.story) {
+    if (action.type === 'storyNext') {
+      const story = ui.story;
+      if (story.kind === 'intro' && story.page < INTRO_PAGES - 1) return { game, ui: { ...ui, story: { kind: 'intro', page: story.page + 1 } } };
+      return closeStory(state);
+    }
+    if (action.type === 'storyClose' || action.type === 'cancel') return closeStory(state);
+    if (action.type === 'playAgain') return initialState(action.game, ui.seen);
+    return state;
+  }
   switch (action.type) {
     case 'select': {
       if (game.status !== 'playing') return state;
@@ -205,6 +251,11 @@ export function reduce(state: AppState, action: Action): AppState {
       return { game, ui: { ...ui, sheet: action.sheet } };
     case 'closeSheet':
       return afterSheet(state);
+    case 'storyNext':
+    case 'storyClose':
+      return state;
+    case 'playAgain':
+      return initialState(action.game, ui.seen);
   }
 }
 

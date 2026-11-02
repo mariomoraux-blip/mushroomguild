@@ -14,6 +14,8 @@ export interface PaintInput {
   readonly occupied: ReadonlySet<string>;
   /** El Árbol Padre se dibuja aparte con su sprite de Blender: aquí solo su aura y su aro. */
   readonly fatherSprite?: boolean;
+  /** Follaje vivo de la estación (luz y sombra); por defecto, el de primavera. */
+  readonly foliage?: readonly [ColorToken, ColorToken];
 }
 
 /** Lo que se pintó en cada casilla (para pruebas). */
@@ -305,13 +307,13 @@ function paintRock(ctx: Ctx, T: number, t: Tile) {
   ctx.fill();
 }
 
-function paintTree(ctx: Ctx, T: number, t: Tile) {
+function paintTree(ctx: Ctx, T: number, t: Tile, foliage: readonly [ColorToken, ColorToken]) {
   const big = t.kind === 'mother';
   const cx = (t.x + 0.5) * T;
   const base = (t.y + (big ? 0.95 : 0.9)) * T;
   const s = big ? 1.12 : 1;
   const alive = t.alive;
-  const [light, dark]: [ColorToken, ColorToken] = alive ? ['leaf', 'leafDark'] : ['stone', 'stoneDark'];
+  const [light, dark] = alive ? foliage : (['stone', 'stoneDark'] as const);
   softShadow(ctx, cx, base, T * 0.3 * s, T * 0.06);
   // Tronco con raíces.
   ctx.beginPath();
@@ -520,9 +522,54 @@ function paintStar(ctx: Ctx, T: number, x: number, y: number) {
   ctx.stroke();
 }
 
+/**
+ * Luz propia del micelio (capa aparte, sin gradación y con mezcla aditiva): un halo amplio en cada
+ * casilla de la red y el resplandor de los hilos. Su intensidad la da el alfa de la capa (estación).
+ */
+export function paintMyceliumGlow(ctx: Ctx, T: number, game: GameState): void {
+  ctx.clearRect(0, 0, W * T, H * T);
+  ctx.save();
+  roundRect(ctx, 0, 0, W * T, H * T, T * 0.16);
+  ctx.clip();
+  for (const t of game.tiles) {
+    if (!t.net) continue;
+    const cx = (t.x + 0.5) * T;
+    const cy = (t.y + 0.5) * T;
+    ctx.fillStyle = radial(ctx, cx, cy, T * 1.1, [
+      [0, 'mycelium', 0.55],
+      [0.45, 'mycelium', 0.22],
+      [1, 'mycelium', 0],
+    ]);
+    ctx.fillRect(cx - T * 1.1, cy - T * 1.1, T * 2.2, T * 2.2);
+    ctx.fillStyle = radial(ctx, cx, cy, T * 0.3, [
+      [0, 'glow', 0.7],
+      [1, 'glow', 0],
+    ]);
+    ctx.fillRect(cx - T * 0.3, cy - T * 0.3, T * 0.6, T * 0.6);
+  }
+  ctx.strokeStyle = rgba('mycelium', 0.8);
+  ctx.lineWidth = T * 0.06;
+  ctx.lineCap = 'round';
+  ctx.shadowColor = rgba('mycelium');
+  ctx.shadowBlur = T * 0.35;
+  for (const t of game.tiles) {
+    if (!t.net) continue;
+    for (const n of neighbors(game, t.x, t.y)) {
+      if (!n.net || n.y * W + n.x < t.y * W + t.x) continue;
+      const w = hash(t.x + n.x, t.y + n.y, 5) - 0.5; // la misma curva que paintNet
+      const [x0, y0, x1, y1] = [(t.x + 0.5) * T, (t.y + 0.5) * T, (n.x + 0.5) * T, (n.y + 0.5) * T];
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.quadraticCurveTo((x0 + x1) / 2 + (y1 - y0) * w * 0.35, (y0 + y1) / 2 + (x0 - x1) * w * 0.35, x1, y1);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
 /** Pinta el claro completo. Devuelve qué objeto se pintó en cada casilla. */
 export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
-  const { game, valid, star, occupied, fatherSprite = false } = input;
+  const { game, valid, star, occupied, fatherSprite = false, foliage = ['leaf', 'leafDark'] } = input;
   ctx.clearRect(0, 0, W * T, H * T);
   // Esquinas redondeadas como el marco (el canvas ya no las recorta: sobresale por arriba).
   ctx.save();
@@ -545,7 +592,7 @@ export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
     }
     if (t.kind === 'log') paintLog(ctx, T, t);
     else if (t.kind === 'rock') paintRock(ctx, T, t);
-    else if (t.kind === 'tree' || t.kind === 'mother') paintTree(ctx, T, t);
+    else if (t.kind === 'tree' || t.kind === 'mother') paintTree(ctx, T, t, foliage);
     else if (t.kind === 'home') paintHome(ctx, T, t);
     painted.push({ x: t.x, y: t.y, object: t.kind });
   }

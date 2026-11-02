@@ -160,7 +160,7 @@ Recortes de la hoja v1 en `public/assets/ui/`. "Listo" significa que el tamaño 
 | `logo.webp` | Portada (y cartel del juego) | 319 × 216 (27 KB) | ≈ 260 × 175 | 520 × 350 | Placeholder (baja resolución) |
 | `logo-mini.webp` | HUD del juego, esquina superior izquierda | 147 × 133 (11 KB) | ≈ 96 × 86 | 192 × 172 | Placeholder (baja resolución) |
 | `fondo-portada.webp` | Portada | 320 × 145 (20 KB) | 390 × 844 (vertical) | 860 × 1860 | Placeholder (baja resolución); Hoy es apaisado: hay que repintarlo en vertical |
-| `fondo-intro.webp` | Carta "El bosque se apaga" y fin del invierno | 323 × 145 (16 KB) | 390 × 844 (vertical) | 860 × 1860 | Placeholder (baja resolución); Ídem |
+| `fondo-intro.webp` | Carta "El bosque se apaga" y fin del invierno | 1672 × 941 (304 KB) | 390 × 844 (vertical) | 860 × 1860 | Repintado en alta resolución (fuente en `assets/ui/source/`); sigue apaisado: en vertical se recorta al centro (camino) |
 | `fondo-victoria.webp` | Pantalla "¡El bosque despertó!" | 355 × 145 (24 KB) | 390 × 844 (vertical) | 860 × 1860 | Placeholder (baja resolución); Ídem |
 | `marco-bosque.webp` | Marco de follaje alrededor de todas las pantallas | 281 × 255 (34 KB) | pantalla completa | 9 partes, esquinas de 240 px | Placeholder (rehacer como pieza) |
 | `marco-raices.webp` | Referencia del marco del tablero | 241 × 241 (21 KB) | ≈ 380 × 600 | — | Placeholder (rehacer como pieza); Se usa partido en piezas |

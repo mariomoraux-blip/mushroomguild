@@ -27,6 +27,8 @@ test.beforeEach(async ({ page }, info) => {
       localStorage.setItem('gremio.seenSpecies', JSON.stringify(['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'])),
     );
   }
+  // La intro (003) sale la primera vez; aquí se da por vista (tiene su propia prueba en story.spec.ts).
+  await page.addInitScript(() => localStorage.setItem('gremio.introSeen', '1'));
   const list: string[] = [];
   errors.set(page, list);
   page.on('pageerror', (e) => list.push(e.message));
@@ -292,10 +294,11 @@ test('estilo cozy: retratos en el dock, tablón de madera, sello, botón de luna
     page.evaluate(() => {
       type Obj = { type: string; visible: boolean; texture?: { key: string } };
       const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: Obj[] } } } } };
-      // Sprites de miembros: imágenes visibles que no son el claro pintado ("claro") ni el Árbol Padre.
+      // Sprites de miembros: imágenes visibles sueltas que no son la luz del micelio ni el Árbol Padre
+      // (el claro pintado va dentro del contenedor del escenario).
       return w.game.scene
         .getScene('Game')
-        .children.list.filter((o) => o.type === 'Image' && o.visible && o.texture?.key !== 'claro' && !o.texture?.key.startsWith('arbol-padre')).length;
+        .children.list.filter((o) => o.type === 'Image' && o.visible && o.texture?.key !== 'micelio' && !o.texture?.key.startsWith('arbol-padre')).length;
     });
   expect(await visibleSprites()).toBe(0);
   await page.locator('[data-id="2"]').click();

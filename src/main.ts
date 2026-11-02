@@ -3,6 +3,7 @@ import { es } from './copy/es';
 import { tileSize } from './layout';
 import { GameScene } from './scenes/GameScene';
 import { newGame, newRandomGame, type SpeciesId } from './rules';
+import { grade, sameGrade, stageLight, type Grade } from './scenes/light';
 import { createStore, initialState } from './store';
 import { applyTheme, BOARD_HEADROOM, renderResolution } from './theme';
 import { mountAmbient } from './ui/ambient';
@@ -11,7 +12,8 @@ import { mountBoardOverlay } from './ui/board';
 import { mountDock } from './ui/dock';
 import { mountHud } from './ui/hud';
 import { mountSheet } from './ui/sheet';
-import { debugGame } from './debug';
+import { mountStory } from './ui/story';
+import { debugStart } from './debug';
 import './styles.css';
 
 applyTheme();
@@ -24,23 +26,35 @@ const storage = {
   set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* sin almacenamiento */ } },
 };
 const SEEN = 'gremio.seenSpecies';
+const INTRO_SEEN = 'gremio.introSeen';
 const seen = (() => { try { return JSON.parse(storage.get(SEEN) ?? '[]') as SpeciesId[]; } catch { return []; } })();
 // Claro de la partida: aleatorio por defecto; `?seed=N` repite un mapa y `?map=clasico` usa el del Capítulo 1.
 const params = new URLSearchParams(location.search);
 const seedParam = Number(params.get('seed'));
 const seed = Number.isFinite(seedParam) && seedParam > 0 ? seedParam : (Date.now() % 2147483647) + 1;
-const firstGame = debugGame() ?? (params.get('map') === 'clasico' ? newGame() : newRandomGame(seed));
-const store = createStore(initialState(firstGame, seen));
+const fixedSeed = Number.isFinite(seedParam) && seedParam > 0;
+/** Claro de una partida nueva: el mismo con `?map=clasico` o `?seed=N`; si no, uno aleatorio. */
+const makeGame = (s: number) => (params.get('map') === 'clasico' ? newGame() : newRandomGame(s));
+const debug = debugStart();
+// La intro sale la primera vez que se abre el juego (no en los estados de prueba ni al jugar otra vez).
+const intro = !debug && storage.get(INTRO_SEEN) !== '1';
+const start = initialState(debug?.game ?? makeGame(seed), seen, intro);
+const store = createStore(debug?.story ? { ...start, ui: { ...start.ui, story: debug.story } } : start);
 store.subscribe((state, prev) => {
   if (state.ui.seen !== prev.ui.seen) storage.set(SEEN, JSON.stringify(state.ui.seen));
+  if (prev.ui.story?.kind === 'intro' && state.ui.story?.kind !== 'intro') storage.set(INTRO_SEEN, '1');
 });
+const playAgain = () =>
+  store.dispatch({ type: 'playAgain', game: makeGame(fixedSeed ? seed : (Date.now() % 2147483647) + 1) });
 
 const renderHud = mountHud($('hud'), store);
 const renderDock = mountDock($('dock'), store);
 const overlay = mountBoardOverlay($('overlay'), store);
 const renderSheet = mountSheet($('sheet'), store);
+const renderStory = mountStory($('story'), document.querySelector<HTMLElement>('.app')!, store, playAgain);
 const notice = $('notice');
-mountAmbient($<HTMLCanvasElement>('ambient'));
+const setAmbient = mountAmbient($<HTMLCanvasElement>('ambient'));
+let ambientGrade: Grade | null = null;
 $('notice-bar').prepend(tornPaper());
 $('board').append(vine(), vine(true));
 const noticeBar = $('notice-bar');
@@ -50,6 +64,10 @@ cardBtn.addEventListener('click', () => {
   const id = store.getState().ui.selected;
   if (id !== null) store.dispatch({ type: 'openSheet', sheet: { kind: 'member', id } });
 });
+// Tras «Ver el claro», la bitácora ofrece jugar otra vez.
+const againBtn = $<HTMLButtonElement>('again-btn');
+againBtn.textContent = es.story.playAgain;
+againBtn.addEventListener('click', playAgain);
 
 const renderDom = () => {
   const state = store.getState();
@@ -57,11 +75,16 @@ const renderDom = () => {
   renderDock(state);
   overlay.render(state);
   renderSheet(state);
+  renderStory(state);
+  // El fondo vivo es parte del escenario: sigue la luz de la estación y el progreso.
+  const g = grade(stageLight(state.game));
+  if (!ambientGrade || !sameGrade(ambientGrade, g)) setAmbient((ambientGrade = g));
   notice.textContent = state.ui.notice.text;
   noticeBar.dataset.tone = state.ui.notice.tone;
   // Botón "Ficha" del miembro seleccionado.
   const selected = state.ui.selected === null ? undefined : state.game.members.find((m) => m.id === state.ui.selected);
   cardBtn.hidden = !selected;
+  againBtn.hidden = state.game.status === 'playing' || state.ui.story !== null;
   if (selected) cardBtn.setAttribute('aria-label', es.card.openLabel(selected.name));
 };
 store.subscribe((state, prev) => {

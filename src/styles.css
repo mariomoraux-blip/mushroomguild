@@ -189,6 +189,8 @@ button { font: inherit; color: inherit; }
 .notice[data-tone='warn']::before { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent); }
 .notice__text { margin: 0; flex: 1; min-width: 0; }
 .notice__btn { flex: 0 0 auto; min-height: var(--touch); height: var(--touch); margin-right: 2px; border-radius: 22px; font-size: 13px; }
+/* «Jugar otra vez» al terminar la partida: botón principal, como el de las cartas. */
+.notice__btn--primary { padding: 0 18px; font-family: var(--font-display); font-size: 16px; color: var(--ink); background: linear-gradient(var(--glow), var(--sun)); }
 
 /* ─── Dock: tarjetas de criatura ──────────────────────────────────────────── */
 .dock { height: var(--dock-h); display: flex; gap: var(--gap); min-width: 0; align-items: stretch; }
@@ -450,6 +452,73 @@ button { font: inherit; color: inherit; }
 .help p, .help ol, .help__tiles { margin: 0; font-size: 14px; line-height: 1.4; }
 .help ol, .help__tiles { padding-left: 20px; display: grid; gap: 4px; }
 .help__tip { margin-top: 14px !important; padding: 10px 12px; background: var(--mycelium); border: 2px dashed var(--moss); border-radius: 16px; }
+
+/* ─── Cartas de historia (003): globo de papel sobre un fondo pintado ─────── */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.story {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: linear-gradient(color-mix(in srgb, var(--ink) 18%, transparent), color-mix(in srgb, var(--ink) 38%, transparent)), var(--story-bg) center / cover no-repeat, var(--bark);
+}
+.story[hidden] { display: none; }
+.story[data-kind='mage'] { background: color-mix(in srgb, var(--bark) 55%, transparent); backdrop-filter: blur(2px); }
+.story__card {
+  position: relative;
+  width: min(360px, 100%);
+  margin: auto 0;
+  padding: 22px 18px 18px;
+  text-align: center;
+  background: var(--grain), linear-gradient(var(--cream), color-mix(in srgb, var(--peach) 40%, var(--cream)));
+  border: 2px solid var(--ink);
+  border-radius: 28px 28px 28px 10px;
+  box-shadow: var(--shadow);
+  animation: story-in 240ms ease-out;
+}
+/* Cola del globo de diálogo. */
+.story__card::after {
+  content: '';
+  position: absolute;
+  left: 34px;
+  bottom: -16px;
+  width: 26px;
+  height: 18px;
+  background: color-mix(in srgb, var(--peach) 40%, var(--cream));
+  border: 2px solid var(--ink);
+  border-top: 0;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+.story__title {
+  margin: 0 auto 10px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 22px 9px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.15;
+  color: var(--paper);
+  background: linear-gradient(var(--moss), var(--mossDark));
+  clip-path: polygon(0 0, 100% 0, 95% 50%, 100% 100%, 0 100%, 5% 50%);
+}
+.story__text { margin: 0; font-size: 18px; line-height: 1.4; font-weight: 700; color: var(--ink); }
+.story__note, .story__list { margin: 12px 0 0; font-size: 16px; line-height: 1.4; color: var(--bark); }
+.story__list { padding: 0; list-style: none; display: grid; gap: 6px; text-align: left; }
+.story__list li { padding: 8px 12px; background: var(--paper); border: 2px solid var(--ink); border-radius: 16px 16px 16px 4px; }
+.story__progress { display: flex; justify-content: center; gap: 8px; margin: 14px 0 0; }
+.story__dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--ink); background: var(--paper); }
+.story__dot[data-on] { background: var(--accent); }
+.story__actions { display: grid; gap: 8px; margin-top: 4px; }
+.story__actions .btn--wide { margin-top: 12px; }
+.story__secondary { font-size: 16px; }
+.story__portrait { display: flex; justify-content: center; margin: -8px 0 6px; }
+@keyframes story-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 /* ─── Horizontal en teléfono: tablero a la izquierda, HUD y dock a la derecha ─ */
 @media (orientation: landscape) and (max-height: 540px) {

@@ -1,7 +1,9 @@
 // Fondo vivo: shader WebGL con luz cálida entre las copas, haces de luz, esporas que flotan y grano
 // de papel. Va detrás de la interfaz, a media resolución. Con movimiento reducido pinta un solo
 // cuadro; se pausa al ocultar la pestaña. Si no hay WebGL, queda el fondo CSS.
-import { vec3, type ColorToken } from '../theme';
+// Es parte del escenario: recibe la luz de la estación y la saturación del progreso (003).
+import { mixGrade, type Grade } from '../scenes/light';
+import { LIGHT_TRANSITION_MS, vec3, type ColorToken } from '../theme';
 
 const VERT = `attribute vec2 p; void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
 
@@ -15,6 +17,9 @@ uniform vec3 u_glow;
 uniform vec3 u_leaf;
 uniform vec3 u_leafDark;
 uniform vec3 u_spore;
+uniform vec3 u_tint;
+uniform float u_bright;
+uniform float u_sat;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) {
@@ -58,6 +63,10 @@ void main() {
     col += tint * exp(-dot(d, d) * size) * twinkle * 0.55;
   }
 
+  // Luz de la estación: saturación del progreso, después tinte × brillo.
+  float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
+  col = mix(vec3(lum), col, u_sat) * u_tint * u_bright;
+
   // Viñeta suave y grano de papel.
   vec2 c = uv - 0.5;
   col *= 1.0 - dot(c, c) * 0.12;
@@ -65,9 +74,11 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
-export function mountAmbient(canvas: HTMLCanvasElement): void {
+/** Monta el fondo vivo. Devuelve cómo cambiarle la luz (no hace nada si no hay WebGL). */
+export function mountAmbient(canvas: HTMLCanvasElement): (g: Grade) => void {
+  const none = () => {};
   const gl = canvas.getContext('webgl', { antialias: false, premultipliedAlpha: false, preserveDrawingBuffer: true });
-  if (!gl) return;
+  if (!gl) return none;
   const compile = (type: number, src: string) => {
     const sh = gl.createShader(type)!;
     gl.shaderSource(sh, src);
@@ -76,12 +87,12 @@ export function mountAmbient(canvas: HTMLCanvasElement): void {
   };
   const vs = compile(gl.VERTEX_SHADER, VERT);
   const fs = compile(gl.FRAGMENT_SHADER, FRAG);
-  if (!vs || !fs) return;
+  if (!vs || !fs) return none;
   const prog = gl.createProgram()!;
   gl.attachShader(prog, vs);
   gl.attachShader(prog, fs);
   gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return none;
   gl.useProgram(prog);
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -91,8 +102,6 @@ export function mountAmbient(canvas: HTMLCanvasElement): void {
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const u = (name: string) => gl.getUniformLocation(prog, name);
   const colors: [string, ColorToken][] = [
-    ['u_top', 'peach'],
-    ['u_bottom', 'cream'],
     ['u_glow', 'glow'],
     ['u_leaf', 'leaf'],
     ['u_leafDark', 'leafDark'],
@@ -101,6 +110,27 @@ export function mountAmbient(canvas: HTMLCanvasElement): void {
   for (const [name, token] of colors) gl.uniform3fv(u(name), vec3(token));
   const uRes = u('u_res');
   const uTime = u('u_time');
+  const uTop = u('u_top');
+  const uBottom = u('u_bottom');
+  const uTint = u('u_tint');
+  const uBright = u('u_bright');
+  const uSat = u('u_sat');
+  const setGrade = (g: Grade) => {
+    gl.uniform3fv(uTop, [...g.skyTop]);
+    gl.uniform3fv(uBottom, [...g.skyBottom]);
+    gl.uniform3fv(uTint, [...g.tint]);
+    gl.uniform1f(uBright, g.brightness);
+    gl.uniform1f(uSat, g.saturation);
+  };
+  gl.uniform3fv(uTop, vec3('peach'));
+  gl.uniform3fv(uBottom, vec3('cream'));
+  gl.uniform3fv(uTint, [1, 1, 1]);
+  gl.uniform1f(uBright, 1);
+  gl.uniform1f(uSat, 1);
+  // Transición de luz: de `from` a `to` desde `since` (ms).
+  let from: Grade | null = null;
+  let to: Grade | null = null;
+  let since = 0;
 
   const resize = () => {
     const scale = 0.5; // media resolución: es un fondo difuso
@@ -119,9 +149,14 @@ export function mountAmbient(canvas: HTMLCanvasElement): void {
       // ~30 fps: el fondo no necesita más.
       last = now;
       gl.uniform1f(uTime, (now - start) / 1000);
+      if (from && to) {
+        const t = Math.min(1, (now - since) / LIGHT_TRANSITION_MS);
+        setGrade(mixGrade(from, to, t));
+        if (t >= 1) from = null;
+      }
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
-    if (!reduce.matches && !document.hidden) raf = requestAnimationFrame(frame);
+    if ((!reduce.matches || from) && !document.hidden) raf = requestAnimationFrame(frame);
   };
   const kick = () => {
     if (!raf) raf = requestAnimationFrame(frame);
@@ -138,4 +173,18 @@ export function mountAmbient(canvas: HTMLCanvasElement): void {
   reduce.addEventListener('change', kick);
   canvas.dataset.ready = 'true';
   if (!reduce.matches) kick();
+
+  return (g: Grade) => {
+    if (!to || reduce.matches) {
+      from = null;
+      to = g;
+      setGrade(g);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      return;
+    }
+    from = from && to ? mixGrade(from, to, Math.min(1, (performance.now() - since) / LIGHT_TRANSITION_MS)) : to;
+    to = g;
+    since = performance.now();
+    kick();
+  };
 }

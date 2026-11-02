@@ -186,6 +186,40 @@ export const es = {
   } satisfies Record<SpeciesId, { context: string; ability: string; howTo: string; movement: string; nutrients: string; heals?: string; messenger?: string; powers?: string }>,
   quote: (text: string) => `«${text}»`,
 
+  /** Cartas de historia (003): intro, llegada de la maga y finales. */
+  story: {
+    intro: [
+      { title: 'El bosque se apaga', text: 'El bosque se apaga: los árboles del claro perdieron su color.' },
+      { title: 'Un gremio despierta', text: 'Bajo la tierra, un gremio de hongos despierta.' },
+      { title: 'Hacia el Árbol Padre', text: 'Lleva la red de micelio al Árbol Padre antes del invierno.' },
+    ],
+    progress: (page: number, total: number) => `Carta ${page} de ${total}`,
+    next: 'Siguiente',
+    skip: 'Saltar',
+    start: 'Comenzar',
+    mage: {
+      title: 'Llega Maestra Bruna',
+      text: 'El bosque volvió a hablar, y alguien escuchó.',
+      spells: [
+        'Brote arcano: una roca vecina a la red se vuelve tierra con micelio.',
+        'Lluvia de esporas: sobre un árbol vivo, esporas y nutrientes ya.',
+      ],
+      ok: 'Continuar',
+    },
+    won: {
+      title: '¡El bosque despertó!',
+      text: (day: number) => `El Árbol Padre despertó en el día ${day}.`,
+      trees: (n: number, total: number) => `Árboles revividos: ${n} de ${total}.`,
+    },
+    lost: {
+      title: 'Fin del invierno',
+      text: 'El bosque esperará la próxima primavera.',
+      tip: 'Pista: revive árboles temprano. Cada árbol vivo da esporas y nutrientes al amanecer.',
+    },
+    playAgain: 'Jugar otra vez',
+    viewBoard: 'Ver el claro',
+  },
+
   /** Libreta de campo (ayuda). */
   help: {
     button: 'Ayuda: Libreta de campo',

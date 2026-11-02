@@ -22,6 +22,22 @@ export const color = {
   peach: '#F6D7B0', // luz cálida del fondo
   glow: '#FFF4C2', // brillos, aura del Árbol Padre, luciérnagas
   stoneDark: '#6F675B', // sombra de rocas y copas dormidas
+  // Luz por estación (003): tintes del escenario, follaje vivo y cielo del fondo vivo.
+  tintSpring: '#F2FAE8',
+  tintSummer: '#FFF1CF',
+  tintAutumn: '#F7C58E',
+  tintWinter: '#8FA3D6',
+  leafSummer: '#A9B848',
+  leafSummerDark: '#83923A',
+  leafAutumn: '#D98A3A',
+  leafAutumnDark: '#B0662A',
+  leafWinter: '#7C93B8',
+  leafWinterDark: '#5C7196',
+  skySpring: '#EAF4D6',
+  skyAutumn: '#F0A46A',
+  skySummerLow: '#FFF4DA',
+  skyWinter: '#2E3A66',
+  skyWinterLow: '#4B5784',
 } as const;
 
 export type ColorToken = keyof typeof color;
@@ -48,6 +64,35 @@ export const FATHER_SCALE = 1.2;
 /** Margen del canvas sobre el claro, en casillas: deja que la copa despierta sobresalga del marco. */
 export const BOARD_HEADROOM = 0.2;
 export const boardArtUrl = (key: string) => `${import.meta.env.BASE_URL}assets/board/${key}.png`;
+/** Piezas de la hoja de UI (public/assets/ui), en WebP. */
+export const uiArtUrl = (key: string) => `${import.meta.env.BASE_URL}assets/ui/${key}.webp`;
+
+/**
+ * Luz del escenario por estación (docs/art-direction.md › Luz por estación). Se aplica al claro, al
+ * Árbol Padre y al fondo vivo; nunca a personajes ni a la interfaz.
+ * `tint` multiplica el color, `brightness` lo escala, `foliage` pinta las copas vivas, `sky` es el
+ * degradado del fondo vivo (arriba, abajo) y `mycelium` es el alfa de la capa de brillo del micelio.
+ */
+export interface SeasonLight {
+  readonly hour: 'mañana' | 'mediodía' | 'atardecer' | 'anochecer';
+  readonly tint: ColorToken;
+  readonly brightness: number;
+  readonly foliage: readonly [ColorToken, ColorToken];
+  readonly sky: readonly [ColorToken, ColorToken];
+  readonly mycelium: number;
+}
+
+export const SEASON_LIGHT: readonly [SeasonLight, SeasonLight, SeasonLight, SeasonLight] = [
+  { hour: 'mañana', tint: 'tintSpring', brightness: 1.05, foliage: ['leaf', 'leafDark'], sky: ['skySpring', 'cream'], mycelium: 0.2 },
+  { hour: 'mediodía', tint: 'tintSummer', brightness: 1.08, foliage: ['leafSummer', 'leafSummerDark'], sky: ['peach', 'skySummerLow'], mycelium: 0.4 },
+  { hour: 'atardecer', tint: 'tintAutumn', brightness: 0.92, foliage: ['leafAutumn', 'leafAutumnDark'], sky: ['skyAutumn', 'peach'], mycelium: 0.65 },
+  { hour: 'anochecer', tint: 'tintWinter', brightness: 0.62, foliage: ['leafWinter', 'leafWinterDark'], sky: ['skyWinter', 'skyWinterLow'], mycelium: 1 },
+];
+
+/** Saturación del escenario: casi gris al empezar, color pleno con el Árbol Padre despierto. */
+export const SATURATION = { min: 0.15, max: 1 } as const;
+/** Duración del cambio de luz entre estaciones (ms). Con movimiento reducido es inmediato. */
+export const LIGHT_TRANSITION_MS = 600;
 
 /** Color de la paleta como número para Phaser (0xRRGGBB). */
 export const hex = (token: ColorToken): number => parseInt(color[token].slice(1), 16);
