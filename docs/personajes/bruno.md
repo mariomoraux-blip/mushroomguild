@@ -52,7 +52,7 @@ Para la ficha de criatura: "el panadero del bosque: huele a tierra mojada y nunc
 | Feliz | Levanta la canasta |
 
 ## Prueba de silueta
-Negro sobre blanco a 56 px, contra embudo (Añil, variante 6), domo alto con falda (Rubí), campana (Perico) y cono alto (Maese Bruma). Las siluetas de comparación son bocetos a partir de referentes, no diseños finales: si cambian, hay que volver a medir.
+Negro sobre blanco a 56 px, contra embudo (Añil, variante 6), domo alto con falda (Rubí), campana (Perico) y cono alto (Maestra Bruma). Las siluetas de comparación son bocetos a partir de referentes, no diseños finales: si cambian, hay que volver a medir.
 
 | Variante | Peor solape (IoU, menor es mejor) | Más parecida a | Diferencia de perfil mínima (mayor es mejor) |
 | --- | --- | --- | --- |

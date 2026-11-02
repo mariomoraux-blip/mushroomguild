@@ -42,7 +42,7 @@ export function addMember(s: MutableState, species: RecruitableSpecies): Mutable
   return m;
 }
 
-/** Agrega a Maese Bruma a un estado ya copiado (uso interno). */
+/** Agrega a Maestra Bruma a un estado ya copiado (uso interno). */
 export function addMage(s: MutableState): Mutable<Member> {
   const m: Mutable<Member> = { id: s.nextId++, species: 'mago', name: es.mageName, used: false, at: null };
   s.members.push(m);
@@ -85,5 +85,5 @@ export const motherTile = (s: GameState): Tile => s.tiles.find((t) => t.kind ===
 export const seasonIndex = (day: number): number =>
   Math.min(Math.ceil(DAYS / DAYS_PER_SEASON) - 1, Math.floor((day - 1) / DAYS_PER_SEASON));
 export const season = (day: number): string => es.seasons[seasonIndex(day)] ?? '';
-/** ¿Maese Bruma ya lanzó un hechizo en la estación actual? */
+/** ¿Maestra Bruma ya lanzó un hechizo en la estación actual? */
 export const magicSpent = (s: GameState): boolean => s.lastSpellSeason === seasonIndex(s.day);

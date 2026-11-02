@@ -14,9 +14,9 @@ export interface Setup {
   used?: number[];
   /** Miembros reclutables extra que se agregan al gremio (disponibles). */
   extraMembers?: RecruitableSpecies[];
-  /** Maese Bruma ya está en el gremio (se agrega después de los extra). */
+  /** Maestra Bruma ya está en el gremio (se agrega después de los extra). */
   mage?: boolean;
-  /** Estación (0–3) del último hechizo de Maese Bruma. */
+  /** Estación (0–3) del último hechizo de Maestra Bruma. */
   lastSpellSeason?: number;
 }
 

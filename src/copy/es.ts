@@ -30,9 +30,9 @@ export const es = {
       quip: 'Viscosa como un caramelo y habladora como un loro. Cambia de color con los días.',
     },
     mago: {
-      name: 'Conocybe arcana', short: 'Conocybe', scientific: 'Conocybe arcana', role: 'Mago',
+      name: 'Conocybe arcana', short: 'Conocybe', scientific: 'Conocybe arcana', role: 'Maga',
       verb: 'Lanza un hechizo por estación: Brote arcano o Lluvia de esporas.',
-      quip: 'No aparece en ningún libro. Él dice que fueron los libros los que no lo encontraron.',
+      quip: 'No aparece en ningún libro. Ella dice que fueron los libros los que no la encontraron.',
     },
   } satisfies Record<SpeciesId, { name: string; short: string; scientific: string; role: string; verb: string; quip: string }>,
 
@@ -43,7 +43,7 @@ export const es = {
     amanita: ['Rubí', 'Cereza', 'Lunar', 'Pimienta'],
     gliophorus: ['Perico', 'Loro', 'Kiwi', 'Lima'],
   } satisfies Record<RecruitableSpecies, readonly string[]>,
-  mageName: 'Maese Bruma',
+  mageName: 'Maestra Bruma',
 
   spells: {
     sprout: 'Brote arcano',
@@ -76,7 +76,7 @@ export const es = {
     reviveCost: (n: number) => `Faltan nutrientes: revivir cuesta ${n}.`,
     gliophorusNeedsTree: 'La Gliophorus solo pasa la voz desde un árbol vivo.',
     messageCost: (n: number) => `Faltan esporas: pasar la voz cuesta ${n}.`,
-    magicSpent: 'Maese Bruma descansa: su magia vuelve con la próxima estación.',
+    magicSpent: 'Maestra Bruma descansa: su magia vuelve con la próxima estación.',
     sproutNeedsRock: 'El Brote arcano solo despierta rocas que tocan la red.',
     rainNeedsTree: 'La Lluvia de esporas se lanza sobre un árbol vivo.',
     guildFull: 'El gremio está completo.',
@@ -134,7 +134,7 @@ export const es = {
     recruitHelp: (cost: number, max: number) => `Cuesta ${cost} esporas. Hasta ${max} miembros; el recluta trabaja desde mañana.`,
     recruitAction: 'Reclutar',
     info: (name: string) => `Ficha de ${name}`,
-    mageArrives: 'Llega solo, al amanecer siguiente al segundo árbol revivido.',
+    mageArrives: 'Llega sola, al amanecer siguiente al segundo árbol revivido.',
     spellTitle: 'Elige un hechizo',
   },
 
@@ -171,6 +171,6 @@ export const es = {
     treesGave: (spores: number, nutrients: number) =>
       `Los árboles dieron ${plural(spores, 'espora')} y ${plural(nutrients, 'nutriente')}.`,
     seasonStart: (season: string) => `Comienza ${season.toLowerCase()}.`,
-    mageArrives: 'El bosque volvió a hablar, y alguien escuchó. Llega Maese Bruma.',
+    mageArrives: 'El bosque volvió a hablar, y alguien escuchó. Llega Maestra Bruma.',
   },
 } as const;

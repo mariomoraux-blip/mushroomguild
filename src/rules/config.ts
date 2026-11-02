@@ -12,7 +12,7 @@ export const COST = { weave: 1, revive: 3, mother: 6, recruit: 2, message: 2 } a
 export const GAIN = { log: 3, treeSpores: 1, treeNutrients: 1, message: 3 } as const;
 export const LOG_USES = 2;
 export const TREES_FOR_MOTHER = 2;
-/** Árboles revividos que hacen llegar a Maese Bruma al amanecer siguiente. */
+/** Árboles revividos que hacen llegar a Maestra Bruma al amanecer siguiente. */
 export const TREES_FOR_MAGE = 2;
 
 /** Especies reclutables; el mago no está aquí y no cuenta en `MAX_GUILD`. */

@@ -34,10 +34,10 @@ describe('Requirement: Selección de miembro', () => {
   });
 });
 
-describe('Requirement: Hechizos del mago', () => {
+describe('Requirement: Hechizos de la maga', () => {
   const withMage = () => initialState(setup({ mage: true, net: [{ x: 3, y: 6 }], alive: [{ x: 4, y: 6 }] }));
 
-  it('al seleccionar a Maese Bruma se pide primero el hechizo y no se resalta nada', () => {
+  it('al seleccionar a Maestra Bruma se pide primero el hechizo y no se resalta nada', () => {
     const s0 = withMage();
     const s = run(s0, { type: 'select', id: idOf(s0.game, 'mago') });
     expect(s.ui.sheet).toEqual({ kind: 'spell' });
@@ -62,7 +62,7 @@ describe('Requirement: Hechizos del mago', () => {
     const s0 = initialState(setup({ mage: true, alive: [{ x: 4, y: 6 }], lastSpellSeason: 0 }));
     const s = run(s0, { type: 'select', id: idOf(s0.game, 'mago') });
     expect(s.ui.sheet).toBeNull();
-    expect(s.ui.notice.text).toBe('Maese Bruma: su magia vuelve con la próxima estación.');
+    expect(s.ui.notice.text).toBe('Maestra Bruma: su magia vuelve con la próxima estación.');
   });
 });
 
@@ -102,10 +102,10 @@ describe('Requirement: Feedback de acción inválida', () => {
     expect(s.ui.notice.text).toBe('Perico: faltan esporas: pasar la voz cuesta 2.');
   });
 
-  it('Scenario: Sin trabajo disponible (Maese Bruma)', () => {
+  it('Scenario: Sin trabajo disponible (Maestra Bruma)', () => {
     const g = setup({ mage: true, alive: [{ x: 4, y: 6 }], lastSpellSeason: 0 });
     const s = run(initialState(g), { type: 'select', id: idOf(g, 'mago') });
-    expect(s.ui.notice.text).toBe('Maese Bruma: su magia vuelve con la próxima estación.');
+    expect(s.ui.notice.text).toBe('Maestra Bruma: su magia vuelve con la próxima estación.');
   });
 
   it('idleReason cubre las claves restantes de la tabla y devuelve null si hay trabajo', () => {

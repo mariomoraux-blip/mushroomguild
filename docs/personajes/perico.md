@@ -92,7 +92,7 @@ Es la más pequeña del gremio: **0,60 m, el 75 % de Bruno**.
 
 | Personaje | Altura | Relativa a Bruno |
 | --- | --- | --- |
-| Maese Bruma | 1,35 m | 1,7× |
+| Maestra Bruma | 1,35 m | 1,7× |
 | Añil | 0,84 m | 1,05× |
 | Bruno | 0,80 m | 1× |
 | Rubí | 0,76 m | 0,95× |

@@ -28,7 +28,7 @@ export interface Notice {
 export interface UiState {
   /** Miembro seleccionado. */
   readonly selected: number | null;
-  /** Hechizo elegido para Maese Bruma. */
+  /** Hechizo elegido para Maestra Bruma. */
   readonly spell: Spell | null;
   readonly sheet: Sheet | null;
   readonly notice: Notice;

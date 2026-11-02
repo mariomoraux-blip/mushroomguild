@@ -4,7 +4,7 @@
 El pilar 2 dice que el mundo cuenta la historia. Sin intro, final ni cambio de color, el juego es un puzzle sin emoción.
 
 ## Qué cambia
-- Tres cartas de intro con opción de saltar; una carta cuando llega Maese Bruma; dos finales (victoria y fin del invierno) con "Jugar otra vez".
+- Tres cartas de intro con opción de saltar; una carta cuando llega Maestra Bruma; dos finales (victoria y fin del invierno) con "Jugar otra vez".
 - La Gliophorus psittacinus cambia de tono con la estación (verde, amarillo, naranja, rosa).
 - El tablero pasa de desaturado a saturado según el progreso.
 - La luz del escenario avanza con las estaciones: mañana (primavera), mediodía (verano), atardecer (otoño), anochecer (invierno). En invierno el micelio brilla y alumbra el claro.

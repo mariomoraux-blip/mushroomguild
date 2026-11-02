@@ -3,7 +3,7 @@ import { COST, DAYS, MAX_GUILD, magicSpent, recruitableCount, season, seasonInde
 import type { AppState, Store } from '../store';
 import { el, hat, setText } from './dom';
 
-/** Estado de la tarjeta: lista, descansa o (Maese Bruma) cuándo vuelve su magia. */
+/** Estado de la tarjeta: lista, descansa o (Maestra Bruma) cuándo vuelve su magia. */
 function status(state: AppState, m: Member): { text: string; ready: boolean } {
   const g = state.game;
   if (m.species === 'mago' && magicSpent(g)) {

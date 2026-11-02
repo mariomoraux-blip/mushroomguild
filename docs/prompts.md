@@ -112,7 +112,7 @@ Corrige lo que falle y muéstrame las capturas de nuevo.
 Cierra 002: fusiona el delta en openspec/specs/board-interaction/spec.md,
 archiva el cambio y abre el pull request con las tres capturas y este guion de
 playtest para teléfono: elegir a la Lactarius indigo, tejer, descomponer un tronco, revivir
-dos árboles, recibir a Maese Bruma, lanzar un Brote arcano y reclutar una Gliophorus.
+dos árboles, recibir a Maestra Bruma, lanzar un Brote arcano y reclutar una Gliophorus.
 ```
 
 ---
@@ -223,7 +223,7 @@ No hagas más personajes hasta que lo apruebe.
 ### 5.3 Producción
 ```
 Aprobado el estilo. Con la misma cámara, luces y materiales:
-- Modela las otras cuatro especies (Maese Bruma al final: es el más complejo) y el Árbol Madre (dormido y despierto).
+- Modela las otras cuatro especies (Maestra Bruma al final: es la más compleja) y el Árbol Madre (dormido y despierto).
 - Renderiza 3 poses por especie: reposo, trabajando, feliz.
 - Exporta los PNG con nombres <especie>-<pose>.png y arma un atlas (PNG + JSON
   compatible con Phaser) de 2048 px como máximo.

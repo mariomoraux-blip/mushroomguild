@@ -2,7 +2,7 @@ export type TileKind = 'home' | 'mother' | 'soil' | 'log' | 'tree' | 'rock';
 export type SpeciesId = 'champi' | 'lactarius' | 'amanita' | 'gliophorus' | 'mago';
 /** Especies que se pueden reclutar con esporas (el mago llega solo). */
 export type RecruitableSpecies = Exclude<SpeciesId, 'mago'>;
-/** Hechizos de Maese Bruma: Brote arcano y Lluvia de esporas. */
+/** Hechizos de Maestra Bruma: Brote arcano y Lluvia de esporas. */
 export type Spell = 'sprout' | 'rain';
 export type GameStatus = 'playing' | 'won' | 'lost';
 
@@ -41,11 +41,11 @@ export interface GameState {
   readonly members: readonly Member[];
   readonly nameIdx: Readonly<Record<RecruitableSpecies, number>>;
   readonly nextId: number;
-  /** Se revivió el segundo árbol: Maese Bruma llega al próximo amanecer. */
+  /** Se revivió el segundo árbol: Maestra Bruma llega al próximo amanecer. */
   readonly mageDue: boolean;
-  /** Maese Bruma ya se unió al gremio (solo una vez por partida). */
+  /** Maestra Bruma ya se unió al gremio (solo una vez por partida). */
   readonly mageArrived: boolean;
-  /** Índice de la estación (0–3) en la que Maese Bruma lanzó su último hechizo. */
+  /** Índice de la estación (0–3) en la que Maestra Bruma lanzó su último hechizo. */
   readonly lastSpellSeason: number | null;
 }
 

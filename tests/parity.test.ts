@@ -18,7 +18,7 @@ import pocSource from '../poc/rules.js?raw';
 
 // El PoC es la fuente de las 3 especies portadas: el port debe comportarse igual, con el mapa rotado.
 // Se carga como texto y se evalúa aislado (sin editar poc/).
-// Fuera del PoC: la Gliophorus no se recluta, Maese Bruma nunca actúa y se ignora al comparar,
+// Fuera del PoC: la Gliophorus no se recluta, Maestra Bruma nunca actúa y se ignora al comparar,
 // y los nombres/especies se traducen (Ostra → Lactarius, nombres nuevos del GDD).
 const Poc = new Function(`${pocSource}\nreturn Rules;`)();
 

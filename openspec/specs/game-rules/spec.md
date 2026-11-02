@@ -12,7 +12,7 @@ El juego SHALL crear un tablero vertical de 5 columnas por 8 filas a partir del 
 - WHEN se inicia una partida
 - THEN el día es 1, hay 2 nutrientes y 0 esporas
 - AND el gremio tiene una Lactarius indigo, un Champiñón y una Amanita muscaria, todos disponibles
-- AND el mago no está en el gremio
+- AND la maga no está en el gremio
 - AND solo la casilla Hogar pertenece a la red
 
 ### Requirement: Alcance de la red
@@ -74,30 +74,30 @@ La Gliophorus psittacinus SHALL, sobre cualquier árbol vivo, cambiar 2 esporas 
 - WHEN la Gliophorus intenta actuar sobre una casilla que no es un árbol vivo
 - THEN la acción se rechaza con "La Gliophorus solo pasa la voz desde un árbol vivo."
 
-### Requirement: Llegada del mago (Conocybe arcana)
-Maese Bruma SHALL unirse al gremio al amanecer siguiente a revivir el segundo árbol, una sola vez por partida. No se puede reclutar y no cuenta en el límite de 6. Si el segundo árbol revive el día 12, Maese Bruma no llega.
+### Requirement: Llegada de la maga (Conocybe arcana)
+Maestra Bruma SHALL unirse al gremio al amanecer siguiente a revivir el segundo árbol, una sola vez por partida. No se puede reclutar y no cuenta en el límite de 6. Si el segundo árbol revive el día 12, Maestra Bruma no llega.
 
 #### Scenario: Segundo árbol revivido
 - WHEN se revive el segundo árbol durante el día 4
-- THEN al empezar el día 5 Maese Bruma está en el gremio y disponible
+- THEN al empezar el día 5 Maestra Bruma está en el gremio y disponible
 
-#### Scenario: Reclutar al mago
+#### Scenario: Reclutar a la maga
 - WHEN el jugador intenta reclutar un Conocybe arcana
 - THEN la acción no está disponible
 
 #### Scenario: Segundo árbol en el último día
 - WHEN se revive el segundo árbol durante el día 12
-- THEN Maese Bruma no se une al gremio y la partida sigue su curso normal
+- THEN Maestra Bruma no se une al gremio y la partida sigue su curso normal
 
 ### Requirement: Hechizos
-Maese Bruma SHALL lanzar como máximo un hechizo por estación, a elegir entre:
+Maestra Bruma SHALL lanzar como máximo un hechizo por estación, a elegir entre:
 - Brote arcano: convierte una roca adyacente a la red en tierra con micelio. Esa casilla es, a todos los efectos, tierra tejida: pertenece a la red y extiende su alcance (por ejemplo, permite revivir árboles vecinos).
 - Lluvia de esporas: sobre cualquier árbol vivo, suma de inmediato 1 espora y 1 nutriente por cada árbol vivo. Es un pago extra: el amanecer siguiente paga normal.
 
-Lanzar un hechizo SHALL gastar la acción del día de Maese Bruma. No tiene otra acción: si ya lanzó en la estación, descansa hasta la próxima.
+Lanzar un hechizo SHALL gastar la acción del día de Maestra Bruma. No tiene otra acción: si ya lanzó en la estación, descansa hasta la próxima.
 
 #### Scenario: Brote arcano
-- WHEN Maese Bruma actúa sobre una roca adyacente a la red
+- WHEN Maestra Bruma actúa sobre una roca adyacente a la red
 - THEN la roca pasa a ser tierra con micelio
 
 #### Scenario: Brote arcano extiende la red
@@ -105,30 +105,30 @@ Lanzar un hechizo SHALL gastar la acción del día de Maese Bruma. No tiene otra
 - THEN la Amanita muscaria puede revivirlo
 
 #### Scenario: Roca lejana
-- WHEN Maese Bruma intenta el Brote arcano sobre una roca que no toca la red
+- WHEN Maestra Bruma intenta el Brote arcano sobre una roca que no toca la red
 - THEN la acción se rechaza con "El Brote arcano solo despierta rocas que tocan la red."
 
 #### Scenario: Lluvia de esporas es un pago extra
-- WHEN Maese Bruma lanza Lluvia de esporas sobre un árbol vivo con 3 árboles vivos
+- WHEN Maestra Bruma lanza Lluvia de esporas sobre un árbol vivo con 3 árboles vivos
 - THEN se suman de inmediato 3 esporas y 3 nutrientes
 - AND al terminar ese día el amanecer suma otras 3 esporas y 3 nutrientes
 
 #### Scenario: Lluvia fuera de un árbol vivo
-- WHEN Maese Bruma intenta la Lluvia de esporas sobre una casilla que no es un árbol vivo
+- WHEN Maestra Bruma intenta la Lluvia de esporas sobre una casilla que no es un árbol vivo
 - THEN la acción se rechaza con "La Lluvia de esporas se lanza sobre un árbol vivo."
 
 #### Scenario: El hechizo gasta la acción del día
-- WHEN Maese Bruma lanza un hechizo
-- THEN queda cansado hasta el amanecer, como cualquier miembro que ya actuó
+- WHEN Maestra Bruma lanza un hechizo
+- THEN queda cansada hasta el amanecer, como cualquier miembro que ya actuó
 
 #### Scenario: Segundo hechizo en la misma estación
-- WHEN Maese Bruma ya lanzó un hechizo en Verano y lo intenta de nuevo en Verano
-- THEN la acción se rechaza con "Maese Bruma descansa: su magia vuelve con la próxima estación."
+- WHEN Maestra Bruma ya lanzó un hechizo en Verano y lo intenta de nuevo en Verano
+- THEN la acción se rechaza con "Maestra Bruma descansa: su magia vuelve con la próxima estación."
 - AND esto ocurre aunque sea un día nuevo de la misma estación
 
 #### Scenario: Nueva estación
 - WHEN empieza Otoño
-- THEN Maese Bruma puede lanzar un hechizo otra vez
+- THEN Maestra Bruma puede lanzar un hechizo otra vez
 
 ### Requirement: Amanecer
 Al terminar el día, cada árbol vivo SHALL producir 1 espora y 1 nutriente, y todos los miembros SHALL quedar disponibles.

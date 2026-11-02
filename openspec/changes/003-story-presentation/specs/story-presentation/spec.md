@@ -9,11 +9,11 @@ Una partida nueva SHALL abrir con tres cartas de una frase cada una, que se pued
 - WHEN el jugador pulsa "Saltar" en la primera carta
 - THEN se cierra la intro y la bitácora invita a elegir un miembro del gremio
 
-### Requirement: Llegada del mago
-Cuando Maese Bruma se une al gremio, el juego SHALL mostrar una carta breve que lo presente y explique sus dos hechizos.
+### Requirement: Llegada de la maga
+Cuando Maestra Bruma se une al gremio, el juego SHALL mostrar una carta breve que la presente y explique sus dos hechizos.
 
-#### Scenario: Amanecer con el mago
-- WHEN empieza el día en que llega Maese Bruma
+#### Scenario: Amanecer con la maga
+- WHEN empieza el día en que llega Maestra Bruma
 - THEN aparece la carta "El bosque volvió a hablar, y alguien escuchó." con sus hechizos en una línea cada uno
 
 ### Requirement: Finales

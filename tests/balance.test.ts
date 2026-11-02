@@ -25,7 +25,7 @@ const report = (name: string, r: { rate: number; avgDay: number }) =>
 // ─── Partida guiada ────────────────────────────────────────────────────────────
 // Escrita en coordenadas del PoC (mapa horizontal 8×5) y traducida al mapa vertical
 // con la rotación de design.md: (x, y) del PoC → (y, 7 - x).
-// Los miembros se nombran por especie y orden de llegada (Maese Bruma llega el día 3 y corre los ids).
+// Los miembros se nombran por especie y orden de llegada (Maestra Bruma llega el día 3 y corre los ids).
 const rotate = ({ x, y }: Point): Point => ({ x: y, y: H - 1 - x });
 
 type Who = readonly [species: SpeciesId, nth: number];
@@ -38,7 +38,7 @@ const RUBI: Who = ['amanita', 1];
 const GUIDED: readonly (readonly Step[])[] = [
   /* día 1 */ [[BRUNO, 0, 1], [ANIL, 1, 2], [RUBI, 2, 2]], // tronco junto al Hogar, tejer, revivir el árbol cercano
   /* día 2 */ [[BRUNO, 0, 1], [ANIL, 1, 3], [RUBI, 1, 4]], // terminar el tronco, tejer, segundo árbol
-  /* día 3 */ [['recruit', 'lactarius'], [ANIL, 3, 2]], // llega Maese Bruma; reclutar a Ola, tejer hacia el este
+  /* día 3 */ [['recruit', 'lactarius'], [ANIL, 3, 2]], // llega Maestra Bruma; reclutar a Ola, tejer hacia el este
   /* día 4 */ [[ANIL, 4, 2], [OLA, 4, 1], [BRUNO, 4, 3], [RUBI, 4, 0]], // tejer ×2, tronco, tercer árbol
   /* día 5 */ [[ANIL, 5, 1], [OLA, 5, 0], [BRUNO, 4, 3]], // tejer ×2, terminar el tronco
   /* día 6 */ [[ANIL, 6, 0], [OLA, 7, 0], [RUBI, 7, 1]], // la red llega al cuarto árbol, vecino del Árbol Madre

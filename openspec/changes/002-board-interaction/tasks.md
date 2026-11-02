@@ -15,7 +15,7 @@
 - [x] 3.2 Selección: resaltar solo `validTargets`; tocar casilla resaltada ejecuta `act`
 - [x] 3.3 Aviso breve de bitácora sobre el dock con el motivo de una acción inválida; `idleReason(state, memberId)` en `src/rules` devuelve una clave y el aviso "Nombre: motivo" sale de `es.ts`
 - [x] 3.4 Reclutar por especie (hoja inferior en móvil), deshabilitado si no alcanza o el gremio está completo
-- [x] 3.5 Maese Bruma: al seleccionarlo, elegir hechizo (Brote arcano / Lluvia de esporas) y luego casilla; mostrar si su magia ya se usó esta estación
+- [x] 3.5 Maestra Bruma: al seleccionarla, elegir hechizo (Brote arcano / Lluvia de esporas) y luego casilla; mostrar si su magia ya se usó esta estación
 - [x] 3.6 Fichas de criatura: un botón de información por especie abre su ficha (nombre científico, rol, acción y línea con humor de `es.ts`; Champiñón = *Agaricus bisporus*)
 - [x] 3.7 Terminar el día, en la fila del dock; en el día 12 el botón dice "Terminar el invierno"
 

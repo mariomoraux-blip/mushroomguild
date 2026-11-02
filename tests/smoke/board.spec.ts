@@ -120,7 +120,7 @@ test('teclado: Tab, Enter y Esc bastan para elegir, actuar y terminar el día', 
   await page.screenshot({ path: `docs/screenshots/002-${info.project.name}.png` });
 });
 
-test('Maese Bruma: primero el hechizo, después las casillas', async ({ page }) => {
+test('Maestra Bruma: primero el hechizo, después las casillas', async ({ page }) => {
   await page.goto('/?debugState=fullGuild');
   const mage = page.locator('.card--mago');
   await mage.scrollIntoViewIfNeeded();

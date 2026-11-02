@@ -2,7 +2,7 @@
 import { endDay, newGame, recruit, type GameState, type RecruitableSpecies } from './rules';
 
 const presets: Record<string, () => GameState> = {
-  /** Gremio completo: 6 reclutables y Maese Bruma (escenario "Gremio completo en el dock"). */
+  /** Gremio completo: 6 reclutables y Maestra Bruma (escenario "Gremio completo en el dock"). */
   fullGuild: () => {
     let s: GameState = { ...newGame(), spores: 20, nutrients: 10 };
     const tiles = s.tiles.map((t) => (t.kind === 'tree' && (t.x + t.y) % 2 === 0 ? { ...t, alive: true, net: true } : t));

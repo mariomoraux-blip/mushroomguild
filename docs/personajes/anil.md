@@ -57,7 +57,7 @@ Detalle opcional: una vuelta de hilo índigo alrededor del tallo, como faja. Que
 | Feliz | Alza el carrete y suelta una gotita de látex |
 
 ## Prueba de silueta
-Negro sobre blanco a 56 px, contra el domo bajo de Bruno (variante E) y el domo alto con falda de Rubí. Las siluetas de comparación de Rubí, Perico y Maese Bruma son bocetos a partir de referentes: si cambian, hay que volver a medir.
+Negro sobre blanco a 56 px, contra el domo bajo de Bruno (variante E) y el domo alto con falda de Rubí. Las siluetas de comparación de Rubí, Perico y Maestra Bruma son bocetos a partir de referentes: si cambian, hay que volver a medir.
 
 | Variante | Solape con Bruno | Solape con Rubí | Perfil vs. Bruno | Perfil vs. Rubí |
 | --- | --- | --- | --- | --- |

@@ -101,7 +101,7 @@ function priority(s: GameState, m: Member, t: Tile): number | null {
 
 /**
  * Política: reclutar (Gliophorus si hay < 3 nutrientes y ningún tronco toca la red; si no, Lactarius
- * mientras la red no toque al Árbol Madre; después Amanita) → Maese Bruma (Brote arcano en la roca
+ * mientras la red no toque al Árbol Madre; después Amanita) → Maestra Bruma (Brote arcano en la roca
  * válida más cercana al Árbol Madre; si no hay, Lluvia de esporas) → en bucle, la acción de mayor
  * prioridad: Árbol Madre > pasar la voz (< 4 nutrientes) > revivir > descomponer > tejer hacia arriba.
  */

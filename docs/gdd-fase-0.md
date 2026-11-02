@@ -35,7 +35,7 @@ Cualquier idea nueva se evalúa contra estos tres pilares. Si no sirve a ninguno
 La red de micelio es a la vez mecánica y progreso visible: define dónde puedes actuar y muestra cuánto has avanzado. Se apoya en algo real, las redes micorrícicas que conectan árboles.
 
 ### Alcance del vertical slice
-- **Incluye:** 1 capítulo, 1 mapa vertical de 5×8, 5 especies (4 reclutables y un mago único), 12 días en 4 estaciones, intro y final. Se juega en navegador de teléfono y de escritorio.
+- **Incluye:** 1 capítulo, 1 mapa vertical de 5×8, 5 especies (4 reclutables y una maga única), 12 días en 4 estaciones, intro y final. Se juega en navegador de teléfono y de escritorio.
 - **Fuera de alcance:** guardado, varios niveles, IA rival, multijugador, monetización.
 
 ### Criterios de éxito
@@ -69,11 +69,11 @@ Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol M
 | *Lactarius indigo* | Tejedor | Inicial, reclutable | Teje micelio en tierra | −1 nutriente, la red crece |
 | *Amanita muscaria* | Sanadora | Inicial, reclutable | Revive un árbol gris | −3 nutrientes; −6 en el Árbol Madre |
 | *Gliophorus psittacinus* | Mensajera | Reclutable | "Pasa la voz" desde un árbol vivo | −2 esporas, +3 nutrientes |
-| *Conocybe arcana* (ficticio) | Mago | Único; llega solo | Un hechizo por estación | Ver hechizos |
+| *Conocybe arcana* (ficticio) | Maga | Única; llega sola | Un hechizo por estación | Ver hechizos |
 
 Cada miembro actúa una vez por día. El gremio llega a 6 reclutables como máximo, y un recluta trabaja desde el día siguiente.
 
-**Maese Bruma, el mago.** No se recluta: llega al amanecer siguiente a revivir el segundo árbol ("el bosque volvió a hablar y alguien escuchó") y no cuenta en el límite de 6. Lanza un hechizo por estación, a elegir:
+**Maestra Bruma, la maga.** No se recluta: llega al amanecer siguiente a revivir el segundo árbol ("el bosque volvió a hablar y alguien escuchó") y no cuenta en el límite de 6. Lanza un hechizo por estación, a elegir:
 - **Brote arcano:** convierte una roca vecina a la red en tierra con micelio. Abre atajos en el mapa.
 - **Lluvia de esporas:** sobre un árbol vivo, todos los árboles vivos dan ya su espora y su nutriente del amanecer.
 
@@ -93,7 +93,7 @@ Inicio: 3 miembros (uno de cada especie), 2 nutrientes, 0 esporas. Los troncos s
 - **Final suave:** si se acaba el invierno, el bosque espera la próxima primavera y se reintenta.
 
 ### Narrativa
-Tres cartas de intro, una frase cada una: el bosque se apaga; un gremio despierta; lleva la red al Árbol Madre antes del invierno. Una carta a mitad de partida, cuando llega Maese Bruma. Dos cartas de final. Todo lo demás lo cuenta el mundo: color que vuelve, esporas flotando, el Árbol Madre que se ilumina.
+Tres cartas de intro, una frase cada una: el bosque se apaga; un gremio despierta; lleva la red al Árbol Madre antes del invierno. Una carta a mitad de partida, cuando llega Maestra Bruma. Dos cartas de final. Todo lo demás lo cuenta el mundo: color que vuelve, esporas flotando, el Árbol Madre que se ilumina.
 
 ### Dirección de arte
 Estilo ilustrado con contorno café, formas redondas y rubor. La luz del mundo avanza con las estaciones, de una mañana de primavera a un anochecer de invierno.
@@ -111,9 +111,9 @@ Cada especie se reconoce por su silueta, sin depender del color: domo bajo, embu
 | *Lactarius indigo* "Añil" | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Suelta gotitas de látex azul; el micelio que teje brilla con destellos índigo |
 | *Amanita muscaria* "Rubí" | Domo alto con verrugas y falda en el tallo | Rojo y crema | Bolso con hojas que curan | — |
 | *Gliophorus psittacinus* "Perico" | Campana pequeña, viscosa y brillante | Verde loro que cambia | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
-| *Conocybe arcana* "Maese Bruma" | Cono alto y puntiagudo, doblado en la punta como sombrero de hechicero; el más alto | Violeta profundo con motas que brillan como estrellas | Bastón de ramita con una espora luminosa | Barba de hilos de micelio; brilla siempre un poco |
+| *Conocybe arcana* "Maestra Bruma" | Cono alto con la punta doblada en rizo, como sombrero de hechicero; túnica larga; la más alta | Sombrero rojo amanita que degrada a blanco, punta naranja; túnica color tallo; motas doradas que brillan como estrellas | Bastón de ramita con una espora luminosa | Cabello rubio de hilos de micelio; brilla siempre un poco |
 
-*Conocybe* es un género real de sombrero cónico; *arcana* es inventado. El mago es el único personaje fantástico del elenco.
+*Conocybe* es un género real de sombrero cónico; *arcana* es inventado. La maga es el único personaje fantástico del elenco.
 
 #### Luz por estación
 | Estación | Hora | Sensación | Micelio |

@@ -190,8 +190,8 @@ describe('Requirement: Pasar la voz (Gliophorus psittacinus)', () => {
   });
 });
 
-describe('Requirement: Llegada del mago (Conocybe arcana)', () => {
-  it('Scenario: Segundo árbol revivido — si revive el día 4, al empezar el día 5 Maese Bruma está y disponible', () => {
+describe('Requirement: Llegada de la maga (Conocybe arcana)', () => {
+  it('Scenario: Segundo árbol revivido — si revive el día 4, al empezar el día 5 Maestra Bruma está y disponible', () => {
     // El primer árbol no lo trae.
     const first = endDay(act(setup({ day: 3, net: [SOIL_NEAR_TREE], nutrients: 3 }), RUBI, TREE.x, TREE.y).state).state;
     expect(first.members.some((m) => m.species === 'mago')).toBe(false);
@@ -202,7 +202,7 @@ describe('Requirement: Llegada del mago (Conocybe arcana)', () => {
     const { state, message } = endDay(revived);
     expect(state.day).toBe(5);
     const mage = state.members.find((m) => m.species === 'mago');
-    expect(mage).toMatchObject({ name: 'Maese Bruma', used: false });
+    expect(mage).toMatchObject({ name: 'Maestra Bruma', used: false });
     expect(message).toContain(es.log.mageArrives);
     // Llega una sola vez por partida, aunque se revivan más árboles.
     const third = act({ ...state, nutrients: 3, tiles: state.tiles.map((t) => (t.x === 3 && t.y === 1 ? { ...t, net: true } : t)) }, RUBI, 4, 1);
@@ -210,12 +210,12 @@ describe('Requirement: Llegada del mago (Conocybe arcana)', () => {
     expect(later.members.filter((m) => m.species === 'mago')).toHaveLength(1);
   });
 
-  it('Scenario: Reclutar al mago — la acción no está disponible', () => {
+  it('Scenario: Reclutar a la maga — la acción no está disponible', () => {
     expect(RECRUITABLE).not.toContain('mago');
     expect(() => recruit(setup({ spores: 10 }), 'mago' as RecruitableSpecies)).toThrow(RuleError);
   });
 
-  it('Scenario: Segundo árbol en el último día — si revive el día 12, Maese Bruma no se une y la partida sigue', () => {
+  it('Scenario: Segundo árbol en el último día — si revive el día 12, Maestra Bruma no se une y la partida sigue', () => {
     const s = setup({ day: 12, alive: [OTHER_TREE], net: [SOIL_NEAR_TREE], nutrients: 3 });
     const revived = act(s, RUBI, TREE.x, TREE.y).state;
     expect(revived.status).toBe('playing');
@@ -239,7 +239,7 @@ describe('Requirement: Hechizos', () => {
     const s = withMage({ net: [NEAR_ROCK] });
     const { state, message } = pure(s, (s) => act(s, mageId(s), ROCK.x, ROCK.y));
     expect(tile(state, ROCK.x, ROCK.y)).toMatchObject({ kind: 'soil', net: true });
-    expect(message).toBe(es.log.sprouted('Maese Bruma'));
+    expect(message).toBe(es.log.sprouted('Maestra Bruma'));
   });
 
   it('Scenario: Brote arcano extiende la red — la Amanita puede revivir un árbol que solo toca la red por el brote', () => {
@@ -263,7 +263,7 @@ describe('Requirement: Hechizos', () => {
     const s = withMage({ alive: [TREE, OTHER_TREE, FAR_TREE], spores: 0, nutrients: 0 });
     const { state, message } = pure(s, (s) => act(s, mageId(s), TREE.x, TREE.y));
     expect([state.spores, state.nutrients]).toEqual([3, 3]);
-    expect(message).toBe(es.log.rained('Maese Bruma', 3, 3));
+    expect(message).toBe(es.log.rained('Maestra Bruma', 3, 3));
     const dawn = endDay(state).state;
     expect([dawn.spores, dawn.nutrients]).toEqual([6, 6]);
   });
@@ -275,11 +275,11 @@ describe('Requirement: Hechizos', () => {
     expect(check(s, mageId(s), SOIL_NEAR_HOME.x, SOIL_NEAR_HOME.y, 'rain')).toEqual({ ok: false, reason: msg });
   });
 
-  it('Scenario: El hechizo gasta la acción del día — Maese Bruma queda cansado hasta el amanecer', () => {
+  it('Scenario: El hechizo gasta la acción del día — Maestra Bruma queda cansada hasta el amanecer', () => {
     const s = withMage({ alive: [TREE] });
     const { state } = act(s, mageId(s), TREE.x, TREE.y);
     expect(state.members.find((m) => m.species === 'mago')?.used).toBe(true);
-    expect(reasonOf(state, mageId(state), TREE)).toBe(es.reasons.tired('Maese Bruma'));
+    expect(reasonOf(state, mageId(state), TREE)).toBe(es.reasons.tired('Maestra Bruma'));
   });
 
   it('Scenario: Segundo hechizo en la misma estación — se rechaza aunque sea otro día de Verano', () => {
@@ -288,7 +288,7 @@ describe('Requirement: Hechizos', () => {
     const nextDay = endDay(cast).state;
     expect(season(nextDay.day)).toBe('Verano');
     expect(reasonOf(nextDay, mageId(nextDay), TREE)).toBe(
-      'Maese Bruma descansa: su magia vuelve con la próxima estación.',
+      'Maestra Bruma descansa: su magia vuelve con la próxima estación.',
     );
     expect(validTargets(nextDay, mageId(nextDay))).toEqual([]);
   });
@@ -333,11 +333,11 @@ describe('Requirement: Reclutar', () => {
     }
   });
 
-  it('Scenario: Gremio completo — reclutar se rechaza con "El gremio está completo." (el mago no cuenta)', () => {
+  it('Scenario: Gremio completo — reclutar se rechaza con "El gremio está completo." (la maga no cuenta)', () => {
     const s = setup({ spores: 10, extraMembers: ['lactarius', 'champi', 'gliophorus'], mage: true });
     expect(s.members).toHaveLength(MAX_GUILD + 1);
     expect(() => recruit(s, 'lactarius')).toThrow(new RuleError('El gremio está completo.'));
-    // Sin el mago y con 5 reclutables todavía cabe uno más.
+    // Sin la maga y con 5 reclutables todavía cabe uno más.
     const five = setup({ spores: 2, extraMembers: ['lactarius', 'champi'], mage: true });
     expect(recruit(five, 'gliophorus').state.members.filter((m) => m.species !== 'mago')).toHaveLength(MAX_GUILD);
   });
