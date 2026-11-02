@@ -18,4 +18,4 @@
 - [x] 3.3 `npm run test` y `npm run build` en verde
 
 ## 4. Cierre
-- [ ] 4.1 Pull request con captura de `BootScene` y resultado del test de balance
+- [x] 4.1 Pull request con captura de `BootScene` y resultado del test de balance
