@@ -11,10 +11,10 @@ Al abrir el juego sin `?map`, `?seed` ni `?debugState`, el juego SHALL mostrar l
 #### Scenario: Abrir el juego
 - WHEN el jugador abre el sitio
 - THEN ve la portada con el foco en "Nueva partida"
-- AND al pulsarla ve la intro y después el tablero en el día 1
+- AND al pulsarla ve la intro y después el tablero en el mes 1
 
 ### Requirement: Cómo jugar
-"Cómo jugar" SHALL mostrar 5 pasos (elige un hongo, trabaja junto a la red, una vez por día, al amanecer, despierta al Árbol Padre) en un carrusel con anterior y siguiente, puntos que llevan a cada paso, flechas del teclado y deslizar con el dedo. El último paso no tiene "siguiente". Desde cualquier paso se puede abrir la Libreta de campo; "¡A jugar!" empieza la partida (desde la portada) o vuelve al tablero (desde el "?").
+"Cómo jugar" SHALL mostrar 5 pasos (elige un hongo, trabaja junto a la red, una vez por mes, al empezar el mes, despierta al Árbol Padre) en un carrusel con anterior y siguiente, puntos que llevan a cada paso, flechas del teclado y deslizar con el dedo. El último paso no tiene "siguiente". Desde cualquier paso se puede abrir la Libreta de campo; "¡A jugar!" empieza la partida (desde la portada) o vuelve al tablero (desde el "?").
 
 #### Scenario: Recorrer los pasos
 - WHEN el jugador abre "Cómo jugar" y pulsa "Paso siguiente"
@@ -25,7 +25,7 @@ Al abrir el juego sin `?map`, `?seed` ni `?debugState`, el juego SHALL mostrar l
 "El gremio" SHALL listar las cinco especies con su retrato, nombre, rol y qué hacen; tocar una SHALL abrir su ficha encima de la pantalla.
 
 #### Scenario: Ver una ficha
-- WHEN el jugador toca a Maestra Bruna en "El gremio"
+- WHEN el jugador toca a Maestra Bruma en "El gremio"
 - THEN se abre su ficha (Conocybe arcana) y al cerrarla sigue en "El gremio"
 
 ### Requirement: Volver

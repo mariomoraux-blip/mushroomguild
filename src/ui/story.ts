@@ -8,7 +8,7 @@ const BACKGROUND: Record<Story['kind'], 'intro' | 'victory'> = { intro: 'intro',
 const GUILD: SpeciesId[] = ['lactarius', 'champi', 'amanita'];
 
 /**
- * Cartas de historia (003): intro de 3 cartas con "Saltar", llegada de Maestra Bruna y los dos finales.
+ * Cartas de historia (003): intro de 3 cartas con "Saltar", llegada de Maestra Bruma y los dos finales.
  * Modal accesible: el foco va al botón principal y vuelve al juego al cerrar; Esc cierra (main.ts › cancel).
  */
 export function mountStory(root: HTMLElement, store: Store, onRestart: () => void) {
@@ -29,7 +29,7 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
 
   function card(state: AppState, story: Story): HTMLElement {
     const g = state.game;
-    const season = seasonIndex(g.day);
+    const season = seasonIndex(g.month);
     const id = 'story-title';
     let title = '';
     const body: Node[] = [];
@@ -65,13 +65,13 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
       case 'lost': {
         const won = story.kind === 'won';
         title = won ? es.story.wonTitle : es.story.lostTitle;
-        body.push(el('p', { class: 'story__text' }, won ? es.story.wonText(g.day) : es.story.lostText));
+        body.push(el('p', { class: 'story__text' }, won ? es.story.wonText(g.month) : es.story.lostText));
         if (!won) body.push(el('p', { class: 'story__note' }, es.story.lostTip));
         const stat = (value: string, label: string) => el('li', { class: 'story__stat' }, el('strong', {}, value), el('span', {}, label));
         body.push(
           el('h3', { class: 'story__sub' }, es.story.summary),
           el('ul', { class: 'story__stats' },
-            stat(String(g.day), es.story.stats.day),
+            stat(String(g.month), es.story.stats.month),
             stat(`${revivedCount(g)}/${treeTotal(g)}`, es.story.stats.trees),
             stat(String(g.nutrients), es.story.stats.nutrients),
             stat(String(g.spores), es.story.stats.spores)),

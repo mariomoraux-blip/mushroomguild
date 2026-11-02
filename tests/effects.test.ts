@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { act, endDay, newGame, newRandomGame, validTargets, type GameState } from '../src/rules';
+import { act, endMonth, newGame, newRandomGame, validTargets, type GameState } from '../src/rules';
 import { diffEffects } from '../src/effects';
 import { ANIL, BRUNO, RUBI, setup } from './helpers';
 
@@ -35,17 +35,17 @@ describe('Requirement: Respuesta a cada acción', () => {
     expect(kinds(g, act(g, RUBI, target.x, target.y).state)).toContain('revive');
   });
 
-  it('al amanecer, las esporas salen de cada árbol vivo', () => {
+  it('al empezar el mes, las esporas salen de cada árbol vivo', () => {
     const tree = newGame().tiles.find((t) => t.kind === 'tree')!;
     const g = setup({ alive: [{ x: tree.x, y: tree.y }] });
-    const fx = diffEffects(g, endDay(g).state).find((e) => e.kind === 'spores');
+    const fx = diffEffects(g, endMonth(g).state).find((e) => e.kind === 'spores');
     expect(fx).toMatchObject({ kind: 'spores', from: [{ x: tree.x, y: tree.y }] });
   });
 
   it('otra partida (reinicio) o el mismo estado no producen efectos', () => {
     const g = newGame();
     expect(diffEffects(g, g)).toEqual([]);
-    expect(diffEffects({ ...g, day: 5 }, newGame())).toEqual([]);
+    expect(diffEffects({ ...g, month: 5 }, newGame())).toEqual([]);
     expect(diffEffects(g, newRandomGame(7))).toEqual([]);
   });
 });

@@ -1,18 +1,18 @@
 import { es } from '../copy/es';
-import { DAYS, revivedCount, season, seasonIndex, treeTotal } from '../rules';
+import { MONTHS, revivedCount, season, seasonIndex, treeTotal } from '../rules';
 import { SEASON_SLUGS } from '../theme';
 import type { AppState, Store } from '../store';
 import { el, setText } from './dom';
 
 /**
- * HUD del referente (011): día y estación en una pastilla verde, pastillas de crema con ícono pintado
+ * HUD del referente (011): mes y estación en una pastilla verde, pastillas de crema con ícono pintado
  * para nutrientes, esporas (abre reclutar) y árboles vivos (del total del claro), y "?" amarillo (Cómo jugar).
  */
 export function mountHud(root: HTMLElement, store: Store) {
-  const dayValue = el('strong', { class: 'hud__day-value' });
-  const dayCaption = el('span');
+  const monthValue = el('strong', { class: 'hud__month-value' });
+  const monthCaption = el('span');
   const seasonIcon = el('span', { class: 'hud__season', 'aria-hidden': 'true' });
-  const day = el('div', { class: 'hud__day' }, dayValue, el('span', { class: 'hud__day-caption' }, seasonIcon, dayCaption));
+  const month = el('div', { class: 'hud__month' }, monthValue, el('span', { class: 'hud__month-caption' }, seasonIcon, monthCaption));
 
   const chip = (iconName: string, label: string, tag: 'div' | 'button' = 'div') => {
     const value = el('strong', { class: 'chip__value' });
@@ -29,16 +29,16 @@ export function mountHud(root: HTMLElement, store: Store) {
   const trees = chip('trees', es.hud.treesShort);
   const help = el('button', { class: 'hud__help', type: 'button', 'aria-label': es.help.button });
   root.setAttribute('aria-label', es.hud.label);
-  root.append(day, nutrients.node, spores.node, trees.node, help);
+  root.append(month, nutrients.node, spores.node, trees.node, help);
 
   spores.node.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'recruit' } }));
   help.addEventListener('click', () => store.dispatch({ type: 'openScreen', screen: { kind: 'howto', step: 0, back: 'game' } }));
 
   return (state: AppState) => {
     const g = state.game;
-    setText(dayValue, `${es.hud.day} ${g.day}${es.hud.of(DAYS)}`);
-    setText(dayCaption, season(g.day));
-    seasonIcon.dataset.season = SEASON_SLUGS[seasonIndex(g.day)] ?? 'spring';
+    setText(monthValue, `${es.hud.month} ${g.month}${es.hud.of(MONTHS)}`);
+    setText(monthCaption, season(g.month));
+    seasonIcon.dataset.season = SEASON_SLUGS[seasonIndex(g.month)] ?? 'spring';
     setText(nutrients.value, String(g.nutrients));
     setText(spores.value, String(g.spores));
     spores.node.setAttribute('aria-label', es.hud.sporesButton(g.spores));

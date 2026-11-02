@@ -5,7 +5,7 @@ import {
   act,
   advise,
   check,
-  endDay,
+  endMonth,
   idleReason,
   member,
   newGame,
@@ -27,7 +27,7 @@ export type Sheet =
   | { kind: 'spell' }
   | { kind: 'help' };
 
-/** Carta de historia (003): intro de 3 pasos, llegada de Maestra Bruna o final. */
+/** Carta de historia (003): intro de 3 pasos, llegada de Maestra Bruma o final. */
 export type Story = { kind: 'intro'; step: number } | { kind: 'mage' } | { kind: 'won' } | { kind: 'lost' };
 export const INTRO_STEPS = 3;
 
@@ -43,7 +43,7 @@ export interface Notice {
 export interface UiState {
   /** Miembro seleccionado. */
   readonly selected: number | null;
-  /** Hechizo elegido para Maestra Bruna. */
+  /** Hechizo elegido para Maestra Bruma. */
   readonly spell: Spell | null;
   readonly sheet: Sheet | null;
   /** Carta de historia abierta sobre el tablero. */
@@ -65,7 +65,7 @@ export type Action =
   | { type: 'chooseSpell'; spell: Spell }
   | { type: 'tapTile'; x: number; y: number }
   | { type: 'recruit'; species: RecruitableSpecies }
-  | { type: 'endDay' }
+  | { type: 'endMonth' }
   | { type: 'cancel' }
   | { type: 'openSheet'; sheet: Sheet }
   | { type: 'closeSheet' }
@@ -103,8 +103,8 @@ export function adviceText(game: GameState, a: Advice): string {
       return es.advice.call(name, member(game, a.calledId)?.name ?? '');
     case 'spell':
       return es.advice.spell(name, es.spells[a.spell]);
-    case 'endDay':
-      return es.advice.endDay;
+    case 'endMonth':
+      return es.advice.endMonth;
   }
 }
 
@@ -249,8 +249,8 @@ export function reduce(state: AppState, action: Action): AppState {
         throw e;
       }
     }
-    case 'endDay': {
-      const r = endDay(game);
+    case 'endMonth': {
+      const r = endMonth(game);
       if (r.state === game) return state;
       return { game: r.state, ui: advance(game, r.state, cleared(ui, info(r.message))) };
     }

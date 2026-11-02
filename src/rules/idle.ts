@@ -8,7 +8,7 @@ export type IdleReason = 'noLogs' | 'noNutrients' | 'noSoil' | 'noGreyTrees' | '
 
 /**
  * Por qué el miembro `id` no tiene ninguna casilla válida, o `null` si tiene trabajo.
- * Un miembro que ya actuó hoy devuelve `null`: eso se informa con el motivo de `check()`.
+ * Un miembro que ya actuó este mes devuelve `null`: eso se informa con el motivo de `check()`.
  */
 export function idleReason(s: GameState, id: number): IdleReason | null {
   const m = member(s, id);

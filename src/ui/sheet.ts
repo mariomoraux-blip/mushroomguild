@@ -124,7 +124,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
   }
 
   return (state: AppState) => {
-    currentSeason = seasonIndex(state.game.day);
+    currentSeason = seasonIndex(state.game.month);
     const sheet = state.ui.sheet;
     if (JSON.stringify(sheet) === JSON.stringify(shown)) return;
     const wasOpen = shown !== null;

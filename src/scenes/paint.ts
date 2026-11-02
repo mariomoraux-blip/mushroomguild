@@ -26,7 +26,7 @@ export interface PaintInput {
 /**
  * Saturación del claro según el progreso (003): apagado al empezar y color pleno al despertar al Árbol Padre.
  * FLOOR + (1 − FLOOR) × (árboles vivos + Árbol Padre × 2) / (árboles del claro + 2). El piso subió de 0,15
- * a 0,4 con las piezas pintadas (010): casi gris, el claro perdía el arte.
+ * a 0,4 con las piezas pintadas (010): casi gris, el claro permes el arte.
  */
 export const SATURATION_FLOOR = 0.4;
 export function progressSaturation(game: GameState): number {
@@ -601,7 +601,7 @@ function paintGroundArt(ctx: Ctx, T: number, game: GameState, art: Art, occupied
 /** Pinta el claro completo. Devuelve qué objeto se pintó en cada casilla. */
 export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
   const { game, valid, star, occupied, fatherSprite = false } = input;
-  const art: Art | null = input.art ? { get: input.art, season: SEASON_SLUGS[seasonIndex(game.day)] ?? 'spring' } : null;
+  const art: Art | null = input.art ? { get: input.art, season: SEASON_SLUGS[seasonIndex(game.month)] ?? 'spring' } : null;
   ctx.clearRect(0, 0, W * T, H * T);
   // Esquinas redondeadas como el marco (el canvas ya no las recorta: sobresale por arriba).
   ctx.save();

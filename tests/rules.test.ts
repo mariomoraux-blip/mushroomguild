@@ -4,7 +4,7 @@ import {
   act,
   check,
   COST,
-  endDay,
+  endMonth,
   H,
   MAX_GUILD,
   newGame,
@@ -48,9 +48,9 @@ function pure<T>(s: GameState, fn: (s: GameState) => T): T {
 }
 
 describe('Requirement: Tablero inicial', () => {
-  it('Scenario: Partida nueva — día 1, 2 nutrientes, 0 esporas, gremio disponible, solo el Hogar en la red', () => {
+  it('Scenario: Partida nueva — mes 1, 2 nutrientes, 0 esporas, gremio disponible, solo el Hogar en la red', () => {
     const s = newGame();
-    expect(s.day).toBe(1);
+    expect(s.month).toBe(1);
     expect(s.nutrients).toBe(2);
     expect(s.spores).toBe(0);
     expect(s.status).toBe('playing');
@@ -94,11 +94,11 @@ describe('Requirement: Alcance de la red', () => {
   });
 });
 
-describe('Requirement: Una acción por día', () => {
-  it('Scenario: Miembro cansado — se rechaza indicando que descansa hasta el amanecer', () => {
+describe('Requirement: Una acción por mes', () => {
+  it('Scenario: Miembro cansado — se rechaza indicando que descansa hasta el mes siguiente', () => {
     const { state } = act(newGame(), ANIL, SOIL_NEAR_HOME.x, SOIL_NEAR_HOME.y);
     expect(reasonOf(state, ANIL, { x: 2, y: 6 })).toBe(es.reasons.tired('Añil'));
-    expect(reasonOf(state, ANIL, { x: 2, y: 6 })).toContain('Descansa hasta el amanecer');
+    expect(reasonOf(state, ANIL, { x: 2, y: 6 })).toContain('Descansa hasta el mes siguiente');
   });
 });
 
@@ -160,7 +160,7 @@ describe('Requirement: Revivir árboles (Amanita muscaria)', () => {
 });
 
 describe('Requirement: Pasar la voz (Gliophorus psittacinus)', () => {
-  // Bruno trabajó hoy en el tronco junto al Hogar.
+  // Bruno trabajó este mes en el tronco junto al Hogar.
   const afterBruno = (spores: number) => act(setup({ extraMembers: ['gliophorus'], spores }), BRUNO, LOG_NEAR_HOME.x, LOG_NEAR_HOME.y).state;
 
   it('Scenario: Llamar a un compañero — Bruno vuelve a estar disponible y las esporas bajan en 1', () => {
@@ -171,7 +171,7 @@ describe('Requirement: Pasar la voz (Gliophorus psittacinus)', () => {
     expect(state.members.find((m) => m.id === glio)?.used).toBe(true);
     expect(state.spores).toBe(0);
     expect(message).toBe(es.log.called('extra-4', 'Bruno'));
-    // Bruno puede descomponer otra vez el mismo día.
+    // Bruno puede descomponer otra vez el mismo mes.
     expect(act(state, BRUNO, LOG_NEAR_HOME.x, LOG_NEAR_HOME.y).state.nutrients).toBe(6);
   });
 
@@ -182,10 +182,10 @@ describe('Requirement: Pasar la voz (Gliophorus psittacinus)', () => {
 
   it('Scenario: Casilla sin compañero — se rechaza con el motivo de la Gliophorus', () => {
     const s = afterBruno(3);
-    expect(reasonOf(s, idOf(s, 'gliophorus'), SOIL_NEAR_HOME)).toBe('La Gliophorus pasa la voz donde un compañero ya trabajó hoy.');
+    expect(reasonOf(s, idOf(s, 'gliophorus'), SOIL_NEAR_HOME)).toBe('La Gliophorus pasa la voz donde un compañero ya trabajó este mes.');
   });
 
-  it('no llama a otra Gliophorus ni a Maestra Bruna, y su voz llega a cualquier casilla', () => {
+  it('no llama a otra Gliophorus ni a Maestra Bruma, y su voz llega a cualquier casilla', () => {
     const g = setup({ extraMembers: ['gliophorus', 'gliophorus'], mage: true, alive: [FAR_TREE], spores: 5 });
     const [g1, g2] = g.members.filter((m) => m.species === 'gliophorus').map((m) => m.id) as [number, number];
     const mageId = idOf(g, 'mago');
@@ -202,22 +202,22 @@ describe('Requirement: Pasar la voz (Gliophorus psittacinus)', () => {
 });
 
 describe('Requirement: Llegada de la maga (Conocybe arcana)', () => {
-  it('Scenario: Segundo árbol revivido — si revive el día 4, al empezar el día 5 Maestra Bruna está y disponible', () => {
+  it('Scenario: Segundo árbol revivido — si revive el mes 4, al empezar el mes 5 Maestra Bruma está y disponible', () => {
     // El primer árbol no lo trae.
-    const first = endDay(act(setup({ day: 3, net: [SOIL_NEAR_TREE], nutrients: 3 }), RUBI, TREE.x, TREE.y).state).state;
+    const first = endMonth(act(setup({ month: 3, net: [SOIL_NEAR_TREE], nutrients: 3 }), RUBI, TREE.x, TREE.y).state).state;
     expect(first.members.some((m) => m.species === 'mago')).toBe(false);
 
-    const s = setup({ day: 4, alive: [OTHER_TREE], net: [SOIL_NEAR_TREE], nutrients: 3 });
+    const s = setup({ month: 4, alive: [OTHER_TREE], net: [SOIL_NEAR_TREE], nutrients: 3 });
     const revived = act(s, RUBI, TREE.x, TREE.y).state;
     expect(revived.members.some((m) => m.species === 'mago')).toBe(false);
-    const { state, message } = endDay(revived);
-    expect(state.day).toBe(5);
+    const { state, message } = endMonth(revived);
+    expect(state.month).toBe(5);
     const mage = state.members.find((m) => m.species === 'mago');
-    expect(mage).toMatchObject({ name: 'Maestra Bruna', used: false });
+    expect(mage).toMatchObject({ name: 'Maestra Bruma', used: false });
     expect(message).toContain(es.log.mageArrives);
     // Llega una sola vez por partida, aunque se revivan más árboles.
     const third = act({ ...state, nutrients: 3, tiles: state.tiles.map((t) => (t.x === 3 && t.y === 1 ? { ...t, net: true } : t)) }, RUBI, 4, 1);
-    const later = endDay(endDay(third.state).state).state;
+    const later = endMonth(endMonth(third.state).state).state;
     expect(later.members.filter((m) => m.species === 'mago')).toHaveLength(1);
   });
 
@@ -226,12 +226,12 @@ describe('Requirement: Llegada de la maga (Conocybe arcana)', () => {
     expect(() => recruit(setup({ spores: 10 }), 'mago' as RecruitableSpecies)).toThrow(RuleError);
   });
 
-  it('Scenario: Segundo árbol en el último día — si revive el día 12, Maestra Bruna no se une y la partida sigue', () => {
-    const s = setup({ day: 12, alive: [OTHER_TREE], net: [SOIL_NEAR_TREE], nutrients: 3 });
+  it('Scenario: Segundo árbol en el último mes — si revive el mes 12, Maestra Bruma no se une y la partida sigue', () => {
+    const s = setup({ month: 12, alive: [OTHER_TREE], net: [SOIL_NEAR_TREE], nutrients: 3 });
     const revived = act(s, RUBI, TREE.x, TREE.y).state;
     expect(revived.status).toBe('playing');
     expect(revived.mageDue).toBe(false);
-    const { state } = endDay(revived);
+    const { state } = endMonth(revived);
     expect(state.status).toBe('lost');
     expect(state.members.some((m) => m.species === 'mago')).toBe(false);
   });
@@ -250,7 +250,7 @@ describe('Requirement: Hechizos', () => {
     const s = withMage({ net: [NEAR_ROCK] });
     const { state, message } = pure(s, (s) => act(s, mageId(s), ROCK.x, ROCK.y));
     expect(tile(state, ROCK.x, ROCK.y)).toMatchObject({ kind: 'soil', net: true });
-    expect(message).toBe(es.log.sprouted('Maestra Bruna'));
+    expect(message).toBe(es.log.sprouted('Maestra Bruma'));
   });
 
   it('Scenario: Brote arcano extiende la red — la Amanita puede revivir un árbol que solo toca la red por el brote', () => {
@@ -270,12 +270,12 @@ describe('Requirement: Hechizos', () => {
     });
   });
 
-  it('Scenario: Lluvia de esporas es un pago extra — con 3 árboles vivos suma 3 y 3 ya, y el amanecer otras 3 y 3', () => {
+  it('Scenario: Lluvia de esporas es un pago extra — con 3 árboles vivos suma 3 y 3 ya, y el cambio de mes otras 3 y 3', () => {
     const s = withMage({ alive: [TREE, OTHER_TREE, FAR_TREE], spores: 0, nutrients: 0 });
     const { state, message } = pure(s, (s) => act(s, mageId(s), TREE.x, TREE.y));
     expect([state.spores, state.nutrients]).toEqual([3, 3]);
-    expect(message).toBe(es.log.rained('Maestra Bruna', 3, 3));
-    const dawn = endDay(state).state;
+    expect(message).toBe(es.log.rained('Maestra Bruma', 3, 3));
+    const dawn = endMonth(state).state;
     expect([dawn.spores, dawn.nutrients]).toEqual([6, 6]);
   });
 
@@ -286,29 +286,29 @@ describe('Requirement: Hechizos', () => {
     expect(check(s, mageId(s), SOIL_NEAR_HOME.x, SOIL_NEAR_HOME.y, 'rain')).toEqual({ ok: false, reason: msg });
   });
 
-  it('Scenario: El hechizo gasta la acción del día — Maestra Bruna queda cansada hasta el amanecer', () => {
+  it('Scenario: El hechizo gasta la acción del mes — Maestra Bruma queda cansada hasta el mes siguiente', () => {
     const s = withMage({ alive: [TREE] });
     const { state } = act(s, mageId(s), TREE.x, TREE.y);
     expect(state.members.find((m) => m.species === 'mago')?.used).toBe(true);
-    expect(reasonOf(state, mageId(state), TREE)).toBe(es.reasons.tired('Maestra Bruna'));
+    expect(reasonOf(state, mageId(state), TREE)).toBe(es.reasons.tired('Maestra Bruma'));
   });
 
-  it('Scenario: Segundo hechizo en la misma estación — se rechaza aunque sea otro día de Verano', () => {
-    const s = withMage({ day: 4, alive: [TREE] });
+  it('Scenario: Segundo hechizo en la misma estación — se rechaza aunque sea otro mes de Verano', () => {
+    const s = withMage({ month: 4, alive: [TREE] });
     const cast = act(s, mageId(s), TREE.x, TREE.y).state;
-    const nextDay = endDay(cast).state;
-    expect(season(nextDay.day)).toBe('Verano');
-    expect(reasonOf(nextDay, mageId(nextDay), TREE)).toBe(
-      'Maestra Bruna descansa: su magia vuelve con la próxima estación.',
+    const nextMonth = endMonth(cast).state;
+    expect(season(nextMonth.month)).toBe('Verano');
+    expect(reasonOf(nextMonth, mageId(nextMonth), TREE)).toBe(
+      'Maestra Bruma descansa: su magia vuelve con la próxima estación.',
     );
-    expect(validTargets(nextDay, mageId(nextDay))).toEqual([]);
+    expect(validTargets(nextMonth, mageId(nextMonth))).toEqual([]);
   });
 
   it('Scenario: Nueva estación — al empezar Otoño puede lanzar otra vez', () => {
-    const s = withMage({ day: 6, alive: [TREE], lastSpellSeason: 1 });
+    const s = withMage({ month: 6, alive: [TREE], lastSpellSeason: 1 });
     expect(reasonOf(s, mageId(s), TREE)).toBe(es.reasons.magicSpent);
-    const autumn = endDay(s).state;
-    expect(season(autumn.day)).toBe('Otoño');
+    const autumn = endMonth(s).state;
+    expect(season(autumn.month)).toBe('Otoño');
     expect(check(autumn, mageId(autumn), TREE.x, TREE.y)).toEqual({ ok: true });
   });
 
@@ -320,19 +320,19 @@ describe('Requirement: Hechizos', () => {
   });
 });
 
-describe('Requirement: Amanecer', () => {
-  it('Scenario: Dos árboles vivos — se suman 2 esporas y 2 nutrientes, y el día avanza en 1', () => {
+describe('Requirement: Cambio de mes', () => {
+  it('Scenario: Dos árboles vivos — se suman 2 esporas y 2 nutrientes, y el mes avanza en 1', () => {
     const s = setup({ alive: [TREE, OTHER_TREE], nutrients: 4, spores: 1, used: [ANIL, BRUNO, RUBI] });
-    const { state } = pure(s, endDay);
+    const { state } = pure(s, endMonth);
     expect(state.spores).toBe(3);
     expect(state.nutrients).toBe(6);
-    expect(state.day).toBe(2);
+    expect(state.month).toBe(2);
     expect(state.members.every((m) => !m.used && m.at === null)).toBe(true);
   });
 });
 
 describe('Requirement: Reclutar', () => {
-  it('con 2 esporas recluta un miembro de cualquier especie, que trabaja desde el día siguiente', () => {
+  it('con 2 esporas recluta un miembro de cualquier especie, que trabaja desde el mes siguiente', () => {
     for (const sp of RECRUITABLE) {
       const s = setup({ spores: 2, net: [SOIL_NEAR_HOME] });
       const { state } = pure(s, (s) => recruit(s, sp));
@@ -340,7 +340,7 @@ describe('Requirement: Reclutar', () => {
       expect(m.species).toBe(sp);
       expect(state.spores).toBe(0);
       expect(m.used).toBe(true);
-      expect(endDay(state).state.members.at(-1)!.used).toBe(false);
+      expect(endMonth(state).state.members.at(-1)!.used).toBe(false);
     }
   });
 
@@ -367,14 +367,14 @@ describe('Requirement: Reclutar', () => {
 });
 
 describe('Requirement: Estaciones', () => {
-  it('Scenario: Cambio de estación — al terminar el día 3, el día 4 pertenece a Verano', () => {
-    const { state, message } = endDay(setup({ day: 3 }));
-    expect(state.day).toBe(4);
-    expect(season(state.day)).toBe('Verano');
+  it('Scenario: Cambio de estación — al terminar el mes 3, el mes 4 pertenece a Verano', () => {
+    const { state, message } = endMonth(setup({ month: 3 }));
+    expect(state.month).toBe(4);
+    expect(season(state.month)).toBe('Verano');
     expect(message).toContain('Comienza verano.');
   });
 
-  it('12 días en 4 estaciones de 3 días', () => {
+  it('12 meses en 4 estaciones de 3 meses', () => {
     const seasons = Array.from({ length: 12 }, (_, i) => season(i + 1));
     expect(seasons).toEqual([
       ...Array(3).fill('Primavera'),
@@ -393,10 +393,10 @@ describe('Requirement: Victoria', () => {
   });
 
   it('con la red tocándolo, 10 nutrientes y 3 árboles revividos, despertar al Árbol Padre gana la partida', () => {
-    const s = setup({ day: 7, net: [SOIL_NEAR_MOTHER], alive: [TREE, OTHER_TREE, FAR_TREE], nutrients: 10 });
+    const s = setup({ month: 7, net: [SOIL_NEAR_MOTHER], alive: [TREE, OTHER_TREE, FAR_TREE], nutrients: 10 });
     const { state } = pure(s, (s) => act(s, RUBI, MOTHER.x, MOTHER.y));
     expect(state.status).toBe('won');
-    expect(state.wonDay).toBe(7);
+    expect(state.wonMonth).toBe(7);
     expect(state.nutrients).toBe(0);
     expect(reasonOf(state, ANIL, SOIL_NEAR_HOME)).toBe(es.reasons.gameOver);
   });
@@ -409,15 +409,15 @@ describe('Requirement: Victoria', () => {
 });
 
 describe('Requirement: Final suave', () => {
-  it('Scenario: Fin del invierno — al terminar el día 12 sin ganar, el estado es `lost`', () => {
-    const { state } = endDay(setup({ day: 12 }));
+  it('Scenario: Fin del invierno — al terminar el mes 12 sin ganar, el estado es `lost`', () => {
+    const { state } = endMonth(setup({ month: 12 }));
     expect(state.status).toBe('lost');
-    expect(state.day).toBe(12);
+    expect(state.month).toBe(12);
   });
 
-  it('sin penalización: terminar el día otra vez no cambia nada y se puede reiniciar', () => {
-    const lost = endDay(setup({ day: 12 })).state;
-    const again = endDay(lost);
+  it('sin penalización: terminar el mes otra vez no cambia nada y se puede reiniciar', () => {
+    const lost = endMonth(setup({ month: 12 })).state;
+    const again = endMonth(lost);
     expect(again.state).toBe(lost);
     expect(again.message).toBe('');
     expect(() => recruit(lost, 'lactarius')).toThrow(RuleError);

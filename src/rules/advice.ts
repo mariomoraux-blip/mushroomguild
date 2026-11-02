@@ -10,7 +10,7 @@ export type Advice =
   | { kind: 'weave'; memberId: number; target: Tile; toward: 'tree' | 'mother' }
   | { kind: 'spell'; memberId: number; target: Tile; spell: Spell }
   | { kind: 'recruit'; species: RecruitableSpecies }
-  | { kind: 'endDay' }
+  | { kind: 'endMonth' }
   | { kind: 'over' };
 
 const dist = (a: Tile, b: Tile) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
@@ -32,7 +32,7 @@ export function weaveGoal(s: GameState): { goal: Tile; toward: 'tree' | 'mother'
 
 /**
  * Especie que conviene reclutar: un segundo Lactarius mientras la red no llegue al Árbol Padre;
- * después una Gliophorus (para repetir la mejor jugada del día); después otra Amanita.
+ * después una Gliophorus (para repetir la mejor jugada del mes); después otra Amanita.
  */
 export function recruitPick(s: GameState): RecruitableSpecies {
   const mother = motherTile(s);
@@ -43,7 +43,7 @@ export function recruitPick(s: GameState): RecruitableSpecies {
 }
 
 /**
- * A quién conviene que la Gliophorus le pase la voz: el compañero que ya trabajó hoy y que,
+ * A quién conviene que la Gliophorus le pase la voz: el compañero que ya trabajó este mes y que,
  * despierto, tendría trabajo útil. Rango: 0 Amanita, 1 Champiñón, 2 Lactarius.
  */
 function callOption(s: GameState, glio: Member): (Advice & { kind: 'call'; rank: number }) | null {
@@ -64,7 +64,7 @@ function callOption(s: GameState, glio: Member): (Advice & { kind: 'call'; rank:
 /**
  * Siguiente paso sugerido. Prioridad: despertar al Árbol Padre > revivir > hechizo > pasar la voz a una
  * Amanita > reclutar > descomponer > pasar la voz a un Champiñón > tejer > pasar la voz a un Lactarius >
- * terminar el día.
+ * terminar el mes.
  */
 export function advise(s: GameState): Advice {
   if (s.status !== 'playing') return { kind: 'over' };
@@ -109,5 +109,5 @@ export function advise(s: GameState): Advice {
   }
   const callAny = call(2);
   if (callAny) return callAny;
-  return { kind: 'endDay' };
+  return { kind: 'endMonth' };
 }

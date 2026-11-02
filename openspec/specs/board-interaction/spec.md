@@ -9,7 +9,7 @@ Interacción con el tablero en el navegador: selección de miembros y casillas, 
 Al seleccionar un miembro disponible, la interfaz SHALL resaltar solo las casillas donde su acción es válida.
 
 #### Scenario: Tejedor al inicio
-- WHEN el jugador selecciona al Lactarius indigo en el día 1
+- WHEN el jugador selecciona al Lactarius indigo en el mes 1
 - THEN se resaltan las tierras adyacentes al Hogar y ninguna otra casilla
 
 #### Scenario: Deseleccionar
@@ -17,14 +17,14 @@ Al seleccionar un miembro disponible, la interfaz SHALL resaltar solo las casill
 - THEN no queda ningún miembro seleccionado ni casilla resaltada
 
 ### Requirement: Hechizos dla maga
-Al seleccionar a Maestra Bruna, la interfaz SHALL pedir primero el hechizo y después resaltar solo las casillas válidas para ese hechizo.
+Al seleccionar a Maestra Bruma, la interfaz SHALL pedir primero el hechizo y después resaltar solo las casillas válidas para ese hechizo.
 
 #### Scenario: Elegir Brote arcano
-- WHEN el jugador selecciona a Maestra Bruna y elige Brote arcano
+- WHEN el jugador selecciona a Maestra Bruma y elige Brote arcano
 - THEN se resaltan solo las rocas adyacentes a la red
 
 #### Scenario: Magia agotada
-- WHEN Maestra Bruna ya lanzó un hechizo esta estación
+- WHEN Maestra Bruma ya lanzó un hechizo esta estación
 - THEN su tarjeta en el dock indica que su magia vuelve con la próxima estación
 
 ### Requirement: Feedback de acción inválida
@@ -38,11 +38,11 @@ Cuando el miembro seleccionado no tiene ninguna casilla válida, la bitácora SH
 | Lactarius indigo | No hay tierra libre junto a la red | "no hay tierra junto a la red." |
 | Amanita muscaria | Menos nutrientes que el costo de revivir | "faltan nutrientes." |
 | Amanita muscaria | No hay árboles grises junto a la red | "no hay árboles grises junto a la red." |
-| Gliophorus psittacinus | Hay un compañero que ya trabajó hoy, pero menos esporas que el costo de pasar la voz | "falta 1 espora: pasar la voz cuesta 1." |
-| Gliophorus psittacinus | Nadie ha trabajado todavía hoy | "nadie ha trabajado todavía hoy. Pasa la voz después de que trabaje un compañero." |
-| Maestra Bruna | Ya lanzó un hechizo esta estación | "su magia vuelve con la próxima estación." |
+| Gliophorus psittacinus | Hay un compañero que ya trabajó este mes, pero menos esporas que el costo de pasar la voz | "falta 1 espora: pasar la voz cuesta 1." |
+| Gliophorus psittacinus | Nadie ha trabajado todavía este mes | "nadie ha trabajado todavía este mes. Pasa la voz después de que trabaje un compañero." |
+| Maestra Bruma | Ya lanzó un hechizo esta estación | "su magia vuelve con la próxima estación." |
 
-Maestra Bruna no tiene otro motivo de inactividad: cuando llega siempre hay árboles vivos.
+Maestra Bruma no tiene otro motivo de inactividad: cuando llega siempre hay árboles vivos.
 
 #### Scenario: Toque en una casilla no válida
 - WHEN hay un miembro seleccionado y el jugador toca una casilla no resaltada
@@ -61,15 +61,15 @@ Maestra Bruna no tiene otro motivo de inactividad: cuando llega siempre hay árb
 - THEN la bitácora dice "Rubí: no hay árboles grises junto a la red."
 
 #### Scenario: Sin trabajo disponible (Gliophorus psittacinus)
-- WHEN se selecciona a Chispa, Bruno ya trabajó hoy y hay 0 esporas
+- WHEN se selecciona a Chispa, Bruno ya trabajó este mes y hay 0 esporas
 - THEN la bitácora dice "Chispa: falta 1 espora: pasar la voz cuesta 1."
 
-#### Scenario: Sin trabajo disponible (Maestra Bruna)
-- WHEN se selecciona a Maestra Bruna después de que ya lanzó un hechizo esta estación
-- THEN la bitácora dice "Maestra Bruna: su magia vuelve con la próxima estación."
+#### Scenario: Sin trabajo disponible (Maestra Bruma)
+- WHEN se selecciona a Maestra Bruma después de que ya lanzó un hechizo esta estación
+- THEN la bitácora dice "Maestra Bruma: su magia vuelve con la próxima estación."
 
 ### Requirement: Estado visible
-El HUD SHALL mostrar en todo momento día (de 12), estación, nutrientes, esporas y árboles vivos (del total de árboles del claro).
+El HUD SHALL mostrar en todo momento mes (de 12), estación, nutrientes, esporas y árboles vivos (del total de árboles del claro).
 
 #### Scenario: Tras una acción
 - WHEN el Champiñón descompone un tronco
@@ -80,7 +80,7 @@ Todo lo que se hace con el puntero SHALL poder hacerse con teclado, y el foco SH
 
 #### Scenario: Jugar con teclado
 - WHEN el jugador usa solo Tab, Enter y Esc
-- THEN puede seleccionar un miembro, actuar sobre una casilla y terminar el día
+- THEN puede seleccionar un miembro, actuar sobre una casilla y terminar el mes
 
 ### Requirement: Móvil primero
 El juego SHALL ser jugable de principio a fin en un navegador de teléfono en vertical, con el tablero completo visible y sin scroll de página. En vertical las casillas SHALL medir al menos 48 px en cualquier tamaño de ventana soportado. No hay dock plegable.
@@ -93,7 +93,7 @@ El juego SHALL ser jugable de principio a fin en un navegador de teléfono en ve
 #### Scenario: Safari con barras
 - WHEN la ventana mide 390 × 664 (iPhone con las barras del navegador visibles)
 - THEN el HUD, el tablero completo y el dock caben sin scroll, con casillas de al menos 56 px
-- AND "Terminar el día" está en la misma fila que las tarjetas del gremio
+- AND "Terminar el mes" está en la misma fila que las tarjetas del gremio
 
 #### Scenario: Teléfono en horizontal
 - WHEN la ventana mide 844 × 390
@@ -105,9 +105,9 @@ El juego SHALL ser jugable de principio a fin en un navegador de teléfono en ve
 - THEN el mismo layout se centra con más espacio, sin estirar las casillas más de 96 px
 
 #### Scenario: Gremio completo en el dock
-- WHEN el gremio tiene 7 miembros (6 reclutables y Maestra Bruna) en una ventana de 390 px de ancho
+- WHEN el gremio tiene 7 miembros (6 reclutables y Maestra Bruma) en una ventana de 390 px de ancho
 - THEN las tarjetas se desplazan en horizontal dentro del dock y la tarjeta siguiente asoma cortada
-- AND "Terminar el día" queda fijo fuera de ese desplazamiento
+- AND "Terminar el mes" queda fijo fuera de ese desplazamiento
 - AND la página no se mueve
 - AND las tarjetas mantienen siempre el mismo orden (orden de llegada al gremio)
 
@@ -119,40 +119,40 @@ Todo control interactivo SHALL medir al menos 44 × 44 px y no SHALL depender de
 - THEN el miembro queda seleccionado sin zoom de la página
 
 ### Requirement: Retratos del gremio
-El tablero, el dock y las fichas SHALL usar el retrato pintado de cada especie (`public/assets/characters/<personaje>/portrait`): en el dock, dentro de un medallón de madera, con un pequeño salto cuando el miembro está seleccionado o sugerido; en la ficha, grande; en el tablero, sobre la casilla donde ese miembro trabajó hoy. En la interfaz, la Gliophorus SHALL llevar la corona de su estación (`frame-<estación>`). Maestra Bruna SHALL conservar la proporción de su retrato, más alto que ancho, sin deformarse.
+El tablero, el dock y las fichas SHALL usar el retrato pintado de cada especie (`public/assets/characters/<personaje>/portrait`): en el dock, dentro de un medallón de madera, con un pequeño salto cuando el miembro está seleccionado o sugerido; en la ficha, grande; en el tablero, sobre la casilla donde ese miembro trabajó este mes. En la interfaz, la Gliophorus SHALL llevar la corona de su estación (`frame-<estación>`). Maestra Bruma SHALL conservar la proporción de su retrato, más alto que ancho, sin deformarse.
 
-#### Scenario: Trabajó hoy
+#### Scenario: Trabajó este mes
 - WHEN Bruno descompone un tronco
-- THEN el tablero muestra el retrato de Bruno sobre ese tronco hasta el amanecer
+- THEN el tablero muestra el retrato de Bruno sobre ese tronco hasta el mes siguiente
 
 #### Scenario: Retratos en el dock
 - WHEN empieza la partida
 - THEN el dock muestra los medallones de Añil, Bruno y Rubí con sus retratos pintados y sus nombres
 
 #### Scenario: La maga en el tablero
-- WHEN Maestra Bruna lanza un hechizo
+- WHEN Maestra Bruma lanza un hechizo
 - THEN el tablero muestra su retrato sobre la casilla del hechizo, más alto que el de los demás miembros
 
 ### Requirement: Estilo cozy
-La pantalla de juego SHALL seguir el lenguaje del referente "Bosque pintado": el tablero va sobre un bosque pintado (vertical en teléfono, apaisado en horizontal y escritorio); el HUD es una barra con la pastilla verde del día y el ícono de la estación, pastillas de crema con ícono pintado, valor y etiqueta para nutrientes, esporas y árboles, y el botón amarillo de ayuda; la bitácora es un pergamino con el libro de campo; el dock es una fila de medallones de madera con el retrato, el nombre en una cinta y una insignia (★ sugerido, Zz descansa), más el medallón de reclutar; "Fin del día" es una píldora amarilla con la luna; el tablero tiene marco de raíces trenzadas; las hojas (ficha, reclutar, hechizos, Libreta de campo) son pergamino redondeado con letrero de madera, botón redondo de cerrar y retratos en medallón. Las piezas pintadas vienen de `public/assets/`, sus rutas las arma `src/theme.ts`, y todos los colores y tipografías SHALL venir de `src/theme.ts`. El juego no SHALL mostrar sistemas que las reglas no tienen (misiones, moneda, potenciadores).
+La pantalla de juego SHALL seguir el lenguaje del referente "Bosque pintado": el tablero va sobre un bosque pintado (vertical en teléfono, apaisado en horizontal y escritorio); el HUD es una barra con la pastilla verde del mes y el ícono de la estación, pastillas de crema con ícono pintado, valor y etiqueta para nutrientes, esporas y árboles, y el botón amarillo de ayuda; la bitácora es un pergamino con el libro de campo; el dock es una fila de medallones de madera con el retrato, el nombre en una cinta y una insignia (★ sugerido, Zz descansa), más el medallón de reclutar; "Fin del mes" es una píldora amarilla con la luna; el tablero tiene marco de raíces trenzadas; las hojas (ficha, reclutar, hechizos, Libreta de campo) son pergamino redondeado con letrero de madera, botón redondo de cerrar y retratos en medallón. Las piezas pintadas vienen de `public/assets/`, sus rutas las arma `src/theme.ts`, y todos los colores y tipografías SHALL venir de `src/theme.ts`. El juego no SHALL mostrar sistemas que las reglas no tienen (misiones, moneda, potenciadores).
 
 #### Scenario: Pantalla de juego
 - WHEN se abre el juego a 390 × 844
 - THEN detrás del tablero se ve el bosque pintado
-- AND el HUD muestra la pastilla verde del día, las tres pastillas con ícono y el botón de ayuda
-- AND el dock muestra los medallones del gremio y la píldora amarilla "Fin del día"
+- AND el HUD muestra la pastilla verde del mes, las tres pastillas con ícono y el botón de ayuda
+- AND el dock muestra los medallones del gremio y la píldora amarilla "Fin del mes"
 
 #### Scenario: Miembro que descansa
-- WHEN un miembro ya trabajó hoy
+- WHEN un miembro ya trabajó este mes
 - THEN su medallón se ve apagado y lleva la insignia Zz
 
 ### Requirement: Casilla ocupada
-Cuando un miembro trabajó hoy en una casilla, su retrato SHALL ocupar la casilla y el objeto de abajo (tronco, árbol, roca, Hogar) no SHALL pintarse; el suelo, la red de micelio y el aura del Árbol Padre se mantienen. Sobre el Hogar queda la red. El Árbol Padre es la excepción: se sigue viendo y el miembro se dibuja delante.
+Cuando un miembro trabajó este mes en una casilla, su retrato SHALL ocupar la casilla y el objeto de abajo (tronco, árbol, roca, Hogar) no SHALL pintarse; el suelo, la red de micelio y el aura del Árbol Padre se mantienen. Sobre el Hogar queda la red. El Árbol Padre es la excepción: se sigue viendo y el miembro se dibuja delante.
 
 #### Scenario: Hongo sobre un tronco
 - WHEN Bruno descompone el tronco junto al Hogar
 - THEN en esa casilla se ve a Bruno y no el tronco debajo
-- AND al amanecer, cuando Bruno descansa, el tronco vuelve a verse
+- AND al empezar el mes, cuando Bruno descansa, el tronco vuelve a verse
 
 #### Scenario: Hongo sobre la casa
 - WHEN un miembro trabaja sobre el Hogar
@@ -170,18 +170,18 @@ El Árbol Padre SHALL dibujarse con su pieza pintada: dormido (gris) mientras no
 - THEN el Árbol Padre se ve con la copa dorada encendida y su copa asoma por encima del marco
 
 ### Requirement: Tablero pintado por estación
-El claro SHALL pintarse con las piezas pintadas de `public/assets/board/`, con la variante de la estación del día cuando exista y la de primavera cuando no: pasto (primavera y verano alternan tres losas; otoño e invierno tienen la suya), red de micelio como losa dorada, troncos enteros y usados, rocas (nevadas en invierno), árboles dormidos, despertando (la red ya los alcanza) y vivos (de otoño o nevados), y la casa-hongo. Si una pieza no carga, la casilla SHALL pintarse con el dibujo vectorial.
+El claro SHALL pintarse con las piezas pintadas de `public/assets/board/`, con la variante de la estación del mes cuando exista y la de primavera cuando no: pasto (primavera y verano alternan tres losas; otoño e invierno tienen la suya), red de micelio como losa dorada, troncos enteros y usados, rocas (nevadas en invierno), árboles dormidos, despertando (la red ya los alcanza) y vivos (de otoño o nevados), y la casa-hongo. Si una pieza no carga, la casilla SHALL pintarse con el dibujo vectorial.
 
 #### Scenario: Primavera
 - WHEN empieza la partida
 - THEN el pasto es verde con flores, los árboles dormidos son grises y los troncos están enteros
 
 #### Scenario: Otoño
-- WHEN llega el día 7
+- WHEN llega el mes 7
 - THEN el pasto tiene hojas naranjas y los árboles vivos tienen la copa de otoño
 
 #### Scenario: Invierno
-- WHEN llega el día 10
+- WHEN llega el mes 10
 - THEN el pasto y las rocas tienen nieve y los árboles vivos están nevados
 
 #### Scenario: La red alcanza un árbol dormido

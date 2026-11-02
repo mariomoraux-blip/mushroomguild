@@ -22,11 +22,11 @@ describe('Requirement: Tablero inicial (claros aleatorios)', () => {
     expect(generateMap(42)).toEqual(generateMap(42));
   });
 
-  it('Scenario: Partida nueva — día 1, 2 nutrientes, 0 esporas y solo el Hogar en la red, también en claros generados', () => {
+  it('Scenario: Partida nueva — mes 1, 2 nutrientes, 0 esporas y solo el Hogar en la red, también en claros generados', () => {
     const s = newRandomGame(9);
-    expect([s.day, s.nutrients, s.spores]).toEqual([1, 2, 0]);
+    expect([s.month, s.nutrients, s.spores]).toEqual([1, 2, 0]);
     expect(s.tiles.filter((t) => t.net).map((t) => t.kind)).toEqual(['home']);
-    // Un tronco junto al Hogar: el Champiñón tiene trabajo el día 1.
+    // Un tronco junto al Hogar: el Champiñón tiene trabajo el mes 1.
     const home = s.tiles.find((t) => t.kind === 'home')!;
     expect(s.tiles.some((t) => t.kind === 'log' && Math.abs(t.x - home.x) + Math.abs(t.y - home.y) === 1)).toBe(true);
   });

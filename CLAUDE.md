@@ -46,4 +46,4 @@ Concept doc y GDD: documento "El Gremio de los Hongos · Fase 0" (Claude Docs), 
 
 ## URL de la app
 - Sin parámetros: portada, y tras "Nueva partida", intro de 3 cartas y claro aleatorio. `?seed=N`: repite un claro. `?map=clasico`: mapa del Capítulo 1 (lo usan las pruebas de humo). Con `?seed`, `?map` o `?debugState` se entra directo al tablero (sin portada ni intro).
-- Solo en desarrollo, `?debugState=`: `fullGuild` (gremio completo con Maestra Bruna), `fatherAwake`, `autumn`, `winter`, `mageTomorrow` (llega la maga al terminar el día), `nearWin` (Rubí puede despertar al Árbol Padre) y `lastDay` (día 12).
+- Solo en desarrollo, `?debugState=`: `fullGuild` (gremio completo con Maestra Bruma), `fatherAwake`, `autumn`, `winter`, `mageNextMonth` (llega la maga al terminar el mes), `nearWin` (Rubí puede despertar al Árbol Padre) y `lastMonth` (mes 12).

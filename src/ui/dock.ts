@@ -1,21 +1,21 @@
 import { es } from '../copy/es';
-import { COST, DAYS, MAX_GUILD, magicSpent, recruitableCount, season, seasonIndex, DAYS_PER_SEASON, type Member } from '../rules';
+import { COST, MONTHS, MAX_GUILD, magicSpent, recruitableCount, season, seasonIndex, MONTHS_PER_SEASON, type Member } from '../rules';
 import { suggestedMember, type AppState, type Store } from '../store';
 import { el, portrait, setPortrait, setText } from './dom';
 
-/** Estado de la tarjeta: lista, descansa o (Maestra Bruna) cuándo vuelve su magia. */
+/** Estado de la tarjeta: lista, descansa o (Maestra Bruma) cuándo vuelve su magia. */
 function status(state: AppState, m: Member): { text: string; ready: boolean } {
   const g = state.game;
   if (m.species === 'mago' && magicSpent(g)) {
-    const next = (seasonIndex(g.day) + 1) * DAYS_PER_SEASON + 1;
-    return { text: next > DAYS ? es.dock.magicGone : es.dock.magicBack(season(next)), ready: false };
+    const next = (seasonIndex(g.month) + 1) * MONTHS_PER_SEASON + 1;
+    return { text: next > MONTHS ? es.dock.magicGone : es.dock.magicBack(season(next)), ready: false };
   }
   return m.used ? { text: es.dock.resting, ready: false } : { text: es.dock.ready, ready: true };
 }
 
 /**
  * Dock del gremio (011): medallones de madera con el retrato de cada miembro, su nombre en una cinta e
- * insignia de estado (★ sugerido, Zz descansa), con scroll horizontal interno; "Fin del día" es la
+ * insignia de estado (★ sugerido, Zz descansa), con scroll horizontal interno; "Fin del mes" es la
  * píldora amarilla fija en la misma fila. La acción del miembro elegido se lee en la bitácora.
  */
 export function mountDock(root: HTMLElement, store: Store) {
@@ -41,7 +41,7 @@ export function mountDock(root: HTMLElement, store: Store) {
     if (target.dataset.action === 'recruit') store.dispatch({ type: 'openSheet', sheet: { kind: 'recruit' } });
     else if (target.dataset.id) store.dispatch({ type: 'select', id: Number(target.dataset.id) });
   });
-  end.addEventListener('click', () => store.dispatch({ type: 'endDay' }));
+  end.addEventListener('click', () => store.dispatch({ type: 'endMonth' }));
 
   return (state: AppState) => {
     const g = state.game;
@@ -73,7 +73,7 @@ export function mountDock(root: HTMLElement, store: Store) {
       setText(card.badge, star ? '★' : st.ready ? '' : 'Zz');
       card.badge.dataset.kind = star ? 'star' : st.ready ? 'none' : 'rest';
       card.button.classList.toggle('is-suggested', star);
-      setPortrait(card.face, m.species, st.ready && (star || state.ui.selected === m.id) ? 'feliz' : 'reposo', seasonIndex(g.day));
+      setPortrait(card.face, m.species, st.ready && (star || state.ui.selected === m.id) ? 'feliz' : 'reposo', seasonIndex(g.month));
       card.button.setAttribute('aria-label', `${m.name}, ${sp.name}, ${sp.role}: ${sp.action}. ${st.text}.${star ? ` ★ ${es.advice.star}.` : ''}`);
       card.button.setAttribute('aria-pressed', String(state.ui.selected === m.id));
       card.button.classList.toggle('is-used', !st.ready);
@@ -84,9 +84,9 @@ export function mountDock(root: HTMLElement, store: Store) {
     recruit.disabled = !playing;
     recruit.classList.toggle('is-used', g.spores < COST.recruit || recruitableCount(g) >= MAX_GUILD);
 
-    const last = g.day >= DAYS;
+    const last = g.month >= MONTHS;
     setText(endLabel, last ? es.dock.endWinterShort : es.dock.endShort);
-    end.setAttribute('aria-label', last ? es.dock.endWinter : es.dock.endDay);
+    end.setAttribute('aria-label', last ? es.dock.endWinter : es.dock.endMonth);
     end.disabled = !playing;
   };
 }

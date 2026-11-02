@@ -57,7 +57,7 @@ Revisa tu propio trabajo en 001 como lo haría un revisor exigente:
 - ¿Cada escenario de la spec tiene su test y el test falla si la regla se rompe?
 - ¿Algún número de balance o texto quedó fuera de config.ts / es.ts?
 - ¿Alguna acción muta el estado recibido?
-- ¿El test de balance usa semilla y reporta tasa de victoria y día medio?
+- ¿El test de balance usa semilla y reporta tasa de victoria y mes medio?
 Lista lo que encuentres y corrígelo. No agregues alcance nuevo.
 ```
 
@@ -67,7 +67,7 @@ Cierra 001:
 - Fusiona el delta de specs/game-rules/ en openspec/specs/game-rules/spec.md.
 - Mueve openspec/changes/001-port-rules/ a openspec/changes/archive/.
 - Abre el pull request con: captura de BootScene, resultado del test de balance
-  (tasa de victoria del bot y día de la partida guiada) y una línea de qué probar.
+  (tasa de victoria del bot y mes de la partida guiada) y una línea de qué probar.
 ```
 
 ---
@@ -102,7 +102,7 @@ Revisa 002 contra la spec y la checklist móvil:
 - ¿Las casillas miden ≥ 64 px a 390×844 y todo el tablero es visible sin scroll?
 - ¿Todos los controles miden ≥ 44 px y nada depende de hover?
 - ¿Una acción inválida muestra el motivo exacto de check()?
-- ¿Se puede jugar un día completo solo con teclado en escritorio?
+- ¿Se puede jugar un mes completo solo con teclado en escritorio?
 - ¿El juego se pausa al ocultar la pestaña?
 Corrige lo que falle y muéstrame las capturas de nuevo.
 ```
@@ -112,7 +112,7 @@ Corrige lo que falle y muéstrame las capturas de nuevo.
 Cierra 002: fusiona el delta en openspec/specs/board-interaction/spec.md,
 archiva el cambio y abre el pull request con las tres capturas y este guion de
 playtest para teléfono: elegir al Lactarius indigo, tejer, descomponer un tronco, revivir
-dos árboles, recibir a Maestra Bruna, lanzar un Brote arcano y reclutar una Gliophorus.
+dos árboles, recibir a Maestra Bruma, lanzar un Brote arcano y reclutar una Gliophorus.
 ```
 
 ---
@@ -127,14 +127,14 @@ Incluye:
 2. Cómo combinas esa gradación con la saturación del progreso.
 3. Valores propuestos de theme.ts para las 4 estaciones según la tabla de docs/art-direction.md.
 4. Cómo haces accesibles las cartas de intro y final (foco, Esc, lectores de pantalla) y legibles a 360 px.
-5. Cómo pruebas visualmente las 4 estaciones y los 2 finales sin jugar 12 días.
+5. Cómo pruebas visualmente las 4 estaciones y los 2 finales sin jugar 12 meses.
 Detente y espera mi aprobación.
 ```
 
 ### 3.2 Implementar
 ```
 Aprobado. Implementa 003 siguiendo tasks.md y márcalas al terminar.
-- Agrega una forma de saltar a un día y estado concretos solo en modo desarrollo
+- Agrega una forma de saltar a un mes y estado concretos solo en modo desarrollo
   (por ejemplo ?debugDay=10) para poder revisar estaciones y finales.
 - Textos de cartas en src/copy/es.ts, idénticos a la spec.
 - Al final: tests, build y capturas a 390×844 de las 4 estaciones y los 2 finales.
@@ -175,7 +175,7 @@ Detente y espera mi aprobación.
 ### 4.2 Implementar
 ```
 Aprobado. Implementa 004 siguiendo tasks.md y márcalas al terminar.
-- Primero las animaciones de las 3 acciones; después amanecer; al final partículas.
+- Primero las animaciones de las 3 acciones; después el cambio de mes; al final partículas.
 - El juego debe verse y funcionar igual sin el atlas de public/assets/atlas/.
 - Al final: tests, build, tamaño total de dist/assets y una captura antes/después.
 ```
@@ -223,7 +223,7 @@ No hagas más personajes hasta que lo apruebe.
 ### 5.3 Producción
 ```
 Aprobado el estilo. Con la misma cámara, luces y materiales:
-- Modela las otras cuatro especies (Maestra Bruna al final: es el más complejo) y el Árbol Padre (dormido y despierto).
+- Modela las otras cuatro especies (Maestra Bruma al final: es el más complejo) y el Árbol Padre (dormido y despierto).
 - Renderiza 3 poses por especie: reposo, trabajando, feliz.
 - Exporta los PNG con nombres <especie>-<pose>.png y arma un atlas (PNG + JSON
   compatible con Phaser) de 2048 px como máximo.
@@ -256,7 +256,7 @@ openspec/project.md; si no, dímelo antes de escribir nada.
 ```
 Quiero ajustar el balance: <qué se siente mal>.
 Propón cambios solo en config.ts, uno a la vez, y para cada uno corre la
-simulación de balance y dame: tasa de victoria del bot, día medio y día de
+simulación de balance y dame: tasa de victoria del bot, mes medio y mes de
 victoria de la partida guiada. No cambies reglas, solo números.
 ```
 

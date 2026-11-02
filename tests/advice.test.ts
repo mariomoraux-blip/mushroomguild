@@ -26,11 +26,11 @@ describe('Requirement: Pista y camino sugerido', () => {
     expect(weaveGoal(s)).toMatchObject({ toward: 'mother', goal: { x: 2, y: 0 } });
   });
 
-  it('Scenario: Nadie más puede trabajar — invita a terminar el día', () => {
+  it('Scenario: Nadie más puede trabajar — invita a terminar el mes', () => {
     const s = setup({ used: [ANIL, BRUNO, RUBI] });
-    expect(advise(s)).toEqual({ kind: 'endDay' });
-    expect(idleHint(s).text).toBe(es.advice.endDay);
-    expect(es.advice.endDay).toContain('cada árbol vivo dará 1 espora y 1 nutriente');
+    expect(advise(s)).toEqual({ kind: 'endMonth' });
+    expect(idleHint(s).text).toBe(es.advice.endMonth);
+    expect(es.advice.endMonth).toContain('cada árbol vivo dará 1 espora y 1 nutriente');
   });
 
   it('prioridad: despertar al Árbol Padre antes que revivir, y revivir antes que reclutar o descomponer', () => {
@@ -124,7 +124,7 @@ describe('Requirement: Ficha al seleccionar un hongo', () => {
     expect(es.memberNames.gliophorus[0]).toBe('Chispa');
   });
 
-  it('Scenario: Poderes de Maestra Bruna — explica los dos hechizos y después pide elegir uno', () => {
+  it('Scenario: Poderes de Maestra Bruma — explica los dos hechizos y después pide elegir uno', () => {
     expect(es.guide.mago.powers).toContain('Brote arcano');
     expect(es.guide.mago.powers).toContain('Lluvia de esporas');
     const g = setup({ mage: true, alive: [{ x: 4, y: 6 }] });

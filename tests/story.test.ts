@@ -42,15 +42,15 @@ describe('Requirement: Intro', () => {
 });
 
 describe('Requirement: Llegada de la maga', () => {
-  it('Scenario: Amanecer con la maga — al terminar el día en que llega, se abre su carta', () => {
+  it('Scenario: Mes nuevo con la maga — al terminar el mes en que llega, se abre su carta', () => {
     const g = { ...newGame(), mageDue: true };
-    const next = run(initialState(g), { type: 'endDay' });
+    const next = run(initialState(g), { type: 'endMonth' });
     expect(next.game.members.some((m) => m.species === 'mago')).toBe(true);
     expect(next.ui.story).toEqual({ kind: 'mage' });
   });
 
-  it('un día normal no abre ninguna carta', () => {
-    expect(run(initialState(newGame()), { type: 'endDay' }).ui.story).toBeNull();
+  it('un mes normal no abre ninguna carta', () => {
+    expect(run(initialState(newGame()), { type: 'endMonth' }).ui.story).toBeNull();
   });
 });
 
@@ -63,18 +63,18 @@ describe('Requirement: Finales', () => {
     expect(next.ui.story).toEqual({ kind: 'won' });
   });
 
-  it('Scenario: Fin del invierno — al terminar el día 12 se abre la carta del final suave', () => {
-    const next = run(initialState({ ...newGame(), day: 12 }), { type: 'endDay' });
+  it('Scenario: Fin del invierno — al terminar el mes 12 se abre la carta del final suave', () => {
+    const next = run(initialState({ ...newGame(), month: 12 }), { type: 'endMonth' });
     expect(next.game.status).toBe('lost');
     expect(next.ui.story).toEqual({ kind: 'lost' });
   });
 
   it('"Ver el claro" cierra la carta y "Jugar de nuevo" empieza otra partida conservando las fichas vistas', () => {
-    const lost = run(initialState({ ...newGame(), day: 12 }, ['champi']), { type: 'endDay' });
+    const lost = run(initialState({ ...newGame(), month: 12 }, ['champi']), { type: 'endMonth' });
     expect(run(lost, { type: 'closeStory' }).ui.story).toBeNull();
     const again = run(lost, { type: 'restart', game: newGame() });
     expect(again.game.status).toBe('playing');
-    expect(again.game.day).toBe(1);
+    expect(again.game.month).toBe(1);
     expect(again.ui.story).toBeNull();
     expect(again.ui.seen).toEqual(['champi']);
   });

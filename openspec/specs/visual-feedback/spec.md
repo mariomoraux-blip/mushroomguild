@@ -21,10 +21,10 @@ Cada acción válida SHALL tener una animación de 400 ms o menos que muestre su
 - THEN un anillo de luz se abre desde el árbol y queda un halo cálido detrás de él
 
 ### Requirement: Esporas al contador
-Al amanecer, por cada árbol vivo (hasta 12) SHALL volar una espora al contador de esporas del HUD, que da un saltito al recibirlas. Con la Lluvia de esporas, las esporas salen del árbol del hechizo.
+Al empezar el mes, por cada árbol vivo (hasta 12) SHALL volar una espora al contador de esporas del HUD, que da un saltito al recibirlas. Con la Lluvia de esporas, las esporas salen del árbol del hechizo.
 
-#### Scenario: Amanecer con árboles vivos
-- WHEN termina el día con dos árboles vivos
+#### Scenario: Mes nuevo con árboles vivos
+- WHEN termina el mes con dos árboles vivos
 - THEN dos esporas vuelan desde esos árboles hasta el contador
 
 ### Requirement: Partículas

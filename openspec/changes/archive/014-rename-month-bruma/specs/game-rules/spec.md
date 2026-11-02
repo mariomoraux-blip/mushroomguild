@@ -85,7 +85,7 @@ Lanzar un hechizo SHALL gastar la acción del mes de Maestra Bruma. No tiene otr
 #### Scenario: Lluvia de esporas es un pago extra
 - WHEN Maestra Bruma lanza Lluvia de esporas sobre un árbol vivo con 3 árboles vivos
 - THEN se suman de inmediato 3 esporas y 3 nutrientes
-- AND al terminar ese mes el cambio de mes suma otras 3 esporas y 3 nutrientes
+- AND al empezar el mes siguiente se suman otras 3 esporas y 3 nutrientes
 
 #### Scenario: Lluvia fuera de un árbol vivo
 - WHEN Maestra Bruma intenta la Lluvia de esporas sobre una casilla que no es un árbol vivo

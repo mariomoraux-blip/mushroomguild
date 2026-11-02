@@ -57,7 +57,7 @@ export function mountScreens(root: HTMLElement, store: Store) {
       el('h1', { class: 'screen__title', id: 'screen-title' }, title));
 
   function title(state: AppState) {
-    const season = seasonIndex(state.game.day);
+    const season = seasonIndex(state.game.month);
     return el('div', { class: 'title' },
       el('h1', { class: 'title__logo' }, img(SCREEN_ART.logo, 'title__logo-img'), el('span', { class: 'sr-only' }, es.title)),
       el('div', { class: 'title__cast', 'aria-hidden': 'true' }, ...CAST.map((sp) => portrait(sp, 'reposo', season, 'md'))),
@@ -91,7 +91,7 @@ export function mountScreens(root: HTMLElement, store: Store) {
   }
 
   function guild(state: AppState) {
-    const season = seasonIndex(state.game.day);
+    const season = seasonIndex(state.game.month);
     return el('div', { class: 'screen__panel' },
       header(es.guild.title),
       el('p', { class: 'guild__intro' }, es.guild.intro),

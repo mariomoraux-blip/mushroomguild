@@ -42,7 +42,7 @@ describe('Requirement: Selección de miembro', () => {
 describe('Requirement: Hechizos dla maga', () => {
   const withMage = () => init(setup({ mage: true, net: [{ x: 3, y: 6 }], alive: [{ x: 4, y: 6 }] }));
 
-  it('al seleccionar a Maestra Bruna se pide primero el hechizo y no se resalta nada', () => {
+  it('al seleccionar a Maestra Bruma se pide primero el hechizo y no se resalta nada', () => {
     const s0 = withMage();
     const s = run(s0, { type: 'select', id: idOf(s0.game, 'mago') });
     expect(s.ui.sheet).toEqual({ kind: 'spell' });
@@ -67,7 +67,7 @@ describe('Requirement: Hechizos dla maga', () => {
     const s0 = init(setup({ mage: true, alive: [{ x: 4, y: 6 }], lastSpellSeason: 0 }));
     const s = run(s0, { type: 'select', id: idOf(s0.game, 'mago') });
     expect(s.ui.sheet).toBeNull();
-    expect(s.ui.notice.text).toBe('Maestra Bruna: su magia vuelve con la próxima estación.');
+    expect(s.ui.notice.text).toBe('Maestra Bruma: su magia vuelve con la próxima estación.');
   });
 });
 
@@ -100,17 +100,17 @@ describe('Requirement: Feedback de acción inválida', () => {
   });
 
   it('Scenario: Sin trabajo disponible (Gliophorus psittacinus)', () => {
-    // Chispa recién reclutada; al día siguiente Bruno trabaja y no quedan esporas para pasarle la voz.
+    // Chispa recién reclutada; al mes siguiente Bruno trabaja y no quedan esporas para pasarle la voz.
     const withChispa = reduce(init(setup({ spores: 2 })), { type: 'recruit', species: 'gliophorus' }).game;
-    const nextDay = run(init(withChispa), { type: 'endDay' }, { type: 'select', id: BRUNO }, { type: 'tapTile', x: 1, y: 7 }).game;
-    const s = run(init(nextDay), { type: 'select', id: idOf(nextDay, 'gliophorus') });
+    const nextMonth = run(init(withChispa), { type: 'endMonth' }, { type: 'select', id: BRUNO }, { type: 'tapTile', x: 1, y: 7 }).game;
+    const s = run(init(nextMonth), { type: 'select', id: idOf(nextMonth, 'gliophorus') });
     expect(s.ui.notice.text).toBe('Chispa: falta 1 espora: pasar la voz cuesta 1.');
   });
 
-  it('Scenario: Sin trabajo disponible (Maestra Bruna)', () => {
+  it('Scenario: Sin trabajo disponible (Maestra Bruma)', () => {
     const g = setup({ mage: true, alive: [{ x: 4, y: 6 }], lastSpellSeason: 0 });
     const s = run(init(g), { type: 'select', id: idOf(g, 'mago') });
-    expect(s.ui.notice.text).toBe('Maestra Bruna: su magia vuelve con la próxima estación.');
+    expect(s.ui.notice.text).toBe('Maestra Bruma: su magia vuelve con la próxima estación.');
   });
 
   it('idleReason cubre las claves restantes de la tabla y devuelve null si hay trabajo', () => {
@@ -136,7 +136,7 @@ describe('Requirement: Estado visible', () => {
   });
 });
 
-describe('store: reclutar, terminar el día y fin de partida', () => {
+describe('store: reclutar, terminar el mes y fin de partida', () => {
   it('reclutar con esporas usa las reglas; sin esporas avisa el motivo', () => {
     const ok = reduce(init(setup({ spores: 2 })), { type: 'recruit', species: 'gliophorus' });
     expect(ok.game.members.at(-1)?.name).toBe('Chispa');
@@ -144,17 +144,17 @@ describe('store: reclutar, terminar el día y fin de partida', () => {
     expect(no.ui.notice).toEqual({ text: es.reasons.recruitCost(2), tone: 'warn' });
   });
 
-  it('terminar el día avanza el día y muestra el amanecer', () => {
-    const s = reduce(init(), { type: 'endDay' });
-    expect(s.game.day).toBe(2);
-    expect(s.ui.notice.text).toContain('Amanece el día 2.');
+  it('terminar el mes avanza el mes y muestra el cambio de mes', () => {
+    const s = reduce(init(), { type: 'endMonth' });
+    expect(s.game.month).toBe(2);
+    expect(s.ui.notice.text).toContain('Empieza el mes 2.');
   });
 
   it('con la partida terminada no se puede seleccionar ni actuar', () => {
-    const lost = reduce(init(setup({ day: 12 })), { type: 'endDay' });
+    const lost = reduce(init(setup({ month: 12 })), { type: 'endMonth' });
     expect(lost.game.status).toBe('lost');
     expect(reduce(lost, { type: 'select', id: ANIL })).toBe(lost);
-    expect(reduce(lost, { type: 'endDay' })).toBe(lost);
+    expect(reduce(lost, { type: 'endMonth' })).toBe(lost);
   });
 
   it('un miembro cansado no queda seleccionado y se avisa', () => {

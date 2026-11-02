@@ -12,7 +12,7 @@
 Ya existe una [prueba de concepto jugable](../poc/game.html) que validó el loop y el balance. La Fase 1 la reconstruye bien hecha en Claude Code.
 
 ### Pilares
-1. **Cuidar, no conquistar.** No hay enemigos. El reto es el tiempo (12 días) y los recursos. Perder no castiga: el bosque espera la próxima primavera.
+1. **Cuidar, no conquistar.** No hay enemigos. El reto es el tiempo (12 meses) y los recursos. Perder no castiga: el bosque espera la próxima primavera.
 2. **El mundo cuenta la historia.** El claro empieza gris y gana color con cada árbol revivido. El texto se limita a tres cartas de intro.
 3. **Decisiones pequeñas, efecto en cadena.** Cada árbol revivido alimenta el motor con esporas y nutrientes, y extiende la red.
 
@@ -35,7 +35,7 @@ Cualquier idea nueva se evalúa contra estos tres pilares. Si no sirve a ninguno
 La red de micelio es a la vez mecánica y progreso visible: define dónde puedes actuar y muestra cuánto has avanzado. Se apoya en algo real, las redes micorrícicas que conectan árboles.
 
 ### Alcance del vertical slice
-- **Incluye:** 1 capítulo, claros aleatorios de 5×8 (un mapa nuevo en cada partida), 5 especies (4 reclutables y una maga única), 12 días en 4 estaciones, intro y final. Se juega en navegador de teléfono y de escritorio.
+- **Incluye:** 1 capítulo, claros aleatorios de 5×8 (un mapa nuevo en cada partida), 5 especies (4 reclutables y una maga única), 12 meses en 4 estaciones, intro y final. Se juega en navegador de teléfono y de escritorio.
 - **Fuera de alcance:** guardado, varios niveles, IA rival, multijugador, monetización.
 
 ### Criterios de éxito
@@ -45,13 +45,13 @@ La red de micelio es a la vez mecánica y progreso visible: define dónde puedes
 
 ## GDD mínimo
 
-La partida es un loop diario de colocar, producir y expandir. Dura 12 días y se gana despertando al Árbol Padre.
+La partida es un loop mensual de colocar, producir y expandir. Dura 12 meses y se gana despertando al Árbol Padre.
 
 ### Loop central
-Cada día eliges a un miembro del gremio y una casilla. La acción gasta o produce nutrientes, y la red crece o un árbol revive. Al cerrar el día, los árboles vivos pagan esporas y nutrientes, y las esporas reclutan más gremio.
+Cada mes eliges a un miembro del gremio y una casilla. La acción gasta o produce nutrientes, y la red crece o un árbol revive. Al cerrar el mes, los árboles vivos pagan esporas y nutrientes, y las esporas reclutan más gremio.
 
 ### Tablero
-Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol Padre arriba. La red crece hacia el árbol y el tablero cabe en un teléfono en vertical. Solo se actúa sobre casillas que tocan la red (adyacencia ortogonal). Cada partida genera un claro distinto (7 árboles grises, 5 troncos, 6 rocas, Hogar abajo y Árbol Padre arriba). El generador solo acepta claros que un jugador que sigue las pistas gana entre el día 8 y el 11. El mapa de la prueba de concepto, rotado, queda como "mapa clásico" para pruebas.
+Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol Padre arriba. La red crece hacia el árbol y el tablero cabe en un teléfono en vertical. Solo se actúa sobre casillas que tocan la red (adyacencia ortogonal). Cada partida genera un claro distinto (7 árboles grises, 5 troncos, 6 rocas, Hogar abajo y Árbol Padre arriba). El generador solo acepta claros que un jugador que sigue las pistas gana entre el mes 8 y el 11. El mapa de la prueba de concepto, rotado, queda como "mapa clásico" para pruebas.
 
 | Casilla | Comportamiento |
 | --- | --- |
@@ -68,32 +68,32 @@ Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol P
 | Champiñón | Descompositor | Inicial, reclutable | Descompone un tronco | +2 nutrientes |
 | *Lactarius indigo* | Tejedor | Inicial, reclutable | Teje micelio en tierra | −1 nutriente, la red crece |
 | *Amanita muscaria* | Sanadora | Inicial, reclutable | Revive un árbol gris | −3 nutrientes; −6 en el Árbol Padre |
-| *Gliophorus psittacinus* | Mensajera | Reclutable | "Pasa la voz" a un compañero que ya trabajó hoy | −1 espora; ese compañero trabaja otra vez |
+| *Gliophorus psittacinus* | Mensajera | Reclutable | "Pasa la voz" a un compañero que ya trabajó este mes | −1 espora; ese compañero trabaja otra vez |
 | *Conocybe arcana* (ficticio) | Maga | Única; llega sola | Un hechizo por estación | Ver hechizos |
 
-Cada miembro actúa una vez por día. El gremio llega a 6 reclutables como máximo, y un recluta trabaja desde el día siguiente.
+Cada miembro actúa una vez por mes. El gremio llega a 6 reclutables como máximo, y un recluta trabaja desde el mes siguiente.
 
-**Maestra Bruna, la maga.** No se recluta: llega al amanecer siguiente a revivir el segundo árbol ("el bosque volvió a hablar y alguien escuchó") y no cuenta en el límite de 6. Lanza un hechizo por estación, a elegir:
+**Maestra Bruma, la maga.** No se recluta: llega al empezar el mes siguiente a revivir el segundo árbol ("el bosque volvió a hablar y alguien escuchó") y no cuenta en el límite de 6. Lanza un hechizo por estación, a elegir:
 - **Brote arcano:** convierte una roca vecina a la red en tierra con micelio. Abre atajos en el mapa.
-- **Lluvia de esporas:** sobre un árbol vivo, todos los árboles vivos dan ya su espora y su nutriente del amanecer.
+- **Lluvia de esporas:** sobre un árbol vivo, todos los árboles vivos dan ya la espora y el nutriente que darían al empezar el mes.
 
-La Mensajera, **Chispa**, convierte esporas en una segunda jugada: despierta a la Amanita para revivir otro árbol el mismo día o al Champiñón para descomponer otra vez. Agrega la decisión de gastar esporas en crecer el gremio o en repetir la mejor jugada.
+La Mensajera, **Chispa**, convierte esporas en una segunda jugada: despierta a la Amanita para revivir otro árbol el mismo mes o al Champiñón para descomponer otra vez. Agrega la decisión de gastar esporas en crecer el gremio o en repetir la mejor jugada.
 
 ### Economía
 | Recurso | Se gana | Se gasta |
 | --- | --- | --- |
-| Nutrientes | Tronco: +2 por uso · árbol vivo: +1 al amanecer · Lluvia de esporas | Tejer 1 · revivir 3 · Árbol Padre 10 |
-| Esporas | Árbol vivo: +1 al amanecer · Lluvia de esporas | Reclutar 2 · Mensajera 1 |
+| Nutrientes | Tronco: +2 por uso · árbol vivo: +1 al empezar el mes · Lluvia de esporas | Tejer 1 · revivir 3 · Árbol Padre 10 |
+| Esporas | Árbol vivo: +1 al empezar el mes · Lluvia de esporas | Reclutar 2 · Mensajera 1 |
 
 Inicio: 3 miembros (uno de cada especie), 2 nutrientes, 0 esporas. Los troncos son finitos; los árboles vivos son la fuente renovable. Esa tensión es el corazón del juego.
 
 ### Tiempo y victoria
-- 4 estaciones de 3 días. La estación cambia el color del follaje.
+- 4 estaciones de 3 meses. La estación cambia el color del follaje.
 - **Victoria:** la Amanita despierta al Árbol Padre. Requiere que toque la red, 10 nutrientes y al menos 3 árboles revividos.
 - **Final suave:** si se acaba el invierno, el bosque espera la próxima primavera y se reintenta.
 
 ### Narrativa
-Tres cartas de intro, una frase cada una: el bosque se apaga; un gremio despierta; lleva la red al Árbol Padre antes del invierno. Una carta a mitad de partida, cuando llega Maestra Bruna. Dos cartas de final. Todo lo demás lo cuenta el mundo: color que vuelve, esporas flotando, el Árbol Padre que se ilumina.
+Tres cartas de intro, una frase cada una: el bosque se apaga; un gremio despierta; lleva la red al Árbol Padre antes del invierno. Una carta a mitad de partida, cuando llega Maestra Bruma. Dos cartas de final. Todo lo demás lo cuenta el mundo: color que vuelve, esporas flotando, el Árbol Padre que se ilumina.
 
 ### Dirección de arte
 Estilo ilustrado con contorno café, formas redondas y rubor. La luz del mundo avanza con las estaciones, de una mañana de primavera a un anochecer de invierno.
@@ -111,7 +111,7 @@ Cada especie se reconoce por su silueta, sin depender del color: domo bajo, embu
 | *Lactarius indigo* "Añil" | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Suelta gotitas de látex azul; el micelio que teje brilla con destellos índigo |
 | *Amanita muscaria* "Rubí" | Domo alto con verrugas y falda en el tallo | Rojo y crema | Bolso con hojas que curan | — |
 | *Gliophorus psittacinus* "Chispa" | Campana pequeña, viscosa y brillante | Verde loro que cambia | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
-| *Conocybe arcana* "Maestra Bruna" | Cono alto y puntiagudo, doblado en la punta como sombrero de hechicera; la más alta | Violeta profundo con motas que brillan como estrellas | Bastón de ramita con una espora luminosa | Melena de hilos de micelio; brilla siempre un poco |
+| *Conocybe arcana* "Maestra Bruma" | Cono alto y puntiagudo, doblado en la punta como sombrero de hechicera; la más alta | Violeta profundo con motas que brillan como estrellas | Bastón de ramita con una espora luminosa | Melena de hilos de micelio; brilla siempre un poco |
 
 *Conocybe* es un género real de sombrero cónico; *arcana* es inventado. La maga es el único personaje fantástico del elenco.
 
@@ -150,9 +150,9 @@ Las referencias son de terceros: guían el estilo, pero no se copian ni se publi
 ### UI y controles
 El juego es mobile-first en vertical. El escritorio usa el mismo layout con más aire.
 
-1. **Arriba:** HUD compacto con día y estación, nutrientes, esporas y árboles vivos.
+1. **Arriba:** HUD compacto con mes y estación, nutrientes, esporas y árboles vivos.
 2. **Centro:** el tablero vertical; cada casilla mide al menos 64 px en un teléfono de 390 px.
-3. **Abajo:** dock del gremio al alcance del pulgar, con el botón de terminar el día.
+3. **Abajo:** dock del gremio al alcance del pulgar, con el botón de terminar el mes.
 4. **Bitácora:** un aviso breve sobre el dock, no una lista larga.
 
 Interacción: tocar un miembro resalta las casillas válidas; tocar una casilla ejecuta la acción. Nada depende de hover ni de gestos largos. Una acción inválida explica el motivo en lenguaje claro.
@@ -174,12 +174,12 @@ Medido por simulación (`tests/balance.test.ts`, 100 claros generados con semill
 
 | Escenario | Resultado |
 | --- | --- |
-| Jugador que sigue las pistas (`playAdvised`) | Gana el 100 % de los claros aceptados, día medio ≈ 8,9 (entre el 8 y el 11) |
+| Jugador que sigue las pistas (`playAdvised`) | Gana el 100 % de los claros aceptados, mes medio ≈ 8,9 (entre el 8 y el 11) |
 | Bot que juega al azar (1.000 partidas) | Gana ≈ 17 % |
 
-Con las reglas de la prueba de concepto, un jugador atento ganaba hacia el día 5–7 y el playtest lo confirmó: se sentía demasiado fácil. Desde el cambio 006 el Árbol Padre pide 3 árboles revividos y 10 nutrientes, cada tronco da +2 y el generador descarta claros regalados.
+Con las reglas de la prueba de concepto, un jugador atento ganaba hacia el mes 5–7 y el playtest lo confirmó: se sentía demasiado fácil. Desde el cambio 006 el Árbol Padre pide 3 árboles revividos y 10 nutrientes, cada tronco da +2 y el generador descarta claros regalados.
 
-Palancas de ajuste: coste de tejer, ganancia por tronco, número de troncos, días totales y nutriente diario por árbol.
+Palancas de ajuste: coste de tejer, ganancia por tronco, número de troncos, meses totales y nutriente mensual por árbol.
 
 ### Ideas del referente visual (sin decidir)
 El referente "Bosque pintado" muestra sistemas que el vertical slice no tiene: misiones con recompensas, estrellas como moneda, enciclopedia del bosque (hongos, plantas, aliados, lugares), logros y potenciadores con cargas (martillo, cambio, bolsa). El cambio 011 solo tomó su lenguaje visual. Si alguno entra al juego, necesita su propio cambio de OpenSpec con reglas y balance.
@@ -194,8 +194,8 @@ El mayor riesgo no es técnico: es que la regla de adyacencia no se entienda sin
 | Los créditos alcanzan antes del 5 de noviembre | Una tarea pequeña por sesión, con criterio de aceptación | Recortar audio y animaciones; proteger el loop jugable |
 | Los sprites de Blender se leen bien a 44 px | Render de prueba de un solo personaje antes de producir los tres | Volver a SVG para personajes; Blender solo para escenario |
 | Claude Code en la nube no ve ni juega el juego | Tests de reglas en Node y capturas automáticas con navegador sin interfaz | Tú haces el playtest manual al cerrar cada tarea |
-| El balance se rompe al agregar contenido | La simulación queda como test de regresión: bot al azar ≥ 20 % de victorias, partida guiada gana antes del día 9 | Ajustar las palancas del GDD, no reescribir reglas |
-| Un mapa fijo no invita a repetir | Resuelto en 006: cada partida es un claro aleatorio y justo | Ajustar `MAP_GEN` (árboles, troncos, rocas, días) |
+| El balance se rompe al agregar contenido | La simulación queda como test de regresión: bot al azar ≥ 20 % de victorias, partida guiada gana antes del mes 9 | Ajustar las palancas del GDD, no reescribir reglas |
+| Un mapa fijo no invita a repetir | Resuelto en 006: cada partida es un claro aleatorio y justo | Ajustar `MAP_GEN` (árboles, troncos, rocas, meses) |
 | La página pesa demasiado para el portafolio | Presupuesto de assets ≤ 4 MB (desde el 2 de noviembre; antes 2 MB), carga diferida de portada, intro y victoria, y carga < 3 s | Comprimir sprites o bajar resolución |
 
 ## Decisiones técnicas

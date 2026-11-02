@@ -1,7 +1,7 @@
 import { addMage, cloneState, newGame, type GameState, type Point, type RecruitableSpecies } from '../src/rules';
 
 export interface Setup {
-  day?: number;
+  month?: number;
   nutrients?: number;
   spores?: number;
   /** Casillas que se agregan a la red. */
@@ -10,13 +10,13 @@ export interface Setup {
   alive?: Point[];
   /** Usos ya hechos de un tronco. */
   uses?: (Point & { n: number })[];
-  /** Ids de miembros que ya actuaron hoy. */
+  /** Ids de miembros que ya actuaron este mes. */
   used?: number[];
   /** Miembros reclutables extra que se agregan al gremio (disponibles). */
   extraMembers?: RecruitableSpecies[];
-  /** Maestra Bruna ya está en el gremio (se agrega después de los extra). */
+  /** Maestra Bruma ya está en el gremio (se agrega después de los extra). */
   mage?: boolean;
-  /** Estación (0–3) del último hechizo de Maestra Bruna. */
+  /** Estación (0–3) del último hechizo de Maestra Bruma. */
   lastSpellSeason?: number;
 }
 
@@ -24,7 +24,7 @@ export interface Setup {
 export function setup(o: Setup = {}): GameState {
   const s = cloneState(newGame());
   const at = (p: Point) => s.tiles.find((t) => t.x === p.x && t.y === p.y)!;
-  if (o.day !== undefined) s.day = o.day;
+  if (o.month !== undefined) s.month = o.month;
   if (o.nutrients !== undefined) s.nutrients = o.nutrients;
   if (o.spores !== undefined) s.spores = o.spores;
   o.net?.forEach((p) => (at(p).net = true));

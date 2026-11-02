@@ -11,14 +11,14 @@ export type Effect =
   | { kind: 'revive'; at: Point }
   /** El Árbol Padre despertó. */
   | { kind: 'awaken'; at: Point }
-  /** Esporas ganadas: al amanecer (desde los árboles vivos) o por la Lluvia de esporas (desde el árbol del hechizo). */
+  /** Esporas ganadas: al empezar el mes (desde los árboles vivos) o por la Lluvia de esporas (desde el árbol del hechizo). */
   | { kind: 'spores'; from: Point[]; amount: number };
 
 const key = (p: Point) => `${p.x},${p.y}`;
 
 /** Efectos de pasar de `prev` a `next`. Vacío si es otra partida (reinicio) o si no cambió nada visible. */
 export function diffEffects(prev: GameState, next: GameState): Effect[] {
-  if (prev === next || next.day < prev.day || prev.tiles.length !== next.tiles.length || next.members.length < prev.members.length) return [];
+  if (prev === next || next.month < prev.month || prev.tiles.length !== next.tiles.length || next.members.length < prev.members.length) return [];
   const before = new Map(prev.tiles.map((t) => [key(t), t]));
   const effects: Effect[] = [];
   for (const t of next.tiles) {
@@ -36,9 +36,9 @@ export function diffEffects(prev: GameState, next: GameState): Effect[] {
   const gained = next.spores - prev.spores;
   if (gained > 0) {
     const alive = (g: GameState) => g.tiles.filter((t) => (t.kind === 'tree' || t.kind === 'mother') && t.alive);
-    // Al amanecer salen de cada árbol vivo; de día (Lluvia de esporas), del árbol donde la maga lanzó el hechizo.
+    // Al empezar el mes salen de cada árbol vivo; de mes (Lluvia de esporas), del árbol donde la maga lanzó el hechizo.
     const mage = next.members.find((m) => m.species === 'mago' && m.at);
-    const from = next.day > prev.day ? alive(prev) : mage?.at ? [mage.at] : alive(next);
+    const from = next.month > prev.month ? alive(prev) : mage?.at ? [mage.at] : alive(next);
     if (from.length) effects.push({ kind: 'spores', from: from.map(({ x, y }) => ({ x, y })), amount: gained });
   }
   return effects;

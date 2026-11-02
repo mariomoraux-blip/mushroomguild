@@ -1,7 +1,7 @@
 # story-presentation
 
 ## Purpose
-Historia del claro: intro, llegada de Maestra Bruna, finales y el color que vuelve con el progreso.
+Historia del claro: intro, llegada de Maestra Bruma, finales y el color que vuelve con el progreso.
 Origen: cambio 003 (archivado). La estación la cuentan las piezas pintadas del tablero (`board-interaction` › Tablero pintado por estación). Implementada en `src/store.ts` (`ui.story`), `src/ui/story.ts` y `src/scenes/paint.ts` (`progressSaturation`).
 
 ## Requirements
@@ -18,18 +18,18 @@ Una partida nueva SHALL abrir con tres cartas de una frase cada una (el bosque s
 - THEN ve las tres cartas en orden y después el tablero
 
 ### Requirement: Llegada de la maga
-Cuando Maestra Bruna se une al gremio, el juego SHALL mostrar una carta breve que la presente y explique sus dos hechizos.
+Cuando Maestra Bruma se une al gremio, el juego SHALL mostrar una carta breve que la presente y explique sus dos hechizos.
 
-#### Scenario: Amanecer con la maga
-- WHEN empieza el día en que llega Maestra Bruna
+#### Scenario: Mes nuevo con la maga
+- WHEN empieza el mes en que llega Maestra Bruma
 - THEN aparece la carta "El bosque volvió a hablar, y alguien escuchó." con sus hechizos en una línea cada uno
 
 ### Requirement: Finales
-Al ganar o al terminar el invierno, el juego SHALL mostrar una carta de final con un resumen (día, árboles revividos, nutrientes y esporas) y las opciones "Ver el claro" y "Jugar de nuevo". "Jugar de nuevo" SHALL empezar una partida nueva sin repetir la intro.
+Al ganar o al terminar el invierno, el juego SHALL mostrar una carta de final con un resumen (mes, árboles revividos, nutrientes y esporas) y las opciones "Ver el claro" y "Jugar de nuevo". "Jugar de nuevo" SHALL empezar una partida nueva sin repetir la intro.
 
 #### Scenario: Victoria
-- WHEN la Amanita muscaria despierta al Árbol Padre en el día 8
-- THEN la carta dice "El Árbol Padre despertó en el día 8." e indica los árboles revividos
+- WHEN la Amanita muscaria despierta al Árbol Padre en el mes 8
+- THEN la carta dice "El Árbol Padre despertó en el mes 8." e indica los árboles revividos
 
 #### Scenario: Fin del invierno
 - WHEN el estado pasa a `lost`

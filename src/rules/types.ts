@@ -2,7 +2,7 @@ export type TileKind = 'home' | 'mother' | 'soil' | 'log' | 'tree' | 'rock';
 export type SpeciesId = 'champi' | 'lactarius' | 'amanita' | 'gliophorus' | 'mago';
 /** Especies que se pueden reclutar con esporas (la maga llega sola). */
 export type RecruitableSpecies = Exclude<SpeciesId, 'mago'>;
-/** Hechizos de Maestra Bruna: Brote arcano y Lluvia de esporas. */
+/** Hechizos de Maestra Bruma: Brote arcano y Lluvia de esporas. */
 export type Spell = 'sprout' | 'rain';
 export type GameStatus = 'playing' | 'won' | 'lost';
 
@@ -25,27 +25,27 @@ export interface Member {
   readonly id: number;
   readonly species: SpeciesId;
   readonly name: string;
-  /** Ya actuó hoy. */
+  /** Ya actuó este mes. */
   readonly used: boolean;
-  /** Casilla donde actuó hoy. */
+  /** Casilla donde actuó este mes. */
   readonly at: Point | null;
 }
 
 export interface GameState {
   readonly tiles: readonly Tile[];
-  readonly day: number;
+  readonly month: number;
   readonly nutrients: number;
   readonly spores: number;
   readonly status: GameStatus;
-  readonly wonDay: number | null;
+  readonly wonMonth: number | null;
   readonly members: readonly Member[];
   readonly nameIdx: Readonly<Record<RecruitableSpecies, number>>;
   readonly nextId: number;
-  /** Se revivió el segundo árbol: Maestra Bruna llega al próximo amanecer. */
+  /** Se revivió el segundo árbol: Maestra Bruma llega al próximo cambio de mes. */
   readonly mageDue: boolean;
-  /** Maestra Bruna ya se unió al gremio (solo una vez por partida). */
+  /** Maestra Bruma ya se unió al gremio (solo una vez por partida). */
   readonly mageArrived: boolean;
-  /** Índice de la estación (0–3) en la que Maestra Bruna lanzó su último hechizo. */
+  /** Índice de la estación (0–3) en la que Maestra Bruma lanzó su último hechizo. */
   readonly lastSpellSeason: number | null;
 }
 

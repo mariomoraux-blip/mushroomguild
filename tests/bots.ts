@@ -2,7 +2,7 @@
 import {
   act,
   COST,
-  endDay,
+  endMonth,
   MAX_GUILD,
   recruit,
   recruitableCount,
@@ -26,12 +26,12 @@ export function shuffle<T>(rng: Rng, list: readonly T[]): T[] {
 
 const canRecruit = (s: GameState) => s.spores >= COST.recruit && recruitableCount(s) < MAX_GUILD;
 
-/** Juega una partida completa: `day` decide lo que pasa en cada día y luego se termina el día. */
-export function playGame(start: GameState, day: (s: GameState) => GameState): GameState {
+/** Juega una partida completa: `month` decide lo que pasa en cada mes y luego se termina el mes. */
+export function playGame(start: GameState, month: (s: GameState) => GameState): GameState {
   let s = start;
   while (s.status === 'playing') {
-    s = day(s);
-    if (s.status === 'playing') s = endDay(s).state;
+    s = month(s);
+    if (s.status === 'playing') s = endMonth(s).state;
   }
   return s;
 }
@@ -39,7 +39,7 @@ export function playGame(start: GameState, day: (s: GameState) => GameState): Ga
 // ─── Bot al azar (piso de dificultad) ───────────────────────────────────────────
 // Recluta una especie al azar si puede; cada miembro, en orden aleatorio, actúa sobre
 // una casilla válida al azar (la maga, con cualquier hechizo válido).
-export function randomDay(rng: Rng) {
+export function randomMonth(rng: Rng) {
   return (start: GameState): GameState => {
     let s = start;
     if (canRecruit(s)) s = recruit(s, pick(rng, RECRUITABLE)).state;

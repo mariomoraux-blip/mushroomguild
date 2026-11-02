@@ -65,7 +65,7 @@ export function roughMap(rng: Rng): string[] | null {
 /** ¿El mapa se gana siguiendo las pistas, ni muy pronto ni muy tarde? */
 export function isFairMap(map: readonly string[]): boolean {
   const end = playAdvised(newGame(map));
-  return end.status === 'won' && end.wonDay! >= MAP_GEN.minDay && end.wonDay! <= MAP_GEN.maxDay;
+  return end.status === 'won' && end.wonMonth! >= MAP_GEN.minMonth && end.wonMonth! <= MAP_GEN.maxMonth;
 }
 
 /** Mapa aleatorio y justo para una semilla (o el clásico si no aparece ninguno). */

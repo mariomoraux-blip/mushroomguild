@@ -8,7 +8,7 @@ const MAX_FLYERS = 12;
 const FLY_MS = 620;
 
 /**
- * Esporas que vuelan al contador del HUD (004): al amanecer, desde cada árbol vivo; con la Lluvia de
+ * Esporas que vuelan al contador del HUD (004): al empezar el mes, desde cada árbol vivo; con la Lluvia de
  * esporas, desde el árbol del hechizo. Al llegar, el contador da un saltito. Con movimiento reducido no hay vuelo.
  */
 export function mountFlyers(store: Store, board: HTMLElement, tileSize: () => number) {

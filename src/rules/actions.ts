@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { COST, DAYS, GAIN, LOG_USES, MAX_GUILD, RECRUITABLE, TREES_FOR_MAGE, TREES_FOR_MOTHER } from './config';
+import { COST, MONTHS, GAIN, LOG_USES, MAX_GUILD, RECRUITABLE, TREES_FOR_MAGE, TREES_FOR_MOTHER } from './config';
 import {
   addMage,
   addMember,
@@ -35,7 +35,7 @@ export const spellFor = (t: Tile): Spell => (t.kind === 'rock' ? 'sprout' : 'rai
 
 /**
  * ¿Puede el miembro `id` actuar sobre (x, y)? No cambia el estado.
- * `spell` solo aplica a Maestra Bruna: restringe el hechizo (si se omite, se deduce de la casilla).
+ * `spell` solo aplica a Maestra Bruma: restringe el hechizo (si se omite, se deduce de la casilla).
  */
 export function check(s: GameState, id: number, x: number, y: number, spell?: Spell): CheckResult {
   const m = member(s, id);
@@ -118,7 +118,7 @@ export function act(s: GameState, id: number, x: number, y: number): ActionResul
       return { state: n, message: es.log.called(m.name, called.name) };
     }
     case 'mago': {
-      n.lastSpellSeason = seasonIndex(n.day);
+      n.lastSpellSeason = seasonIndex(n.month);
       if (spellFor(t) === 'sprout') {
         t.kind = 'soil';
         t.net = true;
@@ -135,19 +135,19 @@ export function act(s: GameState, id: number, x: number, y: number): ActionResul
         t.alive = true;
         t.net = true;
         n.status = 'won';
-        n.wonDay = n.day;
+        n.wonMonth = n.month;
         return { state: n, message: es.log.motherAwake(m.name) };
       }
       n.nutrients -= COST.revive;
       t.alive = true;
       t.net = true;
-      // Maestra Bruna llega al amanecer siguiente al segundo árbol (no hay amanecer después del día 12).
-      if (!n.mageArrived && !n.mageDue && revivedCount(n) >= TREES_FOR_MAGE && n.day < DAYS) n.mageDue = true;
+      // Maestra Bruma llega al empezar el mes siguiente al segundo árbol (no hay cambio de mes después del mes 12).
+      if (!n.mageArrived && !n.mageDue && revivedCount(n) >= TREES_FOR_MAGE && n.month < MONTHS) n.mageDue = true;
       return { state: n, message: es.log.revived(m.name) };
   }
 }
 
-/** Recluta un miembro de una especie reclutable. Llega cansado: trabaja desde mañana. Lanza `RuleError` si no se puede. */
+/** Recluta un miembro de una especie reclutable. Llega cansado: trabaja desde el mes siguiente. Lanza `RuleError` si no se puede. */
 export function recruit(s: GameState, species: RecruitableSpecies): ActionResult {
   if (!RECRUITABLE.includes(species)) throw new RuleError(R.unknown);
   if (s.status !== 'playing') throw new RuleError(R.gameOver);
@@ -160,16 +160,16 @@ export function recruit(s: GameState, species: RecruitableSpecies): ActionResult
   return { state: n, message: es.log.recruited(m.name, es.species[species].name) };
 }
 
-/** Termina el día. Con la partida terminada no hace nada (mismo estado, mensaje vacío). */
-export function endDay(s: GameState): ActionResult {
+/** Termina el mes. Con la partida terminada no hace nada (mismo estado, mensaje vacío). */
+export function endMonth(s: GameState): ActionResult {
   if (s.status !== 'playing') return { state: s, message: '' };
   const n = cloneState(s);
-  if (n.day >= DAYS) {
+  if (n.month >= MONTHS) {
     n.status = 'lost';
     return { state: n, message: es.log.winterEnd };
   }
-  const before = season(n.day);
-  n.day++;
+  const before = season(n.month);
+  n.month++;
   const trees = revivedCount(n);
   n.spores += trees * GAIN.treeSpores;
   n.nutrients += trees * GAIN.treeNutrients; // hojarasca
@@ -177,8 +177,8 @@ export function endDay(s: GameState): ActionResult {
     m.used = false;
     m.at = null;
   });
-  const now = season(n.day);
-  const parts: string[] = [es.log.dawn(n.day)];
+  const now = season(n.month);
+  const parts: string[] = [es.log.newMonth(n.month)];
   if (trees) parts.push(es.log.treesGave(trees * GAIN.treeSpores, trees * GAIN.treeNutrients));
   if (now !== before) parts.push(es.log.seasonStart(now));
   if (n.mageDue) {

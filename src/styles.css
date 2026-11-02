@@ -68,7 +68,7 @@ button { font: inherit; color: inherit; }
     max(var(--gap), env(safe-area-inset-bottom)) max(var(--gap), env(safe-area-inset-left));
 }
 
-/* ─── HUD (011): pastilla verde del día, pastillas de crema con ícono pintado y "?" amarillo ── */
+/* ─── HUD (011): pastilla verde del mes, pastillas de crema con ícono pintado y "?" amarillo ── */
 .hud {
   grid-area: hud;
   position: relative;
@@ -81,7 +81,7 @@ button { font: inherit; color: inherit; }
   background: linear-gradient(color-mix(in srgb, var(--bark) 62%, transparent), color-mix(in srgb, var(--ink) 70%, transparent));
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--glow) 25%, transparent), 0 4px 10px color-mix(in srgb, var(--ink) 35%, transparent);
 }
-.hud__day,
+.hud__month,
 .chip {
   height: 48px;
   min-width: 0;
@@ -90,7 +90,7 @@ button { font: inherit; color: inherit; }
   box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--ink) 18%, transparent), inset 0 2px 0 color-mix(in srgb, var(--glow) 55%, transparent);
   line-height: 1.05;
 }
-.hud__day {
+.hud__month {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -98,8 +98,8 @@ button { font: inherit; color: inherit; }
   color: var(--paper);
   background: linear-gradient(var(--leaf), var(--moss) 55%, var(--mossDark));
 }
-.hud__day-value { font-family: var(--font-display); font-weight: 700; font-size: 16px; white-space: nowrap; letter-spacing: -0.3px; text-shadow: 0 1.5px 0 var(--mossDark); }
-.hud__day-caption { display: flex; align-items: center; gap: 2px; font-size: 11px; font-weight: 800; white-space: nowrap; color: var(--glow); }
+.hud__month-value { font-family: var(--font-display); font-weight: 700; font-size: 16px; white-space: nowrap; letter-spacing: -0.3px; text-shadow: 0 1.5px 0 var(--mossDark); }
+.hud__month-caption { display: flex; align-items: center; gap: 2px; font-size: 11px; font-weight: 800; white-space: nowrap; color: var(--glow); }
 .hud__season { flex: 0 0 13px; height: 13px; background: var(--art-season-spring) center / contain no-repeat; }
 .hud__season[data-season='summer'] { background-image: var(--art-season-summer); }
 .hud__season[data-season='autumn'] { background-image: var(--art-season-autumn); }
@@ -294,7 +294,7 @@ button { font: inherit; color: inherit; }
 .card__icon--recruit { width: 46px; height: 32px; background: var(--art-recruit) center / contain no-repeat; }
 .card--recruit.is-used .card__medal { filter: saturate(0.4); opacity: 0.8; }
 
-/* "Fin del día": píldora amarilla con la luna pintada. */
+/* "Fin del mes": píldora amarilla con la luna pintada. */
 .end {
   position: relative;
   flex: 0 0 auto;
@@ -320,7 +320,7 @@ button { font: inherit; color: inherit; }
 .portrait { flex: 0 0 auto; display: inline-flex; align-items: flex-end; justify-content: center; }
 .portrait img { width: 100%; height: auto; display: block; pointer-events: none; transition: transform 0.2s ease-out; transform-origin: 50% 100%; }
 .portrait[data-pose='happy'] img { transform: translateY(-2px) scale(1.06); }
-/* En el dock la altura es fija: Maestra Bruna (retrato más alto) se ajusta al medallón en vez de agrandarlo. */
+/* En el dock la altura es fija: Maestra Bruma (retrato más alto) se ajusta al medallón en vez de agrandarlo. */
 .portrait--sm { width: 52px; height: 48px; }
 .portrait--sm img { width: auto; height: 100%; }
 .portrait--md { width: 88px; }

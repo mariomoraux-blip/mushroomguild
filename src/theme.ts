@@ -7,7 +7,7 @@ export const color = {
   accent: '#E8A33D', // selección, foco, casillas válidas
   mycelium: '#B9F0D6', // red y líneas de micelio
   indigo: '#4B5FD6', // destello del micelio tejido por el Lactarius indigo
-  soil: '#7A5C3E', // tierra base del tablero (de día)
+  soil: '#7A5C3E', // tierra base del tablero (de mes)
   cream: '#FBF5E6', // fondo de página: papel claro
   moss: '#6E8B3D', // cintas de título y HUD
   mossDark: '#55702C', // borde de las cintas
@@ -52,7 +52,7 @@ export const CHARACTER_DIR: Readonly<Record<string, string>> = {
   lactarius: 'anil',
   amanita: 'rubi',
   gliophorus: 'chispa',
-  mago: 'maestra-bruna',
+  mago: 'maestra-bruma',
 };
 /** Retrato pintado sin marco (tablero), o null si la especie no tiene arte. */
 export function portraitKey(species: string): string | null {

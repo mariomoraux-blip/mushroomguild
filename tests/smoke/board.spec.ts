@@ -3,11 +3,11 @@
 //   "Escritorio" → "layout" (un proyecto por tamaño); "Gremio completo en el dock" → "gremio completo".
 // board-interaction › Objetivos táctiles: "Tocar un miembro con el pulgar" → "layout" (≥ 44 px) y "táctil".
 // board-interaction › Accesibilidad básica: "Jugar con teclado" → "teclado".
-// board-interaction › Retratos del gremio: "Retratos en el dock" y "Trabajó hoy" → "estilo cozy".
+// board-interaction › Retratos del gremio: "Retratos en el dock" y "Trabajó este mes" → "estilo cozy".
 // board-interaction › Estilo cozy: "Pantalla de juego" → "estilo cozy".
 // board-interaction › Casilla ocupada: "Hongo sobre un tronco" → tests/paint.test.ts.
 // board-interaction › Fondo vivo: "Movimiento reducido" → "fondo vivo".
-// board-interaction › Retratos del gremio: "La maga en el tablero" → "Maestra Bruna: retrato propio…".
+// board-interaction › Retratos del gremio: "La maga en el tablero" → "Maestra Bruma: retrato propio…".
 // player-guidance › Libreta de campo: "Consultar la ayuda" → "Libreta de campo".
 // player-guidance › Meta visible: "Inicio" → "guía".
 import { expect, test, type Page } from '@playwright/test';
@@ -15,7 +15,7 @@ import { expect, test, type Page } from '@playwright/test';
 const cell = (page: Page, x: number, y: number) => page.locator(`.cell[data-x="${x}"][data-y="${y}"]`);
 const valid = (page: Page) => page.locator('.cell[data-valid="true"]');
 const nutrients = (page: Page) => page.locator('.chip__value').nth(0);
-const day = (page: Page) => page.locator('.hud__day-value');
+const month = (page: Page) => page.locator('.hud__month-value');
 const isTouch = (name: string) => name !== 'escritorio-1280x800';
 
 const errors = new WeakMap<Page, string[]>();
@@ -66,7 +66,7 @@ test('layout: tablero completo, casillas en rango y controles ≥ 44 px', async 
     expect(hud.y + hud.height).toBeLessThanOrEqual(first.y);
     expect(dock.y).toBeGreaterThanOrEqual(last.y + last.height);
   }
-  // "Terminar el día" en la misma fila que las tarjetas.
+  // "Terminar el mes" en la misma fila que las tarjetas.
   const end = (await page.locator('.end').boundingBox())!;
   const card = (await page.locator('.card').first().boundingBox())!;
   expect(Math.abs(end.y + end.height / 2 - (card.y + card.height / 2))).toBeLessThan(6);
@@ -81,7 +81,7 @@ test('layout: tablero completo, casillas en rango y controles ≥ 44 px', async 
   await noScrollNoZoom(page);
 });
 
-test('táctil: elegir al Lactarius, tejer y terminar el día (con captura)', async ({ page }, info) => {
+test('táctil: elegir al Lactarius, tejer y terminar el mes (con captura)', async ({ page }, info) => {
   test.skip(!isTouch(info.project.name), 'flujo táctil');
   await page.goto('/?map=clasico');
   await page.locator('[data-id="1"]').tap();
@@ -94,12 +94,12 @@ test('táctil: elegir al Lactarius, tejer y terminar el día (con captura)', asy
   await cell(page, 3, 7).tap();
   await expect(nutrients(page)).toHaveText('1');
   await page.locator('.end').tap();
-  await expect(day(page)).toHaveText('Día 2/12');
+  await expect(month(page)).toHaveText('Mes 2/12');
   // Doble toque en el tablero: ni zoom ni scroll.
   await cell(page, 2, 3).tap();
   await cell(page, 2, 3).tap();
   await noScrollNoZoom(page);
-  // Captura con Añil seleccionado el día 2.
+  // Captura con Añil seleccionado el mes 2.
   await page.locator('[data-id="1"]').tap();
   await page.screenshot({ path: `docs/screenshots/002-${info.project.name}.png` });
 });
@@ -111,7 +111,7 @@ test('estado visible: el Champiñón descompone y el HUD suma nutrientes', async
   await expect(nutrients(page)).toHaveText('4');
 });
 
-test('teclado: Tab, Enter y Esc bastan para elegir, actuar y terminar el día', async ({ page }, info) => {
+test('teclado: Tab, Enter y Esc bastan para elegir, actuar y terminar el mes', async ({ page }, info) => {
   test.skip(isTouch(info.project.name), 'teclado en escritorio');
   await page.goto('/?map=clasico');
   // Tab recorre el HUD (esporas, ayuda) y llega a las tarjetas del gremio.
@@ -132,18 +132,18 @@ test('teclado: Tab, Enter y Esc bastan para elegir, actuar y terminar el día', 
   expect(await page.evaluate(() => getComputedStyle(document.activeElement!).outlineStyle)).toBe('solid');
   await page.keyboard.press('Enter');
   await expect(nutrients(page)).toHaveText('1');
-  // Terminar el día.
+  // Terminar el mes.
   for (let i = 0; i < 10; i++) {
     if (await page.locator('.end').evaluate((b) => b === document.activeElement)) break;
     await page.keyboard.press('Tab');
   }
   await expect(page.locator('.end')).toBeFocused();
   await page.keyboard.press('Enter');
-  await expect(day(page)).toHaveText('Día 2/12');
+  await expect(month(page)).toHaveText('Mes 2/12');
   await page.screenshot({ path: `docs/screenshots/002-${info.project.name}.png` });
 });
 
-test('Maestra Bruna: primero el hechizo, después las casillas', async ({ page }) => {
+test('Maestra Bruma: primero el hechizo, después las casillas', async ({ page }) => {
   await page.goto('/?debugState=fullGuild');
   const mage = page.locator('.card--mago');
   await mage.scrollIntoViewIfNeeded();
@@ -156,10 +156,10 @@ test('Maestra Bruna: primero el hechizo, después las casillas', async ({ page }
   await expect(valid(page).first()).toHaveAttribute('aria-label', /Árbol vivo/);
 });
 
-test('Maestra Bruna: retrato pintado en el dock y más alta en el tablero', async ({ page }, info) => {
+test('Maestra Bruma: retrato pintado en el dock y más alta en el tablero', async ({ page }, info) => {
   await page.goto('/?debugState=fullGuild');
   const img = page.locator('.card--mago .portrait img');
-  await expect(img).toHaveAttribute('src', /characters\/maestra-bruna\/portrait\.webp$/);
+  await expect(img).toHaveAttribute('src', /characters\/maestra-bruma\/portrait\.webp$/);
   await expect.poll(() => img.evaluate((i: HTMLImageElement) => (i.complete ? i.naturalHeight : 0))).toBe(141);
   const mage = page.locator('.card--mago');
   await mage.scrollIntoViewIfNeeded();
@@ -170,7 +170,7 @@ test('Maestra Bruna: retrato pintado en el dock y más alta en el tablero', asyn
   const ratio = () =>
     page.evaluate(() => {
       const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: { type: string; visible: boolean; texture: { key: string }; displayWidth: number; displayHeight: number }[] } } } } };
-      const s = w.game.scene.getScene('Game').children.list.find((o) => o.type === 'Image' && o.visible && o.texture.key === 'characters/maestra-bruna/portrait');
+      const s = w.game.scene.getScene('Game').children.list.find((o) => o.type === 'Image' && o.visible && o.texture.key === 'characters/maestra-bruma/portrait');
       return s ? s.displayHeight / s.displayWidth : 0;
     });
   await expect.poll(ratio).toBeCloseTo(141 / 119, 2);
@@ -267,7 +267,7 @@ test('guía: ★ en el sugerido, camino hacia el árbol, meta marcada y esporas 
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: /Esporas: 0/ }).click();
   await expect(page.getByRole('dialog')).toContainText('Reclutar al gremio');
-  await expect(page.getByRole('dialog')).toContainText('Pasa la voz: un compañero que ya trabajó hoy vuelve a trabajar');
+  await expect(page.getByRole('dialog')).toContainText('Pasa la voz: un compañero que ya trabajó este mes vuelve a trabajar');
 });
 
 test('claros aleatorios: cada partida cambia y ?seed= repite el mismo mapa', async ({ page }) => {
@@ -300,7 +300,7 @@ test('estilo cozy: bosque de fondo, pastillas, medallones, luna pintada, marco d
   expect(await bg('.end__moon')).toContain('ui/icons/moon.webp');
   expect(await bg('.board', 'border-image-source')).toContain('ui/frames/roots.webp');
   await expect(page.locator('canvas.ambient')).toBeAttached();
-  // Trabajó hoy: al descomponer, el sprite de Bruno aparece en el tablero.
+  // Trabajó este mes: al descomponer, el sprite de Bruno aparece en el tablero.
   const visibleSprites = () =>
     page.evaluate(() => {
       type Obj = { type: string; visible: boolean; texture?: { key: string } };
@@ -383,8 +383,8 @@ test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page 
   await page.getByRole('button', { name: 'Nueva partida' }).click();
   await page.keyboard.press('Escape');
   await expect(card).toHaveCount(0);
-  // Llegada de Maestra Bruna al terminar el día.
-  await page.goto('/?debugState=mageTomorrow');
+  // Llegada de Maestra Bruma al terminar el mes.
+  await page.goto('/?debugState=mageNextMonth');
   await page.locator('.end').click();
   await expect(card).toContainText('El bosque volvió a hablar, y alguien escuchó.');
   await shot('maga');
@@ -399,13 +399,13 @@ test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page 
   await page.getByRole('button', { name: 'Ver el claro' }).click();
   await expect(card).toHaveCount(0);
   // Fin del invierno y "Jugar de nuevo".
-  await page.goto('/?debugState=lastDay');
+  await page.goto('/?debugState=lastMonth');
   await page.locator('.end').click();
   await expect(card).toContainText('El bosque esperará la próxima primavera.');
   await shot('invierno');
   await page.getByRole('button', { name: 'Jugar de nuevo' }).click();
   await expect(card).toHaveCount(0);
-  await expect(page.locator('.hud__day-value')).toHaveText('Día 1/12');
+  await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
 });
 
 test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la ficha)', async ({ page }, info) => {
@@ -433,7 +433,7 @@ test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la f
   await page.getByRole('button', { name: 'El gremio', exact: true }).click();
   await expect(screen.locator('.guild__row')).toHaveCount(5);
   await shot('gremio');
-  await page.getByRole('button', { name: 'Ver la ficha de Maestra Bruna' }).click();
+  await page.getByRole('button', { name: 'Ver la ficha de Maestra Bruma' }).click();
   await expect(page.getByRole('dialog')).toContainText('Conocybe arcana');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -445,7 +445,7 @@ test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la f
   expect(await page.locator('#app').evaluate((n) => (n as HTMLElement).inert)).toBe(true);
   await page.getByRole('button', { name: 'Saltar' }).click();
   await expect(screen).toBeHidden();
-  await expect(page.locator('.hud__day-value')).toHaveText('Día 1/12');
+  await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
   expect(await page.locator('#app').evaluate((n) => (n as HTMLElement).inert)).toBe(false);
   await noScrollNoZoom(page);
 });
@@ -458,7 +458,7 @@ test('Efectos: animaciones al jugar, nada con movimiento reducido, y carga difer
     page.on('request', (r) => requested.push(r.url()));
     await page.goto('/?map=clasico');
     // En la partida no se descargan el logo ni los fondos de intro y victoria.
-    await expect(page.locator('.hud__day-value')).toHaveText('Día 1/12');
+    await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
     expect(requested.filter((u) => /ui\/hud\/logo|backgrounds\/(intro|victory)/.test(u))).toEqual([]);
     // Cuenta, cuadro a cuadro dentro de la página, cuántos objetos de efecto hay (y el máximo visto).
     await page.evaluate(() => {
