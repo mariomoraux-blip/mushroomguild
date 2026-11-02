@@ -26,5 +26,5 @@
 
 ## 5. Verificación
 - [x] 5.1 Playwright con emulación táctil: elegir a la Lactarius indigo, tejer, terminar día; capturas a 390 × 844, 390 × 664, 844 × 390 y 1280 × 800
-- [ ] 5.2 Proyecto listo para Vercel (build de Vite en `dist/`) y pasos en el README para conectar la cuenta
-- [ ] 5.3 Pull request con capturas, link de preview de Vercel y guion de playtest en teléfono real
+- [x] 5.2 Proyecto listo para Vercel (build de Vite en `dist/`) y pasos en el README para conectar la cuenta
+- [x] 5.3 Pull request con capturas, link de preview de Vercel y guion de playtest en teléfono real
