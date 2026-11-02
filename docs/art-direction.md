@@ -293,7 +293,7 @@ public/assets/
 ## Qué se conserva del 008
 - La regla de **casilla ocupada** y el pintor como respaldo si una imagen no carga.
 - El **fondo vivo** (shader) queda solo detrás del marco de bosque y con la paleta v2; si compite con el follaje pintado, se apaga.
-- Las piezas SVG del 008 (tablón, sello, papel rasgado) se retiran a medida que llegan las piezas pintadas.
+- Las piezas SVG del 008 (`src/ui/art.ts`: tablón, etiqueta, sello, luna, sobre, enredaderas, montículo, ramita y papel rasgado) se retiraron con el 011–013; las reemplazan las piezas pintadas y el CSS del referente.
 
 ## Sprites en el juego
 - **Desde el 010** el juego usa los retratos pintados (`characters/<personaje>/portrait`): en el dock (con un salto "feliz" cuando está seleccionado o sugerido), grande en la ficha y en el tablero sobre la casilla donde ese miembro trabajó hoy, a 0,92 casillas de ancho y con su alto propio (Maestra Bruna, más alta).

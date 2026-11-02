@@ -50,8 +50,6 @@ body {
 button { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-.art { position: absolute; inset: 0; pointer-events: none; display: block; }
-.art svg { width: 100%; height: 100%; display: block; overflow: visible; }
 
 /* ─── Shell: vertical por defecto (móvil primero) ─────────────────────────── */
 .app {
@@ -185,7 +183,6 @@ button { font: inherit; color: inherit; }
   background: var(--grain), linear-gradient(var(--cream), var(--paper) 70%, var(--peach));
   box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--wood) 35%, transparent), 0 4px 10px color-mix(in srgb, var(--ink) 35%, transparent);
 }
-.notice > .art--torn { display: none; }
 .notice::before {
   content: '';
   position: absolute;
@@ -337,7 +334,7 @@ button { font: inherit; color: inherit; }
 .hat--gliophorus::before { background: var(--leaf); border-radius: 50% 50% 30% 30% / 80% 80% 20% 20%; left: 6px; right: 6px; top: 6px; }
 .hat--mago::before { background: var(--berry); border: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 
-/* ─── Hojas: pergamino con borde rasgado y cinta de puntas cortadas ───────── */
+/* ─── Hojas (013): pergamino redondeado, letrero de madera, medallones y botones del referente ── */
 .sheet {
   position: fixed;
   inset: 0;
@@ -345,144 +342,172 @@ button { font: inherit; color: inherit; }
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: color-mix(in srgb, var(--bark) 55%, transparent);
-  backdrop-filter: blur(2px);
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
 }
 .sheet[hidden] { display: none; }
 .sheet__panel {
   width: min(480px, 100%);
-  max-height: 84dvh;
+  max-height: 86dvh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: var(--grain), linear-gradient(var(--cream), color-mix(in srgb, var(--peach) 40%, var(--cream)));
-  padding: 24px 16px max(16px, env(safe-area-inset-bottom));
-  /* Borde superior rasgado. */
-  -webkit-mask: var(--torn-top) top / 100% 14px no-repeat, linear-gradient(#000, #000) 0 13px / 100% 100% no-repeat;
-  mask: var(--torn-top) top / 100% 14px no-repeat, linear-gradient(#000, #000) 0 13px / 100% 100% no-repeat;
+  margin-top: 30px;
+  padding: 0 16px max(16px, env(safe-area-inset-bottom));
+  border: 2px solid var(--ink);
+  border-bottom: 0;
+  border-radius: 26px 26px 0 0;
+  background: var(--grain), linear-gradient(var(--cream), var(--paper) 55%, color-mix(in srgb, var(--peach) 60%, var(--paper)));
+  box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--wood) 30%, transparent), 0 -8px 24px color-mix(in srgb, var(--ink) 40%, transparent);
 }
 .sheet__head {
   position: sticky;
-  top: -24px;
+  top: 0;
   z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin: -6px -4px 10px;
-  padding-top: 6px;
+  justify-content: center;
+  min-height: 64px;
+  margin: 0 -12px 8px;
+  padding: 10px 56px 6px;
+  background: linear-gradient(var(--cream) 75%, transparent);
 }
 .sheet__title {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   margin: 0;
-  padding: 7px 28px 9px 14px;
+  max-width: 100%;
+  padding: 6px 18px 8px;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 19px;
+  line-height: 1.15;
+  text-align: center;
   color: var(--paper);
-  background: linear-gradient(var(--moss), var(--mossDark));
-  clip-path: polygon(0 0, 100% 0, 93% 50%, 100% 100%, 0 100%, 3% 50%);
+  text-shadow: 0 2px 0 var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  background: linear-gradient(var(--wood), var(--bark));
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--peach) 40%, transparent), 0 4px 0 var(--ink);
 }
-.sheet__title .art--sprig { position: relative; inset: auto; width: 30px; height: 20px; flex: 0 0 auto; }
-.sheet__help { margin: 6px 0 10px; font-size: 13px; color: var(--ink-soft); }
-.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sheet__head .round-btn--close { position: absolute; right: 8px; top: 12px; width: 46px; height: 46px; background-image: var(--art-btn-close); }
+.sheet__help { margin: 0 0 10px; font-size: 13px; font-weight: 700; color: var(--ink-soft); text-align: center; }
+.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .row {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: var(--touch);
-  padding: 4px 6px 4px 2px;
-  background: var(--grain), var(--paper);
+  gap: 10px;
+  min-height: 64px;
+  padding: 6px 8px 6px 6px;
   border: 2px solid var(--ink);
-  border-radius: 18px 18px 18px 6px;
-  box-shadow: var(--shadow-sm);
+  border-radius: 18px;
+  background: var(--grain), linear-gradient(var(--cream), var(--paper));
+  box-shadow: 0 3px 0 var(--ink);
 }
-.row__text { flex: 1; min-width: 0; font-size: 14px; }
-.row__verb { display: block; font-size: 12px; color: var(--ink-soft); }
-.row__note { flex: 0 1 120px; font-size: 11px; color: var(--ink-soft); }
+.row__text { flex: 1; min-width: 0; font-size: 14px; line-height: 1.25; }
+.row__text strong { font-family: var(--font-display); font-size: 16px; }
+.row__role { color: var(--moss); font-weight: 700; }
+.row__verb { display: block; margin-top: 1px; font-size: 12px; color: var(--ink-soft); }
+.row__note { flex: 0 1 112px; font-size: 11px; font-weight: 700; color: var(--ink-soft); }
+/* Medallón de madera con retrato (filas, fichas). */
+.medal {
+  flex: 0 0 50px;
+  height: 50px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--leaf) 55%, var(--glow)), var(--leafDark) 75%);
+  box-shadow: 0 0 0 3px var(--wood), 0 0 0 5px var(--ink);
+  margin: 5px;
+}
+.medal .portrait { width: 44px; height: 42px; }
+.medal--lg { flex-basis: 112px; height: 112px; box-shadow: 0 0 0 5px var(--wood), 0 0 0 7px var(--ink), 0 8px 12px color-mix(in srgb, var(--ink) 35%, transparent); margin: 8px; }
+.medal--lg .portrait--lg { width: 98px; }
 .btn {
   min-height: var(--touch);
   min-width: var(--touch);
   padding: 0 14px;
-  background: linear-gradient(var(--wood), var(--bark));
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
   color: var(--paper);
+  text-shadow: 0 1.5px 0 var(--ink);
+  background: linear-gradient(var(--wood), var(--bark));
   border: 2px solid var(--ink);
   border-radius: 16px;
-  box-shadow: 0 3px 0 var(--ink);
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--peach) 40%, transparent), 0 3px 0 var(--ink);
   cursor: pointer;
-  font-weight: 800;
 }
 .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
 .btn:disabled { opacity: 0.45; cursor: default; }
-.btn--icon { padding: 0; width: var(--touch); font-family: var(--font-display); font-size: 18px; border-radius: 50%; }
-.sheet__head .btn--icon { background: var(--berry); color: var(--paper); }
-.btn--wide {
-  width: 100%;
-  margin-top: 16px;
-  font-size: 18px;
-  font-family: var(--font-display);
+.btn--primary, .btn--wide {
   color: var(--ink);
-  background: linear-gradient(var(--glow), var(--sun));
-  border-radius: 24px;
+  text-shadow: none;
+  background: linear-gradient(var(--glow), var(--sun) 45%, var(--accent));
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--wood) 40%, transparent), 0 3px 0 var(--ink);
+  border-radius: 22px;
 }
+.btn--icon { padding: 0; width: var(--touch); font-size: 19px; border-radius: 50%; }
+.btn--wide { width: 100%; min-height: 52px; margin-top: 16px; font-size: 19px; border-radius: 26px; }
 .spells { display: grid; gap: 10px; margin-top: 4px; }
 .btn--spell {
   display: grid;
   gap: 2px;
   padding: 12px 14px;
   text-align: left;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 14px;
   color: var(--ink);
-  background: var(--grain), linear-gradient(160deg, var(--paper), var(--mycelium));
-  border-radius: 20px 20px 20px 6px;
+  text-shadow: none;
+  background: var(--grain), linear-gradient(var(--cream), color-mix(in srgb, var(--mycelium) 60%, var(--paper)));
+  border-radius: 18px;
 }
 .btn--spell strong { font-family: var(--font-display); font-size: 18px; color: var(--moss); }
 
-.creature { display: grid; gap: 8px; }
+.creature { display: grid; gap: 10px; }
 .creature p { margin: 0; font-size: 14px; line-height: 1.4; }
 .creature__head {
-  position: relative;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 14px 8px;
-  background:
-    radial-gradient(circle at 25% 40%, color-mix(in srgb, var(--glow) 90%, transparent), transparent 55%),
-    linear-gradient(160deg, var(--mycelium), color-mix(in srgb, var(--leaf) 35%, var(--mycelium)));
+  gap: 12px;
+  padding: 8px 12px;
   border: 2px solid var(--ink);
-  border-radius: 26px 26px 26px 8px;
-  box-shadow: var(--shadow-sm);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 20% 45%, color-mix(in srgb, var(--glow) 80%, transparent), transparent 55%),
+    linear-gradient(160deg, color-mix(in srgb, var(--mycelium) 70%, var(--paper)), color-mix(in srgb, var(--leaf) 30%, var(--mycelium)));
+  box-shadow: 0 3px 0 var(--ink);
 }
 .creature__head p { font-weight: 700; }
-.creature__stage .art--mound { inset: auto 0 -4px 0; height: 22px; }
-.creature h3 {
+.creature__role { font-family: var(--font-display); font-size: 17px; color: var(--moss); }
+.creature h3, .help h3 {
   justify-self: start;
-  margin: 10px 0 0;
-  padding: 3px 16px 4px 10px;
+  margin: 8px 0 0;
+  padding: 3px 12px 4px;
   font-family: var(--font-display);
   font-size: 14px;
   color: var(--paper);
-  background: var(--moss);
-  clip-path: polygon(0 0, 100% 0, 92% 50%, 100% 100%, 0 100%);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  background: linear-gradient(var(--leaf), var(--moss));
 }
 .creature__quip {
   font-family: var(--font-display);
   font-size: 15px !important;
   color: var(--bark);
   padding: 10px 14px;
-  background: var(--paper);
   border: 2px solid var(--ink);
-  border-radius: 18px 18px 18px 4px;
-  transform: rotate(-1deg);
+  border-radius: 18px;
+  background: var(--grain), var(--paper);
 }
 
-.help h3 { margin: 14px 0 4px; font-family: var(--font-display); font-size: 17px; color: var(--moss); }
+.help { display: grid; gap: 6px; }
+.help h3 { margin-top: 12px; font-size: 15px; }
 .help p, .help ol, .help__tiles { margin: 0; font-size: 14px; line-height: 1.4; }
 .help ol, .help__tiles { padding-left: 20px; display: grid; gap: 4px; }
-.help__tip { margin-top: 14px !important; padding: 10px 12px; background: var(--mycelium); border: 2px dashed var(--moss); border-radius: 16px; }
+.help .rows { margin-top: 4px; }
+.help__tip { margin-top: 12px !important; padding: 10px 12px; font-weight: 700; border: 2px solid var(--ink); border-radius: 16px; background: color-mix(in srgb, var(--sun) 30%, var(--paper)); }
 
 /* ─── Cartas de historia (003): fondo pintado, letrero de madera y pergamino ─ */
 .story {

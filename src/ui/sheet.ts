@@ -1,7 +1,6 @@
 import { es } from '../copy/es';
 import { COST, MAX_GUILD, RECRUITABLE, recruitableCount, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
 import type { AppState, Sheet, Store } from '../store';
-import { grassMound, sprig } from './art';
 import { el, portrait } from './dom';
 
 const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
@@ -30,8 +29,8 @@ export function mountSheet(root: HTMLElement, store: Store) {
       'div',
       { class: 'sheet__panel', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': id },
       el('div', { class: 'sheet__head' },
-        el('h2', { id, class: 'sheet__title' }, sprig(), el('span', {}, title)),
-        el('button', { class: 'btn btn--icon', type: 'button', 'data-action': 'close', 'aria-label': es.sheet.close }, '×')),
+        el('h2', { id, class: 'sheet__title' }, title),
+        el('button', { class: 'round-btn round-btn--close', type: 'button', 'data-action': 'close', 'aria-label': es.sheet.close })),
       ...body,
     );
   };
@@ -45,13 +44,13 @@ export function mountSheet(root: HTMLElement, store: Store) {
       const action =
         sp === 'mago'
           ? el('span', { class: 'row__note' }, es.sheet.mageArrives)
-          : el('button', { class: 'btn', type: 'button', 'data-action': 'recruit', 'data-species': sp, disabled: !can }, es.sheet.recruitAction);
+          : el('button', { class: 'btn btn--primary', type: 'button', 'data-action': 'recruit', 'data-species': sp, disabled: !can }, es.sheet.recruitAction);
       return el(
         'li',
         { class: 'row' },
-        portrait(sp, 'reposo', season),
+        el('span', { class: 'medal' }, portrait(sp, 'reposo', season)),
         el('span', { class: 'row__text' },
-          el('strong', {}, info.name), el('span', {}, ` · ${info.role}`),
+          el('strong', {}, info.name), el('span', { class: 'row__role' }, ` · ${info.role}`),
           el('span', { class: 'row__verb' }, info.verb)),
         el('button', { class: 'btn btn--icon', type: 'button', 'data-action': 'info', 'data-species': sp, 'aria-label': es.sheet.info(info.name) }, 'i'),
         action,
@@ -72,7 +71,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
     return panel(
       title,
       el('div', { class: 'creature' },
-        el('div', { class: 'creature__head' }, el('span', { class: 'card__stage creature__stage' }, grassMound(), portrait(species, 'feliz', season, 'lg')), el('p', {}, el('em', {}, info.scientific), el('br'), info.role)),
+        el('div', { class: 'creature__head' }, el('span', { class: 'medal medal--lg' }, portrait(species, 'feliz', season, 'lg')), el('p', {}, el('em', {}, info.scientific), el('br'), el('span', { class: 'creature__role' }, info.role))),
         el('p', {}, g.context),
         el('p', { class: 'creature__quip' }, es.quote(info.quip)),
         ...section(S.ability, g.ability),
@@ -100,9 +99,9 @@ export function mountSheet(root: HTMLElement, store: Store) {
         el('h3', {}, h.guildTitle),
         el('ul', { class: 'rows' },
           ...SPECIES.map((sp) =>
-            el('li', { class: 'row' }, portrait(sp, 'reposo', season),
+            el('li', { class: 'row' }, el('span', { class: 'medal' }, portrait(sp, 'reposo', season)),
               el('span', { class: 'row__text' },
-                el('strong', {}, sp === 'mago' ? es.mageName : es.species[sp].short), el('span', {}, ` · ${es.species[sp].role}`),
+                el('strong', {}, sp === 'mago' ? es.mageName : es.species[sp].short), el('span', { class: 'row__role' }, ` · ${es.species[sp].role}`),
                 el('span', { class: 'row__verb' }, es.species[sp].verb))))),
         el('h3', {}, h.tilesTitle),
         el('ul', { class: 'help__tiles' }, ...tiles.map((t) => el('li', {}, t))),
