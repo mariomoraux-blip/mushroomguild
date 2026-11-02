@@ -26,5 +26,10 @@
 
 ## 5. Verificación
 - [x] 5.1 Playwright con emulación táctil: elegir al Lactarius indigo, tejer, terminar día; capturas a 390 × 844, 390 × 664, 844 × 390 y 1280 × 800
-- [ ] 5.2 Proyecto listo para Vercel (build de Vite en `dist/`) y pasos en el README para conectar la cuenta
-- [ ] 5.3 Pull request con capturas, link de preview de Vercel y guion de playtest en teléfono real
+- [x] 5.2 Proyecto listo para Vercel (build de Vite en `dist/`) y pasos en el README para conectar la cuenta
+- [x] 5.3 Pull request con capturas, link de preview de Vercel y guion de playtest en teléfono real
+
+## Notas de cierre (2 de noviembre)
+- 5.2: `vercel.json` (preset Vite, `npm ci`, `npm run build`, salida `dist/`) y la sección "Preview en Vercel" del README. Mario conectó el proyecto en su cuenta de Vercel.
+- 5.3: PR #8 con las capturas de Playwright (`docs/screenshots/002-*.png`) y el guion de playtest. El bot de Vercel no publicó el link en el PR: el playtest se hizo en la URL de Vercel de la cuenta de Mario.
+- El playtest mostró que la mecánica no se entendía; se atiende en `005-guide-player`.
