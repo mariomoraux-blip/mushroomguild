@@ -31,16 +31,34 @@ export const font = {
   body: '"Nunito", "Segoe UI", system-ui, sans-serif',
 } as const;
 
-/** Sprites de Blender (public/assets/characters). La Gliophorus tiene una variante por estación. */
+/** URL de un asset publicado (`public/assets/<ruta>.webp`). */
+export const assetUrl = (path: string) => `${import.meta.env.BASE_URL}assets/${path}.webp`;
+
+/**
+ * Sprites de Blender en `public/assets/characters/<personaje>/<pose>.webp`. La carpeta lleva el nombre
+ * del primer miembro de cada especie; los reclutas de la misma especie usan el mismo arte.
+ * La Gliophorus tiene una variante por estación (`<pose>-<estación>.webp`).
+ */
 export type Pose = 'reposo' | 'trabajando' | 'feliz';
-export const SEASON_SLUGS = ['primavera', 'verano', 'otono', 'invierno'] as const;
+export const SEASON_SLUGS = ['spring', 'summer', 'autumn', 'winter'] as const;
 export const SPRITE_SPECIES = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'] as const;
+export const CHARACTER_DIR: Readonly<Record<string, string>> = {
+  champi: 'bruno',
+  lactarius: 'anil',
+  amanita: 'rubi',
+  gliophorus: 'chispa',
+  mago: 'maestra-bruna',
+};
+const POSE_FILE: Readonly<Record<Pose, string>> = { reposo: 'rest', trabajando: 'work', feliz: 'happy' };
+/** Clave del sprite (es también su ruta bajo `public/assets/`), o null si la especie no tiene arte. */
 export function spriteKey(species: string, pose: Pose, seasonIndex = 0): string | null {
-  if (!(SPRITE_SPECIES as readonly string[]).includes(species)) return null;
-  return species === 'gliophorus' ? `${species}-${pose}-${SEASON_SLUGS[seasonIndex] ?? 'primavera'}` : `${species}-${pose}`;
+  const dir = CHARACTER_DIR[species];
+  if (!dir) return null;
+  const season = species === 'gliophorus' ? `-${SEASON_SLUGS[seasonIndex] ?? 'spring'}` : '';
+  return `characters/${dir}/${POSE_FILE[pose]}${season}`;
 }
 /** Todos miden 176 px de ancho a la misma escala (100 px/m); el alto es 128 px, o 160 px para Maestra Bruna, la más alta. */
-export const spriteUrl = (key: string) => `${import.meta.env.BASE_URL}assets/characters/${key}.png`;
+export const spriteUrl = (key: string) => assetUrl(key);
 
 /** Color de la paleta como número para Phaser (0xRRGGBB). */
 export const hex = (token: ColorToken): number => parseInt(color[token].slice(1), 16);

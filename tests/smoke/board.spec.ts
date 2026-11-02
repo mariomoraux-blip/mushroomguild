@@ -159,7 +159,7 @@ test('Maestra Bruna: primero el hechizo, después las casillas', async ({ page }
 test('Maestra Bruna: retrato propio en el dock y más alta en el tablero', async ({ page }, info) => {
   await page.goto('/?debugState=fullGuild');
   const img = page.locator('.card--mago .portrait img');
-  await expect(img).toHaveAttribute('src', /mago-(reposo|feliz)\.png$/); // feliz si es la sugerida
+  await expect(img).toHaveAttribute('src', /characters\/maestra-bruna\/(rest|happy)\.webp$/); // feliz si es la sugerida
   await expect.poll(() => img.evaluate((i: HTMLImageElement) => (i.complete ? i.naturalHeight : 0))).toBe(160);
   const mage = page.locator('.card--mago');
   await mage.scrollIntoViewIfNeeded();
@@ -170,7 +170,7 @@ test('Maestra Bruna: retrato propio en el dock y más alta en el tablero', async
   const ratio = () =>
     page.evaluate(() => {
       const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: { type: string; visible: boolean; texture: { key: string }; displayWidth: number; displayHeight: number }[] } } } } };
-      const s = w.game.scene.getScene('Game').children.list.find((o) => o.type === 'Image' && o.visible && o.texture.key === 'mago-trabajando');
+      const s = w.game.scene.getScene('Game').children.list.find((o) => o.type === 'Image' && o.visible && o.texture.key === 'characters/maestra-bruna/work');
       return s ? s.displayHeight / s.displayWidth : 0;
     });
   await expect.poll(ratio).toBeCloseTo(160 / 176, 2);

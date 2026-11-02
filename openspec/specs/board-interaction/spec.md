@@ -119,7 +119,7 @@ Todo control interactivo SHALL medir al menos 44 × 44 px y no SHALL depender de
 - THEN el miembro queda seleccionado sin zoom de la página
 
 ### Requirement: Retratos del gremio
-El dock, las fichas y el tablero SHALL usar los sprites de Blender de cada especie (`public/assets/characters/`): en el dock, el retrato en reposo; en la ficha, la pose feliz; en el tablero, la pose de trabajo sobre la casilla donde ese miembro trabajó hoy. La Gliophorus SHALL usar la variante de su estación. Maestra Bruna SHALL usar su propio sprite, más alto que el resto y sin deformarse.
+El dock, las fichas y el tablero SHALL usar los sprites de Blender de cada especie (`public/assets/characters/<personaje>/`: `rest`, `work`, `happy`): en el dock, el retrato en reposo; en la ficha, la pose feliz; en el tablero, la pose de trabajo sobre la casilla donde ese miembro trabajó hoy. La Gliophorus SHALL usar la variante de su estación. Maestra Bruna SHALL usar su propio sprite, más alto que el resto y sin deformarse.
 
 #### Scenario: Trabajó hoy
 - WHEN Bruno descompone un tronco
