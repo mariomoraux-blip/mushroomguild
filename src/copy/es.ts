@@ -1,14 +1,17 @@
+import { COST, GAIN } from '../rules/config';
 import type { RecruitableSpecies, SpeciesId } from '../rules/types';
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 // Textos visibles del juego. Español neutro, tono cozy, frases cortas.
 export const es = {
   title: 'El Gremio de los Hongos',
 
   species: {
-    champi: { name: 'Champiñón', role: 'Descompositor', verb: 'Descompone un tronco vecino a la red (+3 nutrientes).' },
-    lactarius: { name: 'Lactarius indigo', role: 'Tejedora', verb: 'Teje micelio en tierra vecina a la red (1 nutriente).' },
-    amanita: { name: 'Amanita muscaria', role: 'Sanadora', verb: 'Revive un árbol gris vecino a la red (3 nutrientes).' },
-    gliophorus: { name: 'Gliophorus psittacinus', role: 'Mensajera', verb: 'Pasa la voz desde un árbol vivo (−2 esporas, +3 nutrientes).' },
+    champi: { name: 'Champiñón', role: 'Descompositor', verb: `Descompone un tronco vecino a la red (+${plural(GAIN.log, 'nutriente')}).` },
+    lactarius: { name: 'Lactarius indigo', role: 'Tejedora', verb: `Teje micelio en tierra vecina a la red (${plural(COST.weave, 'nutriente')}).` },
+    amanita: { name: 'Amanita muscaria', role: 'Sanadora', verb: `Revive un árbol gris vecino a la red (${plural(COST.revive, 'nutriente')}).` },
+    gliophorus: { name: 'Gliophorus psittacinus', role: 'Mensajera', verb: `Pasa la voz desde un árbol vivo (−${plural(COST.message, 'espora')}, +${plural(GAIN.message, 'nutriente')}).` },
     mago: { name: 'Conocybe arcana', role: 'Mago', verb: 'Lanza un hechizo por estación: Brote arcano o Lluvia de esporas.' },
   } satisfies Record<SpeciesId, { name: string; role: string; verb: string }>,
 
@@ -36,7 +39,7 @@ export const es = {
     lactariusNeedsSoil: 'La Lactarius solo teje sobre tierra libre.',
     alreadyNet: 'Aquí ya hay micelio.',
     farSoil: 'Muy lejos: la tierra debe tocar la red.',
-    noNutrientWeave: 'Falta 1 nutriente para tejer.',
+    noNutrientWeave: (n: number) => `Falta${n === 1 ? '' : 'n'} ${plural(n, 'nutriente')} para tejer.`,
     champiNeedsLog: 'El Champiñón necesita un tronco caído.',
     farLog: 'Muy lejos: el tronco debe tocar la red.',
     motherFar: 'La red todavía no llega al Árbol Madre.',
@@ -65,13 +68,13 @@ export const es = {
     passedWord: (name: string, spores: number, nutrients: number) =>
       `${name} pasó la voz: −${spores} esporas, +${nutrients} nutrientes.`,
     sprouted: (name: string) => `${name} lanzó el Brote arcano. La roca ahora es tierra con micelio.`,
-    rained: (name: string, n: number) =>
-      `${name} lanzó la Lluvia de esporas: +${n} espora${n === 1 ? '' : 's'} y +${n} nutriente${n === 1 ? '' : 's'}.`,
+    rained: (name: string, spores: number, nutrients: number) =>
+      `${name} lanzó la Lluvia de esporas: +${plural(spores, 'espora')} y +${plural(nutrients, 'nutriente')}.`,
     recruited: (name: string, species: string) => `${name} (${species}) se unió al gremio. Trabajará desde mañana.`,
     winterEnd: 'Llegó el final del invierno.',
     dawn: (day: number) => `Amanece el día ${day}.`,
-    treesGave: (n: number) =>
-      `Los árboles dieron ${n} espora${n > 1 ? 's' : ''} y ${n} nutriente${n > 1 ? 's' : ''}.`,
+    treesGave: (spores: number, nutrients: number) =>
+      `Los árboles dieron ${plural(spores, 'espora')} y ${plural(nutrients, 'nutriente')}.`,
     seasonStart: (season: string) => `Comienza ${season.toLowerCase()}.`,
     mageArrives: 'El bosque volvió a hablar, y alguien escuchó. Llega Maese Bruma.',
   },

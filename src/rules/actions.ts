@@ -48,7 +48,7 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
       if (t.kind !== 'soil') return no(R.lactariusNeedsSoil);
       if (t.net) return no(R.alreadyNet);
       if (!near) return no(R.farSoil);
-      if (s.nutrients < COST.weave) return no(R.noNutrientWeave);
+      if (s.nutrients < COST.weave) return no(R.noNutrientWeave(COST.weave));
       return yes;
     case 'champi':
       if (t.kind !== 'log') return no(R.champiNeedsLog);
@@ -122,7 +122,7 @@ export function act(s: GameState, id: number, x: number, y: number): ActionResul
       const trees = revivedCount(n);
       n.spores += trees * GAIN.treeSpores;
       n.nutrients += trees * GAIN.treeNutrients;
-      return { state: n, message: es.log.rained(m.name, trees) };
+      return { state: n, message: es.log.rained(m.name, trees * GAIN.treeSpores, trees * GAIN.treeNutrients) };
     }
     case 'amanita':
       if (t.kind === 'mother') {
@@ -174,7 +174,7 @@ export function endDay(s: GameState): ActionResult {
   });
   const now = season(n.day);
   const parts: string[] = [es.log.dawn(n.day)];
-  if (trees) parts.push(es.log.treesGave(trees));
+  if (trees) parts.push(es.log.treesGave(trees * GAIN.treeSpores, trees * GAIN.treeNutrients));
   if (now !== before) parts.push(es.log.seasonStart(now));
   if (n.mageDue) {
     addMage(n);

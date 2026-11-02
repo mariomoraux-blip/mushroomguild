@@ -192,6 +192,10 @@ describe('Requirement: Pasar la voz (Gliophorus psittacinus)', () => {
 
 describe('Requirement: Llegada del mago (Conocybe arcana)', () => {
   it('Scenario: Segundo árbol revivido — si revive el día 4, al empezar el día 5 Maese Bruma está y disponible', () => {
+    // El primer árbol no lo trae.
+    const first = endDay(act(setup({ day: 3, net: [SOIL_NEAR_TREE], nutrients: 3 }), RUBI, TREE.x, TREE.y).state).state;
+    expect(first.members.some((m) => m.species === 'mago')).toBe(false);
+
     const s = setup({ day: 4, alive: [OTHER_TREE], net: [SOIL_NEAR_TREE], nutrients: 3 });
     const revived = act(s, RUBI, TREE.x, TREE.y).state;
     expect(revived.members.some((m) => m.species === 'mago')).toBe(false);
@@ -200,8 +204,9 @@ describe('Requirement: Llegada del mago (Conocybe arcana)', () => {
     const mage = state.members.find((m) => m.species === 'mago');
     expect(mage).toMatchObject({ name: 'Maese Bruma', used: false });
     expect(message).toContain(es.log.mageArrives);
-    // Llega una sola vez por partida.
-    const later = endDay(endDay(state).state).state;
+    // Llega una sola vez por partida, aunque se revivan más árboles.
+    const third = act({ ...state, nutrients: 3, tiles: state.tiles.map((t) => (t.x === 3 && t.y === 1 ? { ...t, net: true } : t)) }, RUBI, 4, 1);
+    const later = endDay(endDay(third.state).state).state;
     expect(later.members.filter((m) => m.species === 'mago')).toHaveLength(1);
   });
 
@@ -214,6 +219,7 @@ describe('Requirement: Llegada del mago (Conocybe arcana)', () => {
     const s = setup({ day: 12, alive: [OTHER_TREE], net: [SOIL_NEAR_TREE], nutrients: 3 });
     const revived = act(s, RUBI, TREE.x, TREE.y).state;
     expect(revived.status).toBe('playing');
+    expect(revived.mageDue).toBe(false);
     const { state } = endDay(revived);
     expect(state.status).toBe('lost');
     expect(state.members.some((m) => m.species === 'mago')).toBe(false);
@@ -257,7 +263,7 @@ describe('Requirement: Hechizos', () => {
     const s = withMage({ alive: [TREE, OTHER_TREE, FAR_TREE], spores: 0, nutrients: 0 });
     const { state, message } = pure(s, (s) => act(s, mageId(s), TREE.x, TREE.y));
     expect([state.spores, state.nutrients]).toEqual([3, 3]);
-    expect(message).toBe(es.log.rained('Maese Bruma', 3));
+    expect(message).toBe(es.log.rained('Maese Bruma', 3, 3));
     const dawn = endDay(state).state;
     expect([dawn.spores, dawn.nutrients]).toEqual([6, 6]);
   });

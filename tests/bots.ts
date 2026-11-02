@@ -29,6 +29,10 @@ export function shuffle<T>(rng: Rng, list: readonly T[]): T[] {
   return a;
 }
 
+// Umbrales de la política del bot con criterio (design.md).
+const GLIO_RECRUIT_BELOW = 3; // recluta Gliophorus con menos de 3 nutrientes
+const GLIO_TRADE_BELOW = 4; // pasa la voz con menos de 4 nutrientes
+
 const canRecruit = (s: GameState) => s.spores >= COST.recruit && recruitableCount(s) < MAX_GUILD;
 
 /** Juega una partida completa: `day` decide lo que pasa en cada día y luego se termina el día. */
@@ -74,7 +78,7 @@ function closestToMother(rng: Rng, s: GameState, tiles: readonly Tile[]): Tile |
 function smartRecruit(s: GameState): RecruitableSpecies {
   const logNearNet = s.tiles.some((t) => t.kind === 'log' && touchesNet(s, t.x, t.y));
   const mother = motherTile(s);
-  if (s.nutrients < 3 && !logNearNet) return 'gliophorus';
+  if (s.nutrients < GLIO_RECRUIT_BELOW && !logNearNet) return 'gliophorus';
   if (!touchesNet(s, mother.x, mother.y)) return 'lactarius';
   return 'amanita';
 }
@@ -85,7 +89,7 @@ function priority(s: GameState, m: Member, t: Tile): number | null {
     case 'amanita':
       return t.kind === 'mother' ? 0 : 2;
     case 'gliophorus':
-      return s.nutrients < 4 ? 1 : null;
+      return s.nutrients < GLIO_TRADE_BELOW ? 1 : null;
     case 'champi':
       return 3;
     case 'lactarius':

@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { DAYS_PER_SEASON, H, KIND, MAP, START_NUTRIENTS, STARTING_GUILD, W } from './config';
+import { DAYS, DAYS_PER_SEASON, H, KIND, MAP, START_NUTRIENTS, START_SPORES, STARTING_GUILD, W } from './config';
 import type { GameState, Member, Mutable, RecruitableSpecies, Tile } from './types';
 
 export type MutableState = Mutable<GameState> & { tiles: Mutable<Tile>[]; members: Mutable<Member>[] };
@@ -18,7 +18,7 @@ export function newGame(): GameState {
     tiles,
     day: 1,
     nutrients: START_NUTRIENTS,
-    spores: 0,
+    spores: START_SPORES,
     status: 'playing',
     wonDay: null,
     members: [],
@@ -82,7 +82,8 @@ export const recruitableCount = (s: GameState): number => s.members.filter((m) =
 export const motherTile = (s: GameState): Tile => s.tiles.find((t) => t.kind === 'mother')!;
 
 /** Índice de estación (0 = Primavera … 3 = Invierno). */
-export const seasonIndex = (day: number): number => Math.min(3, Math.floor((day - 1) / DAYS_PER_SEASON));
+export const seasonIndex = (day: number): number =>
+  Math.min(Math.ceil(DAYS / DAYS_PER_SEASON) - 1, Math.floor((day - 1) / DAYS_PER_SEASON));
 export const season = (day: number): string => es.seasons[seasonIndex(day)] ?? '';
 /** ¿Maese Bruma ya lanzó un hechizo en la estación actual? */
 export const magicSpent = (s: GameState): boolean => s.lastSpellSeason === seasonIndex(s.day);

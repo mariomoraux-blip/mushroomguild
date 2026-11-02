@@ -7,6 +7,7 @@ export const DAYS = 12;
 export const DAYS_PER_SEASON = 3;
 export const MAX_GUILD = 6;
 export const START_NUTRIENTS = 2;
+export const START_SPORES = 0;
 export const COST = { weave: 1, revive: 3, mother: 6, recruit: 2, message: 2 } as const;
 export const GAIN = { log: 3, treeSpores: 1, treeNutrients: 1, message: 3 } as const;
 export const LOG_USES = 2;
