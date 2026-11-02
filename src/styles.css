@@ -530,6 +530,16 @@ button { font: inherit; color: inherit; }
   }
   .board-area { width: calc((100dvh - 2 * var(--gap) - 24px) * 5 / 8 + 24px); }
   .board > .art--vine { display: none; }
+  /* Cartas: más anchas y bajas para que quepan sin desplazarse. */
+  .story { padding-block: 12px; }
+  .story__card { width: min(600px, 100%); padding: 14px 18px 12px; }
+  .story__portrait { display: none; }
+  .story__title { margin-bottom: 6px; font-size: 19px; }
+  .story__list { grid-template-columns: 1fr 1fr; margin-top: 8px; }
+  .story__note { margin-top: 6px; }
+  .story__actions { grid-template-columns: 1fr 1fr; align-items: end; }
+  .story__actions > :only-child { grid-column: 1 / -1; }
+  .story__actions .btn--wide { margin-top: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

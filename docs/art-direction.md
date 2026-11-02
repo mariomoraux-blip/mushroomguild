@@ -104,7 +104,8 @@ FICHA                          EL GREMIO                      INTRO / VICTORIA
 - **Ficha:** retrato grande, nombre, nombre científico y rol, contexto, frase entre comillas y secciones con etiqueta verde (Habilidad, Movimiento, Nutrientes…), como la ficha actual.
 - **El gremio:** lista de las cinco especies, cada fila con retrato, nombre, rol y una línea; abre la ficha.
 - **Intro (003):** fondo `fondo-intro` (bosque lila apagado), letrero "El bosque se apaga", texto y "Comenzar".
-- **Victoria (003):** fondo `fondo-victoria`, letrero "¡El bosque despertó!", texto y resumen (días, árboles, nutrientes, esporas); "Ver resumen" y "Jugar de nuevo". El fin del invierno usa el mismo layout con `fondo-intro`.
+- **Victoria (003):** fondo `fondo-victoria`, letrero "¡El bosque despertó!", el día y los árboles revividos; "Jugar otra vez" (principal) y "Ver el claro". El fin del invierno usa el mismo layout con `fondo-intro` y una pista. Tras "Ver el claro", la bitácora ofrece "Jugar otra vez".
+- **Llegada de Maestra Bruna (003):** carta sobre el tablero con su retrato y sus dos hechizos, una línea cada uno.
 
 ## Personajes
 - Cuerpo-tallo redondo, sombrero ≈ 55 % de la altura, cara mínima (ojos de punto, rubor, boca pequeña).
