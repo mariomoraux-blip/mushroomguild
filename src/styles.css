@@ -221,7 +221,7 @@ button { font: inherit; color: inherit; }
 
 .card {
   position: relative;
-  width: 60px;
+  width: 56px;
   height: calc(var(--dock-h) - 2px);
   display: flex;
   flex-direction: column;
@@ -234,8 +234,8 @@ button { font: inherit; color: inherit; }
 }
 .card__medal {
   position: relative;
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
   flex: 0 0 auto;
   display: flex;
   align-items: flex-end;
@@ -247,7 +247,7 @@ button { font: inherit; color: inherit; }
   box-shadow: 0 0 0 4px var(--wood), 0 0 0 6px var(--ink), inset 0 -4px 0 color-mix(in srgb, var(--ink) 20%, transparent), 0 6px 6px color-mix(in srgb, var(--ink) 45%, transparent);
   margin-top: 6px;
 }
-.card__medal .portrait { width: 48px; height: 45px; }
+.card__medal .portrait { width: 45px; height: 42px; }
 .card__name {
   position: absolute;
   bottom: 0;
@@ -494,6 +494,12 @@ button { font: inherit; color: inherit; }
   }
   .board-area { width: calc((100dvh - 2 * var(--gap) - 24px) * 5 / 8 + 24px); }
   }
+
+/* Pantallas bajas (Safari con barras, 390 × 664): dock y bitácora compactos para que la casilla no baje de 56 px. */
+@media (max-height: 720px) {
+  :root { --dock-h: 62px; --notice-h: 44px; }
+  .card__medal { margin-top: 3px; }
+}
 
 /* Pantallas apaisadas (horizontal y escritorio): fondo 16:9. */
 @media (orientation: landscape) {
