@@ -5,6 +5,9 @@
 // board-interaction › Accesibilidad básica: "Jugar con teclado" → "teclado".
 // board-interaction › Retratos del gremio: "Retratos en el dock" y "Trabajó hoy" → "estilo cozy".
 // board-interaction › Estilo cozy: "Pantalla de juego" → "estilo cozy".
+// board-interaction › Casilla ocupada: "Hongo sobre un tronco" → tests/paint.test.ts.
+// board-interaction › Fondo vivo: "Movimiento reducido" → "fondo vivo".
+// board-interaction › Retratos del gremio: "La maga en el tablero" → "Maestra Bruna: retrato propio…".
 // player-guidance › Libreta de campo: "Consultar la ayuda" → "Libreta de campo".
 // player-guidance › Meta visible: "Inicio" → "guía".
 import { expect, test, type Page } from '@playwright/test';
@@ -66,7 +69,7 @@ test('layout: tablero completo, casillas en rango y controles ≥ 44 px', async 
   // "Terminar el día" en la misma fila que las tarjetas.
   const end = (await page.locator('.end').boundingBox())!;
   const card = (await page.locator('.card').first().boundingBox())!;
-  expect(Math.abs(end.y - card.y)).toBeLessThan(4);
+  expect(Math.abs(end.y + end.height / 2 - (card.y + card.height / 2))).toBeLessThan(6);
   // Todo control visible mide ≥ 44 × 44.
   const small = await page.evaluate(() =>
     [...document.querySelectorAll('button')]
@@ -274,28 +277,23 @@ test('claros aleatorios: cada partida cambia y ?seed= repite el mismo mapa', asy
   expect(a.split('|').filter((n) => n === 'Árbol gris')).toHaveLength(7);
 });
 
-test('estilo cozy: retratos en el dock, cinta verde y "Fin del día" amarillo', async ({ page }, info) => {
+test('estilo cozy: retratos en el dock, tablón de madera, sello, botón de luna y fondo vivo', async ({ page }, info) => {
   await page.goto('/?seed=7');
   const imgs = page.locator('.dock__item .portrait img');
   await expect(imgs).toHaveCount(3);
   for (const img of await imgs.all()) expect(await img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
-  const css = await page.evaluate(() => ({
-    hud: getComputedStyle(document.querySelector('.hud')!).backgroundColor,
-    end: getComputedStyle(document.querySelector('.end')!).backgroundColor,
-    moss: getComputedStyle(document.documentElement).getPropertyValue('--moss'),
-    sun: getComputedStyle(document.documentElement).getPropertyValue('--sun'),
-  }));
-  const rgb = (hexColor: string) => {
-    const n = parseInt(hexColor.trim().slice(1), 16);
-    return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
-  };
-  expect(css.hud).toBe(rgb(css.moss));
-  expect(css.end).toBe(rgb(css.sun));
+  // Piezas ilustradas en SVG (bosque ilustrado, 008).
+  for (const sel of ['.hud .art--sign svg', '.hud__day .art--tag svg', '.chip .art--medal svg', '.hud__help .art--seal svg', '.notice .art--torn svg', '.end .art--moon svg', '.board .art--vine svg', '.card .art--mound svg']) {
+    await expect(page.locator(sel).first()).toBeAttached();
+  }
+  await expect(page.locator('canvas.ambient')).toBeAttached();
   // Trabajó hoy: al descomponer, el sprite de Bruno aparece en el tablero.
   const visibleSprites = () =>
     page.evaluate(() => {
-      const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: { type: string; visible: boolean }[] } } } } };
-      return w.game.scene.getScene('Game').children.list.filter((o) => o.type === 'Image' && o.visible).length;
+      type Obj = { type: string; visible: boolean; texture?: { key: string } };
+      const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: Obj[] } } } } };
+      // Sprites de miembros: imágenes visibles que no son el claro pintado (textura "claro").
+      return w.game.scene.getScene('Game').children.list.filter((o) => o.type === 'Image' && o.visible && o.texture?.key !== 'claro').length;
     });
   expect(await visibleSprites()).toBe(0);
   await page.locator('[data-id="2"]').click();
@@ -305,4 +303,17 @@ test('estilo cozy: retratos en el dock, cinta verde y "Fin del día" amarillo', 
     await page.locator('[data-id="1"]').click();
     await page.screenshot({ path: 'docs/screenshots/006-cozy-390x844.png' });
   }
+});
+
+test('fondo vivo: con movimiento reducido el shader pinta un solo cuadro', async ({ browser }) => {
+  const ctx = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto('/?map=clasico');
+  const ready = await page.locator('canvas.ambient').getAttribute('data-ready');
+  test.skip(ready !== 'true', 'sin WebGL en este navegador: queda el degradado CSS');
+  const frame = () => page.locator('canvas.ambient').evaluate((c: HTMLCanvasElement) => c.toDataURL());
+  const a = await frame();
+  await page.waitForTimeout(400);
+  expect(await frame()).toBe(a);
+  await ctx.close();
 });

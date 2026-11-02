@@ -1,15 +1,19 @@
-/* Estilo cozy (libreta de campo moderna). Colores y tipografías: solo variables que define
-   applyTheme() desde src/theme.ts. */
+/* Bosque ilustrado (008): madera, papel rasgado, cera y hojas en SVG sobre un fondo vivo (shader).
+   Colores y tipografías: solo variables que define applyTheme() desde src/theme.ts. */
 :root {
   --gap: 6px;
-  --hud-h: 54px;
+  --hud-h: 56px;
   --notice-h: 44px;
   --dock-h: 62px;
   --touch: 44px;
-  --radius: 16px;
-  --ink-soft: color-mix(in srgb, var(--ink) 62%, transparent);
-  --shadow: 0 2px 0 color-mix(in srgb, var(--ink) 18%, transparent), 0 6px 14px color-mix(in srgb, var(--ink) 12%, transparent);
-  --shadow-sm: 0 2px 0 color-mix(in srgb, var(--ink) 16%, transparent);
+  --radius: 18px;
+  --ink-soft: color-mix(in srgb, var(--ink) 64%, transparent);
+  --drop: drop-shadow(0 3px 0 color-mix(in srgb, var(--ink) 22%, transparent));
+  --shadow: 0 3px 0 color-mix(in srgb, var(--ink) 20%, transparent), 0 10px 22px color-mix(in srgb, var(--bark) 18%, transparent);
+  --shadow-sm: 0 2px 0 color-mix(in srgb, var(--ink) 18%, transparent);
+  /* Grano de papel: ruido SVG (feTurbulence) gris translúcido. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  --torn-top: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M0 12 L0 6 L6 3 L12 7 L19 2 L26 6 L33 3 L40 8 L47 3 L54 6 L61 2 L68 7 L75 3 L82 6 L89 2 L96 7 L103 3 L110 6 L116 3 L120 6 L120 12Z'/%3E%3C/svg%3E");
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -33,20 +37,22 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 15px;
-  background:
-    radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--leaf) 18%, transparent) 0 18%, transparent 40%),
-    radial-gradient(circle at 90% 85%, color-mix(in srgb, var(--sun) 20%, transparent) 0 15%, transparent 38%),
-    var(--cream);
+  background: linear-gradient(var(--peach), var(--cream));
 }
+
+/* Fondo vivo (src/ui/ambient.ts). */
+.ambient { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
 button { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-.icon { display: inline-flex; width: 18px; height: 18px; flex: 0 0 auto; }
-.icon svg { width: 100%; height: 100%; }
+.art { position: absolute; inset: 0; pointer-events: none; display: block; }
+.art svg { width: 100%; height: 100%; display: block; overflow: visible; }
 
 /* ─── Shell: vertical por defecto (móvil primero) ─────────────────────────── */
 .app {
+  position: relative;
+  z-index: 1;
   height: 100vh;
   height: 100dvh;
   max-width: 480px;
@@ -60,56 +66,66 @@ button { font: inherit; color: inherit; }
     max(var(--gap), env(safe-area-inset-bottom)) max(var(--gap), env(safe-area-inset-left));
 }
 
-/* ─── HUD: cinta verde con chips ──────────────────────────────────────────── */
+/* ─── HUD: tablón de madera colgante ──────────────────────────────────────── */
 .hud {
   grid-area: hud;
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) repeat(3, minmax(0, 1fr)) var(--touch);
+  grid-template-columns: 72px repeat(3, minmax(0, 1fr)) 28px;
   align-items: center;
-  gap: 5px;
-  padding: 4px;
-  background: var(--moss);
-  border: 2px solid var(--mossDark);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
+  gap: 4px 8px;
+  padding: 7px 8px 5px 10px;
+  filter: var(--drop);
 }
-.hud__day { display: flex; flex-direction: column; padding: 0 6px; color: var(--paper); min-width: 0; line-height: 1.05; }
-.hud__day-value { font-family: var(--font-display); font-weight: 700; font-size: 16px; white-space: nowrap; }
-.hud__day-caption { font-size: 12px; font-weight: 700; opacity: 0.9; }
+.hud > .art--sign { z-index: 0; }
+.hud > :not(.art) { position: relative; z-index: 1; }
+.hud__day {
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 2px 2px 15px;
+  min-width: 0;
+  line-height: 1.02;
+  transform: rotate(-2deg);
+}
+.hud__day > :not(.art) { position: relative; }
+.hud__day-value { font-family: var(--font-display); font-weight: 700; font-size: 14px; white-space: nowrap; letter-spacing: -0.2px; }
+.hud__day-caption { font-size: 11px; font-weight: 800; color: var(--moss); }
 .chip {
   height: var(--touch);
   min-width: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background: var(--paper);
+  gap: 1px;
+  padding: 0 4px 0 0;
   border: 0;
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
-  line-height: 1.05;
-  padding: 0 2px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--bark) 25%, transparent);
+  line-height: 1;
 }
-.chip__row { display: flex; align-items: center; gap: 3px; color: var(--moss); }
+.chip__medal { position: relative; flex: 0 0 32px; height: 32px; margin-left: -12px; filter: var(--drop); }
+.chip__medal .art--icon { inset: 6px; }
+.chip__text { display: flex; flex-direction: column; min-width: 0; }
 .chip__value { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--ink); }
-.chip__label { font-size: 10px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.chip__label { font-size: 9.5px; letter-spacing: -0.1px; font-weight: 800; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chip--button { cursor: pointer; }
-.chip--button .chip__label { color: var(--wood); }
+.chip--button .chip__label { color: var(--berry); }
 .hud__help {
   width: var(--touch);
   height: var(--touch);
-  border-radius: 50%;
+  margin-right: -10px; /* el sello sobresale del tablón */
+  justify-self: end;
   border: 0;
-  background: var(--sun);
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  box-shadow: var(--shadow-sm);
+  padding: 0;
+  background: transparent;
   cursor: pointer;
+  transform: rotate(8deg);
 }
+.hud__help-mark { position: relative; font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--paper); }
 
-/* ─── Tablero con marco de madera ─────────────────────────────────────────── */
+/* ─── Tablero: marco de madera con enredaderas ────────────────────────────── */
 .board-area {
   grid-area: board;
   min-height: 0;
@@ -121,14 +137,15 @@ button { font: inherit; color: inherit; }
   position: relative;
   border: 2px solid var(--ink);
   outline: 4px solid var(--wood);
-  border-radius: 10px;
+  border-radius: 14px;
   box-sizing: content-box;
-  box-shadow: var(--shadow);
-  overflow: hidden;
+  box-shadow: 0 0 0 6px var(--ink), 0 9px 0 0 color-mix(in srgb, var(--bark) 35%, transparent);
   touch-action: none;
 }
-.board__canvas, .board__overlay { position: absolute; inset: 0; }
+.board__canvas, .board__overlay { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; }
 .board__canvas canvas { display: block; }
+.board > .art--vine { inset: auto; top: -20px; left: -16px; width: 78px; height: 40px; z-index: 2; }
+.board > .art--vine-flip { left: auto; right: -16px; }
 .cell {
   position: absolute;
   margin: 0;
@@ -136,13 +153,12 @@ button { font: inherit; color: inherit; }
   border: 0;
   background: transparent;
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 .cell:focus-visible { outline-offset: -4px; }
 
-/* ─── Bitácora (globo) y dock ─────────────────────────────────────────────── */
+/* ─── Bitácora: papel rasgado con cinta ───────────────────────────────────── */
 .bottom { grid-area: bottom; display: grid; gap: var(--gap); min-width: 0; }
-
 .notice {
   position: relative;
   margin: 0;
@@ -150,27 +166,36 @@ button { font: inherit; color: inherit; }
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 0 0 12px;
-  background: var(--paper);
-  border-radius: 14px;
-  border-left: 6px solid var(--leaf);
-  box-shadow: var(--shadow-sm);
+  padding: 0 0 0 16px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2;
-  overflow: hidden;
+  filter: var(--drop);
 }
-.notice[data-tone='warn'] { border-left-color: var(--accent); }
+.notice > .art--torn { z-index: 0; }
+.notice > :not(.art) { position: relative; z-index: 1; }
+.notice::before {
+  content: '';
+  position: relative;
+  z-index: 1;
+  flex: 0 0 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--leaf);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--leaf) 30%, transparent);
+}
+.notice[data-tone='warn']::before { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent); }
 .notice__text { margin: 0; flex: 1; min-width: 0; }
-.notice__btn { flex: 0 0 auto; min-height: var(--touch); border-radius: 0 14px 14px 0; font-size: 13px; }
+.notice__btn { flex: 0 0 auto; min-height: var(--touch); height: var(--touch); margin-right: 2px; border-radius: 22px; font-size: 13px; }
 
-.dock { height: var(--dock-h); display: flex; gap: var(--gap); min-width: 0; }
+/* ─── Dock: tarjetas de criatura ──────────────────────────────────────────── */
+.dock { height: var(--dock-h); display: flex; gap: var(--gap); min-width: 0; align-items: stretch; }
 .dock__cards {
   flex: 1;
   min-width: 0;
   display: flex;
-  gap: var(--gap);
-  padding: 2px 2px 4px;
+  gap: 8px;
+  padding: 4px 3px 6px;
   overflow-x: auto;
   overscroll-behavior-x: contain; /* el scroll del dock no mueve la página */
   scroll-snap-type: x proximity;
@@ -183,29 +208,41 @@ button { font: inherit; color: inherit; }
 .card {
   position: relative;
   height: 100%;
-  min-width: 108px;
+  min-width: 112px;
   min-height: var(--touch);
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 10px 2px 2px;
-  background: var(--paper);
-  border: 2px solid transparent;
-  border-radius: var(--radius);
+  padding: 2px 12px 2px 4px;
+  background: var(--grain), linear-gradient(170deg, var(--paper), color-mix(in srgb, var(--peach) 55%, var(--paper)));
+  border: 2px solid var(--ink);
+  border-radius: 20px 20px 20px 8px;
   box-shadow: var(--shadow-sm);
   text-align: left;
   cursor: pointer;
 }
-.card[aria-pressed='true'] { border-color: var(--sun); box-shadow: 0 0 0 3px var(--sun), var(--shadow-sm); }
-.card.is-used { opacity: 0.6; }
+/* Costura de libreta. */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1.5px dashed color-mix(in srgb, var(--wood) 55%, transparent);
+  border-radius: 15px 15px 15px 5px;
+  pointer-events: none;
+}
+.card[aria-pressed='true'] { box-shadow: 0 0 0 4px var(--sun), var(--shadow-sm); transform: translateY(-2px) rotate(-1deg); }
+.card.is-used { filter: saturate(0.35); opacity: 0.78; }
 .card:disabled { cursor: default; }
-.card__star { display: none; position: absolute; top: -6px; right: 2px; color: var(--sun); font-size: 18px; -webkit-text-stroke: 1px var(--ink); }
+.card__stage { position: relative; flex: 0 0 auto; display: flex; align-items: flex-end; justify-content: center; }
+.card__stage .art--mound { inset: auto 0 -2px 0; height: 14px; }
+.card__stage .portrait { position: relative; }
+.card__star { display: none; position: absolute; top: -10px; right: 4px; z-index: 2; color: var(--sun); font-size: 20px; -webkit-text-stroke: 1.2px var(--ink); filter: drop-shadow(0 0 4px var(--glow)); }
 .card.is-suggested .card__star { display: block; }
-.card.is-suggested:not([aria-pressed='true']) { border-color: var(--sun); }
-.card__text { display: flex; flex-direction: column; line-height: 1.12; min-width: 0; }
+.card.is-suggested:not([aria-pressed='true']) { box-shadow: 0 0 0 3px color-mix(in srgb, var(--sun) 75%, transparent), var(--shadow-sm); }
+.card__text { position: relative; display: flex; flex-direction: column; line-height: 1.12; min-width: 0; }
 .card__name { font-family: var(--font-display); font-weight: 700; font-size: 15px; white-space: nowrap; }
-.card__species { font-family: var(--font-body); font-weight: 600; font-style: italic; font-size: 10px; color: var(--ink-soft); }
-.card__meta { font-size: 11px; color: var(--ink-soft); white-space: nowrap; }
+.card__species { font-family: var(--font-body); font-weight: 700; font-style: italic; font-size: 10px; color: var(--ink-soft); }
+.card__meta { font-size: 11px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; }
 .card__status { font-size: 11px; font-weight: 800; color: var(--moss); white-space: nowrap; }
 .card.is-used .card__status { color: var(--ink-soft); }
 .card--recruit {
@@ -213,92 +250,119 @@ button { font: inherit; color: inherit; }
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 2px 12px;
-  background: var(--mycelium);
+  padding: 2px 12px 2px 52px;
+  background: var(--grain), linear-gradient(170deg, var(--mycelium), color-mix(in srgb, var(--leaf) 30%, var(--mycelium)));
 }
+.card--recruit > .art--packet { inset: 6px auto 6px 8px; width: 38px; }
 
 .end {
-  flex: 0 0 72px;
+  position: relative;
+  flex: 0 0 74px;
   min-height: var(--touch);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 1px;
-  background: var(--sun);
-  color: var(--ink);
-  border: 2px solid var(--ink);
-  border-radius: 20px;
-  box-shadow: 0 3px 0 var(--ink);
+  justify-content: flex-end;
+  padding: 0 0 2px;
+  border: 0;
+  background: transparent;
   cursor: pointer;
+  filter: var(--drop);
 }
-.end__label { font-family: var(--font-display); font-size: 12px; font-weight: 700; line-height: 1.05; text-align: center; }
-.end:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.end > .art--moon { inset: -2px 9px 16px; }
+.end__label {
+  position: relative;
+  padding: 2px 9px 3px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.05;
+  white-space: nowrap;
+  color: var(--paper);
+  background: var(--moss);
+  clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%);
+}
+.end:active { transform: translateY(2px); }
 .end:disabled { opacity: 0.55; }
 
 /* ─── Retratos (sprites de Blender) y siluetas de respaldo ───────────────── */
 .portrait { flex: 0 0 auto; display: inline-flex; align-items: flex-end; justify-content: center; }
 .portrait img { width: 100%; height: auto; display: block; pointer-events: none; }
 /* En el dock la altura es fija: Maestra Bruna (sprite más alto) se ajusta a la tarjeta en vez de agrandarla. */
-.portrait--sm { width: 58px; height: 42px; }
+.portrait--sm { width: 58px; height: 46px; }
 .portrait--sm img { width: auto; height: 100%; }
 .portrait--md { width: 88px; }
-.portrait--lg { width: 132px; }
+.portrait--lg { width: 140px; }
 .hat { flex: 0 0 auto; width: 30px; height: 30px; position: relative; display: inline-block; }
 .portrait--lg .hat { width: 64px; height: 64px; }
 .hat::before { content: ''; position: absolute; inset: 0; border: 2px solid var(--ink); }
 .hat--champi::before { background: var(--wood); border-radius: 50% 50% 12% 12% / 70% 70% 30% 30%; top: 8px; }
 .hat--lactarius::before { background: var(--indigo); border-radius: 50% 50% 50% 50% / 20% 20% 80% 80%; clip-path: polygon(0 0, 100% 0, 75% 100%, 25% 100%); }
-.hat--amanita::before { background: var(--accent); border-radius: 50% 50% 10% 10% / 90% 90% 10% 10%; }
+.hat--amanita::before { background: var(--berry); border-radius: 50% 50% 10% 10% / 90% 90% 10% 10%; }
 .hat--gliophorus::before { background: var(--leaf); border-radius: 50% 50% 30% 30% / 80% 80% 20% 20%; left: 6px; right: 6px; top: 6px; }
-.hat--mago::before { background: var(--accent); border: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.hat--mago::before { background: var(--berry); border: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 
-/* ─── Hojas: papel con cinta de título ────────────────────────────────────── */
+/* ─── Hojas: pergamino con borde rasgado y cinta de puntas cortadas ───────── */
 .sheet {
   position: fixed;
   inset: 0;
+  z-index: 10;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: color-mix(in srgb, var(--ink) 45%, transparent);
-  z-index: 10;
+  background: color-mix(in srgb, var(--bark) 55%, transparent);
+  backdrop-filter: blur(2px);
 }
 .sheet[hidden] { display: none; }
 .sheet__panel {
   width: min(480px, 100%);
-  max-height: 82dvh;
+  max-height: 84dvh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: var(--cream);
-  border-radius: 22px 22px 0 0;
-  box-shadow: var(--shadow);
-  padding: 0 16px max(16px, env(safe-area-inset-bottom));
+  background: var(--grain), linear-gradient(var(--cream), color-mix(in srgb, var(--peach) 40%, var(--cream)));
+  padding: 24px 16px max(16px, env(safe-area-inset-bottom));
+  /* Borde superior rasgado. */
+  -webkit-mask: var(--torn-top) top / 100% 14px no-repeat, linear-gradient(#000, #000) 0 13px / 100% 100% no-repeat;
+  mask: var(--torn-top) top / 100% 14px no-repeat, linear-gradient(#000, #000) 0 13px / 100% 100% no-repeat;
 }
 .sheet__head {
   position: sticky;
-  top: 0;
-  z-index: 1;
+  top: -24px;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin: 0 -16px 8px;
-  padding: 10px 10px 10px 18px;
-  background: var(--moss);
-  color: var(--paper);
-  border-bottom: 3px solid var(--mossDark);
+  margin: -6px -4px 10px;
+  padding-top: 6px;
 }
-.sheet__title { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 20px; }
+.sheet__title {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 7px 28px 9px 14px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  color: var(--paper);
+  background: linear-gradient(var(--moss), var(--mossDark));
+  clip-path: polygon(0 0, 100% 0, 93% 50%, 100% 100%, 0 100%, 3% 50%);
+}
+.sheet__title .art--sprig { position: relative; inset: auto; width: 30px; height: 20px; flex: 0 0 auto; }
 .sheet__help { margin: 6px 0 10px; font-size: 13px; color: var(--ink-soft); }
 .rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
   min-height: var(--touch);
   padding: 4px 6px 4px 2px;
-  background: var(--paper);
-  border-radius: 14px;
+  background: var(--grain), var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 18px 18px 18px 6px;
   box-shadow: var(--shadow-sm);
 }
 .row__text { flex: 1; min-width: 0; font-size: 14px; }
@@ -308,49 +372,82 @@ button { font: inherit; color: inherit; }
   min-height: var(--touch);
   min-width: var(--touch);
   padding: 0 14px;
-  background: var(--wood);
+  background: linear-gradient(var(--wood), var(--bark));
   color: var(--paper);
-  border: 0;
-  border-radius: 14px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
   box-shadow: 0 3px 0 var(--ink);
   cursor: pointer;
   font-weight: 800;
 }
+.btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
 .btn:disabled { opacity: 0.45; cursor: default; }
 .btn--icon { padding: 0; width: var(--touch); font-family: var(--font-display); font-size: 18px; border-radius: 50%; }
-.sheet__head .btn--icon { background: var(--paper); color: var(--ink); box-shadow: none; }
-.btn--wide { width: 100%; margin-top: 14px; font-size: 17px; background: var(--sun); color: var(--ink); border: 2px solid var(--ink); border-radius: 20px; font-family: var(--font-display); }
-.spells { display: grid; gap: 8px; margin-top: 4px; }
-.btn--spell { display: grid; gap: 2px; padding: 10px 14px; text-align: left; font-weight: 600; background: var(--paper); color: var(--ink); border: 2px solid var(--wood); box-shadow: var(--shadow-sm); }
-.btn--spell strong { font-family: var(--font-display); font-size: 17px; color: var(--moss); }
+.sheet__head .btn--icon { background: var(--berry); color: var(--paper); }
+.btn--wide {
+  width: 100%;
+  margin-top: 16px;
+  font-size: 18px;
+  font-family: var(--font-display);
+  color: var(--ink);
+  background: linear-gradient(var(--glow), var(--sun));
+  border-radius: 24px;
+}
+.spells { display: grid; gap: 10px; margin-top: 4px; }
+.btn--spell {
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--grain), linear-gradient(160deg, var(--paper), var(--mycelium));
+  border-radius: 20px 20px 20px 6px;
+}
+.btn--spell strong { font-family: var(--font-display); font-size: 18px; color: var(--moss); }
 
-.creature { display: grid; gap: 6px; }
-.creature p { margin: 0; font-size: 14px; line-height: 1.38; }
+.creature { display: grid; gap: 8px; }
+.creature p { margin: 0; font-size: 14px; line-height: 1.4; }
 .creature__head {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 10px;
-  background: var(--paper);
-  border-radius: 18px;
+  gap: 14px;
+  padding: 10px 14px 8px;
+  background:
+    radial-gradient(circle at 25% 40%, color-mix(in srgb, var(--glow) 90%, transparent), transparent 55%),
+    linear-gradient(160deg, var(--mycelium), color-mix(in srgb, var(--leaf) 35%, var(--mycelium)));
+  border: 2px solid var(--ink);
+  border-radius: 26px 26px 26px 8px;
   box-shadow: var(--shadow-sm);
 }
+.creature__head p { font-weight: 700; }
+.creature__stage .art--mound { inset: auto 0 -4px 0; height: 22px; }
 .creature h3 {
   justify-self: start;
-  margin: 8px 0 0;
-  padding: 2px 10px;
+  margin: 10px 0 0;
+  padding: 3px 16px 4px 10px;
   font-family: var(--font-display);
   font-size: 14px;
   color: var(--paper);
   background: var(--moss);
-  border-radius: 10px;
+  clip-path: polygon(0 0, 100% 0, 92% 50%, 100% 100%, 0 100%);
 }
-.creature__quip { font-style: italic; color: var(--ink-soft); padding-left: 10px; border-left: 3px solid var(--leaf); }
+.creature__quip {
+  font-family: var(--font-display);
+  font-size: 15px !important;
+  color: var(--bark);
+  padding: 10px 14px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 18px 18px 18px 4px;
+  transform: rotate(-1deg);
+}
 
-.help h3 { margin: 12px 0 4px; font-family: var(--font-display); font-size: 16px; color: var(--moss); }
-.help p, .help ol, .help__tiles { margin: 0; font-size: 14px; line-height: 1.35; }
+.help h3 { margin: 14px 0 4px; font-family: var(--font-display); font-size: 17px; color: var(--moss); }
+.help p, .help ol, .help__tiles { margin: 0; font-size: 14px; line-height: 1.4; }
 .help ol, .help__tiles { padding-left: 20px; display: grid; gap: 4px; }
-.help__tip { margin-top: 12px !important; padding: 8px 10px; background: var(--mycelium); border-radius: 12px; }
+.help__tip { margin-top: 14px !important; padding: 10px 12px; background: var(--mycelium); border: 2px dashed var(--moss); border-radius: 16px; }
 
 /* ─── Horizontal en teléfono: tablero a la izquierda, HUD y dock a la derecha ─ */
 @media (orientation: landscape) and (max-height: 540px) {
@@ -360,10 +457,11 @@ button { font: inherit; color: inherit; }
     grid-template-rows: var(--hud-h) minmax(0, 1fr) auto;
     grid-template-areas: 'board hud' 'board .' 'board bottom';
   }
-  .board-area { width: calc((100dvh - 2 * var(--gap) - 12px) * 5 / 8 + 12px); }
+  .board-area { width: calc((100dvh - 2 * var(--gap) - 24px) * 5 / 8 + 24px); }
+  .board > .art--vine { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
-  .end:active { transform: none; }
+  .end:active, .btn:active, .card[aria-pressed='true'] { transform: none; }
 }

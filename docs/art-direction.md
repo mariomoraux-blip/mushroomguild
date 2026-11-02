@@ -59,6 +59,13 @@ Valores de día; la gradación por estación (003) los oscurece hacia el inviern
 | Hoja | `#8DB255` | Follaje vivo y briznas |
 | Pradera | `#B5C285` | Casillas del tablero |
 | Piedra | `#9A9183` | Rocas y copas de los árboles dormidos |
+| Corteza | `#5E3B22` | Vetas, cuerdas, sombra de troncos y botones de madera |
+| Hoja oscura | `#5F8A3A` | Sombra del follaje y del pasto |
+| Pradera oscura | `#97A86A` | Juntas y sombras de la pradera |
+| Baya | `#C9503C` | Sello de cera, sombrero de la casa-hongo, flores |
+| Durazno | `#F6D7B0` | Luz cálida del fondo, cortes de tronco, cinta adhesiva |
+| Brillo | `#FFF4C2` | Brillos, aura del Árbol Padre, esporas y luciérnagas |
+| Piedra oscura | `#6F675B` | Sombra de rocas y copas dormidas |
 
 ## Layout móvil (vertical)
 ```
@@ -79,6 +86,14 @@ Valores de día; la gradación por estación (003) los oscurece hacia el inviern
 - El dock es una sola fila: las tarjetas se desplazan en horizontal dentro del dock, la siguiente asoma cortada y el orden es el de llegada. "Terminar el día" queda fijo fuera del desplazamiento.
 - Horizontal en teléfono: tablero a la izquierda, dock a la derecha, casillas ≥ 44 px.
 - Escritorio: el mismo layout centrado, con más aire; casillas ≤ 96 px.
+
+## Bosque ilustrado (008)
+Nada de cajas planas: cada pieza parece hecha a mano.
+- **Tablero (Canvas2D, `src/scenes/paint.ts`):** pradera con luz desde arriba a la izquierda, motas, briznas curvas y florecitas; micelio como hilos luminosos ondulados con nudos y destellos índigo; árboles de copa en capas (gris dormido con hojas que caen, verde con flores al revivir); troncos con corteza, corte con anillos y un hongo diminuto (agrietados tras el primer uso); rocas con musgo y brillo; casa-hongo de sombrero rojo con puerta y ventana encendida; Árbol Padre con aura dorada, aro de meta punteado (sólido al despertar) y destellos. La variación sale de un hash de la casilla: el mismo claro siempre se ve igual.
+- **Casilla ocupada:** si un hongo trabajó hoy en una casilla, su sprite la ocupa y el objeto de abajo no se pinta.
+- **Fondo vivo (shader WebGL, `src/ui/ambient.ts`):** copas arriba, haces de luz, pasto lejano, esporas y luciérnagas que suben, grano de papel. Quieto con movimiento reducido.
+- **Piezas SVG (`src/ui/art.ts`):** tablón de madera con cuerdas y clavos (HUD), etiqueta de papel (día), medallones festoneados con íconos a color (recursos), sello de cera (ayuda), papel rasgado con cinta (bitácora), fichas de criatura con costura y montículo de pasto (dock), sobre de semillas (reclutar), botón redondo de madera con luna (fin del día), enredaderas con hongo en el marco, pergamino con borde rasgado y cintas de puntas cortadas (hojas). Grano de papel con `feTurbulence`.
+- **Gestos de forma:** esquinas asimétricas (18/18/18/6 px) en tarjetas y filas, ligeras rotaciones (etiqueta −2°, sello 8°, tarjeta seleccionada −1°), sombras sólidas de tinta en lugar de sombras difusas.
 
 ## Sprites en el juego
 - Los renders de Blender viven en `assets/sprites/` (fuente) y se copian a `public/assets/characters/` (lo que se publica): `<especie>-<pose>.png` con poses `reposo`, `trabajando` y `feliz`, a 176 × 128. Maestra Bruna, la más alta, va a 176 × 160 con la misma escala y el mismo suelo; su render `hechizo` se publica como `mago-trabajando.png`. La Gliophorus tiene una variante por estación (`gliophorus-<pose>-<estación>.png`).

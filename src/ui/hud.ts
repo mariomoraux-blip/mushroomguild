@@ -1,7 +1,8 @@
 import { es } from '../copy/es';
 import { DAYS, revivedCount, season, treeTotal } from '../rules';
 import type { AppState, Store } from '../store';
-import { el, icon, setText } from './dom';
+import { dayTag, iconArt, medallion, waxSeal, woodSign } from './art';
+import { el, setText } from './dom';
 
 /**
  * HUD en una cinta verde: día (de 12) y estación, nutrientes, esporas (abre reclutar) y árboles vivos
@@ -10,7 +11,7 @@ import { el, icon, setText } from './dom';
 export function mountHud(root: HTMLElement, store: Store) {
   const dayValue = el('strong', { class: 'hud__day-value' });
   const dayCaption = el('span', { class: 'hud__day-caption' });
-  const day = el('div', { class: 'hud__day' }, dayValue, dayCaption);
+  const day = el('div', { class: 'hud__day' }, dayTag(), dayValue, dayCaption);
 
   const chip = (iconName: string, label: string, tag: 'div' | 'button' = 'div') => {
     const value = el('strong', { class: 'chip__value' });
@@ -18,17 +19,17 @@ export function mountHud(root: HTMLElement, store: Store) {
     const node = el(
       tag,
       { class: `chip${tag === 'button' ? ' chip--button' : ''}`, ...(tag === 'button' ? { type: 'button' } : {}) },
-      el('span', { class: 'chip__row' }, icon(iconName), value),
-      caption,
+      el('span', { class: 'chip__medal' }, medallion(), iconArt(iconName)),
+      el('span', { class: 'chip__text' }, value, caption),
     );
     return { node, value };
   };
-  const nutrients = chip('leaf', es.hud.nutrients);
-  const spores = chip('spore', es.hud.recruitHint, 'button');
-  const trees = chip('tree', es.hud.trees);
-  const help = el('button', { class: 'hud__help', type: 'button', 'aria-label': es.help.button }, '?');
+  const nutrients = chip('nutrients', es.hud.nutrients);
+  const spores = chip('spores', es.hud.recruitHint, 'button');
+  const trees = chip('trees', es.hud.treesShort);
+  const help = el('button', { class: 'hud__help', type: 'button', 'aria-label': es.help.button }, waxSeal(), el('span', { class: 'hud__help-mark' }, '?'));
   root.setAttribute('aria-label', es.hud.label);
-  root.append(day, nutrients.node, spores.node, trees.node, help);
+  root.append(woodSign(), day, nutrients.node, spores.node, trees.node, help);
 
   spores.node.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'recruit' } }));
   help.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'help' } }));

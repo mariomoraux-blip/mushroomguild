@@ -1,7 +1,8 @@
 import { es } from '../copy/es';
 import { COST, DAYS, MAX_GUILD, magicSpent, recruitableCount, season, seasonIndex, DAYS_PER_SEASON, type Member } from '../rules';
 import { suggestedMember, type AppState, type Store } from '../store';
-import { el, icon, portrait, setPortrait, setText } from './dom';
+import { grassMound, moonButton, seedPacket } from './art';
+import { el, portrait, setPortrait, setText } from './dom';
 
 /** Estado de la tarjeta: lista, descansa o (Maestra Bruna) cuándo vuelve su magia. */
 function status(state: AppState, m: Member): { text: string; ready: boolean } {
@@ -19,11 +20,12 @@ export function mountDock(root: HTMLElement, store: Store) {
   const recruit = el(
     'button',
     { class: 'card card--recruit', type: 'button', 'data-action': 'recruit' },
+    seedPacket(),
     el('span', { class: 'card__name' }, `+ ${es.dock.recruit}`),
     el('span', { class: 'card__meta' }, es.dock.recruitCost(COST.recruit)),
   );
   const endLabel = el('span', { class: 'end__label' });
-  const end = el('button', { class: 'end', type: 'button' }, icon('moon'), endLabel);
+  const end = el('button', { class: 'end', type: 'button' }, moonButton(), endLabel);
   root.setAttribute('aria-label', es.dock.label);
   root.append(cards, end);
 
@@ -51,7 +53,7 @@ export function mountDock(root: HTMLElement, store: Store) {
         const button = el(
           'button',
           { class: `card card--${m.species}`, type: 'button', 'data-id': m.id },
-          face,
+          el('span', { class: 'card__stage' }, grassMound(), face),
           el('span', { class: 'card__star', 'aria-hidden': 'true' }, '★'),
           el('span', { class: 'card__text' },
             el('span', { class: 'card__name' }, m.name, ' ', el('em', { class: 'card__species' }, sp.short)),

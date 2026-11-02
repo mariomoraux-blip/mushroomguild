@@ -1,0 +1,547 @@
+// Pintor del claro (Canvas2D): pradera con textura, micelio luminoso y objetos ilustrados.
+// Solo dibuja a partir de datos; los colores salen de theme.ts. Es determinista (sin Math.random):
+// la variación sale de un hash de la casilla.
+import { H, neighbors, W, type GameState, type Tile } from '../rules';
+import { rgba, type ColorToken } from '../theme';
+
+export interface PaintInput {
+  readonly game: GameState;
+  /** Casillas resaltadas para el miembro seleccionado ("x,y"). */
+  readonly valid: ReadonlySet<string>;
+  /** Casilla con la ★ sugerida. */
+  readonly star: { x: number; y: number } | null;
+  /** Casillas con un miembro trabajando encima ("x,y"): su objeto no se pinta. */
+  readonly occupied: ReadonlySet<string>;
+}
+
+/** Lo que se pintó en cada casilla (para pruebas). */
+export interface Painted {
+  readonly x: number;
+  readonly y: number;
+  readonly object: Tile['kind'] | 'none';
+}
+
+type Ctx = CanvasRenderingContext2D;
+const TAU = Math.PI * 2;
+
+/** Hash determinista 0–1 por casilla y semilla. */
+function hash(x: number, y: number, i = 0): number {
+  let h = (x * 374761393 + y * 668265263 + i * 2147483647) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+
+function roundRect(ctx: Ctx, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function radial(ctx: Ctx, x: number, y: number, r: number, stops: [number, ColorToken, number][]) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  for (const [at, c, a] of stops) g.addColorStop(at, rgba(c, a));
+  return g;
+}
+
+function linear(ctx: Ctx, x0: number, y0: number, x1: number, y1: number, stops: [number, ColorToken, number][]) {
+  const g = ctx.createLinearGradient(x0, y0, x1, y1);
+  for (const [at, c, a] of stops) g.addColorStop(at, rgba(c, a));
+  return g;
+}
+
+// ─── Suelo ─────────────────────────────────────────────────────────────────────
+function paintGround(ctx: Ctx, T: number, game: GameState) {
+  ctx.fillStyle = rgba('meadowDark');
+  ctx.fillRect(0, 0, W * T, H * T);
+  for (const t of game.tiles) {
+    const x = t.x * T;
+    const y = t.y * T;
+    const inset = T * 0.035;
+    // Almohadilla de pradera con luz desde arriba a la izquierda.
+    roundRect(ctx, x + inset, y + inset, T - 2 * inset, T - 2 * inset, T * 0.2);
+    ctx.fillStyle = linear(ctx, x, y, x + T, y + T, [
+      [0, 'meadow', 1],
+      [1, hash(t.x, t.y) > 0.5 ? 'meadowDark' : 'meadow', 0.95],
+    ]);
+    ctx.fill();
+    ctx.fillStyle = radial(ctx, x + T * 0.32, y + T * 0.28, T * 0.6, [
+      [0, 'glow', 0.35],
+      [1, 'glow', 0],
+    ]);
+    ctx.fill();
+    // Motas de tierra y semillas.
+    for (let i = 0; i < 7; i++) {
+      ctx.fillStyle = rgba(i % 2 ? 'leafDark' : 'soil', 0.18);
+      ctx.beginPath();
+      ctx.arc(x + T * (0.15 + 0.7 * hash(t.x, t.y, i)), y + T * (0.15 + 0.7 * hash(t.x, t.y, i + 9)), T * 0.018, 0, TAU);
+      ctx.fill();
+    }
+    if (t.kind !== 'soil' || t.net) continue;
+    // Pasto: briznas curvas.
+    const tufts = 1 + Math.floor(hash(t.x, t.y, 3) * 2);
+    for (let k = 0; k < tufts; k++) {
+      const bx = x + T * (0.2 + 0.6 * hash(t.x, t.y, 20 + k));
+      const by = y + T * (0.55 + 0.3 * hash(t.x, t.y, 30 + k));
+      ctx.strokeStyle = rgba(k % 2 ? 'leafDark' : 'leaf', 0.95);
+      ctx.lineWidth = T * 0.022;
+      ctx.lineCap = 'round';
+      for (const [dx, h, bend] of [
+        [-0.05, 0.13, -0.05],
+        [0, 0.17, 0.02],
+        [0.05, 0.12, 0.06],
+      ] as const) {
+        ctx.beginPath();
+        ctx.moveTo(bx + T * dx * 0.4, by);
+        ctx.quadraticCurveTo(bx + T * (dx + bend * 0.5), by - T * h * 0.6, bx + T * (dx + bend), by - T * h);
+        ctx.stroke();
+      }
+    }
+    // Florecitas.
+    if (hash(t.x, t.y, 7) > 0.72) {
+      const fx = x + T * (0.25 + 0.5 * hash(t.x, t.y, 8));
+      const fy = y + T * (0.25 + 0.3 * hash(t.x, t.y, 9));
+      const petal: ColorToken = hash(t.x, t.y, 10) > 0.5 ? 'glow' : 'peach';
+      for (let p = 0; p < 5; p++) {
+        const a = (p / 5) * TAU;
+        ctx.fillStyle = rgba(petal);
+        ctx.beginPath();
+        ctx.arc(fx + Math.cos(a) * T * 0.035, fy + Math.sin(a) * T * 0.035, T * 0.028, 0, TAU);
+        ctx.fill();
+      }
+      ctx.fillStyle = rgba('sun');
+      ctx.beginPath();
+      ctx.arc(fx, fy, T * 0.022, 0, TAU);
+      ctx.fill();
+    }
+  }
+}
+
+// ─── Red de micelio ────────────────────────────────────────────────────────────
+function paintNet(ctx: Ctx, T: number, game: GameState) {
+  for (const t of game.tiles) {
+    if (!t.net) continue;
+    const cx = (t.x + 0.5) * T;
+    const cy = (t.y + 0.5) * T;
+    ctx.fillStyle = radial(ctx, cx, cy, T * 0.62, [
+      [0, 'mycelium', 0.75],
+      [0.7, 'mycelium', 0.35],
+      [1, 'mycelium', 0],
+    ]);
+    ctx.fillRect(t.x * T, t.y * T, T, T);
+  }
+  // Hilos ondulados entre casillas vecinas, con resplandor.
+  const threads: [number, number, number, number, number][] = [];
+  for (const t of game.tiles) {
+    if (!t.net) continue;
+    for (const n of neighbors(game, t.x, t.y)) {
+      if (!n.net || n.y * W + n.x < t.y * W + t.x) continue;
+      threads.push([(t.x + 0.5) * T, (t.y + 0.5) * T, (n.x + 0.5) * T, (n.y + 0.5) * T, hash(t.x + n.x, t.y + n.y, 5) - 0.5]);
+    }
+  }
+  const strokeThreads = (width: number, color: ColorToken, alpha: number, blur: number) => {
+    ctx.save();
+    ctx.strokeStyle = rgba(color, alpha);
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = rgba('mycelium', 0.9);
+    ctx.shadowBlur = blur;
+    for (const [x0, y0, x1, y1, w] of threads) {
+      const mx = (x0 + x1) / 2 + (y1 - y0) * w * 0.35;
+      const my = (y0 + y1) / 2 + (x0 - x1) * w * 0.35;
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.quadraticCurveTo(mx, my, x1, y1);
+      ctx.stroke();
+    }
+    ctx.restore();
+  };
+  strokeThreads(T * 0.075, 'mycelium', 1, T * 0.3);
+  strokeThreads(T * 0.025, 'glow', 1, 0);
+  // Nudos y destellos índigo del tejido.
+  for (const t of game.tiles) {
+    if (!t.net) continue;
+    const cx = (t.x + 0.5) * T;
+    const cy = (t.y + 0.5) * T;
+    ctx.fillStyle = rgba('glow');
+    ctx.beginPath();
+    ctx.arc(cx, cy, T * 0.04, 0, TAU);
+    ctx.fill();
+    if (t.kind === 'soil') {
+      for (let i = 0; i < 3; i++) {
+        ctx.fillStyle = rgba('indigo', 0.85);
+        ctx.beginPath();
+        ctx.arc(t.x * T + T * (0.2 + 0.6 * hash(t.x, t.y, 40 + i)), t.y * T + T * (0.2 + 0.6 * hash(t.x, t.y, 50 + i)), T * (0.018 + 0.015 * i), 0, TAU);
+        ctx.fill();
+      }
+    }
+  }
+}
+
+// ─── Objetos ───────────────────────────────────────────────────────────────────
+const outline = (ctx: Ctx, T: number) => {
+  ctx.strokeStyle = rgba('ink');
+  ctx.lineWidth = T * 0.03;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+};
+
+function softShadow(ctx: Ctx, cx: number, cy: number, rx: number, ry: number) {
+  ctx.fillStyle = rgba('ink', 0.18);
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, TAU);
+  ctx.fill();
+}
+
+function paintLog(ctx: Ctx, T: number, t: Tile) {
+  const cx = (t.x + 0.5) * T;
+  const cy = (t.y + 0.55) * T;
+  const w = T * 0.7;
+  const h = T * 0.27;
+  softShadow(ctx, cx, cy + h * 0.55, w * 0.55, h * 0.3);
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-0.12);
+  roundRect(ctx, -w / 2, -h / 2, w, h, h / 2);
+  ctx.fillStyle = linear(ctx, 0, -h / 2, 0, h / 2, [
+    [0, 'wood', 1],
+    [0.55, 'wood', 1],
+    [1, 'bark', 1],
+  ]);
+  ctx.fill();
+  outline(ctx, T);
+  ctx.stroke();
+  // Vetas de corteza.
+  ctx.strokeStyle = rgba('bark', 0.8);
+  ctx.lineWidth = T * 0.015;
+  for (const k of [-0.25, -0.05, 0.15]) {
+    ctx.beginPath();
+    ctx.moveTo(-w * 0.35 + k * T * 0.2, -h * 0.2);
+    ctx.bezierCurveTo(-w * 0.1, -h * 0.35 + k * h, w * 0.05, h * 0.1, w * 0.25, -h * 0.05 + k * h);
+    ctx.stroke();
+  }
+  // Corte con anillos.
+  const ex = w / 2 - h * 0.35;
+  ctx.fillStyle = rgba('peach');
+  ctx.beginPath();
+  ctx.ellipse(ex, 0, h * 0.36, h * 0.48, 0, 0, TAU);
+  ctx.fill();
+  outline(ctx, T);
+  ctx.stroke();
+  ctx.strokeStyle = rgba('wood', 0.7);
+  ctx.lineWidth = T * 0.012;
+  for (const r of [0.26, 0.14]) {
+    ctx.beginPath();
+    ctx.ellipse(ex, 0, h * r, h * r * 1.3, 0, 0, TAU);
+    ctx.stroke();
+  }
+  if (t.uses) {
+    // Grieta: ya se descompuso una vez.
+    ctx.strokeStyle = rgba('ink', 0.7);
+    ctx.lineWidth = T * 0.018;
+    ctx.beginPath();
+    ctx.moveTo(-w * 0.2, -h * 0.5);
+    ctx.lineTo(-w * 0.12, -h * 0.05);
+    ctx.lineTo(-w * 0.2, h * 0.15);
+    ctx.lineTo(-w * 0.1, h * 0.5);
+    ctx.stroke();
+  } else {
+    // Hongo diminuto y musgo.
+    ctx.fillStyle = rgba('leaf');
+    ctx.beginPath();
+    ctx.ellipse(-w * 0.15, -h * 0.45, w * 0.16, h * 0.16, 0, Math.PI, TAU);
+    ctx.fill();
+    ctx.fillStyle = rgba('paper');
+    ctx.fillRect(-w * 0.31, -h * 0.75, T * 0.03, h * 0.3);
+    ctx.fillStyle = rgba('berry');
+    ctx.beginPath();
+    ctx.ellipse(-w * 0.295, -h * 0.75, T * 0.06, T * 0.045, 0, Math.PI, TAU);
+    ctx.fill();
+    outline(ctx, T);
+    ctx.lineWidth = T * 0.015;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function paintRock(ctx: Ctx, T: number, t: Tile) {
+  const cx = (t.x + 0.5) * T;
+  const cy = (t.y + 0.58) * T;
+  const r = T * 0.3;
+  const wob = (i: number) => 1 + (hash(t.x, t.y, 60 + i) - 0.5) * 0.22;
+  softShadow(ctx, cx, cy + r * 0.62, r * 1.05, r * 0.28);
+  ctx.beginPath();
+  const pts = 9;
+  for (let i = 0; i <= pts; i++) {
+    const a = Math.PI + (i / pts) * Math.PI;
+    const px = cx + Math.cos(a) * r * 1.1 * wob(i);
+    const py = cy + Math.sin(a) * r * 0.95 * wob(i);
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.quadraticCurveTo(cx + r * 1.15, cy + r * 0.55, cx, cy + r * 0.6);
+  ctx.quadraticCurveTo(cx - r * 1.15, cy + r * 0.55, cx - r * 1.1 * wob(0), cy);
+  ctx.closePath();
+  ctx.fillStyle = linear(ctx, cx - r, cy - r, cx + r, cy + r, [
+    [0, 'stone', 1],
+    [1, 'stoneDark', 1],
+  ]);
+  ctx.fill();
+  outline(ctx, T);
+  ctx.stroke();
+  // Musgo en la cima y brillo.
+  ctx.fillStyle = rgba('leaf', 0.95);
+  ctx.beginPath();
+  ctx.ellipse(cx - r * 0.15, cy - r * 0.72, r * 0.55, r * 0.2, -0.15, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = rgba('glow', 0.55);
+  ctx.beginPath();
+  ctx.ellipse(cx - r * 0.45, cy - r * 0.2, r * 0.18, r * 0.09, -0.6, 0, TAU);
+  ctx.fill();
+}
+
+function paintTree(ctx: Ctx, T: number, t: Tile) {
+  const big = t.kind === 'mother';
+  const cx = (t.x + 0.5) * T;
+  const base = (t.y + (big ? 0.95 : 0.9)) * T;
+  const s = big ? 1.12 : 1;
+  const alive = t.alive;
+  const [light, dark]: [ColorToken, ColorToken] = alive ? ['leaf', 'leafDark'] : ['stone', 'stoneDark'];
+  softShadow(ctx, cx, base, T * 0.3 * s, T * 0.06);
+  // Tronco con raíces.
+  ctx.beginPath();
+  ctx.moveTo(cx - T * 0.16 * s, base);
+  ctx.quadraticCurveTo(cx - T * 0.06 * s, base - T * 0.05, cx - T * 0.055 * s, base - T * 0.32 * s);
+  ctx.lineTo(cx + T * 0.055 * s, base - T * 0.32 * s);
+  ctx.quadraticCurveTo(cx + T * 0.06 * s, base - T * 0.05, cx + T * 0.16 * s, base);
+  ctx.closePath();
+  ctx.fillStyle = linear(ctx, cx - T * 0.1, 0, cx + T * 0.1, 0, [
+    [0, 'wood', 1],
+    [1, 'bark', 1],
+  ]);
+  ctx.fill();
+  outline(ctx, T);
+  ctx.stroke();
+  // Copa: bolas superpuestas; primero el contorno de todas, después el relleno (contorno limpio).
+  const cy = base - T * 0.47 * s;
+  const R = T * 0.21 * s;
+  const blobs: [number, number, number][] = [
+    [-0.95, 0.25, 0.75],
+    [0.95, 0.25, 0.75],
+    [-0.5, -0.45, 0.85],
+    [0.5, -0.45, 0.85],
+    [0, 0.1, 1],
+    [0, -0.85, 0.7],
+  ];
+  ctx.fillStyle = rgba('ink');
+  for (const [dx, dy, r] of blobs) {
+    ctx.beginPath();
+    ctx.arc(cx + dx * R, cy + dy * R, r * R + T * 0.03, 0, TAU);
+    ctx.fill();
+  }
+  for (const [dx, dy, r] of blobs) {
+    ctx.beginPath();
+    ctx.arc(cx + dx * R, cy + dy * R, r * R, 0, TAU);
+    ctx.fillStyle = radial(ctx, cx + dx * R - r * R * 0.35, cy + dy * R - r * R * 0.4, r * R * 1.4, [
+      [0, light, 1],
+      [0.6, light, 1],
+      [1, dark, 1],
+    ]);
+    ctx.fill();
+  }
+  if (alive) {
+    // Flores y brillo: el árbol respira.
+    for (let i = 0; i < (big ? 7 : 4); i++) {
+      const a = hash(t.x, t.y, 70 + i) * TAU;
+      const d = R * (0.4 + 0.9 * hash(t.x, t.y, 80 + i));
+      ctx.fillStyle = rgba(i % 2 ? 'berry' : 'glow');
+      ctx.beginPath();
+      ctx.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d * 0.8, T * 0.025, 0, TAU);
+      ctx.fill();
+    }
+  } else {
+    // Hojas secas que caen.
+    ctx.fillStyle = rgba('stoneDark', 0.8);
+    for (let i = 0; i < 2; i++) {
+      ctx.beginPath();
+      ctx.ellipse(cx + R * (1.2 - 2.4 * i), base - T * 0.08 - i * T * 0.06, T * 0.03, T * 0.015, 0.6, 0, TAU);
+      ctx.fill();
+    }
+  }
+  ctx.fillStyle = rgba('glow', alive ? 0.5 : 0.25);
+  ctx.beginPath();
+  ctx.ellipse(cx - R * 0.55, cy - R * 0.75, R * 0.32, R * 0.18, -0.5, 0, TAU);
+  ctx.fill();
+}
+
+function paintHome(ctx: Ctx, T: number, t: Tile) {
+  const cx = (t.x + 0.5) * T;
+  const base = (t.y + 0.88) * T;
+  softShadow(ctx, cx, base, T * 0.3, T * 0.06);
+  // Tallo-casa.
+  ctx.beginPath();
+  ctx.moveTo(cx - T * 0.2, base);
+  ctx.quadraticCurveTo(cx - T * 0.23, base - T * 0.22, cx - T * 0.16, base - T * 0.34);
+  ctx.lineTo(cx + T * 0.16, base - T * 0.34);
+  ctx.quadraticCurveTo(cx + T * 0.23, base - T * 0.22, cx + T * 0.2, base);
+  ctx.closePath();
+  ctx.fillStyle = linear(ctx, cx - T * 0.2, 0, cx + T * 0.2, 0, [
+    [0, 'paper', 1],
+    [1, 'peach', 1],
+  ]);
+  ctx.fill();
+  outline(ctx, T);
+  ctx.stroke();
+  // Puerta y ventana iluminada.
+  ctx.beginPath();
+  ctx.moveTo(cx - T * 0.06, base);
+  ctx.lineTo(cx - T * 0.06, base - T * 0.12);
+  ctx.arc(cx, base - T * 0.12, T * 0.06, Math.PI, 0);
+  ctx.lineTo(cx + T * 0.06, base);
+  ctx.closePath();
+  ctx.fillStyle = rgba('wood');
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = rgba('sun');
+  ctx.beginPath();
+  ctx.arc(cx + T * 0.12, base - T * 0.2, T * 0.035, 0, TAU);
+  ctx.fill();
+  ctx.lineWidth = T * 0.015;
+  ctx.stroke();
+  // Sombrero rojo con lunares.
+  const cy = base - T * 0.36;
+  ctx.beginPath();
+  ctx.moveTo(cx - T * 0.38, cy + T * 0.04);
+  ctx.bezierCurveTo(cx - T * 0.36, cy - T * 0.34, cx + T * 0.36, cy - T * 0.34, cx + T * 0.38, cy + T * 0.04);
+  ctx.quadraticCurveTo(cx, cy + T * 0.12, cx - T * 0.38, cy + T * 0.04);
+  ctx.closePath();
+  ctx.fillStyle = radial(ctx, cx - T * 0.1, cy - T * 0.18, T * 0.45, [
+    [0, 'accent', 1],
+    [0.55, 'berry', 1],
+    [1, 'berry', 1],
+  ]);
+  ctx.fill();
+  outline(ctx, T);
+  ctx.stroke();
+  ctx.fillStyle = rgba('paper');
+  for (const [dx, dy, r] of [
+    [-0.18, -0.08, 0.045],
+    [0.05, -0.18, 0.055],
+    [0.22, -0.04, 0.035],
+    [-0.02, -0.02, 0.03],
+  ] as const) {
+    ctx.beginPath();
+    ctx.arc(cx + dx * T, cy + dy * T, r * T, 0, TAU);
+    ctx.fill();
+  }
+}
+
+/** Aura y aro de meta del Árbol Padre (se pinta aunque alguien trabaje encima). */
+function paintMotherAura(ctx: Ctx, T: number, t: Tile) {
+  const cx = (t.x + 0.5) * T;
+  const cy = (t.y + 0.5) * T;
+  ctx.fillStyle = radial(ctx, cx, cy, T * 0.75, [
+    [0, 'glow', t.alive ? 0.95 : 0.6],
+    [0.6, 'sun', t.alive ? 0.45 : 0.2],
+    [1, 'sun', 0],
+  ]);
+  ctx.fillRect(cx - T, cy - T, T * 2, T * 2);
+  ctx.save();
+  ctx.strokeStyle = rgba('sun');
+  ctx.lineWidth = T * 0.045;
+  ctx.setLineDash(t.alive ? [] : [T * 0.09, T * 0.06]);
+  ctx.shadowColor = rgba('sun', 0.9);
+  ctx.shadowBlur = T * 0.2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, T * 0.46, 0, TAU);
+  ctx.stroke();
+  ctx.restore();
+  // Destellos alrededor.
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * TAU + 0.4;
+    sparkle(ctx, cx + Math.cos(a) * T * 0.46, cy + Math.sin(a) * T * 0.46, T * 0.06);
+  }
+}
+
+function sparkle(ctx: Ctx, x: number, y: number, r: number) {
+  ctx.fillStyle = rgba('glow');
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * TAU;
+    const d = i % 2 ? r * 0.3 : r;
+    ctx.lineTo(x + Math.cos(a) * d, y + Math.sin(a) * d);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function paintValid(ctx: Ctx, T: number, x: number, y: number) {
+  const inset = T * 0.07;
+  ctx.save();
+  roundRect(ctx, x * T + inset, y * T + inset, T - 2 * inset, T - 2 * inset, T * 0.2);
+  ctx.fillStyle = rgba('sun', 0.2);
+  ctx.fill();
+  ctx.strokeStyle = rgba('sun');
+  ctx.lineWidth = T * 0.055;
+  ctx.setLineDash([T * 0.12, T * 0.07]);
+  ctx.shadowColor = rgba('sun', 0.9);
+  ctx.shadowBlur = T * 0.15;
+  ctx.stroke();
+  ctx.restore();
+}
+
+function paintStar(ctx: Ctx, T: number, x: number, y: number) {
+  const cx = (x + 0.5) * T;
+  const cy = (y + 0.32) * T;
+  const R = T * 0.22;
+  ctx.save();
+  ctx.shadowColor = rgba('sun', 0.9);
+  ctx.shadowBlur = T * 0.2;
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const r = i % 2 ? R * 0.45 : R;
+    ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+  }
+  ctx.closePath();
+  ctx.fillStyle = radial(ctx, cx - R * 0.3, cy - R * 0.3, R * 1.3, [
+    [0, 'glow', 1],
+    [0.5, 'sun', 1],
+    [1, 'accent', 1],
+  ]);
+  ctx.fill();
+  ctx.restore();
+  outline(ctx, T);
+  ctx.stroke();
+}
+
+/** Pinta el claro completo. Devuelve qué objeto se pintó en cada casilla. */
+export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
+  const { game, valid, star, occupied } = input;
+  ctx.clearRect(0, 0, W * T, H * T);
+  paintGround(ctx, T, game);
+  paintNet(ctx, T, game);
+  const painted: Painted[] = [];
+  for (const t of game.tiles) {
+    if (t.kind === 'mother') paintMotherAura(ctx, T, t);
+    // Si un miembro trabaja encima, su sprite ocupa la casilla: el objeto de abajo no se pinta.
+    if (occupied.has(`${t.x},${t.y}`) || t.kind === 'soil') {
+      painted.push({ x: t.x, y: t.y, object: 'none' });
+      continue;
+    }
+    if (t.kind === 'log') paintLog(ctx, T, t);
+    else if (t.kind === 'rock') paintRock(ctx, T, t);
+    else if (t.kind === 'tree' || t.kind === 'mother') paintTree(ctx, T, t);
+    else if (t.kind === 'home') paintHome(ctx, T, t);
+    painted.push({ x: t.x, y: t.y, object: t.kind });
+  }
+  for (const key of valid) {
+    const [x, y] = key.split(',').map(Number) as [number, number];
+    paintValid(ctx, T, x, y);
+  }
+  if (star && valid.has(`${star.x},${star.y}`)) paintStar(ctx, T, star.x, star.y);
+  return painted;
+}

@@ -15,6 +15,13 @@ export const color = {
   leaf: '#8DB255', // follaje vivo
   meadow: '#B5C285', // pradera del tablero
   stone: '#9A9183', // rocas y árboles dormidos
+  bark: '#5E3B22', // madera oscura: vetas, cuerdas, sombras de tronco
+  leafDark: '#5F8A3A', // sombra del follaje y del pasto
+  meadowDark: '#97A86A', // juntas y sombras de la pradera
+  berry: '#C9503C', // sello de cera, sombrero de la casa-hongo
+  peach: '#F6D7B0', // luz cálida del fondo
+  glow: '#FFF4C2', // brillos, aura del Árbol Padre, luciérnagas
+  stoneDark: '#6F675B', // sombra de rocas y copas dormidas
 } as const;
 
 export type ColorToken = keyof typeof color;
@@ -37,6 +44,18 @@ export const spriteUrl = (key: string) => `${import.meta.env.BASE_URL}assets/cha
 
 /** Color de la paleta como número para Phaser (0xRRGGBB). */
 export const hex = (token: ColorToken): number => parseInt(color[token].slice(1), 16);
+
+/** Color de la paleta como rgba() para Canvas2D, con transparencia opcional. */
+export function rgba(token: ColorToken, alpha = 1): string {
+  const n = hex(token);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
+/** Color de la paleta como vec3 (0–1) para shaders. */
+export function vec3(token: ColorToken): [number, number, number] {
+  const n = hex(token);
+  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+}
 
 /** Densidad de píxeles usada para renderizar, limitada a 2× (presupuesto de rendimiento en móvil). */
 export const MAX_RESOLUTION = 2;

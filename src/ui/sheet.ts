@@ -1,6 +1,7 @@
 import { es } from '../copy/es';
 import { COST, MAX_GUILD, RECRUITABLE, recruitableCount, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
 import type { AppState, Sheet, Store } from '../store';
+import { grassMound, sprig } from './art';
 import { el, portrait } from './dom';
 
 const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
@@ -29,7 +30,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
       'div',
       { class: 'sheet__panel', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': id },
       el('div', { class: 'sheet__head' },
-        el('h2', { id, class: 'sheet__title' }, title),
+        el('h2', { id, class: 'sheet__title' }, sprig(), el('span', {}, title)),
         el('button', { class: 'btn btn--icon', type: 'button', 'data-action': 'close', 'aria-label': es.sheet.close }, '×')),
       ...body,
     );
@@ -71,7 +72,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
     return panel(
       title,
       el('div', { class: 'creature' },
-        el('div', { class: 'creature__head' }, portrait(species, 'feliz', season, 'lg'), el('p', {}, el('em', {}, info.scientific), ` · ${info.role}`)),
+        el('div', { class: 'creature__head' }, el('span', { class: 'card__stage creature__stage' }, grassMound(), portrait(species, 'feliz', season, 'lg')), el('p', {}, el('em', {}, info.scientific), el('br'), info.role)),
         el('p', {}, g.context),
         el('p', { class: 'creature__quip' }, es.quote(info.quip)),
         ...section(S.ability, g.ability),

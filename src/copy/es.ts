@@ -222,8 +222,9 @@ export const es = {
     nutrients: 'nutrientes',
     spores: 'esporas',
     sporesButton: (n: number) => `Esporas: ${n}. Abrir reclutar.`,
-    recruitHint: '+ reclutar',
+    recruitHint: 'esporas +',
     trees: 'árboles vivos',
+    treesShort: 'árboles',
   },
 
   dock: {
