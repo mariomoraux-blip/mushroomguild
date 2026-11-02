@@ -142,7 +142,9 @@ button { font: inherit; color: inherit; }
   box-shadow: 0 0 0 6px var(--ink), 0 9px 0 0 color-mix(in srgb, var(--bark) 35%, transparent);
   touch-action: none;
 }
-.board__canvas, .board__overlay { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; }
+.board__overlay { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; }
+/* El canvas sube un poco por encima del claro: la copa del Árbol Padre sobresale del marco. Las esquinas redondeadas las pinta paint.ts. */
+.board__canvas { position: absolute; inset: calc(-1 * var(--headroom, 0px)) 0 0 0; pointer-events: none; }
 .board__canvas canvas { display: block; }
 .board > .art--vine { inset: auto; top: -20px; left: -16px; width: 78px; height: 40px; z-index: 2; }
 .board > .art--vine-flip { left: auto; right: -16px; }

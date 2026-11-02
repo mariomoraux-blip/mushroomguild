@@ -69,7 +69,7 @@ Contraste mínimo de texto: Tinta sobre Pergamino, Crema o Sol (todos ≥ 7:1). 
 - **Red de micelio:** `board/mycelium/net`/`-b`: grietas de luz dorada sobre el pasto. **Cambio respecto del 008:** el micelio pasa de verde menta a dorado; el turquesa queda para la selección y el Hogar.
 - **Estados:** válida = brillo amarillo (`board/terrain/state-valid`); seleccionada / Hogar = brillo turquesa (`board/terrain/state-selected`); sugerida = ★ (`ui/icons/star`) sobre la casilla. Se implementan como **capas** encima de la casilla, no como casillas distintas.
 - **Objetos:** `board/trees/grey` → `board/trees/alive` al revivir; `board/logs/log` → `board/logs/log-used` tras el primer uso; `board/rocks/rock`; `board/terrain/sprout` para la tierra creada por el Brote arcano; `board/terrain/home` en el Hogar.
-- **Árbol Padre:** se dibuja grande (`board/father-tree/asleep` / `-despierto`, unas 3 casillas de ancho) y **sobresale por encima del tablero**, saliendo de su casilla en la fila superior. La regla no cambia: sigue siendo una casilla del tablero; solo su dibujo desborda. Las raíces bajan hacia la casilla.
+- **Árbol Padre:** se dibuja grande (`board/father-tree/asleep` / `awake`, de Blender; los recortes pintados de la hoja son `asleep-painted` / `awake-painted`) y **sobresale por encima del tablero**, saliendo de su casilla en la fila superior. La regla no cambia: sigue siendo una casilla del tablero; solo su dibujo desborda. Las raíces bajan hacia la casilla.
 - **Casilla ocupada (se mantiene del 008):** si un hongo trabajó hoy en una casilla, su sprite la ocupa y el objeto de abajo no se pinta.
 - **Marco:** raíces trenzadas con hojas (`ui/frames/roots-pieces`), y el marco de bosque alrededor de la pantalla.
 
@@ -164,7 +164,7 @@ public/assets/
 │   ├── logs/           log, log-used
 │   ├── rocks/          rock, rock-dark
 │   ├── mycelium/       net, net-b
-│   └── father-tree/    asleep, awake
+│   └── father-tree/    asleep, awake (Blender) · asleep-painted, awake-painted (hoja)
 ├── characters/
 │   ├── anil/           rest, work, happy, card
 │   ├── bruno/          rest, work, happy, card
@@ -210,8 +210,8 @@ Recortes de la hoja v1, con su ruta bajo `public/assets/`. "Listo" significa que
 | `board/trees/grey.webp` | Árbol dormido | 86 × 91 (4 KB) | ≈ 64 × 68 | 128 × 136 | Placeholder (baja resolución) |
 | `board/trees/alive.webp` | Árbol revivido | 92 × 92 (5 KB) | ≈ 64 × 68 | 128 × 136 | Placeholder (baja resolución) |
 | `board/terrain/home.webp` | Hogar del gremio | 124 × 131 (9 KB) | ≈ 66 × 70 | 132 × 140 | Listo |
-| `board/father-tree/asleep.webp` | Árbol Padre dormido (sobresale arriba del tablero) | 239 × 180 (20 KB) | ≈ 190 × 140 | 380 × 280 | Placeholder (baja resolución) |
-| `board/father-tree/awake.webp` | Árbol Padre despierto | 279 × 206 (26 KB) | ≈ 200 × 150 | 400 × 300 | Placeholder (baja resolución) |
+| `board/father-tree/asleep-painted.webp` | Árbol Padre dormido, versión pintada (en el juego se usa el de Blender, `asleep.webp`) | 239 × 180 (20 KB) | ≈ 190 × 140 | 380 × 280 | Placeholder (baja resolución) |
+| `board/father-tree/awake-painted.webp` | Árbol Padre despierto, versión pintada (en el juego se usa el de Blender, `awake.webp`) | 279 × 206 (26 KB) | ≈ 200 × 150 | 400 × 300 | Placeholder (baja resolución) |
 | `characters/anil/card.webp` | Retrato de Añil con placa | 153 × 193 (13 KB) | ≈ 70 × 92 (dock) | 140 × 184 | Listo; Texto horneado: separar retrato y placa |
 | `characters/bruno/card.webp` | Retrato de Bruno con placa | 135 × 191 (11 KB) | ≈ 70 × 92 | 140 × 184 | Listo; Ídem; bordes de la vecina |
 | `characters/rubi/card.webp` | Retrato de Rubí con placa | 129 × 197 (12 KB) | ≈ 70 × 92 | 140 × 184 | Listo; Ídem; bordes de la vecina |
@@ -250,8 +250,9 @@ Recortes de la hoja v1, con su ruta bajo `public/assets/`. "Listo" significa que
 ## Sprites en el juego
 - Los renders de Blender viven en `assets/sprites/` (fuente, PNG) y se publican en WebP en `public/assets/characters/<personaje>/`: `rest`, `work` y `happy`, a 176 × 128. Maestra Bruna, la más alta, va a 176 × 160 con la misma escala y el mismo suelo (su render `hechizo` es `work`). Chispa tiene una variante por estación (`<pose>-<estación>`).
 - Uso: retrato en reposo en el dock (feliz cuando está seleccionado o sugerido), pose feliz grande en la ficha y pose de trabajo en el tablero, sobre la casilla donde ese miembro trabajó hoy.
+- **Árbol Padre:** `assets/blender/arbol-padre.blend` (estados en `estados_arbol.py`), publicado en `public/assets/board/father-tree/{asleep,awake}.webp` a 176 × 192 con la misma escala. Dormido: tronco retorcido gris, raíces largas y ramas desnudas. Despierto: corteza cálida y copa dorada en paraguas (hojas `#F2BC45`, sombra `#C98A2B`, luz `#FFE08A`) con borde que brilla `#FFE27A`, aura `#FFF4C2`, luces cálidas y destellos. En el tablero mide 1,2 casillas de ancho y su copa asoma por encima del marco. Sustituye en el tablero a los recortes `public/assets/ui/arbol-padre-*.webp` (placeholders de baja resolución). La v2 plantea dibujarlo de unas 3 casillas de ancho; hoy mide 1,2 (`FATHER_SCALE` en `theme.ts`) y queda pendiente decidir el tamaño final.
 - La silueta de cono de cada especie (`.hat--*` en `styles.css`) queda solo como respaldo si un sprite faltara.
-- Peso: los 24 sprites publicados en WebP y los 51 recortes de la hoja suman ≈ 730 KB (límite total de assets: 2 MB).
+- Peso: los 24 sprites de personajes, los 2 del Árbol Padre de Blender y los 51 recortes de la hoja suman ≈ 750 KB en WebP (límite total de assets: 2 MB).
 
 ## Referencias (`references/`)
 | Archivo | Tomamos | Dejamos |

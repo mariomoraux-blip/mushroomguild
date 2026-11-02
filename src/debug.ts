@@ -10,6 +10,11 @@ const presets: Record<string, () => GameState> = {
     (['lactarius', 'champi', 'gliophorus'] as RecruitableSpecies[]).forEach((sp) => (s = recruit(s, sp).state));
     return endDay(s).state;
   },
+  /** Árbol Padre despierto (solo para ver su sprite; no dispara el final). */
+  fatherAwake: () => {
+    const s = newGame();
+    return { ...s, tiles: s.tiles.map((t) => (t.kind === 'mother' ? { ...t, alive: true } : t)) };
+  },
 };
 
 export function debugGame(): GameState | null {
