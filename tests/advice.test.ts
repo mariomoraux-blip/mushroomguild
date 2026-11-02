@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
 import { act, advise, newGame, weaveGoal } from '../src/rules';
-import { idleHint, initialState, reduce, suggestedMember, suggestedTile } from '../src/store';
+import { highlighted, idleHint, initialState, reduce, suggestedMember, suggestedTile } from '../src/store';
 import { ANIL, BRUNO, idOf, RUBI, setup } from './helpers';
 
 const at = (t: { x: number; y: number } | null) => (t ? { x: t.x, y: t.y } : null);
@@ -73,5 +73,54 @@ describe('Requirement: Cómo reclutar', () => {
     const g = setup({ spores: 2, nutrients: 1 });
     const noLogs = { ...g, tiles: g.tiles.map((t) => (t.kind === 'log' ? { ...t, kind: 'soil' as const } : t)) };
     expect(advise(noLogs)).toEqual({ kind: 'recruit', species: 'gliophorus' });
+  });
+});
+
+describe('Requirement: Ficha al seleccionar un hongo', () => {
+  it('Scenario: Primera vez con la Tejedora — se abre su ficha y al cerrarla sigue seleccionada', () => {
+    const s = reduce(initialState(newGame()), { type: 'select', id: ANIL });
+    expect(s.ui.sheet).toEqual({ kind: 'member', id: ANIL });
+    expect(s.ui.seen).toContain('lactarius');
+    expect(es.quote(es.species.lactarius.quip)).toBe('«Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.»');
+    const closed = reduce(s, { type: 'closeSheet' });
+    expect(closed.ui.sheet).toBeNull();
+    expect(closed.ui.selected).toBe(ANIL);
+    expect(highlighted(closed)).toHaveLength(2);
+  });
+
+  it('Scenario: Segunda vez — la ficha no se abre sola', () => {
+    const first = reduce(reduce(initialState(newGame()), { type: 'select', id: ANIL }), { type: 'closeSheet' });
+    const again = reduce(reduce(first, { type: 'select', id: ANIL }), { type: 'select', id: ANIL });
+    expect(again.ui.selected).toBe(ANIL);
+    expect(again.ui.sheet).toBeNull();
+    // El botón "Ficha" la vuelve a abrir.
+    expect(reduce(again, { type: 'openSheet', sheet: { kind: 'member', id: ANIL } }).ui.sheet).toEqual({ kind: 'member', id: ANIL });
+  });
+
+  it('cada especie tiene habilidad, cómo usarlo, movimiento y nutrientes', () => {
+    for (const g of Object.values(es.guide)) {
+      for (const k of ['context', 'ability', 'howTo', 'movement', 'nutrients'] as const) expect(g[k].length).toBeGreaterThan(10);
+    }
+  });
+
+  it('Scenario: La Sanadora explica qué árboles cura, con sus costos', () => {
+    const heals = es.guide.amanita.heals;
+    expect(heals).toContain('árboles grises');
+    expect(heals).toContain('3 nutrientes');
+    expect(heals).toContain('Árbol Madre');
+    expect(heals).toContain('6 nutrientes');
+  });
+
+  it('Scenario: La Mensajera — cambia esporas por nutrientes desde cualquier árbol vivo', () => {
+    expect(es.guide.gliophorus.messenger).toContain('Desde cualquier árbol vivo cambia esporas por nutrientes');
+  });
+
+  it('Scenario: Poderes de Maese Bruma — explica los dos hechizos y después pide elegir uno', () => {
+    expect(es.guide.mago.powers).toContain('Brote arcano');
+    expect(es.guide.mago.powers).toContain('Lluvia de esporas');
+    const g = setup({ mage: true, alive: [{ x: 4, y: 6 }] });
+    const card = reduce(initialState(g), { type: 'select', id: idOf(g, 'mago') });
+    expect(card.ui.sheet).toEqual({ kind: 'member', id: idOf(g, 'mago') });
+    expect(reduce(card, { type: 'closeSheet' }).ui.sheet).toEqual({ kind: 'spell' });
   });
 });

@@ -20,7 +20,12 @@ import {
   type Tile,
 } from './rules';
 
-export type Sheet = { kind: 'recruit' } | { kind: 'creature'; species: SpeciesId } | { kind: 'spell' } | { kind: 'help' };
+export type Sheet =
+  | { kind: 'recruit' }
+  | { kind: 'creature'; species: SpeciesId }
+  | { kind: 'member'; id: number }
+  | { kind: 'spell' }
+  | { kind: 'help' };
 
 export interface Notice {
   readonly text: string;
@@ -34,6 +39,8 @@ export interface UiState {
   readonly spell: Spell | null;
   readonly sheet: Sheet | null;
   readonly notice: Notice;
+  /** Especies cuya ficha ya se mostró al seleccionarlas (se recuerdan entre visitas). */
+  readonly seen: readonly SpeciesId[];
 }
 
 export interface AppState {
@@ -105,8 +112,26 @@ function tileHelp(t: Tile): string {
   return es.tileHelp[t.kind];
 }
 
-export function initialState(game: GameState = newGame()): AppState {
-  return { game, ui: { selected: null, spell: null, sheet: null, notice: idleHint(game) } };
+export function initialState(game: GameState = newGame(), seen: readonly SpeciesId[] = []): AppState {
+  return { game, ui: { selected: null, spell: null, sheet: null, notice: idleHint(game), seen } };
+}
+
+/** Si es la primera vez que se selecciona esta especie, abre su ficha (y la marca como vista). */
+function withFirstCard(next: AppState, id: number, species: SpeciesId): AppState {
+  if (next.ui.seen.includes(species)) return next;
+  return { ...next, ui: { ...next.ui, sheet: { kind: 'member', id }, seen: [...next.ui.seen, species] } };
+}
+
+/** Al cerrar una hoja: la del hechizo cancela la selección; la ficha del mago da paso a elegir el hechizo. */
+function afterSheet(state: AppState): AppState {
+  const { game, ui } = state;
+  const sheet = ui.sheet;
+  if (sheet?.kind === 'spell') return { game, ui: { ...ui, sheet: null, selected: null } };
+  if (sheet?.kind === 'member' && ui.selected === sheet.id) {
+    const m = member(game, sheet.id);
+    if (m?.species === 'mago' && !ui.spell && !idleReason(game, m.id)) return { game, ui: { ...ui, sheet: { kind: 'spell' } } };
+  }
+  return { game, ui: { ...ui, sheet: null } };
 }
 
 /** Casillas a resaltar: las válidas del miembro seleccionado (para el mago, solo con hechizo elegido). */
@@ -130,12 +155,13 @@ export function reduce(state: AppState, action: Action): AppState {
       if (!m) return state;
       if (m.used) return { game, ui: { ...cleared(ui, warn(es.reasons.tired(m.name))) } };
       const idle = idleReason(game, m.id);
-      if (idle) return { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: warn(es.idleLine(m.name, es.idle[idle])) } };
-      if (m.species === 'mago') {
-        return { game, ui: { ...ui, selected: m.id, spell: null, sheet: { kind: 'spell' }, notice: info(es.hints.pickSpell(m.name)) } };
-      }
       const pick = suggestedMember(state) === m.id ? es.advice.pickTile(m.name) : es.hints.pickTile(m.name);
-      return { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: info(pick) } };
+      const next: AppState = idle
+        ? { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: warn(es.idleLine(m.name, es.idle[idle])) } }
+        : m.species === 'mago'
+          ? { game, ui: { ...ui, selected: m.id, spell: null, sheet: { kind: 'spell' }, notice: info(es.hints.pickSpell(m.name)) } }
+          : { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: info(pick) } };
+      return withFirstCard(next, m.id, m.species);
     }
     case 'chooseSpell': {
       const m = ui.selected === null ? undefined : member(game, ui.selected);
@@ -173,12 +199,12 @@ export function reduce(state: AppState, action: Action): AppState {
       return { game: r.state, ui: cleared(ui, info(r.message)) };
     }
     case 'cancel':
-      if (ui.sheet) return { game, ui: { ...ui, sheet: null, ...(ui.sheet.kind === 'spell' ? { selected: null } : {}) } };
+      if (ui.sheet) return afterSheet(state);
       return { game, ui: cleared(ui, ui.selected === null ? ui.notice : idleHint(game)) };
     case 'openSheet':
       return { game, ui: { ...ui, sheet: action.sheet } };
     case 'closeSheet':
-      return { game, ui: { ...ui, sheet: null, ...(ui.sheet?.kind === 'spell' ? { selected: null } : {}) } };
+      return afterSheet(state);
   }
 }
 

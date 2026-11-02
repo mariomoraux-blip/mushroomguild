@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
 import { idleReason, newGame, tile } from '../src/rules';
 import { createStore, highlighted, initialState, reduce, type AppState } from '../src/store';
+import type { GameState, SpeciesId } from '../src/rules';
+
+// Fichas ya vistas: estos escenarios (002) no prueban la ficha al seleccionar (005).
+const ALL: SpeciesId[] = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'];
+const init = (g?: GameState) => initialState(g, ALL);
 import { ANIL, BRUNO, idOf, RUBI, setup } from './helpers';
 
 const pts = (s: AppState) => highlighted(s).map(({ x, y }) => ({ x, y }));
@@ -9,7 +14,7 @@ const run = (s: AppState, ...actions: Parameters<typeof reduce>[1][]) => actions
 
 describe('Requirement: Selección de miembro', () => {
   it('Scenario: Tejedora al inicio — se resaltan las tierras adyacentes al Hogar y ninguna otra', () => {
-    const s = run(initialState(), { type: 'select', id: ANIL });
+    const s = run(init(), { type: 'select', id: ANIL });
     expect(pts(s)).toEqual([
       { x: 2, y: 6 },
       { x: 3, y: 7 },
@@ -18,7 +23,7 @@ describe('Requirement: Selección de miembro', () => {
   });
 
   it('Scenario: Deseleccionar — tocar de nuevo o Esc no deja selección ni resaltado', () => {
-    const selected = run(initialState(), { type: 'select', id: ANIL });
+    const selected = run(init(), { type: 'select', id: ANIL });
     for (const again of [run(selected, { type: 'select', id: ANIL }), run(selected, { type: 'cancel' })]) {
       expect(again.ui.selected).toBeNull();
       expect(pts(again)).toEqual([]);
@@ -26,7 +31,7 @@ describe('Requirement: Selección de miembro', () => {
   });
 
   it('tocar una casilla resaltada ejecuta la acción y limpia la selección', () => {
-    const s = run(initialState(), { type: 'select', id: ANIL }, { type: 'tapTile', x: 3, y: 7 });
+    const s = run(init(), { type: 'select', id: ANIL }, { type: 'tapTile', x: 3, y: 7 });
     expect(tile(s.game, 3, 7)?.net).toBe(true);
     expect(s.game.nutrients).toBe(1);
     expect(s.ui.selected).toBeNull();
@@ -35,7 +40,7 @@ describe('Requirement: Selección de miembro', () => {
 });
 
 describe('Requirement: Hechizos del mago', () => {
-  const withMage = () => initialState(setup({ mage: true, net: [{ x: 3, y: 6 }], alive: [{ x: 4, y: 6 }] }));
+  const withMage = () => init(setup({ mage: true, net: [{ x: 3, y: 6 }], alive: [{ x: 4, y: 6 }] }));
 
   it('al seleccionar a Maese Bruma se pide primero el hechizo y no se resalta nada', () => {
     const s0 = withMage();
@@ -59,7 +64,7 @@ describe('Requirement: Hechizos del mago', () => {
   });
 
   it('Scenario: Magia agotada — no pide hechizo y avisa que su magia vuelve con la próxima estación', () => {
-    const s0 = initialState(setup({ mage: true, alive: [{ x: 4, y: 6 }], lastSpellSeason: 0 }));
+    const s0 = init(setup({ mage: true, alive: [{ x: 4, y: 6 }], lastSpellSeason: 0 }));
     const s = run(s0, { type: 'select', id: idOf(s0.game, 'mago') });
     expect(s.ui.sheet).toBeNull();
     expect(s.ui.notice.text).toBe('Maese Bruma: su magia vuelve con la próxima estación.');
@@ -68,7 +73,7 @@ describe('Requirement: Hechizos del mago', () => {
 
 describe('Requirement: Feedback de acción inválida', () => {
   it('Scenario: Toque en una casilla no válida — motivo exacto de check() y el miembro sigue seleccionado', () => {
-    const s = run(initialState(), { type: 'select', id: ANIL }, { type: 'tapTile', x: 0, y: 0 });
+    const s = run(init(), { type: 'select', id: ANIL }, { type: 'tapTile', x: 0, y: 0 });
     expect(s.ui.notice).toEqual({ text: 'Muy lejos: la tierra debe tocar la red.', tone: 'warn' });
     expect(s.ui.selected).toBe(ANIL);
   });
@@ -80,31 +85,31 @@ describe('Requirement: Feedback de acción inválida', () => {
   };
 
   it('Scenario: Sin trabajo disponible (Champiñón)', () => {
-    const s = run(initialState(noLogs()), { type: 'select', id: BRUNO });
+    const s = run(init(noLogs()), { type: 'select', id: BRUNO });
     expect(s.ui.notice.text).toBe('Bruno: no hay troncos junto a la red. Teje hacia uno.');
   });
 
   it('Scenario: Sin trabajo disponible (Lactarius indigo)', () => {
-    const s = run(initialState(setup({ nutrients: 0 })), { type: 'select', id: ANIL });
+    const s = run(init(setup({ nutrients: 0 })), { type: 'select', id: ANIL });
     expect(s.ui.notice.text).toBe('Añil: faltan nutrientes.');
   });
 
   it('Scenario: Sin trabajo disponible (Amanita muscaria)', () => {
-    const s = run(initialState(setup({ nutrients: 9 })), { type: 'select', id: RUBI });
+    const s = run(init(setup({ nutrients: 9 })), { type: 'select', id: RUBI });
     expect(s.ui.notice.text).toBe('Rubí: no hay árboles grises junto a la red.');
   });
 
   it('Scenario: Sin trabajo disponible (Gliophorus psittacinus)', () => {
     const g = setup({ spores: 2, alive: [{ x: 4, y: 6 }] });
-    const withPerico = reduce(initialState(g), { type: 'recruit', species: 'gliophorus' }).game;
+    const withPerico = reduce(init(g), { type: 'recruit', species: 'gliophorus' }).game;
     const rested = { ...withPerico, spores: 1, members: withPerico.members.map((m) => ({ ...m, used: false })) };
-    const s = run(initialState(rested), { type: 'select', id: idOf(rested, 'gliophorus') });
+    const s = run(init(rested), { type: 'select', id: idOf(rested, 'gliophorus') });
     expect(s.ui.notice.text).toBe('Perico: faltan esporas: pasar la voz cuesta 2.');
   });
 
   it('Scenario: Sin trabajo disponible (Maese Bruma)', () => {
     const g = setup({ mage: true, alive: [{ x: 4, y: 6 }], lastSpellSeason: 0 });
-    const s = run(initialState(g), { type: 'select', id: idOf(g, 'mago') });
+    const s = run(init(g), { type: 'select', id: idOf(g, 'mago') });
     expect(s.ui.notice.text).toBe('Maese Bruma: su magia vuelve con la próxima estación.');
   });
 
@@ -133,27 +138,27 @@ describe('Requirement: Estado visible', () => {
 
 describe('store: reclutar, terminar el día y fin de partida', () => {
   it('reclutar con esporas usa las reglas; sin esporas avisa el motivo', () => {
-    const ok = reduce(initialState(setup({ spores: 2 })), { type: 'recruit', species: 'gliophorus' });
+    const ok = reduce(init(setup({ spores: 2 })), { type: 'recruit', species: 'gliophorus' });
     expect(ok.game.members.at(-1)?.name).toBe('Perico');
-    const no = reduce(initialState(), { type: 'recruit', species: 'gliophorus' });
+    const no = reduce(init(), { type: 'recruit', species: 'gliophorus' });
     expect(no.ui.notice).toEqual({ text: es.reasons.recruitCost(2), tone: 'warn' });
   });
 
   it('terminar el día avanza el día y muestra el amanecer', () => {
-    const s = reduce(initialState(), { type: 'endDay' });
+    const s = reduce(init(), { type: 'endDay' });
     expect(s.game.day).toBe(2);
     expect(s.ui.notice.text).toContain('Amanece el día 2.');
   });
 
   it('con la partida terminada no se puede seleccionar ni actuar', () => {
-    const lost = reduce(initialState(setup({ day: 12 })), { type: 'endDay' });
+    const lost = reduce(init(setup({ day: 12 })), { type: 'endDay' });
     expect(lost.game.status).toBe('lost');
     expect(reduce(lost, { type: 'select', id: ANIL })).toBe(lost);
     expect(reduce(lost, { type: 'endDay' })).toBe(lost);
   });
 
   it('un miembro cansado no queda seleccionado y se avisa', () => {
-    const s = run(initialState(setup({ used: [ANIL] })), { type: 'select', id: ANIL });
+    const s = run(init(setup({ used: [ANIL] })), { type: 'select', id: ANIL });
     expect(s.ui.selected).toBeNull();
     expect(s.ui.notice).toEqual({ text: es.reasons.tired('Añil'), tone: 'warn' });
   });

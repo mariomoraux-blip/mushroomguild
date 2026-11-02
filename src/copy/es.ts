@@ -128,6 +128,64 @@ export const es = {
     rock: 'Roca: bloquea la red. Maese Bruma puede convertirla en tierra.',
   },
 
+  /** Ficha de cada especie al seleccionarla (player-guidance). */
+  card: {
+    understood: 'Entendido',
+    open: 'Ficha',
+    openLabel: (name: string) => `Ver la ficha de ${name}`,
+    title: (member: string, species: string) => `${member} · ${species}`,
+    sections: {
+      ability: 'Habilidad',
+      howTo: 'Cómo usarlo',
+      movement: 'Movimiento',
+      nutrients: 'Nutrientes',
+      heals: 'Qué árboles cura',
+      messenger: 'Para qué sirve la mensajera',
+      powers: 'Poderes',
+    },
+  },
+  guide: {
+    champi: {
+      context: 'El más trabajador del gremio: convierte la madera muerta en alimento para el bosque.',
+      ability: 'Descompone troncos caídos.',
+      howTo: 'Tócalo y después toca un tronco resaltado que toque la red.',
+      movement: 'No camina: trabaja desde la red, en cualquier casilla vecina a ella. Para alcanzar un tronco lejano, primero teje la red hasta él.',
+      nutrients: `Consigue +${GAIN.log} nutrientes cada vez. Cada tronco aguanta ${LOG_USES} usos y después queda tierra libre.`,
+    },
+    lactarius: {
+      context: 'Teje los hilos de micelio que conectan el bosque. La red es el camino de todo el gremio.',
+      ability: 'Teje micelio en tierra libre y extiende la red.',
+      howTo: 'Tócala y después toca una tierra resaltada junto a la red. La ★ marca la que acerca la red a tu meta.',
+      movement: 'No camina: hace crecer la red una casilla cada vez. Donde llega la red, el resto del gremio puede trabajar.',
+      nutrients: `Gasta ${plural(COST.weave, 'nutriente')} por cada casilla tejida.`,
+    },
+    amanita: {
+      context: 'Cura a los árboles dormidos del claro y, al final, despierta al Árbol Madre.',
+      ability: 'Revive árboles grises y despierta al Árbol Madre.',
+      howTo: 'Tócala y después toca un árbol resaltado que toque la red.',
+      movement: 'No camina: cura los árboles vecinos a la red. Teje la red hasta un árbol para poder curarlo.',
+      nutrients: `Gasta ${COST.revive} nutrientes por árbol y ${COST.mother} en el Árbol Madre.`,
+      heals: `Los árboles grises (círculos oscuros con tronco), por ${COST.revive} nutrientes: al revivir entran a la red y cada amanecer dan ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. El Árbol Madre (aro dorado, arriba): se despierta cuando la red lo toca, hay ${TREES_FOR_MOTHER} árboles revividos y ${COST.mother} nutrientes. Despertarlo es ganar.`,
+    },
+    gliophorus: {
+      context: 'Lleva noticias de árbol en árbol y convierte esporas en alimento cuando hace falta.',
+      ability: `Pasa la voz: cambia ${plural(COST.message, 'espora')} por ${plural(GAIN.message, 'nutriente')}.`,
+      howTo: 'Tócala y después toca cualquier árbol vivo.',
+      movement: 'No camina: habla desde cualquier árbol vivo, esté donde esté en la red.',
+      nutrients: `Consigue +${GAIN.message} nutrientes a cambio de ${COST.message} esporas. Útil cuando ya no quedan troncos cerca.`,
+      messenger: 'Desde cualquier árbol vivo cambia esporas por nutrientes. Te deja elegir qué hacer con las esporas: reclutar más hongos o convertirlas en nutrientes para revivir árboles antes.',
+    },
+    mago: {
+      context: 'Nadie lo recluta: llega solo al amanecer siguiente a revivir el segundo árbol, cuando el bosque vuelve a hablar.',
+      ability: 'Lanza un hechizo por estación.',
+      howTo: 'Tócalo, elige el hechizo y después toca la casilla resaltada.',
+      movement: 'No camina: su magia alcanza rocas vecinas a la red y cualquier árbol vivo. Después de lanzar, descansa hasta la próxima estación.',
+      nutrients: 'No gasta nutrientes. La Lluvia de esporas, además, los regala.',
+      powers: `Brote arcano: convierte una roca vecina a la red en tierra con micelio; sirve para abrir atajos hacia el Árbol Madre. Lluvia de esporas: sobre un árbol vivo, cada árbol vivo da ya ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')} extra; sirve para reclutar o revivir antes.`,
+    },
+  } satisfies Record<SpeciesId, { context: string; ability: string; howTo: string; movement: string; nutrients: string; heals?: string; messenger?: string; powers?: string }>,
+  quote: (text: string) => `«${text}»`,
+
   /** Libreta de campo (ayuda). */
   help: {
     button: 'Ayuda: Libreta de campo',

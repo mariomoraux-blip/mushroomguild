@@ -2,13 +2,45 @@
 
 ## ADDED Requirements
 
-### Requirement: Libreta de campo
-El HUD SHALL tener un botón "?" que abre la Libreta de campo: la meta, cómo se juega en 4 pasos, para qué sirve cada una de las 5 especies (con su costo) y la leyenda de casillas. La libreta SHALL abrirse sola en la primera visita y cerrarse con "¡A jugar!", el botón de cerrar o Esc.
+### Requirement: Ficha al seleccionar un hongo
+La primera vez que el jugador selecciona a un miembro de cada especie, el juego SHALL mostrar su ficha: nombre del miembro y especie, rol, un contexto corto, su frase entre comillas y, según la especie, estas secciones:
 
-#### Scenario: Primera visita
-- WHEN el jugador abre el juego por primera vez en ese navegador
-- THEN se muestra la Libreta de campo con la meta "Despierta al Árbol Madre antes de que acabe el invierno"
-- AND al cerrarla no vuelve a abrirse sola en las visitas siguientes
+| Sección | Especies |
+| --- | --- |
+| Habilidad | Todas |
+| Cómo usarlo | Todas |
+| Movimiento (cómo se mueve o desde dónde trabaja) | Todas |
+| Nutrientes (cómo los consigue o cuánto gasta) | Todas |
+| Qué árboles cura | Amanita muscaria |
+| Para qué sirve la mensajera | Gliophorus psittacinus |
+| Poderes y para qué sirven | Maese Bruma |
+
+Al cerrar la ficha con "Entendido", el miembro SHALL seguir seleccionado con sus casillas resaltadas (para Maese Bruma, se pide después el hechizo). Las siguientes selecciones de esa especie no SHALL abrir la ficha sola: la bitácora SHALL ofrecer un botón "Ficha" para volver a verla. Las especies ya vistas se recuerdan entre visitas.
+
+#### Scenario: Primera vez con la Tejedora
+- WHEN el jugador selecciona a Añil por primera vez
+- THEN se abre la ficha "Añil · Lactarius indigo" con la frase "«Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.»" y las secciones Habilidad, Cómo usarlo, Movimiento y Nutrientes
+- AND al pulsar "Entendido" Añil sigue seleccionada y sus casillas válidas se ven resaltadas
+
+#### Scenario: Segunda vez
+- WHEN el jugador vuelve a seleccionar a Añil
+- THEN la ficha no se abre sola y la bitácora tiene el botón "Ficha" que la muestra
+
+#### Scenario: La Sanadora explica qué árboles cura
+- WHEN se abre la ficha de Rubí
+- THEN la sección "Qué árboles cura" nombra los árboles grises y el Árbol Madre con sus costos
+
+#### Scenario: La Mensajera
+- WHEN se abre la ficha de Perico
+- THEN la sección "Para qué sirve la mensajera" explica que cambia esporas por nutrientes desde cualquier árbol vivo
+
+#### Scenario: Poderes de Maese Bruma
+- WHEN se abre la ficha de Maese Bruma
+- THEN la sección "Poderes" explica el Brote arcano y la Lluvia de esporas y para qué sirve cada uno
+- AND al pulsar "Entendido" se pide elegir el hechizo
+
+### Requirement: Libreta de campo
+El HUD SHALL tener un botón "?" que abre la Libreta de campo: la meta, cómo se juega en 4 pasos, para qué sirve cada una de las 5 especies (con su costo) y la leyenda de casillas. La libreta no se abre sola; se cierra con "¡A jugar!", el botón de cerrar o Esc.
 
 #### Scenario: Consultar la ayuda
 - WHEN el jugador pulsa "?" durante la partida

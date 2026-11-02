@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { es } from './copy/es';
 import { tileSize } from './layout';
 import { GameScene } from './scenes/GameScene';
+import type { SpeciesId } from './rules';
 import { createStore, initialState } from './store';
 import { applyTheme, color, renderResolution } from './theme';
 import { mountBoardOverlay } from './ui/board';
@@ -15,13 +16,30 @@ applyTheme();
 document.title = es.title;
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-const store = createStore(initialState(debugGame() ?? undefined));
+// localStorage es solo una comodidad por visitante: puede fallar o venir vacío.
+const storage = {
+  get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } },
+  set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* sin almacenamiento */ } },
+};
+const SEEN = 'gremio.seenSpecies';
+const seen = (() => { try { return JSON.parse(storage.get(SEEN) ?? '[]') as SpeciesId[]; } catch { return []; } })();
+const store = createStore(initialState(debugGame() ?? undefined, seen));
+store.subscribe((state, prev) => {
+  if (state.ui.seen !== prev.ui.seen) storage.set(SEEN, JSON.stringify(state.ui.seen));
+});
 
 const renderHud = mountHud($('hud'), store);
 const renderDock = mountDock($('dock'), store);
 const overlay = mountBoardOverlay($('overlay'), store);
 const renderSheet = mountSheet($('sheet'), store);
 const notice = $('notice');
+const noticeBar = $('notice-bar');
+const cardBtn = $<HTMLButtonElement>('card-btn');
+cardBtn.textContent = es.card.open;
+cardBtn.addEventListener('click', () => {
+  const id = store.getState().ui.selected;
+  if (id !== null) store.dispatch({ type: 'openSheet', sheet: { kind: 'member', id } });
+});
 
 const renderDom = () => {
   const state = store.getState();
@@ -30,7 +48,11 @@ const renderDom = () => {
   overlay.render(state);
   renderSheet(state);
   notice.textContent = state.ui.notice.text;
-  notice.dataset.tone = state.ui.notice.tone;
+  noticeBar.dataset.tone = state.ui.notice.tone;
+  // Botón "Ficha" del miembro seleccionado.
+  const selected = state.ui.selected === null ? undefined : state.game.members.find((m) => m.id === state.ui.selected);
+  cardBtn.hidden = !selected;
+  if (selected) cardBtn.setAttribute('aria-label', es.card.openLabel(selected.name));
 };
 store.subscribe((state, prev) => {
   renderDom();
@@ -39,17 +61,6 @@ store.subscribe((state, prev) => {
   if (picked && document.body.dataset.input === 'keyboard') overlay.focusFirstValid();
 });
 renderDom();
-
-// Libreta de campo: se abre sola en la primera visita (localStorage es solo una comodidad: puede fallar).
-const HELP_SEEN = 'gremio.helpSeen';
-const storage = {
-  get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } },
-  set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* sin almacenamiento */ } },
-};
-if (!storage.get(HELP_SEEN)) store.dispatch({ type: 'openSheet', sheet: { kind: 'help' } });
-store.subscribe((state, prev) => {
-  if (prev.ui.sheet?.kind === 'help' && state.ui.sheet?.kind !== 'help') storage.set(HELP_SEEN, '1');
-});
 
 // ─── Phaser: solo el tablero ──────────────────────────────────────────────────
 const scene = new GameScene(store);

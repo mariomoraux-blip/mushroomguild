@@ -8,8 +8,12 @@ const isTouch = (name: string) => name !== 'escritorio-1280x800';
 const errors = new WeakMap<Page, string[]>();
 
 test.beforeEach(async ({ page }, info) => {
-  // La Libreta de campo se abre sola en la primera visita; salvo en su propia prueba, se da por vista.
-  if (!info.title.startsWith('Libreta')) await page.addInitScript(() => localStorage.setItem('gremio.helpSeen', '1'));
+  // La ficha de cada especie se abre sola la primera vez; salvo en su propia prueba, se dan por vistas.
+  if (!info.title.startsWith('Ficha')) {
+    await page.addInitScript(() =>
+      localStorage.setItem('gremio.seenSpecies', JSON.stringify(['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'])),
+    );
+  }
   const list: string[] = [];
   errors.set(page, list);
   page.on('pageerror', (e) => list.push(e.message));
@@ -172,18 +176,38 @@ test('fichas de criatura: nombre científico, rol, acción y línea con humor', 
   await expect(dialog).toHaveCount(0);
 });
 
-test('Libreta de campo: se abre sola la primera vez y después con "?"', async ({ page }, info) => {
+test('Libreta de campo: no se abre sola y se consulta con "?"', async ({ page }) => {
   await page.goto('/');
-  const dialog = page.getByRole('dialog');
-  await expect(dialog).toContainText('Despierta al Árbol Madre');
-  await expect(dialog).toContainText('Lactarius · Tejedora');
-  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/005-libreta-390x844.png' });
-  await page.getByRole('button', { name: '¡A jugar!' }).click();
-  await expect(dialog).toHaveCount(0);
-  await page.reload();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'Ayuda: Libreta de campo' }).click();
-  await expect(page.getByRole('dialog')).toContainText('Gliophorus · Mensajera');
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Despierta al Árbol Madre');
+  await expect(dialog).toContainText('Gliophorus · Mensajera');
+  await page.getByRole('button', { name: '¡A jugar!' }).click();
+  await expect(dialog).toHaveCount(0);
+});
+
+test('Ficha al seleccionar: primera vez por especie, "Entendido" mantiene la selección y "Ficha" la reabre', async ({ page }, info) => {
+  await page.goto('/');
+  await page.locator('[data-id="1"]').click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Añil · Lactarius indigo');
+  await expect(dialog).toContainText('«Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.»');
+  for (const h of ['Habilidad', 'Cómo usarlo', 'Movimiento', 'Nutrientes']) await expect(dialog.getByRole('heading', { name: h })).toBeVisible();
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/005-ficha-390x844.png' });
+  await page.getByRole('button', { name: 'Entendido' }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(valid(page)).toHaveCount(2);
+  // Segunda vez: no se abre sola.
+  await page.locator('[data-id="1"]').click();
+  await page.locator('[data-id="1"]').click();
+  await expect(dialog).toHaveCount(0);
+  await page.getByRole('button', { name: 'Ver la ficha de Añil' }).click();
+  await expect(page.getByRole('dialog')).toContainText('Añil · Lactarius indigo');
+  // Se recuerda entre visitas.
+  await page.reload();
+  await page.locator('[data-id="1"]').click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
 test('guía: ★ en el sugerido, camino hacia el árbol, meta marcada y esporas que abren reclutar', async ({ page }, info) => {
