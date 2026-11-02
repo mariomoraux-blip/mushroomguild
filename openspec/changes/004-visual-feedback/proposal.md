@@ -5,8 +5,8 @@ Es lo que convierte el prototipo en pieza de portafolio. Va al final a propósit
 
 ## Qué cambia
 - Animaciones: el micelio crece al tejer, el tronco se encoge al descomponer, el árbol brota al revivir, las esporas vuelan al contador al amanecer.
-- Partículas de esporas sobre árboles vivos y halo del Árbol Madre al despertar.
-- Sprites de los tres hongos y del Árbol Madre desde Blender (atlas en `public/assets/`), con fallback a formas si no existen.
+- Partículas de esporas sobre árboles vivos y halo del Árbol Padre al despertar.
+- Sprites de los tres hongos y del Árbol Padre desde Blender (atlas en `public/assets/`), con fallback a formas si no existen.
 - Movimiento reducido: sin animaciones de desplazamiento ni partículas, solo cambios de estado.
 
 ## Flujo de arte (en local, no en esta sesión)

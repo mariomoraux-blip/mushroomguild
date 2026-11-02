@@ -4,7 +4,7 @@
 Con las reglas probadas (001), el siguiente paso es la primera versión jugable de principio a fin en Phaser, con formas simples como placeholders.
 
 ## Qué cambia
-- `GameScene` dibuja el tablero, la red, los troncos, árboles, rocas, el Hogar y el Árbol Madre.
+- `GameScene` dibuja el tablero, la red, los troncos, árboles, rocas, el Hogar y el Árbol Padre.
 - Panel del gremio, reclutamiento, botón de terminar el día y bitácora.
 - HUD con día, estación, nutrientes, esporas y árboles vivos.
 - Flujo de selección: miembro → casillas válidas resaltadas → acción.

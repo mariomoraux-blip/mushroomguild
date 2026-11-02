@@ -35,7 +35,7 @@ Cualquier idea nueva se evalúa contra estos tres pilares. Si no sirve a ninguno
 La red de micelio es a la vez mecánica y progreso visible: define dónde puedes actuar y muestra cuánto has avanzado. Se apoya en algo real, las redes micorrícicas que conectan árboles.
 
 ### Alcance del vertical slice
-- **Incluye:** 1 capítulo, 1 mapa vertical de 5×8, 5 especies (4 reclutables y un mago único), 12 días en 4 estaciones, intro y final. Se juega en navegador de teléfono y de escritorio.
+- **Incluye:** 1 capítulo, 1 mapa vertical de 5×8, 5 especies (4 reclutables y una maga única), 12 días en 4 estaciones, intro y final. Se juega en navegador de teléfono y de escritorio.
 - **Fuera de alcance:** guardado, varios niveles, IA rival, multijugador, monetización.
 
 ### Criterios de éxito
@@ -45,13 +45,13 @@ La red de micelio es a la vez mecánica y progreso visible: define dónde puedes
 
 ## GDD mínimo
 
-La partida es un loop diario de colocar, producir y expandir. Dura 12 días y se gana despertando al Árbol Madre.
+La partida es un loop diario de colocar, producir y expandir. Dura 12 días y se gana despertando al Árbol Padre.
 
 ### Loop central
 Cada día eliges a un miembro del gremio y una casilla. La acción gasta o produce nutrientes, y la red crece o un árbol revive. Al cerrar el día, los árboles vivos pagan esporas y nutrientes, y las esporas reclutan más gremio.
 
 ### Tablero
-Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol Madre arriba. La red crece hacia el árbol y el tablero cabe en un teléfono en vertical. Solo se actúa sobre casillas que tocan la red (adyacencia ortogonal). Es el mapa de la prueba de concepto rotado, así que el balance no cambia.
+Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol Padre arriba. La red crece hacia el árbol y el tablero cabe en un teléfono en vertical. Solo se actúa sobre casillas que tocan la red (adyacencia ortogonal). Es el mapa de la prueba de concepto rotado, así que el balance no cambia.
 
 | Casilla | Comportamiento |
 | --- | --- |
@@ -60,20 +60,20 @@ Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol M
 | Tronco caído | Da nutrientes; aguanta 2 usos y queda tierra libre |
 | Árbol gris | Se puede revivir; al revivir entra en la red |
 | Roca | Bloquea la red |
-| Árbol Madre | Objetivo final, en el extremo opuesto al Hogar |
+| Árbol Padre | Objetivo final, en el extremo opuesto al Hogar |
 
 ### Especies
 | Especie | Rol | Disponibilidad | Acción | Efecto |
 | --- | --- | --- | --- | --- |
 | Champiñón | Descompositor | Inicial, reclutable | Descompone un tronco | +3 nutrientes |
-| *Lactarius indigo* | Tejedora | Inicial, reclutable | Teje micelio en tierra | −1 nutriente, la red crece |
-| *Amanita muscaria* | Sanadora | Inicial, reclutable | Revive un árbol gris | −3 nutrientes; −6 en el Árbol Madre |
+| *Lactarius indigo* | Tejedor | Inicial, reclutable | Teje micelio en tierra | −1 nutriente, la red crece |
+| *Amanita muscaria* | Sanadora | Inicial, reclutable | Revive un árbol gris | −3 nutrientes; −6 en el Árbol Padre |
 | *Gliophorus psittacinus* | Mensajera | Reclutable | "Pasa la voz" desde un árbol vivo | −2 esporas, +3 nutrientes |
-| *Conocybe arcana* (ficticio) | Mago | Único; llega solo | Un hechizo por estación | Ver hechizos |
+| *Conocybe arcana* (ficticio) | Maga | Única; llega sola | Un hechizo por estación | Ver hechizos |
 
 Cada miembro actúa una vez por día. El gremio llega a 6 reclutables como máximo, y un recluta trabaja desde el día siguiente.
 
-**Maese Bruma, el mago.** No se recluta: llega al amanecer siguiente a revivir el segundo árbol ("el bosque volvió a hablar y alguien escuchó") y no cuenta en el límite de 6. Lanza un hechizo por estación, a elegir:
+**Maestra Bruna, la maga.** No se recluta: llega al amanecer siguiente a revivir el segundo árbol ("el bosque volvió a hablar y alguien escuchó") y no cuenta en el límite de 6. Lanza un hechizo por estación, a elegir:
 - **Brote arcano:** convierte una roca vecina a la red en tierra con micelio. Abre atajos en el mapa.
 - **Lluvia de esporas:** sobre un árbol vivo, todos los árboles vivos dan ya su espora y su nutriente del amanecer.
 
@@ -82,18 +82,18 @@ La Mensajera agrega la única decisión que faltaba: gastar esporas en crecer el
 ### Economía
 | Recurso | Se gana | Se gasta |
 | --- | --- | --- |
-| Nutrientes | Tronco: +3 por uso · árbol vivo: +1 al amanecer · Mensajera: +3 · Lluvia de esporas | Tejer 1 · revivir 3 · Árbol Madre 6 |
+| Nutrientes | Tronco: +3 por uso · árbol vivo: +1 al amanecer · Mensajera: +3 · Lluvia de esporas | Tejer 1 · revivir 3 · Árbol Padre 6 |
 | Esporas | Árbol vivo: +1 al amanecer · Lluvia de esporas | Reclutar 2 · Mensajera 2 |
 
 Inicio: 3 miembros (uno de cada especie), 2 nutrientes, 0 esporas. Los troncos son finitos; los árboles vivos son la fuente renovable. Esa tensión es el corazón del juego.
 
 ### Tiempo y victoria
 - 4 estaciones de 3 días. La estación cambia el color del follaje.
-- **Victoria:** la Amanita despierta al Árbol Madre. Requiere que toque la red, 6 nutrientes y al menos 2 árboles revividos.
+- **Victoria:** la Amanita despierta al Árbol Padre. Requiere que toque la red, 6 nutrientes y al menos 2 árboles revividos.
 - **Final suave:** si se acaba el invierno, el bosque espera la próxima primavera y se reintenta.
 
 ### Narrativa
-Tres cartas de intro, una frase cada una: el bosque se apaga; un gremio despierta; lleva la red al Árbol Madre antes del invierno. Una carta a mitad de partida, cuando llega Maese Bruma. Dos cartas de final. Todo lo demás lo cuenta el mundo: color que vuelve, esporas flotando, el Árbol Madre que se ilumina.
+Tres cartas de intro, una frase cada una: el bosque se apaga; un gremio despierta; lleva la red al Árbol Padre antes del invierno. Una carta a mitad de partida, cuando llega Maestra Bruna. Dos cartas de final. Todo lo demás lo cuenta el mundo: color que vuelve, esporas flotando, el Árbol Padre que se ilumina.
 
 ### Dirección de arte
 Estilo ilustrado con contorno café, formas redondas y rubor. La luz del mundo avanza con las estaciones, de una mañana de primavera a un anochecer de invierno.
@@ -110,10 +110,10 @@ Cada especie se reconoce por su silueta, sin depender del color: domo bajo, embu
 | Champiñón "Bruno" | Domo bajo y ancho | Café claro | Canasta | — |
 | *Lactarius indigo* "Añil" | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Suelta gotitas de látex azul; el micelio que teje brilla con destellos índigo |
 | *Amanita muscaria* "Rubí" | Domo alto con verrugas y falda en el tallo | Rojo y crema | Bolso con hojas que curan | — |
-| *Gliophorus psittacinus* "Perico" | Campana pequeña, viscosa y brillante | Verde loro que cambia | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
-| *Conocybe arcana* "Maese Bruma" | Cono alto y puntiagudo, doblado en la punta como sombrero de hechicero; el más alto | Violeta profundo con motas que brillan como estrellas | Bastón de ramita con una espora luminosa | Barba de hilos de micelio; brilla siempre un poco |
+| *Gliophorus psittacinus* "Perica" | Campana pequeña, viscosa y brillante | Verde loro que cambia | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
+| *Conocybe arcana* "Maestra Bruna" | Cono alto y puntiagudo, doblado en la punta como sombrero de hechicera; la más alta | Violeta profundo con motas que brillan como estrellas | Bastón de ramita con una espora luminosa | Melena de hilos de micelio; brilla siempre un poco |
 
-*Conocybe* es un género real de sombrero cónico; *arcana* es inventado. El mago es el único personaje fantástico del elenco.
+*Conocybe* es un género real de sombrero cónico; *arcana* es inventado. La maga es el único personaje fantástico del elenco.
 
 #### Luz por estación
 | Estación | Hora | Sensación | Micelio |
@@ -230,7 +230,7 @@ Blender MCP corre en tu máquina, así que el arte se hace en una sesión local 
 4. Empacar en un atlas de sprites y subir a `assets/` en el repo.
 5. Claude Code en la nube los integra en Phaser.
 
-El escenario (tierra, micelio, troncos) puede seguir en vectores o shaders simples: Blender se reserva para lo que más luce, los personajes y el Árbol Madre.
+El escenario (tierra, micelio, troncos) puede seguir en vectores o shaders simples: Blender se reserva para lo que más luce, los personajes y el Árbol Padre.
 
 ### Flujo de trabajo en Claude Code en la nube
 1. Crear un repo en GitHub con `CLAUDE.md`, la carpeta `openspec/` y las reglas de la prueba de concepto.

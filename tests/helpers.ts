@@ -14,9 +14,9 @@ export interface Setup {
   used?: number[];
   /** Miembros reclutables extra que se agregan al gremio (disponibles). */
   extraMembers?: RecruitableSpecies[];
-  /** Maese Bruma ya está en el gremio (se agrega después de los extra). */
+  /** Maestra Bruna ya está en el gremio (se agrega después de los extra). */
   mage?: boolean;
-  /** Estación (0–3) del último hechizo de Maese Bruma. */
+  /** Estación (0–3) del último hechizo de Maestra Bruna. */
   lastSpellSeason?: number;
 }
 
@@ -34,12 +34,12 @@ export function setup(o: Setup = {}): GameState {
     t.net = true;
   });
   o.uses?.forEach((p) => (at(p).uses = p.n));
-  o.used?.forEach((id) => (s.members.find((m) => m.id === id)!.used = true));
   o.extraMembers?.forEach((species) => {
     const id = s.nextId++;
     s.members.push({ id, species, name: `extra-${id}`, used: false, at: null });
   });
   if (o.mage) addMage(s);
+  o.used?.forEach((id) => (s.members.find((m) => m.id === id)!.used = true));
   if (o.lastSpellSeason !== undefined) s.lastSpellSeason = o.lastSpellSeason;
   return s;
 }

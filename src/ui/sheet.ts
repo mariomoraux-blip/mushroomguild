@@ -47,7 +47,9 @@ export function mountSheet(root: HTMLElement, store: Store) {
         'li',
         { class: 'row' },
         hat(sp),
-        el('span', { class: 'row__text' }, el('strong', {}, info.name), el('span', {}, ` · ${info.role}`)),
+        el('span', { class: 'row__text' },
+          el('strong', {}, info.name), el('span', {}, ` · ${info.role}`),
+          el('span', { class: 'row__verb' }, info.verb)),
         el('button', { class: 'btn btn--icon', type: 'button', 'data-action': 'info', 'data-species': sp, 'aria-label': es.sheet.info(info.name) }, 'i'),
         action,
       );
@@ -55,16 +57,52 @@ export function mountSheet(root: HTMLElement, store: Store) {
     return panel(es.sheet.recruitTitle, el('p', { class: 'sheet__help' }, es.sheet.recruitHelp(COST.recruit, MAX_GUILD)), el('ul', { class: 'rows' }, ...rows));
   }
 
-  function creatureSheet(species: SpeciesId) {
+  /** Ficha de una especie (y de un miembro concreto, si se abrió al seleccionarlo). */
+  function cardSheet(species: SpeciesId, memberName?: string) {
     const info = es.species[species];
+    const g = es.guide[species];
+    const S = es.card.sections;
     const name = species === 'mago' ? es.mageName : info.name;
+    const title = memberName && memberName !== name ? es.card.title(memberName, info.name) : species === 'mago' ? es.card.title(name, info.name) : name;
+    const section = (heading: string, text?: string) => (text ? [el('h3', {}, heading), el('p', {}, text)] : []);
     return panel(
-      name,
+      title,
       el('div', { class: 'creature' },
-        hat(species),
-        el('p', {}, el('em', {}, info.scientific), ` · ${info.role}`),
-        el('p', {}, info.verb),
-        el('p', { class: 'creature__quip' }, info.quip)),
+        el('div', { class: 'creature__head' }, hat(species), el('p', {}, el('em', {}, info.scientific), ` · ${info.role}`)),
+        el('p', {}, g.context),
+        el('p', { class: 'creature__quip' }, es.quote(info.quip)),
+        ...section(S.ability, g.ability),
+        ...section(S.howTo, g.howTo),
+        ...section(S.movement, g.movement),
+        ...section(S.nutrients, g.nutrients),
+        ...section(S.heals, 'heals' in g ? g.heals : undefined),
+        ...section(S.messenger, 'messenger' in g ? g.messenger : undefined),
+        ...section(S.powers, 'powers' in g ? g.powers : undefined),
+        el('button', { class: 'btn btn--wide', type: 'button', 'data-action': 'close' }, es.card.understood)),
+    );
+  }
+
+  function helpSheet() {
+    const h = es.help;
+    const tiles = [es.tileHelp.mother, es.tileHelp.home, es.tileHelp.soil, es.tileHelp.log, es.tileHelp.tree, es.tileHelp.treeAlive, es.tileHelp.rock];
+    return panel(
+      h.title,
+      el('div', { class: 'help' },
+        el('h3', {}, h.goalTitle),
+        el('p', {}, h.goal),
+        el('h3', {}, h.howTitle),
+        el('ol', {}, ...h.how.map((step) => el('li', {}, step))),
+        el('h3', {}, h.guildTitle),
+        el('ul', { class: 'rows' },
+          ...SPECIES.map((sp) =>
+            el('li', { class: 'row' }, hat(sp),
+              el('span', { class: 'row__text' },
+                el('strong', {}, sp === 'mago' ? es.mageName : es.species[sp].short), el('span', {}, ` · ${es.species[sp].role}`),
+                el('span', { class: 'row__verb' }, es.species[sp].verb))))),
+        el('h3', {}, h.tilesTitle),
+        el('ul', { class: 'help__tiles' }, ...tiles.map((t) => el('li', {}, t))),
+        el('p', { class: 'help__tip' }, h.tip),
+        el('button', { class: 'btn btn--wide', type: 'button', 'data-action': 'close' }, h.start)),
     );
   }
 
@@ -93,7 +131,17 @@ export function mountSheet(root: HTMLElement, store: Store) {
       return;
     }
     if (!wasOpen) opener = document.activeElement as HTMLElement | null;
-    root.replaceChildren(sheet.kind === 'recruit' ? recruitSheet(state) : sheet.kind === 'creature' ? creatureSheet(sheet.species) : spellSheet(state));
+    const views = {
+      recruit: () => recruitSheet(state),
+      creature: () => cardSheet((sheet as { species: SpeciesId }).species),
+      member: () => {
+        const m = state.game.members.find((mm) => mm.id === (sheet as { id: number }).id);
+        return m ? cardSheet(m.species, m.name) : el('div');
+      },
+      spell: () => spellSheet(state),
+      help: () => helpSheet(),
+    };
+    root.replaceChildren(views[sheet.kind]());
     root.hidden = false;
     root.querySelector<HTMLElement>('.sheet__panel button:not([disabled])')?.focus();
   };

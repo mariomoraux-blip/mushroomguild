@@ -6,7 +6,7 @@
 Cada acción válida SHALL tener una animación de 400 ms o menos que muestre su efecto en el tablero.
 
 #### Scenario: Tejer
-- WHEN la Lactarius indigo teje micelio
+- WHEN el Lactarius indigo teje micelio
 - THEN la línea de micelio crece desde la casilla vecina hacia la nueva
 
 ### Requirement: Movimiento reducido

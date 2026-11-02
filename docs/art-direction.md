@@ -10,13 +10,13 @@ Estilo **ilustrado con contorno café**, formas redondas y rubor. La **luz cambi
 | Especie (nombre) | Rol | Silueta | Color | Accesorio | Rasgo especial |
 | --- | --- | --- | --- | --- | --- |
 | Champiñón ("Bruno") | Descompositor | Domo bajo y ancho | Café claro | Canasta | — |
-| *Lactarius indigo* ("Añil") | Tejedora | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Gotitas de látex azul; el micelio que teje tiene destellos índigo |
+| *Lactarius indigo* ("Añil") | Tejedor | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Gotitas de látex azul; el micelio que teje tiene destellos índigo |
 | *Amanita muscaria* ("Rubí") | Sanadora | Domo alto con verrugas y falda en el tallo | Rojo y crema | Bolso con hojas que curan | — |
-| *Gliophorus psittacinus* ("Perico") | Mensajera | Campana pequeña, viscosa y brillante | Verde loro | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
-| *Conocybe arcana* ("Maese Bruma") | Mago | Cono alto y puntiagudo, doblado en la punta como sombrero de hechicero; el más alto | Violeta profundo con motas que brillan como estrellas | Bastón de ramita con una espora luminosa | Barba de hilos de micelio; brilla siempre un poco |
+| *Gliophorus psittacinus* ("Perica") | Mensajera | Campana pequeña, viscosa y brillante | Verde loro | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
+| *Conocybe arcana* ("Maestra Bruna") | Maga | Cono alto y puntiagudo, doblado en la punta como sombrero de hechicera; la más alta | Violeta profundo con motas que brillan como estrellas | Bastón de ramita con una espora luminosa | Melena de hilos de micelio; brilla siempre un poco |
 
 Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña y cono alto deben distinguirse en negro sobre blanco a 56 px.
-*Conocybe* es un género real de sombrero cónico; *arcana* es inventado: el mago es el único personaje fantástico.
+*Conocybe* es un género real de sombrero cónico; *arcana* es inventado: la maga es el único personaje fantástico.
 
 - Antes de Blender: una hoja de personaje por especie (frente, perfil, ¾ espalda, paleta, escala), formato de `references/mushie-character-sheet.jpg`.
 - Tamaño en pantalla: ~56 px de alto en un teléfono de 390 px. Render a 2× (≈ 128 px).
@@ -49,7 +49,7 @@ Valores de día; la gradación por estación (003) los oscurece hacia el inviern
 | Tinta café | `#3B2A1E` | Contornos y texto (nunca negro) |
 | Acento | `#E8A33D` | Selección, foco, casillas válidas |
 | Micelio | `#B9F0D6` | Red y líneas de micelio |
-| Destello índigo | `#4B5FD6` | Micelio tejido por la Lactarius indigo |
+| Destello índigo | `#4B5FD6` | Micelio tejido por el Lactarius indigo |
 | Tierra base | `#7A5C3E` | Fondo del tablero (de día) |
 
 ## Layout móvil (vertical)
@@ -59,7 +59,7 @@ Valores de día; la gradación por estación (003) los oscurece hacia el inviern
 │ nutrientes · esporas │
 ├──────────────────────┤
 │                      │
-│   Tablero 5 × 8      │  ← Árbol Madre arriba
+│   Tablero 5 × 8      │  ← Árbol Padre arriba
 │   casillas ≥ 64 px   │     Hogar abajo
 │   (≥ 56 a 390×664)   │
 ├──────────────────────┤

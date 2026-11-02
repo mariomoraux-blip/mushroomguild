@@ -7,7 +7,13 @@ const isTouch = (name: string) => name !== 'escritorio-1280x800';
 
 const errors = new WeakMap<Page, string[]>();
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }, info) => {
+  // La ficha de cada especie se abre sola la primera vez; salvo en su propia prueba, se dan por vistas.
+  if (!info.title.startsWith('Ficha')) {
+    await page.addInitScript(() =>
+      localStorage.setItem('gremio.seenSpecies', JSON.stringify(['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'])),
+    );
+  }
   const list: string[] = [];
   errors.set(page, list);
   page.on('pageerror', (e) => list.push(e.message));
@@ -62,13 +68,13 @@ test('layout: tablero completo, casillas en rango y controles ≥ 44 px', async 
   await noScrollNoZoom(page);
 });
 
-test('táctil: elegir a la Lactarius, tejer y terminar el día (con captura)', async ({ page }, info) => {
+test('táctil: elegir al Lactarius, tejer y terminar el día (con captura)', async ({ page }, info) => {
   test.skip(!isTouch(info.project.name), 'flujo táctil');
   await page.goto('/');
   await page.locator('[data-id="1"]').tap();
   await expect(valid(page)).toHaveCount(2);
   await expect(page.locator('#notice')).toHaveText('Añil: toca una casilla resaltada.');
-  // Toque en una casilla no válida: motivo exacto y sigue seleccionada.
+  // Toque en una casilla no válida: motivo exacto y sigue seleccionado.
   await cell(page, 0, 0).tap();
   await expect(page.locator('#notice')).toHaveText('Muy lejos: la tierra debe tocar la red.');
   await expect(page.locator('[data-id="1"]')).toHaveAttribute('aria-pressed', 'true');
@@ -80,7 +86,7 @@ test('táctil: elegir a la Lactarius, tejer y terminar el día (con captura)', a
   await cell(page, 2, 3).tap();
   await cell(page, 2, 3).tap();
   await noScrollNoZoom(page);
-  // Captura con Añil seleccionada el día 2.
+  // Captura con Añil seleccionado el día 2.
   await page.locator('[data-id="1"]').tap();
   await page.screenshot({ path: `docs/screenshots/002-${info.project.name}.png` });
 });
@@ -95,7 +101,11 @@ test('estado visible: el Champiñón descompone y el HUD suma nutrientes', async
 test('teclado: Tab, Enter y Esc bastan para elegir, actuar y terminar el día', async ({ page }, info) => {
   test.skip(isTouch(info.project.name), 'teclado en escritorio');
   await page.goto('/');
-  await page.keyboard.press('Tab');
+  // Tab recorre el HUD (esporas, ayuda) y llega a las tarjetas del gremio.
+  for (let i = 0; i < 6; i++) {
+    await page.keyboard.press('Tab');
+    if (await page.locator('[data-id="1"]').evaluate((b) => b === document.activeElement)) break;
+  }
   await expect(page.locator('[data-id="1"]')).toBeFocused();
   // Esc deselecciona y devuelve el foco a la tarjeta.
   await page.keyboard.press('Enter');
@@ -120,7 +130,7 @@ test('teclado: Tab, Enter y Esc bastan para elegir, actuar y terminar el día', 
   await page.screenshot({ path: `docs/screenshots/002-${info.project.name}.png` });
 });
 
-test('Maese Bruma: primero el hechizo, después las casillas', async ({ page }) => {
+test('Maestra Bruna: primero el hechizo, después las casillas', async ({ page }) => {
   await page.goto('/?debugState=fullGuild');
   const mage = page.locator('.card--mago');
   await mage.scrollIntoViewIfNeeded();
@@ -164,4 +174,59 @@ test('fichas de criatura: nombre científico, rol, acción y línea con humor', 
   await expect(dialog).toContainText('Comestible: sí, y lo sabe. Por eso trabaja rápido.');
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
+});
+
+test('Libreta de campo: no se abre sola y se consulta con "?"', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Ayuda: Libreta de campo' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Despierta al Árbol Padre');
+  await expect(dialog).toContainText('Gliophorus · Mensajera');
+  await page.getByRole('button', { name: '¡A jugar!' }).click();
+  await expect(dialog).toHaveCount(0);
+});
+
+test('Ficha al seleccionar: primera vez por especie, "Entendido" mantiene la selección y "Ficha" la reabre', async ({ page }, info) => {
+  await page.goto('/');
+  await page.locator('[data-id="1"]').click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Añil · Lactarius indigo');
+  await expect(dialog).toContainText('«Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.»');
+  for (const h of ['Habilidad', 'Cómo usarlo', 'Movimiento', 'Nutrientes']) await expect(dialog.getByRole('heading', { name: h })).toBeVisible();
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/005-ficha-390x844.png' });
+  await page.getByRole('button', { name: 'Entendido' }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(valid(page)).toHaveCount(2);
+  // Segunda vez: no se abre sola.
+  await page.locator('[data-id="1"]').click();
+  await page.locator('[data-id="1"]').click();
+  await expect(dialog).toHaveCount(0);
+  await page.getByRole('button', { name: 'Ver la ficha de Añil' }).click();
+  await expect(page.getByRole('dialog')).toContainText('Añil · Lactarius indigo');
+  // Se recuerda entre visitas.
+  await page.reload();
+  await page.locator('[data-id="1"]').click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+test('guía: ★ en el sugerido, camino hacia el árbol, meta marcada y esporas que abren reclutar', async ({ page }, info) => {
+  await page.goto('/');
+  await expect(page.locator('#notice')).toHaveText('Pista: Bruno puede descomponer un tronco junto a la red (+3 nutrientes).');
+  await expect(page.locator('[data-id="2"]')).toHaveClass(/is-suggested/);
+  await expect(cell(page, 2, 0)).toHaveAttribute('aria-label', /la meta/);
+  // Tocar un tronco sin selección lo explica.
+  await cell(page, 1, 7).click();
+  await expect(page.locator('#notice')).toContainText('Tronco caído: el Champiñón lo descompone');
+  await page.locator('[data-id="2"]').click();
+  await cell(page, 1, 7).click();
+  await expect(page.locator('[data-id="1"]')).toHaveClass(/is-suggested/);
+  await page.locator('[data-id="1"]').click();
+  await expect(cell(page, 2, 6)).toHaveAttribute('aria-label', /★/);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/005-camino-390x844.png' });
+  // El chip de esporas abre la hoja de reclutar, que dice para qué sirve cada especie.
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /Esporas: 0/ }).click();
+  await expect(page.getByRole('dialog')).toContainText('Reclutar al gremio');
+  await expect(page.getByRole('dialog')).toContainText('Pasa la voz desde un árbol vivo');
 });
