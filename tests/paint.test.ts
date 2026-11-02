@@ -30,3 +30,15 @@ describe('Requirement: Casilla ocupada', () => {
     expect(painted.filter((p) => p.object === 'tree')).toHaveLength(5);
   });
 });
+
+describe('Requirement: Árbol Padre de Blender', () => {
+  it('Scenario: Alguien trabaja sobre el Árbol Padre — con sprite, el árbol se sigue viendo (el miembro va delante)', () => {
+    const game = newGame();
+    const father = game.tiles.find((t) => t.kind === 'mother')!;
+    const occupied = new Set([`${father.x},${father.y}`]);
+    const at = (fatherSprite: boolean) =>
+      paintBoard(fakeCtx(), 64, { game, valid: new Set(), star: null, occupied, fatherSprite }).find((p) => p.x === father.x && p.y === father.y)?.object;
+    expect(at(true)).toBe('mother');
+    expect(at(false)).toBe('none');
+  });
+});

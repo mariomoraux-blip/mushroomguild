@@ -41,6 +41,13 @@ export function spriteKey(species: string, pose: Pose, seasonIndex = 0): string 
 }
 /** Todos miden 176 px de ancho a la misma escala (100 px/m); el alto es 128 px, o 160 px para Maestra Bruna, la más alta. */
 export const spriteUrl = (key: string) => `${import.meta.env.BASE_URL}assets/characters/${key}.png`;
+/** Árbol Padre de Blender (public/assets/board): 176 × 192; ocupa su casilla y sobresale hacia arriba. */
+export const fatherKey = (awake: boolean) => (awake ? 'arbol-padre-despierto' : 'arbol-padre-dormido');
+/** Ancho del sprite del Árbol Padre en casillas (los personajes usan 1,05). */
+export const FATHER_SCALE = 1.2;
+/** Margen del canvas sobre el claro, en casillas: deja que la copa despierta sobresalga del marco. */
+export const BOARD_HEADROOM = 0.2;
+export const boardArtUrl = (key: string) => `${import.meta.env.BASE_URL}assets/board/${key}.png`;
 
 /** Color de la paleta como número para Phaser (0xRRGGBB). */
 export const hex = (token: ColorToken): number => parseInt(color[token].slice(1), 16);

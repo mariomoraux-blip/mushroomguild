@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { H, seasonIndex, W } from '../rules';
 import { paintBoard } from './paint';
 import { highlighted, suggestedTile, type AppState, type Store } from '../store';
-import { renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteKey, spriteUrl, type Pose } from '../theme';
+import { BOARD_HEADROOM, boardArtUrl, FATHER_SCALE, fatherKey, renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteKey, spriteUrl, type Pose } from '../theme';
 
 const POSES: Pose[] = ['reposo', 'trabajando', 'feliz'];
 const BOARD_KEY = 'claro';
@@ -16,6 +16,7 @@ export class GameScene extends Phaser.Scene {
   private canvasTex: Phaser.Textures.CanvasTexture | null = null;
   private boardImage: Phaser.GameObjects.Image | null = null;
   private sprites = new Map<number, Phaser.GameObjects.Image>();
+  private father: Phaser.GameObjects.Image | null = null;
   private tile = 0;
   private created = false;
 
@@ -33,6 +34,7 @@ export class GameScene extends Phaser.Scene {
         }
       }
     }
+    for (const awake of [false, true]) this.load.image(fatherKey(awake), boardArtUrl(fatherKey(awake)));
   }
 
   create(): void {
@@ -65,6 +67,8 @@ export class GameScene extends Phaser.Scene {
     const T = Math.round(this.tile * renderResolution()); // px del canvas (≤ 2×)
     const tex = this.boardCanvas(T * W, T * H);
     if (!tex) return;
+    // El canvas tiene un margen arriba del claro para que la copa del Árbol Padre sobresalga del marco.
+    this.cameras.main.setScroll(0, -Math.round(Math.round(BOARD_HEADROOM * this.tile) * renderResolution())); // igual que main.ts › resize
     const occupied = new Set(state.game.members.filter((m) => m.at).map((m) => `${m.at!.x},${m.at!.y}`));
     const star = suggestedTile(state);
     paintBoard(tex.getContext(), T, {
@@ -72,10 +76,27 @@ export class GameScene extends Phaser.Scene {
       valid: new Set(highlighted(state).map((t) => `${t.x},${t.y}`)),
       star: star ? { x: star.x, y: star.y } : null,
       occupied,
+      fatherSprite: this.textures.exists(fatherKey(false)) && this.textures.exists(fatherKey(true)),
     });
     tex.refresh();
     this.boardImage?.setTexture(BOARD_KEY).setDisplaySize(T * W, T * H);
+    this.drawFather(state, T);
     this.drawWorkers(state, T);
+  }
+
+  /** Árbol Padre: dormido o despierto, apoyado en el borde inferior de su casilla y sobresaliendo hacia arriba. */
+  private drawFather(state: AppState, T: number): void {
+    const tile = state.game.tiles.find((t) => t.kind === 'mother');
+    const key = fatherKey(Boolean(tile?.alive));
+    if (!tile || !this.textures.exists(key)) {
+      this.father?.setVisible(false);
+      return;
+    }
+    this.father ??= this.add.image(0, 0, key).setOrigin(0.5, 1).setDepth(4);
+    // Un poco mayor que los personajes (es el patriarca del claro); quien trabaje encima (profundidad 5) queda delante.
+    const w = T * FATHER_SCALE;
+    const frame = this.textures.getFrame(key);
+    this.father.setTexture(key).setDisplaySize(w, (w * frame.height) / frame.width).setPosition((tile.x + 0.5) * T, (tile.y + 1) * T).setVisible(true);
   }
 
   /** Miembros que trabajaron hoy: su sprite "trabajando" sobre la casilla donde actuaron. */

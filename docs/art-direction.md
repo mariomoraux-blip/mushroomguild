@@ -219,8 +219,9 @@ Recortes de la hoja v1 en `public/assets/ui/`. "Listo" significa que el tamaño 
 ## Sprites en el juego
 - Los renders de Blender viven en `assets/sprites/` (fuente) y se copian a `public/assets/characters/` (lo que se publica): `<especie>-<pose>.png` con poses `reposo`, `trabajando` y `feliz`, a 176 × 128. Maestra Bruna, la más alta, va a 176 × 160 con la misma escala y el mismo suelo; su render `hechizo` se publica como `mago-trabajando.png`. La Gliophorus tiene una variante por estación (`gliophorus-<pose>-<estación>.png`).
 - Uso: retrato en reposo en el dock (feliz cuando está seleccionado o sugerido), pose feliz grande en la ficha y pose de trabajo en el tablero, sobre la casilla donde ese miembro trabajó hoy.
+- **Árbol Padre:** `assets/blender/arbol-padre.blend` (estados en `estados_arbol.py`), publicado en `public/assets/board/arbol-padre-{dormido,despierto}.png` a 176 × 192 con la misma escala. Dormido: tronco retorcido gris, raíces largas y ramas desnudas. Despierto: corteza cálida y copa dorada en paraguas (hojas `#F2BC45`, sombra `#C98A2B`, luz `#FFE08A`) con borde que brilla `#FFE27A`, aura `#FFF4C2`, luces cálidas y destellos. En el tablero mide 1,2 casillas de ancho y su copa asoma por encima del marco. Sustituye en el tablero a los recortes `public/assets/ui/arbol-padre-*.webp` (placeholders de baja resolución). La v2 plantea dibujarlo de unas 3 casillas de ancho; hoy mide 1,2 (`FATHER_SCALE` en `theme.ts`) y queda pendiente decidir el tamaño final.
 - La silueta de cono de cada especie (`.hat--*` en `styles.css`) queda solo como respaldo si un sprite faltara.
-- Presupuesto: los 24 sprites publicados pesan ≈ 400 KB (límite total de assets: 2 MB).
+- Presupuesto: los 24 sprites de personajes y los 2 del Árbol Padre pesan ≈ 470 KB (límite total de assets: 2 MB).
 
 ## Referencias (`references/`)
 | Archivo | Tomamos | Dejamos |
