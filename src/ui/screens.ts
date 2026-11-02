@@ -5,7 +5,6 @@ import { assetUrl, SCREEN_ART } from '../theme';
 import { el, portrait } from './dom';
 
 const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
-const CAST: readonly SpeciesId[] = ['lactarius', 'champi', 'amanita', 'gliophorus', 'mago'];
 const img = (key: string, cls: string) => el('img', { class: cls, src: assetUrl(key), alt: '', draggable: 'false', decoding: 'async' });
 const nameOf = (sp: SpeciesId) => (sp === 'mago' ? es.mageName : es.species[sp].short);
 
@@ -56,11 +55,10 @@ export function mountScreens(root: HTMLElement, store: Store) {
       el('button', { class: 'round-btn round-btn--back', type: 'button', 'data-action': 'back', 'aria-label': es.howto.back }),
       el('h1', { class: 'screen__title', id: 'screen-title' }, title));
 
-  function title(state: AppState) {
-    const season = seasonIndex(state.game.month);
+  // Portada limpia (018): solo el logo y el menú; el gremio se presenta en la intro y en "El gremio".
+  function title() {
     return el('div', { class: 'title' },
       el('h1', { class: 'title__logo' }, img(SCREEN_ART.logo, 'title__logo-img'), el('span', { class: 'sr-only' }, es.title)),
-      el('div', { class: 'title__cast', 'aria-hidden': 'true' }, ...CAST.map((sp) => portrait(sp, 'reposo', season, 'md'))),
       el('nav', { class: 'title__menu', 'aria-label': es.titleScreen.label },
         el('button', { class: 'menu-btn menu-btn--primary', type: 'button', 'data-action': 'play' }, el('span', { class: 'menu-btn__icon menu-btn__icon--play', 'aria-hidden': 'true' }), es.titleScreen.play),
         el('button', { class: 'menu-btn', type: 'button', 'data-action': 'howto' }, el('span', { class: 'menu-btn__icon menu-btn__icon--book', 'aria-hidden': 'true' }), es.titleScreen.howto),
@@ -121,7 +119,7 @@ export function mountScreens(root: HTMLElement, store: Store) {
     root.dataset.kind = screen.kind;
     const focused = (document.activeElement as HTMLElement | null)?.dataset;
     const refocus = focused?.action === 'step' ? `[data-action="step"][data-step="${focused.step}"]` : null;
-    root.replaceChildren(screen.kind === 'title' ? title(state) : screen.kind === 'howto' ? howto(screen) : guild(state));
+    root.replaceChildren(screen.kind === 'title' ? title() : screen.kind === 'howto' ? howto(screen) : guild(state));
     // Foco: el botón principal al entrar; en el carrusel, se mantiene en el control que se usó.
     const target =
       (!kindChanged && refocus && root.querySelector<HTMLElement>(refocus)) ||

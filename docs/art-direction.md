@@ -101,7 +101,7 @@ FICHA                          EL GREMIO                      INTRO / VICTORIA
 ```
 - **Juego:** HUD con logo mini, pastilla del mes y estación, tres pastillas de recurso y ayuda redonda. Árbol Padre grande sobre el tablero. Bitácora con la cinta "Pista del mes". Dock con tarjetas verticales y "Fin del mes" como pastilla amarilla a todo lo ancho, con ícono de luna.
   - **Pendiente de decidir:** el dock más alto y el logo restan alto al tablero. A 390 × 664 las casillas bajarían de 56 a unos 48 px (el mínimo de la spec es 56). Opciones: aceptar 48 en ese tamaño, ocultar el logo por debajo de 700 px de alto, o tarjetas más bajas.
-- **Portada (012, hecho):** logo, los cinco personajes sobre el claro y menú: Nueva partida (pastilla amarilla con ▶), Cómo jugar y El gremio (madera). "Opciones" se sacó hasta que haya algo que ajustar. En apaisado, logo y elenco a la izquierda y menú a la derecha.
+- **Portada (012, hecho):** logo y menú sobre el claro (los personajes se sacaron en el 018 para dejarla más limpia): Nueva partida (pastilla amarilla con ▶), Cómo jugar y El gremio (madera). "Opciones" se sacó hasta que haya algo que ajustar. En apaisado, logo a la izquierda y menú a la derecha.
 - **Cómo jugar (012, hecho):** carrusel de 5 pasos en pergamino, cada uno con una ilustración de piezas publicadas, ‹ › (`ui/buttons/prev`, `next`), puntos y deslizar. Es la ayuda principal (el "?" la abre); la Libreta de campo queda como detalle.
 - **Ficha:** retrato grande, nombre, nombre científico y rol, contexto, frase entre comillas y secciones con etiqueta verde (Habilidad, Movimiento, Nutrientes…), como la ficha actual.
 - **El gremio (012, hecho):** lista de las cinco especies, cada fila con su medallón, nombre, rol y una línea; abre la ficha encima.
@@ -159,7 +159,7 @@ La saturación del progreso (003, hecho) va de apagado (40 % de color) a color p
 - **Piezas estirables:** marcos, pergamino, letrero, cinta y botones se entregan **en partes** (9 o 3 partes, con márgenes indicados) para que se estiren sin deformarse. Se usan con `border-image` o como capas.
 - **Estados por separado:** los brillos de casilla válida y seleccionada, y la ★, van como capas transparentes del mismo tamaño que la casilla.
 - **Sin texto horneado** (salvo el logo).
-- **Presupuesto:** `public/assets/` ≤ **4 MB** (decisión del 2 de noviembre; antes 2 MB). Hoy hay 2.79 MB. El JavaScript del juego no cuenta en este límite. Los fondos y piezas de portada, intro y victoria se cargan de forma diferida, cuando se muestra esa pantalla; la primera carga solo trae lo del tablero, los personajes y el HUD.
+- **Presupuesto:** `public/assets/` ≤ **4 MB** (decisión del 2 de noviembre; antes 2 MB). Hoy hay 2.82 MB. El JavaScript del juego no cuenta en este límite. Los fondos y piezas de portada, intro y victoria se cargan de forma diferida, cuando se muestra esa pantalla; la primera carga solo trae lo del tablero, los personajes y el HUD.
 - **Estaciones (010):** variantes pintadas por estación, sin gradación de color (descartada en el 003).
 - **Luz de la red (016):** capa aditiva del micelio que crece con la estación; en invierno es lo más brillante del tablero.
 
@@ -199,7 +199,7 @@ public/assets/
 - **Código:** `src/theme.ts` arma las rutas (`assetUrl`, `portraitKey`, `uiPortraitKey`, `CHARACTER_DIR`, `fatherKey`, `BOARD_ART`, y las variables CSS `--art-*` de la interfaz); ningún otro archivo escribe rutas de assets a mano.
 
 ## Inventario de piezas
-94 archivos publicados, 2.79 MB en total (el 010 sacó los sprites de Blender a `assets/sprites/webp/`). "Listo" significa que el ancho alcanza para 2× a 390 px; los demás sirven para maquetar y hay que reexportarlos. Retirados en la v2 por traer texto horneado o baja resolución: las tarjetas con placa (`card`), `ribbon-hint`, `page-dots` y `rock-dark`.
+94 archivos publicados, 2.82 MB en total (el 010 sacó los sprites de Blender a `assets/sprites/webp/`). "Listo" significa que el ancho alcanza para 2× a 390 px; los demás sirven para maquetar y hay que reexportarlos. Retirados en la v2 por traer texto horneado o baja resolución: las tarjetas con placa (`card`), `ribbon-hint`, `page-dots` y `rock-dark`.
 
 | Archivo | Origen | Tamaño | Peso | Estado |
 | --- | --- | --- | --- | --- |
@@ -274,8 +274,8 @@ public/assets/
 | `ui/frames/forest.webp` | UI v1 | 281 × 255 | 34 KB | Baja resolución (objetivo 400 px de ancho) |
 | `ui/frames/roots-pieces.webp` | UI v1 | 186 × 235 | 17 KB | Baja resolución (objetivo 400 px de ancho) |
 | `ui/frames/roots.webp` | UI v2 | 205 × 215 | 17 KB | Baja resolución (objetivo 400 px de ancho) |
-| `ui/hud/logo-small.webp` | logo y fondos | 319 × 252 | 31 KB | Listo |
-| `ui/hud/logo.webp` | logo y fondos | 608 × 354 | 69 KB | Listo |
+| `ui/hud/logo-small.webp` | logo y fondos (recorte completo, 018) | 327 × 282 | 40 KB | Listo |
+| `ui/hud/logo.webp` | logo y fondos (recorte completo, 018) | 616 × 373 | 89 KB | Listo |
 | `ui/hud/pill-nutrients.webp` | UI v2 | 112 × 58 | 3 KB | Baja resolución (objetivo 220 px de ancho) |
 | `ui/hud/pill-spores.webp` | UI v2 | 118 × 58 | 3 KB | Baja resolución (objetivo 220 px de ancho) |
 | `ui/hud/pill-trees.webp` | UI v2 | 117 × 58 | 3 KB | Baja resolución (objetivo 220 px de ancho) |
@@ -309,7 +309,7 @@ public/assets/
 - Los renders de Blender viven en `assets/sprites/` (PNG) y sus WebP de 176 × 128 (Maestra Bruma 176 × 160) en `assets/sprites/webp/`, como fuente.
 - **Árbol Padre:** desde el 010 el tablero usa `asleep-painted` / `awake-painted` a 1,35 casillas de ancho (`FATHER_SCALE`). El de Blender, `assets/blender/arbol-padre.blend` (estados en `estados_arbol.py`), queda como fuente en `assets/sprites/webp/board/father-tree/{asleep,awake}.webp` (176 × 192). Dormido: tronco retorcido gris, raíces largas y ramas desnudas. Despierto: corteza cálida y copa dorada en paraguas (hojas `#F2BC45`, sombra `#C98A2B`, luz `#FFE08A`) con borde que brilla `#FFE27A`, aura `#FFF4C2`, luces cálidas y destellos. En el tablero mide 1,2 casillas de ancho y su copa asoma por encima del marco. Sustituye en el tablero a los recortes `public/assets/ui/arbol-padre-*.webp` (placeholders de baja resolución). La v2 plantea dibujarlo de unas 3 casillas de ancho; este mes mide 1,2 (`FATHER_SCALE` en `theme.ts`) y queda pendiente decidir el tamaño final.
 - La silueta de cono de cada especie (`.hat--*` en `styles.css`) queda solo como respaldo si un retrato faltara.
-- Peso: todo `public/assets/` suma 2.79 MB en WebP (límite 4 MB).
+- Peso: todo `public/assets/` suma 2.82 MB en WebP (límite 4 MB).
 
 ## Referencias (`references/`)
 | Archivo | Tomamos | Dejamos |

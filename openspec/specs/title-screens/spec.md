@@ -1,16 +1,17 @@
 # title-screens
 
 ## Purpose
-Pantallas fuera de la partida: portada, "Cómo jugar" (carrusel de 5 pasos) y "El gremio". Origen: cambio 012 (archivado). Implementadas en `src/store.ts` (`ui.screen`) y `src/ui/screens.ts`.
+Pantallas fuera de la partida: portada, "Cómo jugar" (carrusel de 5 pasos) y "El gremio". Origen: cambio 012 (archivado); el 018 limpió la portada (sin personajes) y rehízo el recorte del logo. Implementadas en `src/store.ts` (`ui.screen`) y `src/ui/screens.ts`.
 
 ## Requirements
 
 ### Requirement: Portada
-Al abrir el juego sin `?map`, `?seed` ni `?debugState`, el juego SHALL mostrar la portada: logo, los cinco personajes y un menú con "Nueva partida" (principal), "Cómo jugar" y "El gremio". "Nueva partida" SHALL abrir la intro y después el tablero.
+Al abrir el juego sin `?map`, `?seed` ni `?debugState`, el juego SHALL mostrar la portada: el logo completo (sin recortes) y un menú con "Nueva partida" (principal), "Cómo jugar" y "El gremio". "Nueva partida" SHALL abrir la intro y después el tablero.
 
 #### Scenario: Abrir el juego
 - WHEN el jugador abre el sitio
 - THEN ve la portada con el foco en "Nueva partida"
+- AND la portada no muestra a los personajes
 - AND al pulsarla ve la intro y después el tablero en el mes 1
 
 ### Requirement: Cómo jugar
