@@ -18,7 +18,7 @@ H = altura total.
 | Cuerpo-tallo | 0,45 H visibles · ≈ 0,8 H de ancho (el más grueso del elenco); nace ancho, justo bajo el ala |
 | Brazos | Muñones cortos, a ⅔ de la altura del cuerpo |
 | Cara | En el cuerpo, justo bajo la franja de láminas |
-| En pantalla | ≈ 45 × 70 px (render 2× ≈ 90 × 140) |
+| Sprite (cámara a ¾, 100 px/m) | ≈ 126 × 92 px en un lienzo de 176 × 128; copia a 56 px: ≈ 55 × 40 |
 
 ## Paleta
 | Uso | Hex |

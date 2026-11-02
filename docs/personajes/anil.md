@@ -18,7 +18,7 @@ H = altura total.
 | Cuello | ≈ 0,4 H de ancho, donde el embudo se une al tallo |
 | Tallo | Recto, con un ligero ensanche en la base |
 | Cara | En el tallo, justo bajo el cuello; sin ala que la tape |
-| En pantalla | ≈ 47 × 60 px (render 2× ≈ 94 × 120) |
+| Sprite (cámara a ¾, 100 px/m) | ≈ 114 × 104 px en un lienzo de 176 × 128; copia a 56 px: ≈ 49 × 45 |
 
 ## Paleta
 | Uso | Hex |
