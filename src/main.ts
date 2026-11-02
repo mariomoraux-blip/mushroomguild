@@ -6,7 +6,7 @@ import { newGame, newRandomGame, type SpeciesId } from './rules';
 import { createStore, initialState } from './store';
 import { applyTheme, BOARD_HEADROOM, renderResolution } from './theme';
 import { mountAmbient } from './ui/ambient';
-import { tornPaper, vine } from './ui/art';
+import { tornPaper } from './ui/art';
 import { mountBoardOverlay } from './ui/board';
 import { mountDock } from './ui/dock';
 import { mountHud } from './ui/hud';
@@ -42,7 +42,6 @@ const renderSheet = mountSheet($('sheet'), store);
 const notice = $('notice');
 mountAmbient($<HTMLCanvasElement>('ambient'));
 $('notice-bar').prepend(tornPaper());
-$('board').append(vine(), vine(true));
 const noticeBar = $('notice-bar');
 const cardBtn = $<HTMLButtonElement>('card-btn');
 cardBtn.textContent = es.card.open;
@@ -88,7 +87,7 @@ const game = new Phaser.Game({
 // ─── Tamaño: casillas que caben en el área del tablero (≤ 96 px), canvas a ≤ 2× ───────
 const area = $('board-area');
 const board = $('board');
-const BOARD_BORDER = 24; // borde 2 px + marco de madera 4 px + contorno 6 px por lado (styles.css › .board)
+const BOARD_BORDER = 24; // marco de raíces de 12 px por lado (styles.css › .board)
 function resize() {
   const tile = tileSize(area.clientWidth - BOARD_BORDER, area.clientHeight - BOARD_BORDER);
   const w = tile * 5;

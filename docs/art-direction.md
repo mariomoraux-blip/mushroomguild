@@ -65,13 +65,13 @@ Contraste mínimo de texto: Tinta sobre Pergamino, Crema o Sol (todos ≥ 7:1). 
 | Marco de raíces | `ui/frames/roots-pieces` | Envuelve el tablero; 9 partes |
 
 ## Tablero
-- **Casillas con relieve:** cada casilla es una losa de pasto con borde redondeado y sombra; alternar `board/terrain/grass` y `board/terrain/grass-b` para que el claro no se vea repetido (variación por hash de la casilla, como en el 008).
-- **Red de micelio:** `board/mycelium/net`/`-b`: grietas de luz dorada sobre el pasto. **Cambio respecto del 008:** el micelio pasa de verde menta a dorado; el turquesa queda para la selección y el Hogar.
-- **Estados:** válida = brillo amarillo (`board/terrain/state-valid`); seleccionada / Hogar = brillo turquesa (`board/terrain/state-selected`); sugerida = ★ (`ui/icons/star`) sobre la casilla. Se implementan como **capas** encima de la casilla, no como casillas distintas.
-- **Objetos:** `board/trees/grey` → `board/trees/alive` al revivir; `board/logs/log` → `board/logs/log-used` tras el primer uso; `board/rocks/rock`; `board/terrain/sprout` para la tierra creada por el Brote arcano; `board/terrain/home` en el Hogar.
-- **Árbol Padre:** se dibuja grande (`board/father-tree/asleep` / `awake`, de Blender; los recortes pintados de la hoja son `asleep-painted` / `awake-painted`) y **sobresale por encima del tablero**, saliendo de su casilla en la fila superior. La regla no cambia: sigue siendo una casilla del tablero; solo su dibujo desborda. Las raíces bajan hacia la casilla.
-- **Casilla ocupada (se mantiene del 008):** si un hongo trabajó hoy en una casilla, su sprite la ocupa y el objeto de abajo no se pinta.
-- **Marco:** raíces trenzadas con hojas (`ui/frames/roots-pieces`), y el marco de bosque alrededor de la pantalla.
+- **Casillas con relieve:** cada casilla es una losa de pasto con borde redondeado y sombra; en primavera y verano se alternan `grass`, `grass-b` y `grass-c` (variación por hash de la casilla, como en el 008); en otoño `grass-autumn` y en invierno `grass-winter`. Implementado en el 010 (`src/scenes/paint.ts`, tabla `BOARD_ART` de `theme.ts`).
+- **Red de micelio:** `board/mycelium/net`/`-b`: grietas de luz dorada sobre el pasto, una casilla entera por casilla de la red (decisión del 010: tile completo, no conectores). **Cambio respecto del 008:** el micelio pasa de verde menta a dorado; el turquesa queda para la selección y el Hogar.
+- **Estados:** válida = brillo amarillo; seleccionada / Hogar = brillo turquesa; sugerida = ★ (`ui/icons/star`, en uso) sobre la casilla. Se implementan como **capas** encima de la casilla, no como casillas distintas. `state-valid` y `state-selected` traen el pasto horneado, así que no sirven de capa sobre un objeto: hasta tener la capa transparente, el brillo de casilla válida es el trazo vectorial del 008.
+- **Objetos:** `board/trees/grey` (dormido) → `board/trees/waking` cuando la red lo alcanza → `alive` al revivir (`autumn` y `winter` en esas estaciones); `board/logs/log` → `board/logs/log-used` tras el primer uso; `board/rocks/rock` (`rock-winter` en invierno); `board/terrain/home` es la casilla del Hogar (con alguien encima queda la red). `board/terrain/sprout` para la tierra creada por el Brote arcano queda pendiente.
+- **Árbol Padre:** se dibuja grande (`board/father-tree/asleep-painted` / `awake-painted`, desde el 010) y **sobresale por encima del tablero**, saliendo de su casilla en la fila superior. La regla no cambia: sigue siendo una casilla del tablero; solo su dibujo desborda. Las raíces bajan hacia la casilla.
+- **Casilla ocupada (se mantiene del 008):** si un hongo trabajó hoy en una casilla, su retrato la ocupa y el objeto de abajo no se pinta.
+- **Marco:** raíces trenzadas con hojas (`ui/frames/roots`, como `border-image` de 12 px por lado, en uso), y el marco de bosque alrededor de la pantalla (pendiente).
 
 ## Pantallas (390 × 844)
 ```
@@ -125,13 +125,13 @@ Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña y co
 - Antes de Blender: una hoja de personaje por especie (frente, perfil, ¾ espalda, paleta, escala), formato de `references/mushie-character-sheet.jpg`.
 - Tamaño en pantalla: ~56 px de alto en un teléfono de 390 px. Render a 2× (≈ 128 px).
 
-### Dos familias de arte de personaje
-- **Sprites de Blender** (`public/assets/characters/`): tablero y poses (reposo, trabajando, feliz). Se mantienen.
-- **Retratos pintados** (`characters/<personaje>/card` de la hoja): dock, fichas, "El gremio" y portada. Son de la misma familia que la propuesta, pero vienen con la placa de nombre horneada y a baja resolución.
-- **Pendiente de decidir:** unificar en una sola familia. Una opción es renderizar retratos de Blender a 2× con la iluminación de la propuesta; la otra, repintar los cinco retratos 2D sin placa y con variantes (Chispa por estación).
+### Una sola familia: retratos pintados (decisión del 010)
+- **Retratos pintados** (`characters/<personaje>/portrait`, sin placa) en todas partes: tablero, dock, fichas y "El gremio". Chispa lleva en la interfaz su corona de la estación (`frame-<estación>`); en el tablero, su retrato.
+- La pose ya no cambia de imagen: "feliz" (seleccionado o sugerido) es un pequeño salto en CSS (`data-pose`), y "trabajando" es estar sobre la casilla.
+- Los sprites de Blender (`rest`, `work`, `happy`) salieron de `public/assets/` y quedan como fuente en `assets/sprites/webp/`.
 
 ## Luz por estación
-Un solo juego de assets; cada estación es una **gradación de color** (filtro de color de Phaser) sobre el escenario. Personajes y UI no se gradúan, con una excepción intencional: la Gliophorus cambia de tono con la estación (una variante de sprite por estación, renderizada desde Blender; el tinte que multiplica no llega del verde a las demás).
+**Decisión del 010:** cada estación usa sus **variantes pintadas** donde existen (pasto, rocas, árboles vivos) y la pieza de primavera donde no. Reemplaza el principio anterior de "un solo juego de assets + gradación". La gradación de la tabla queda como luz ambiental opcional encima (cambio 003), suave, para no ensuciar las piezas pintadas. Personajes y UI no cambian, salvo Chispa (corona de la estación).
 
 | Estación | Días | Hora | Gradación | Micelio |
 | --- | --- | --- | --- | --- |
@@ -149,8 +149,8 @@ La saturación del progreso (gris → color según árboles revividos) se aplica
 - **Piezas estirables:** marcos, pergamino, letrero, cinta y botones se entregan **en partes** (9 o 3 partes, con márgenes indicados) para que se estiren sin deformarse. Se usan con `border-image` o como capas.
 - **Estados por separado:** los brillos de casilla válida y seleccionada, y la ★, van como capas transparentes del mismo tamaño que la casilla.
 - **Sin texto horneado** (salvo el logo).
-- **Presupuesto:** `public/assets/` ≤ **4 MB** (decisión del 2 de noviembre; antes 2 MB). Hoy hay 2.17 MB. El JavaScript del juego no cuenta en este límite. Los fondos y piezas de portada, intro y victoria se cargan de forma diferida, cuando se muestra esa pantalla; la primera carga solo trae lo del tablero, los personajes y el HUD.
-- **Gradación por estación (003):** se aplica sobre el escenario (casillas, objetos y fondos), no sobre personajes ni interfaz.
+- **Presupuesto:** `public/assets/` ≤ **4 MB** (decisión del 2 de noviembre; antes 2 MB). Hoy hay 2.19 MB. El JavaScript del juego no cuenta en este límite. Los fondos y piezas de portada, intro y victoria se cargan de forma diferida, cuando se muestra esa pantalla; la primera carga solo trae lo del tablero, los personajes y el HUD.
+- **Estaciones (010):** variantes pintadas por estación; la gradación del 003, si se hace, es solo una luz suave encima del escenario.
 
 ## Organización de assets
 Lo que se publica vive en `public/assets/` (WebP). La fuente (Blender, renders a tamaño completo, hojas originales) vive en `assets/`; las hojas pintadas están en `assets/ui/source/`. Nombres en inglés, minúscula y guiones, como el código.
@@ -167,11 +167,10 @@ public/assets/
 │   ├── rocks/          rock, rock-tile, rock-winter
 │   ├── mycelium/       net, net-b, net-dirt · conectores node, straight-h, straight-v, corner, cross, cross-b, burst
 │   │                   · trazos thread-a, thread-b, thread-c, sparkles
-│   └── father-tree/    asleep, awake (Blender, en uso) · asleep-, green-, awake-painted y
-│                       spring-, summer-, autumn-, winter-painted (pintados)
+│   └── father-tree/    asleep-, awake-painted (en uso) · green-, spring-, summer-, autumn-, winter-painted
 ├── characters/
-│   ├── anil/ bruno/ rubi/ maestra-bruna/   rest, work, happy (Blender) · portrait (pintado, sin placa)
-│   └── chispa/         rest|work|happy-{spring,summer,autumn,winter} (Blender) · portrait ·
+│   ├── anil/ bruno/ rubi/ maestra-bruna/   portrait (pintado, sin placa)
+│   └── chispa/         portrait ·
 │                       frame-{spring,summer,autumn,winter} (retrato con marco de estación)
 ├── ui/
 │   ├── panels/         parchment, sign, ribbon (sin texto)
@@ -181,15 +180,15 @@ public/assets/
 │   └── frames/         forest, roots, roots-pieces
 └── atlas/              atlas generados (PNG/WebP + JSON de Phaser); no se editan a mano
 ```
-- **Personajes:** la carpeta lleva el nombre del primer miembro de la especie (Añil = *Lactarius indigo*, Bruno = Champiñón, Rubí = *Amanita*, Chispa = *Gliophorus*, Maestra Bruna = *Conocybe arcana*); los reclutas de la misma especie usan el mismo arte. `rest`, `work` y `happy` son las poses de Blender (reposo, trabajando y feliz en el código); `portrait` es el retrato pintado para dock, fichas y "El gremio".
-- **Micelio por conectores:** la red puede dibujarse con piezas que unen casillas vecinas (`straight-h`, `straight-v`, `corner`, `cross`…) sobre `dirt`, o con el tile completo `net` sobre pasto. Falta la pieza en T; hoy `cross-b` es otra cruz.
-- **Estaciones:** pasto (`grass-autumn`, `grass-winter`), rocas (`rock-winter`), árboles (`autumn`, `winter`) y Árbol Padre (`*-painted` por estación) tienen variantes pintadas. Esto **contradice** el principio de "un solo juego de assets + gradación" (ver Luz por estación): hay que elegir entre variantes pintadas o gradación.
+- **Personajes:** la carpeta lleva el nombre del primer miembro de la especie (Añil = *Lactarius indigo*, Bruno = Champiñón, Rubí = *Amanita*, Chispa = *Gliophorus*, Maestra Bruna = *Conocybe arcana*); los reclutas de la misma especie usan el mismo arte. `portrait` es el retrato pintado para tablero, dock, fichas y "El gremio"; los sprites de Blender son fuente (`assets/sprites/webp/`).
+- **Micelio:** se dibuja con el tile completo `net`/`net-b` (decisión del 010). Los conectores (`straight-h`, `straight-v`, `corner`, `cross`…) sobre `dirt` quedan publicados para un efecto futuro (p. ej. el hilo que se teje); falta la pieza en T.
+- **Estaciones:** pasto (`grass-autumn`, `grass-winter`), rocas (`rock-winter`) y árboles (`autumn`, `winter`) cambian por estación (010). El Árbol Padre por estación (`spring-`…`winter-painted`) muestra un árbol vivo y verde, que se confunde con "despierto": por ahora el Padre usa solo `asleep-painted` y `awake-painted`.
 - **Fondos por orientación:** vertical en el teléfono (`menu`, `intro`, `victory`); en horizontal y escritorio, `menu-landscape` (16:9) para la portada y las panorámicas `*-wide` como franja superior o inferior detrás del tablero, la intro y la victoria. Las panorámicas solo tienen 310 px de alto: estiradas a pantalla completa se ven borrosas, así que van como franja y no como fondo completo.
 - **Fuera del árbol propuesto:** el Hogar, los estados de casilla y `blocked` van en `board/terrain/`, y los logos y pastillas en `ui/hud/`.
-- **Código:** `src/theme.ts` arma las rutas (`assetUrl`, `spriteKey`, `CHARACTER_DIR`, `fatherKey`); ningún otro archivo escribe rutas de assets a mano.
+- **Código:** `src/theme.ts` arma las rutas (`assetUrl`, `portraitKey`, `uiPortraitKey`, `CHARACTER_DIR`, `fatherKey`, `BOARD_ART`, y las variables CSS `--art-*` de la interfaz); ningún otro archivo escribe rutas de assets a mano.
 
 ## Inventario de piezas
-119 archivos publicados, 2.2 MB en total. "Listo" significa que el ancho alcanza para 2× a 390 px; los demás sirven para maquetar y hay que reexportarlos. Retirados en la v2 por traer texto horneado o baja resolución: las tarjetas con placa (`card`), `ribbon-hint`, `page-dots` y `rock-dark`.
+93 archivos publicados, 2.19 MB en total (el 010 sacó los sprites de Blender a `assets/sprites/webp/`). "Listo" significa que el ancho alcanza para 2× a 390 px; los demás sirven para maquetar y hay que reexportarlos. Retirados en la v2 por traer texto horneado o baja resolución: las tarjetas con placa (`card`), `ribbon-hint`, `page-dots` y `rock-dark`.
 
 | Archivo | Origen | Tamaño | Peso | Estado |
 | --- | --- | --- | --- | --- |
@@ -201,10 +200,8 @@ public/assets/
 | `backgrounds/menu.webp` | logo y fondos | 463 × 631 | 87 KB | Baja resolución (objetivo 860 px de ancho) |
 | `backgrounds/victory.webp` | logo y fondos | 466 × 631 | 93 KB | Baja resolución (objetivo 860 px de ancho) |
 | `board/father-tree/asleep-painted.webp` | tablero HD | 590 × 450 | 79 KB | Listo |
-| `board/father-tree/asleep.webp` | Blender | 176 × 192 | 6 KB | Listo |
 | `board/father-tree/autumn-painted.webp` | tablero v3 | 254 × 180 | 28 KB | Baja resolución (objetivo 380 px de ancho) |
 | `board/father-tree/awake-painted.webp` | tablero HD | 598 × 456 | 77 KB | Listo |
-| `board/father-tree/awake.webp` | Blender | 176 × 192 | 8 KB | Listo |
 | `board/father-tree/green-painted.webp` | tablero estaciones | 314 × 247 | 38 KB | Baja resolución (objetivo 380 px de ancho) |
 | `board/father-tree/spring-painted.webp` | tablero v3 | 256 × 180 | 29 KB | Baja resolución (objetivo 380 px de ancho) |
 | `board/father-tree/summer-painted.webp` | tablero v3 | 249 × 180 | 27 KB | Baja resolución (objetivo 380 px de ancho) |
@@ -246,39 +243,15 @@ public/assets/
 | `board/trees/grey.webp` | tablero HD | 230 × 239 | 19 KB | Listo |
 | `board/trees/waking.webp` | tablero estaciones | 164 × 147 | 11 KB | Listo |
 | `board/trees/winter.webp` | tablero estaciones | 166 × 147 | 13 KB | Listo |
-| `characters/anil/happy.webp` | Blender | 176 × 128 | 5 KB | Listo |
 | `characters/anil/portrait.webp` | UI v2 | 143 × 135 | 9 KB | Listo |
-| `characters/anil/rest.webp` | Blender | 176 × 128 | 5 KB | Listo |
-| `characters/anil/work.webp` | Blender | 176 × 128 | 5 KB | Listo |
-| `characters/bruno/happy.webp` | Blender | 176 × 128 | 3 KB | Listo |
 | `characters/bruno/portrait.webp` | UI v2 | 143 × 133 | 7 KB | Listo |
-| `characters/bruno/rest.webp` | Blender | 176 × 128 | 3 KB | Listo |
-| `characters/bruno/work.webp` | Blender | 176 × 128 | 3 KB | Listo |
 | `characters/chispa/frame-autumn.webp` | UI v2 | 102 × 108 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
 | `characters/chispa/frame-spring.webp` | UI v2 | 105 × 111 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
 | `characters/chispa/frame-summer.webp` | UI v2 | 103 × 112 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
 | `characters/chispa/frame-winter.webp` | UI v2 | 102 × 111 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
-| `characters/chispa/happy-autumn.webp` | Blender | 176 × 128 | 2 KB | Listo |
-| `characters/chispa/happy-spring.webp` | Blender | 176 × 128 | 2 KB | Listo |
-| `characters/chispa/happy-summer.webp` | Blender | 176 × 128 | 2 KB | Listo |
-| `characters/chispa/happy-winter.webp` | Blender | 176 × 128 | 2 KB | Listo |
 | `characters/chispa/portrait.webp` | UI v2 | 116 × 128 | 6 KB | Baja resolución (objetivo 140 px de ancho) |
-| `characters/chispa/rest-autumn.webp` | Blender | 176 × 128 | 2 KB | Listo |
-| `characters/chispa/rest-spring.webp` | Blender | 176 × 128 | 2 KB | Listo |
-| `characters/chispa/rest-summer.webp` | Blender | 176 × 128 | 2 KB | Listo |
-| `characters/chispa/rest-winter.webp` | Blender | 176 × 128 | 2 KB | Listo |
-| `characters/chispa/work-autumn.webp` | Blender | 176 × 128 | 2 KB | Listo |
-| `characters/chispa/work-spring.webp` | Blender | 176 × 128 | 2 KB | Listo |
-| `characters/chispa/work-summer.webp` | Blender | 176 × 128 | 2 KB | Listo |
-| `characters/chispa/work-winter.webp` | Blender | 176 × 128 | 2 KB | Listo |
-| `characters/maestra-bruna/happy.webp` | Blender | 176 × 160 | 5 KB | Listo |
 | `characters/maestra-bruna/portrait.webp` | UI v2 | 119 × 141 | 8 KB | Baja resolución (objetivo 140 px de ancho) |
-| `characters/maestra-bruna/rest.webp` | Blender | 176 × 160 | 5 KB | Listo |
-| `characters/maestra-bruna/work.webp` | Blender | 176 × 160 | 5 KB | Listo |
-| `characters/rubi/happy.webp` | Blender | 176 × 128 | 4 KB | Listo |
 | `characters/rubi/portrait.webp` | UI v2 | 136 × 133 | 8 KB | Listo |
-| `characters/rubi/rest.webp` | Blender | 176 × 128 | 3 KB | Listo |
-| `characters/rubi/work.webp` | Blender | 176 × 128 | 4 KB | Listo |
 | `ui/buttons/close.webp` | UI v2 | 57 × 52 | 2 KB | Baja resolución (objetivo 88 px de ancho) |
 | `ui/buttons/dot-active.webp` | UI v2 | 19 × 20 | 1 KB | Baja resolución (objetivo 24 px de ancho) |
 | `ui/buttons/dot.webp` | UI v2 | 18 × 18 | 1 KB | Baja resolución (objetivo 24 px de ancho) |
@@ -321,11 +294,11 @@ public/assets/
 - Las piezas SVG del 008 (tablón, sello, papel rasgado) se retiran a medida que llegan las piezas pintadas.
 
 ## Sprites en el juego
-- Los renders de Blender viven en `assets/sprites/` (fuente, PNG) y se publican en WebP en `public/assets/characters/<personaje>/`: `rest`, `work` y `happy`, a 176 × 128. Maestra Bruna, la más alta, va a 176 × 160 con la misma escala y el mismo suelo (su render `hechizo` es `work`). Chispa tiene una variante por estación (`<pose>-<estación>`).
-- Uso: retrato en reposo en el dock (feliz cuando está seleccionado o sugerido), pose feliz grande en la ficha y pose de trabajo en el tablero, sobre la casilla donde ese miembro trabajó hoy.
-- **Árbol Padre:** `assets/blender/arbol-padre.blend` (estados en `estados_arbol.py`), publicado en `public/assets/board/father-tree/{asleep,awake}.webp` a 176 × 192 con la misma escala. Dormido: tronco retorcido gris, raíces largas y ramas desnudas. Despierto: corteza cálida y copa dorada en paraguas (hojas `#F2BC45`, sombra `#C98A2B`, luz `#FFE08A`) con borde que brilla `#FFE27A`, aura `#FFF4C2`, luces cálidas y destellos. En el tablero mide 1,2 casillas de ancho y su copa asoma por encima del marco. Sustituye en el tablero a los recortes `public/assets/ui/arbol-padre-*.webp` (placeholders de baja resolución). La v2 plantea dibujarlo de unas 3 casillas de ancho; hoy mide 1,2 (`FATHER_SCALE` en `theme.ts`) y queda pendiente decidir el tamaño final.
-- La silueta de cono de cada especie (`.hat--*` en `styles.css`) queda solo como respaldo si un sprite faltara.
-- Peso: todo `public/assets/` suma 2.17 MB en WebP (límite 4 MB).
+- **Desde el 010** el juego usa los retratos pintados (`characters/<personaje>/portrait`): en el dock (con un salto "feliz" cuando está seleccionado o sugerido), grande en la ficha y en el tablero sobre la casilla donde ese miembro trabajó hoy, a 0,92 casillas de ancho y con su alto propio (Maestra Bruna, más alta).
+- Los renders de Blender viven en `assets/sprites/` (PNG) y sus WebP de 176 × 128 (Maestra Bruna 176 × 160) en `assets/sprites/webp/`, como fuente.
+- **Árbol Padre:** desde el 010 el tablero usa `asleep-painted` / `awake-painted` a 1,35 casillas de ancho (`FATHER_SCALE`). El de Blender, `assets/blender/arbol-padre.blend` (estados en `estados_arbol.py`), queda como fuente en `assets/sprites/webp/board/father-tree/{asleep,awake}.webp` (176 × 192). Dormido: tronco retorcido gris, raíces largas y ramas desnudas. Despierto: corteza cálida y copa dorada en paraguas (hojas `#F2BC45`, sombra `#C98A2B`, luz `#FFE08A`) con borde que brilla `#FFE27A`, aura `#FFF4C2`, luces cálidas y destellos. En el tablero mide 1,2 casillas de ancho y su copa asoma por encima del marco. Sustituye en el tablero a los recortes `public/assets/ui/arbol-padre-*.webp` (placeholders de baja resolución). La v2 plantea dibujarlo de unas 3 casillas de ancho; hoy mide 1,2 (`FATHER_SCALE` en `theme.ts`) y queda pendiente decidir el tamaño final.
+- La silueta de cono de cada especie (`.hat--*` en `styles.css`) queda solo como respaldo si un retrato faltara.
+- Peso: todo `public/assets/` suma 2.19 MB en WebP (límite 4 MB).
 
 ## Referencias (`references/`)
 | Archivo | Tomamos | Dejamos |

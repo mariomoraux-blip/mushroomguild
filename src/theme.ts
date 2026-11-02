@@ -35,12 +35,16 @@ export const font = {
 export const assetUrl = (path: string) => `${import.meta.env.BASE_URL}assets/${path}.webp`;
 
 /**
- * Sprites de Blender en `public/assets/characters/<personaje>/<pose>.webp`. La carpeta lleva el nombre
- * del primer miembro de cada especie; los reclutas de la misma especie usan el mismo arte.
- * La Gliophorus tiene una variante por estación (`<pose>-<estación>.webp`).
+ * Arte pintado de los personajes (cambio 010): un retrato por personaje en
+ * `public/assets/characters/<personaje>/portrait.webp`, en el tablero, el dock y las fichas.
+ * La carpeta lleva el nombre del primer miembro de cada especie; los reclutas usan el mismo arte.
+ * La pose ya no cambia de imagen: se marca con `data-pose` (CSS) o con escala en el tablero.
+ * Chispa (Gliophorus) lleva en la interfaz su corona de la estación (`frame-<estación>.webp`).
+ * Los sprites de Blender quedaron como fuente en `assets/characters/`.
  */
 export type Pose = 'reposo' | 'trabajando' | 'feliz';
 export const SEASON_SLUGS = ['spring', 'summer', 'autumn', 'winter'] as const;
+export type SeasonSlug = (typeof SEASON_SLUGS)[number];
 export const SPRITE_SPECIES = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'] as const;
 export const CHARACTER_DIR: Readonly<Record<string, string>> = {
   champi: 'bruno',
@@ -49,23 +53,69 @@ export const CHARACTER_DIR: Readonly<Record<string, string>> = {
   gliophorus: 'chispa',
   mago: 'maestra-bruna',
 };
-const POSE_FILE: Readonly<Record<Pose, string>> = { reposo: 'rest', trabajando: 'work', feliz: 'happy' };
-/** Clave del sprite (es también su ruta bajo `public/assets/`), o null si la especie no tiene arte. */
-export function spriteKey(species: string, pose: Pose, seasonIndex = 0): string | null {
+/** Retrato pintado sin marco (tablero), o null si la especie no tiene arte. */
+export function portraitKey(species: string): string | null {
   const dir = CHARACTER_DIR[species];
-  if (!dir) return null;
-  const season = species === 'gliophorus' ? `-${SEASON_SLUGS[seasonIndex] ?? 'spring'}` : '';
-  return `characters/${dir}/${POSE_FILE[pose]}${season}`;
+  return dir ? `characters/${dir}/portrait` : null;
 }
-/** Todos miden 176 px de ancho a la misma escala (100 px/m); el alto es 128 px, o 160 px para Maestra Bruna, la más alta. */
+/** Retrato para la interfaz: el de Chispa va con la corona de la estación. */
+export function uiPortraitKey(species: string, seasonIndex = 0): string | null {
+  if (species === 'gliophorus') return `characters/chispa/frame-${SEASON_SLUGS[seasonIndex] ?? 'spring'}`;
+  return portraitKey(species);
+}
 export const spriteUrl = (key: string) => assetUrl(key);
-/** Árbol Padre de Blender (`public/assets/board/father-tree/`): 176 × 192; ocupa su casilla y sobresale hacia arriba. */
-export const fatherKey = (awake: boolean) => `board/father-tree/${awake ? 'awake' : 'asleep'}`;
-/** Ancho del sprite del Árbol Padre en casillas (los personajes usan 1,05). */
-export const FATHER_SCALE = 1.2;
-/** Margen del canvas sobre el claro, en casillas: deja que la copa despierta sobresalga del marco. */
+
+/** Árbol Padre pintado: dormido (gris) o despierto (dorado). Ocupa su casilla y sobresale hacia arriba. */
+export const fatherKey = (awake: boolean) => `board/father-tree/${awake ? 'awake' : 'asleep'}-painted`;
+/** Ancho del Árbol Padre en casillas (los personajes usan 0,92). */
+export const FATHER_SCALE = 1.35;
+/** Margen del canvas sobre el claro, en casillas: deja que la copa sobresalga del marco. */
 export const BOARD_HEADROOM = 0.2;
 export const boardArtUrl = (key: string) => assetUrl(key);
+
+/**
+ * Piezas pintadas del tablero (`public/assets/board/`), por estación donde hay variante
+ * (docs/art-direction.md › Tablero). `paint.ts` las dibuja si están cargadas; si no, usa su dibujo vectorial.
+ */
+export const BOARD_ART = {
+  grass: { spring: ['board/terrain/grass', 'board/terrain/grass-b', 'board/terrain/grass-c'], summer: ['board/terrain/grass', 'board/terrain/grass-b', 'board/terrain/grass-c'], autumn: ['board/terrain/grass-autumn'], winter: ['board/terrain/grass-winter'] },
+  net: ['board/mycelium/net', 'board/mycelium/net-b'],
+  home: 'board/terrain/home',
+  log: ['board/logs/log', 'board/logs/log-used'],
+  rock: { spring: 'board/rocks/rock', summer: 'board/rocks/rock', autumn: 'board/rocks/rock', winter: 'board/rocks/rock-winter' },
+  tree: { grey: 'board/trees/grey', waking: 'board/trees/waking', spring: 'board/trees/alive', summer: 'board/trees/alive', autumn: 'board/trees/autumn', winter: 'board/trees/winter' },
+  star: 'ui/icons/star',
+} as const;
+
+/** Todas las claves de arte del tablero (para precargar). */
+export function boardArtKeys(): string[] {
+  const keys = new Set<string>();
+  const walk = (v: unknown) => {
+    if (typeof v === 'string') keys.add(v);
+    else if (Array.isArray(v)) v.forEach(walk);
+    else if (v && typeof v === 'object') Object.values(v).forEach(walk);
+  };
+  walk(BOARD_ART);
+  return [...keys];
+}
+
+/** Piezas de interfaz que el CSS usa como fondo (`--art-<nombre>`). */
+const UI_ART: Record<string, string> = {
+  frame: 'ui/frames/roots',
+  'pill-nutrients': 'ui/hud/pill-nutrients',
+  'pill-spores': 'ui/hud/pill-spores',
+  'pill-trees': 'ui/hud/pill-trees',
+  'btn-primary': 'ui/buttons/primary',
+  'btn-secondary': 'ui/buttons/secondary',
+  'btn-help': 'ui/buttons/help',
+  'btn-close': 'ui/buttons/close',
+  calendar: 'ui/icons/calendar',
+  moon: 'ui/icons/moon',
+  recruit: 'ui/icons/recruit',
+  sign: 'ui/panels/sign',
+  ribbon: 'ui/panels/ribbon',
+  ...Object.fromEntries(SEASON_SLUGS.map((s) => [`season-${s}`, `ui/icons/season-${s}`])),
+};
 
 /** Color de la paleta como número para Phaser (0xRRGGBB). */
 export const hex = (token: ColorToken): number => parseInt(color[token].slice(1), 16);
@@ -91,4 +141,5 @@ export function applyTheme(root: HTMLElement = document.documentElement): void {
   for (const [k, v] of Object.entries(color)) root.style.setProperty(`--${k}`, v);
   root.style.setProperty('--font-display', font.display);
   root.style.setProperty('--font-body', font.body);
+  for (const [k, v] of Object.entries(UI_ART)) root.style.setProperty(`--art-${k}`, `url("${assetUrl(v)}")`);
 }

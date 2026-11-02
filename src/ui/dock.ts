@@ -1,7 +1,7 @@
 import { es } from '../copy/es';
 import { COST, DAYS, MAX_GUILD, magicSpent, recruitableCount, season, seasonIndex, DAYS_PER_SEASON, type Member } from '../rules';
 import { suggestedMember, type AppState, type Store } from '../store';
-import { grassMound, moonButton, seedPacket } from './art';
+import { grassMound } from './art';
 import { el, portrait, setPortrait, setText } from './dom';
 
 /** Estado de la tarjeta: lista, descansa o (Maestra Bruna) cuándo vuelve su magia. */
@@ -20,12 +20,12 @@ export function mountDock(root: HTMLElement, store: Store) {
   const recruit = el(
     'button',
     { class: 'card card--recruit', type: 'button', 'data-action': 'recruit' },
-    seedPacket(),
+    el('span', { class: 'card__icon card__icon--recruit', 'aria-hidden': 'true' }),
     el('span', { class: 'card__name' }, `+ ${es.dock.recruit}`),
     el('span', { class: 'card__meta' }, es.dock.recruitCost(COST.recruit)),
   );
   const endLabel = el('span', { class: 'end__label' });
-  const end = el('button', { class: 'end', type: 'button' }, moonButton(), endLabel);
+  const end = el('button', { class: 'end', type: 'button' }, el('span', { class: 'end__moon', 'aria-hidden': 'true' }), endLabel);
   root.setAttribute('aria-label', es.dock.label);
   root.append(cards, end);
 

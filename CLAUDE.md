@@ -19,7 +19,7 @@ Concept doc y GDD: documento "El Gremio de los Hongos · Fase 0" (Claude Docs), 
 - `src/rules/` es lógica pura: sin Phaser, sin DOM, sin `Math.random` sin semilla. Todo el estado del juego vive aquí.
 - `src/scenes/` solo dibuja el estado y traduce input en llamadas a `rules`. Nunca cambia el estado directamente.
 - Los textos visibles viven en `src/copy/es.ts`. Español neutro, tono cozy, frases cortas.
-- Assets publicados en `public/assets/` (WebP): `backgrounds/`, `board/` (terrain, trees, logs, rocks, mycelium, father-tree), `characters/<personaje>/` (rest, work, happy, card), `ui/` (panels, buttons, hud, icons, frames) y `atlas/` (generados). Nombres en inglés y minúscula con guiones. Fuente en `assets/` (Blender, renders, hojas originales). Presupuesto de `public/assets/` ≤ 4 MB; portada, intro y victoria (y sus fondos) se cargan solo cuando se muestran.
+- Assets publicados en `public/assets/` (WebP): `backgrounds/`, `board/` (terrain, trees, logs, rocks, mycelium, father-tree), `characters/<personaje>/` (portrait; Chispa también frame-<estación>), `ui/` (panels, buttons, hud, icons, frames) y `atlas/` (generados). Nombres en inglés y minúscula con guiones. Fuente en `assets/` (Blender, renders, hojas originales). Presupuesto de `public/assets/` ≤ 4 MB; portada, intro y victoria (y sus fondos) se cargan solo cuando se muestran.
 
 ## Móvil primero
 - El objetivo principal es un navegador de teléfono en vertical (360–430 px). El escritorio es una variante, no al revés.

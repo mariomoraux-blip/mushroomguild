@@ -10,12 +10,23 @@ const presets: Record<string, () => GameState> = {
     (['lactarius', 'champi', 'gliophorus'] as RecruitableSpecies[]).forEach((sp) => (s = recruit(s, sp).state));
     return endDay(s).state;
   },
+  /** Otoño e invierno con árboles vivos, red y troncos usados (para ver las piezas por estación). */
+  autumn: () => seasonPreview(7),
+  winter: () => seasonPreview(10),
   /** Árbol Padre despierto (solo para ver su sprite; no dispara el final). */
   fatherAwake: () => {
     const s = newGame();
     return { ...s, tiles: s.tiles.map((t) => (t.kind === 'mother' ? { ...t, alive: true } : t)) };
   },
 };
+
+function seasonPreview(day: number): GameState {
+  const s = newGame();
+  const tiles = s.tiles.map((t, i) =>
+    t.kind === 'tree' && i % 2 ? { ...t, alive: true, net: true } : t.kind === 'log' && i % 2 ? { ...t, uses: 1 } : t.kind === 'soil' && i % 3 === 0 ? { ...t, net: true } : t,
+  );
+  return { ...s, day, tiles };
+}
 
 export function debugGame(): GameState | null {
   if (!import.meta.env.DEV) return null;

@@ -452,6 +452,70 @@ button { font: inherit; color: inherit; }
 .help__tip { margin-top: 14px !important; padding: 10px 12px; background: var(--mycelium); border: 2px dashed var(--moss); border-radius: 16px; }
 
 /* ─── Horizontal en teléfono: tablero a la izquierda, HUD y dock a la derecha ─ */
+/* ─── 010 · Bosque pintado: piezas pintadas en HUD, tablero y dock ────────── */
+/* Marco de raíces trenzadas (ui/frames/roots) en lugar del marco de madera. 12 px por lado = BOARD_BORDER / 2. */
+.board {
+  border: 12px solid transparent;
+  border-image: var(--art-frame) 40 / 12px / 3px stretch;
+  outline: 0;
+  border-radius: 18px;
+  box-shadow: 0 8px 14px -6px color-mix(in srgb, var(--bark) 55%, transparent);
+}
+.board__overlay { border-radius: 10px; }
+
+/* Pastillas pintadas del HUD: el ícono viene en la imagen, el texto a la derecha. */
+.chip {
+  padding: 0 2px 0 46%;
+  border-radius: 0;
+  background: transparent center / 100% 100% no-repeat;
+  box-shadow: none;
+}
+.chip--nutrients { background-image: var(--art-pill-nutrients); }
+.chip--spores { background-image: var(--art-pill-spores); }
+.chip--trees { background-image: var(--art-pill-trees); }
+.chip__value { font-size: 16px; }
+.chip__label { font-size: 8.5px; letter-spacing: -0.3px; }
+.hud__day-caption { display: flex; align-items: center; gap: 1px; font-size: 10px; letter-spacing: -0.2px; white-space: nowrap; }
+.hud__season {
+  flex: 0 0 12px;
+  height: 12px;
+  background: var(--art-season-spring) center / contain no-repeat;
+}
+.hud__season[data-season='summer'] { background-image: var(--art-season-summer); }
+.hud__season[data-season='autumn'] { background-image: var(--art-season-autumn); }
+.hud__season[data-season='winter'] { background-image: var(--art-season-winter); }
+.hud { gap: 4px 5px; }
+.hud__day-value { font-size: 13px; }
+.hud__help {
+  margin-right: -6px;
+  transform: none;
+  background: var(--art-btn-help) center / 40px auto no-repeat;
+}
+
+/* Retratos pintados: la pose se marca con un gesto, no con otra imagen. */
+.portrait img { transition: transform 0.2s ease-out; transform-origin: 50% 100%; }
+.portrait[data-pose='happy'] img { transform: translateY(-2px) scale(1.06); }
+.portrait--sm { width: 52px; height: 48px; }
+
+/* Reclutar: sobre y mochila pintados. */
+.card--recruit { padding-left: 64px; }
+.card__icon--recruit {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  width: 54px;
+  height: 38px;
+  translate: 0 -50%;
+  background: var(--art-recruit) center / contain no-repeat;
+}
+
+/* Terminar el día: luna pintada sobre la cinta. */
+.end__moon {
+  position: absolute;
+  inset: 0 0 16px;
+  background: var(--art-moon) center / contain no-repeat;
+}
+
 @media (orientation: landscape) and (max-height: 540px) {
   .app {
     max-width: none;
@@ -460,8 +524,7 @@ button { font: inherit; color: inherit; }
     grid-template-areas: 'board hud' 'board .' 'board bottom';
   }
   .board-area { width: calc((100dvh - 2 * var(--gap) - 24px) * 5 / 8 + 24px); }
-  .board > .art--vine { display: none; }
-}
+  }
 
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }

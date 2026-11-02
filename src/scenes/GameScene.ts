@@ -1,15 +1,13 @@
 import * as Phaser from 'phaser';
-import { H, seasonIndex, W } from '../rules';
+import { H, W } from '../rules';
 import { paintBoard } from './paint';
 import { highlighted, suggestedTile, type AppState, type Store } from '../store';
-import { BOARD_HEADROOM, boardArtUrl, FATHER_SCALE, fatherKey, renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteKey, spriteUrl, type Pose } from '../theme';
-
-const POSES: Pose[] = ['reposo', 'trabajando', 'feliz'];
+import { BOARD_HEADROOM, boardArtKeys, boardArtUrl, FATHER_SCALE, fatherKey, portraitKey, renderResolution, SPRITE_SPECIES, spriteUrl } from '../theme';
 const BOARD_KEY = 'claro';
 
 /**
- * Dibuja el claro 5×8 (pintado en Canvas2D por `paint.ts`) y a los miembros que trabajaron hoy
- * (sprites de Blender sobre su casilla, que tapan el objeto de abajo).
+ * Dibuja el claro 5×8 (pintado en Canvas2D por `paint.ts` con las piezas pintadas por estación),
+ * el Árbol Padre y a los miembros que trabajaron hoy (su retrato sobre la casilla, que tapa el objeto de abajo).
  * Solo lee el estado del store; nunca lo cambia. La entrada la recibe la capa DOM de `ui/board.ts`.
  */
 export class GameScene extends Phaser.Scene {
@@ -26,15 +24,11 @@ export class GameScene extends Phaser.Scene {
 
   preload(): void {
     for (const sp of SPRITE_SPECIES) {
-      for (const pose of POSES) {
-        const seasons = sp === 'gliophorus' ? SEASON_SLUGS.map((_, i) => i) : [0];
-        for (const i of seasons) {
-          const key = spriteKey(sp, pose, i)!;
-          this.load.image(key, spriteUrl(key));
-        }
-      }
+      const key = portraitKey(sp)!;
+      this.load.image(key, spriteUrl(key));
     }
     for (const awake of [false, true]) this.load.image(fatherKey(awake), boardArtUrl(fatherKey(awake)));
+    for (const key of boardArtKeys()) this.load.image(key, boardArtUrl(key));
   }
 
   create(): void {
@@ -77,6 +71,7 @@ export class GameScene extends Phaser.Scene {
       star: star ? { x: star.x, y: star.y } : null,
       occupied,
       fatherSprite: this.textures.exists(fatherKey(false)) && this.textures.exists(fatherKey(true)),
+      art: (key) => (this.textures.exists(key) ? (this.textures.get(key).getSourceImage() as CanvasImageSource) : undefined),
     });
     tex.refresh();
     this.boardImage?.setTexture(BOARD_KEY).setDisplaySize(T * W, T * H);
@@ -99,13 +94,12 @@ export class GameScene extends Phaser.Scene {
     this.father.setTexture(key).setDisplaySize(w, (w * frame.height) / frame.width).setPosition((tile.x + 0.5) * T, (tile.y + 1) * T).setVisible(true);
   }
 
-  /** Miembros que trabajaron hoy: su sprite "trabajando" sobre la casilla donde actuaron. */
+  /** Miembros que trabajaron hoy: su retrato pintado sobre la casilla donde actuaron. */
   private drawWorkers(state: AppState, T: number): void {
-    const season = seasonIndex(state.game.day);
     const seen = new Set<number>();
     for (const m of state.game.members) {
       if (!m.at) continue;
-      const key = spriteKey(m.species, 'trabajando', season);
+      const key = portraitKey(m.species);
       if (!key || !this.textures.exists(key)) continue;
       seen.add(m.id);
       let img = this.sprites.get(m.id);
@@ -113,10 +107,10 @@ export class GameScene extends Phaser.Scene {
         img = this.add.image(0, 0, key).setOrigin(0.5, 1).setDepth(5);
         this.sprites.set(m.id, img);
       }
-      // Mismo ancho para todos; el alto sale de cada sprite, así Maestra Bruna se ve más alta sin deformarse.
-      const w = T * 1.05;
+      // Mismo ancho para todos; el alto sale de cada retrato, así Maestra Bruna se ve más alta sin deformarse.
+      const w = T * 0.92;
       const frame = this.textures.getFrame(key);
-      img.setTexture(key).setDisplaySize(w, (w * frame.height) / frame.width).setPosition((m.at.x + 0.5) * T, (m.at.y + 1) * T - T * 0.04).setVisible(true);
+      img.setTexture(key).setDisplaySize(w, (w * frame.height) / frame.width).setPosition((m.at.x + 0.5) * T, (m.at.y + 1) * T - T * 0.03).setVisible(true);
     }
     for (const [id, img] of this.sprites) if (!seen.has(id)) img.setVisible(false);
   }

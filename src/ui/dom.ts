@@ -1,4 +1,4 @@
-import { spriteKey, spriteUrl, type Pose } from '../theme';
+import { spriteUrl, uiPortraitKey, type Pose } from '../theme';
 /** Crea un elemento con atributos y hijos. */
 export function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -24,8 +24,8 @@ export function setText(node: Element, text: string): void {
 export const hat = (species: string) => el('span', { class: `hat hat--${species}`, 'aria-hidden': 'true' });
 
 /**
- * Retrato de un miembro: su sprite de Blender o, si una especie no lo tuviera, la silueta.
- * Devuelve un contenedor estable; `setPortrait` cambia la pose sin recrearlo.
+ * Retrato pintado de un miembro (Chispa con la corona de la estación) o, si una especie no lo tuviera,
+ * la silueta. Devuelve un contenedor estable; `setPortrait` cambia la pose (`data-pose`, CSS) sin recrearlo.
  */
 export function portrait(species: string, pose: Pose = 'reposo', seasonIndex = 0, size: 'sm' | 'md' | 'lg' = 'sm'): HTMLElement {
   const box = el('span', { class: `portrait portrait--${size}`, 'aria-hidden': 'true' });
@@ -33,8 +33,11 @@ export function portrait(species: string, pose: Pose = 'reposo', seasonIndex = 0
   return box;
 }
 
+const POSE_ATTR: Readonly<Record<Pose, string>> = { reposo: 'rest', trabajando: 'work', feliz: 'happy' };
+
 export function setPortrait(box: HTMLElement, species: string, pose: Pose, seasonIndex = 0): void {
-  const key = spriteKey(species, pose, seasonIndex);
+  box.dataset.pose = POSE_ATTR[pose];
+  const key = uiPortraitKey(species, seasonIndex);
   const want = key ?? `hat-${species}`;
   if (box.dataset.key === want) return;
   box.dataset.key = want;

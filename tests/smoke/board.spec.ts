@@ -156,24 +156,24 @@ test('Maestra Bruna: primero el hechizo, después las casillas', async ({ page }
   await expect(valid(page).first()).toHaveAttribute('aria-label', /Árbol vivo/);
 });
 
-test('Maestra Bruna: retrato propio en el dock y más alta en el tablero', async ({ page }, info) => {
+test('Maestra Bruna: retrato pintado en el dock y más alta en el tablero', async ({ page }, info) => {
   await page.goto('/?debugState=fullGuild');
   const img = page.locator('.card--mago .portrait img');
-  await expect(img).toHaveAttribute('src', /characters\/maestra-bruna\/(rest|happy)\.webp$/); // feliz si es la sugerida
-  await expect.poll(() => img.evaluate((i: HTMLImageElement) => (i.complete ? i.naturalHeight : 0))).toBe(160);
+  await expect(img).toHaveAttribute('src', /characters\/maestra-bruna\/portrait\.webp$/);
+  await expect.poll(() => img.evaluate((i: HTMLImageElement) => (i.complete ? i.naturalHeight : 0))).toBe(141);
   const mage = page.locator('.card--mago');
   await mage.scrollIntoViewIfNeeded();
   await mage.click();
   await page.getByRole('button', { name: /Lluvia de esporas/ }).click();
   await valid(page).first().click();
-  // Su sprite de trabajo (176 × 160) conserva la proporción: más alto que los de 176 × 128.
+  // Su retrato (119 × 141) conserva la proporción: más alto que ancho, a diferencia de los demás.
   const ratio = () =>
     page.evaluate(() => {
       const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: { type: string; visible: boolean; texture: { key: string }; displayWidth: number; displayHeight: number }[] } } } } };
-      const s = w.game.scene.getScene('Game').children.list.find((o) => o.type === 'Image' && o.visible && o.texture.key === 'characters/maestra-bruna/work');
+      const s = w.game.scene.getScene('Game').children.list.find((o) => o.type === 'Image' && o.visible && o.texture.key === 'characters/maestra-bruna/portrait');
       return s ? s.displayHeight / s.displayWidth : 0;
     });
-  await expect.poll(ratio).toBeCloseTo(160 / 176, 2);
+  await expect.poll(ratio).toBeCloseTo(141 / 119, 2);
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/007-maga-390x844.png' });
 });
 
@@ -277,25 +277,29 @@ test('claros aleatorios: cada partida cambia y ?seed= repite el mismo mapa', asy
   expect(a.split('|').filter((n) => n === 'Árbol gris')).toHaveLength(7);
 });
 
-test('estilo cozy: retratos en el dock, tablón de madera, sello, botón de luna y fondo vivo', async ({ page }, info) => {
+test('estilo cozy: retratos pintados, tablón, pastillas, luna pintada, marco de raíces y fondo vivo', async ({ page }, info) => {
   await page.goto('/?seed=7');
   const imgs = page.locator('.dock__item .portrait img');
   await expect(imgs).toHaveCount(3);
   for (const img of await imgs.all()) expect(await img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
-  // Piezas ilustradas en SVG (bosque ilustrado, 008).
-  for (const sel of ['.hud .art--sign svg', '.hud__day .art--tag svg', '.chip .art--medal svg', '.hud__help .art--seal svg', '.notice .art--torn svg', '.end .art--moon svg', '.board .art--vine svg', '.card .art--mound svg']) {
+  // Piezas SVG que se conservan del 008.
+  for (const sel of ['.hud .art--sign svg', '.hud__day .art--tag svg', '.notice .art--torn svg', '.card .art--mound svg']) {
     await expect(page.locator(sel).first()).toBeAttached();
   }
+  // Piezas pintadas (010) como fondos CSS.
+  const bg = (sel: string, prop = 'background-image') => page.locator(sel).first().evaluate((n, p) => getComputedStyle(n).getPropertyValue(p), prop);
+  expect(await bg('.chip--nutrients')).toContain('ui/hud/pill-nutrients.webp');
+  expect(await bg('.hud__help')).toContain('ui/buttons/help.webp');
+  expect(await bg('.end__moon')).toContain('ui/icons/moon.webp');
+  expect(await bg('.board', 'border-image-source')).toContain('ui/frames/roots.webp');
   await expect(page.locator('canvas.ambient')).toBeAttached();
   // Trabajó hoy: al descomponer, el sprite de Bruno aparece en el tablero.
   const visibleSprites = () =>
     page.evaluate(() => {
       type Obj = { type: string; visible: boolean; texture?: { key: string } };
       const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: Obj[] } } } } };
-      // Sprites de miembros: imágenes visibles que no son el claro pintado ("claro") ni el Árbol Padre.
-      return w.game.scene
-        .getScene('Game')
-        .children.list.filter((o) => o.type === 'Image' && o.visible && o.texture?.key !== 'claro' && !o.texture?.key.startsWith('board/father-tree/')).length;
+      // Retratos de miembros sobre el tablero.
+      return w.game.scene.getScene('Game').children.list.filter((o) => o.type === 'Image' && o.visible && o.texture?.key.startsWith('characters/')).length;
     });
   expect(await visibleSprites()).toBe(0);
   await page.locator('[data-id="2"]').click();
@@ -320,7 +324,7 @@ test('fondo vivo: con movimiento reducido el shader pinta un solo cuadro', async
   await ctx.close();
 });
 
-test('Árbol Padre: sprite de Blender dormido y despierto, sobresaliendo de su casilla', async ({ page }, info) => {
+test('Árbol Padre: pintado dormido y despierto, sobresaliendo de su casilla', async ({ page }, info) => {
   const father = () =>
     page.evaluate(() => {
       const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: { type: string; visible: boolean; texture: { key: string }; displayWidth: number; displayHeight: number }[] } } } } };
@@ -328,9 +332,26 @@ test('Árbol Padre: sprite de Blender dormido y despierto, sobresaliendo de su c
       return s ? { key: s.texture.key, ratio: s.displayHeight / s.displayWidth } : null;
     });
   await page.goto('/?seed=7');
-  await expect.poll(father).toEqual({ key: 'board/father-tree/asleep', ratio: expect.closeTo(192 / 176, 2) });
+  await expect.poll(father).toEqual({ key: 'board/father-tree/asleep-painted', ratio: expect.closeTo(450 / 590, 2) });
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/009-arbol-dormido-390x844.png' });
   await page.goto('/?debugState=fatherAwake');
-  await expect.poll(async () => (await father())?.key).toBe('board/father-tree/awake');
+  await expect.poll(async () => (await father())?.key).toBe('board/father-tree/awake-painted');
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/009-arbol-despierto-390x844.png' });
+});
+
+test('Bosque pintado: el tablero usa las piezas de cada estación', async ({ page }, info) => {
+  const keys = () =>
+    page.evaluate(() => {
+      const w = window as unknown as { game: { textures: { exists: (k: string) => boolean } } };
+      return ['board/terrain/grass', 'board/terrain/grass-autumn', 'board/terrain/grass-winter', 'board/trees/autumn', 'board/rocks/rock-winter'].every((k) => w.game.textures.exists(k));
+    });
+  await page.goto('/?map=clasico');
+  await expect.poll(keys).toBe(true);
+  if (info.project.name !== 'vertical-390x844') return;
+  await page.screenshot({ path: 'docs/screenshots/010-primavera-390x844.png' });
+  for (const season of ['autumn', 'winter']) {
+    await page.goto(`/?map=clasico&debugState=${season}`);
+    await expect.poll(keys).toBe(true);
+    await page.screenshot({ path: `docs/screenshots/010-${season === 'autumn' ? 'otono' : 'invierno'}-390x844.png` });
+  }
 });

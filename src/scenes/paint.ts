@@ -1,8 +1,11 @@
 // Pintor del claro (Canvas2D): pradera con textura, micelio luminoso y objetos ilustrados.
 // Solo dibuja a partir de datos; los colores salen de theme.ts. Es determinista (sin Math.random):
 // la variación sale de un hash de la casilla.
-import { H, neighbors, W, type GameState, type Tile } from '../rules';
-import { rgba, type ColorToken } from '../theme';
+import { H, neighbors, seasonIndex, W, type GameState, type Tile } from '../rules';
+import { BOARD_ART, rgba, SEASON_SLUGS, type ColorToken, type SeasonSlug } from '../theme';
+
+/** Busca una pieza pintada ya cargada (clave = ruta bajo `public/assets/`). */
+export type ArtLookup = (key: string) => CanvasImageSource | undefined;
 
 export interface PaintInput {
   readonly game: GameState;
@@ -14,6 +17,8 @@ export interface PaintInput {
   readonly occupied: ReadonlySet<string>;
   /** El Árbol Padre se dibuja aparte con su sprite de Blender: aquí solo su aura y su aro. */
   readonly fatherSprite?: boolean;
+  /** Piezas pintadas del tablero (cambio 010). Sin ellas, o si falta una, se usa el dibujo vectorial. */
+  readonly art?: ArtLookup;
 }
 
 /** Lo que se pintó en cada casilla (para pruebas). */
@@ -21,6 +26,8 @@ export interface Painted {
   readonly x: number;
   readonly y: number;
   readonly object: Tile['kind'] | 'none';
+  /** Pieza pintada usada para el objeto (si hubo arte). */
+  readonly art?: string;
 }
 
 type Ctx = CanvasRenderingContext2D;
@@ -520,16 +527,76 @@ function paintStar(ctx: Ctx, T: number, x: number, y: number) {
   ctx.stroke();
 }
 
+
+// ─── Piezas pintadas (cambio 010) ──────────────────────────────────────────────
+type Art = { readonly get: ArtLookup; readonly season: SeasonSlug };
+
+const size = (img: CanvasImageSource): [number, number] => {
+  const i = img as { width: number; height: number };
+  return [Number(i.width) || 1, Number(i.height) || 1];
+};
+
+/** Fondo de casilla pintado (pasto de la estación o red de micelio). */
+export function groundKey(t: Tile, season: SeasonSlug, occupied = false): string {
+  // La casa-hongo es una casilla entera; con alguien encima queda solo la red.
+  if (t.kind === 'home' && !occupied) return BOARD_ART.home;
+  if (t.net) return BOARD_ART.net[Math.floor(hash(t.x, t.y, 90) * BOARD_ART.net.length)]!;
+  const set = BOARD_ART.grass[season];
+  return set[Math.floor(hash(t.x, t.y, 91) * set.length)]!;
+}
+
+/** Pieza pintada del objeto de la casilla, o null si se queda en el suelo. */
+export function objectKey(t: Tile, season: SeasonSlug): string | null {
+  switch (t.kind) {
+    case 'log':
+      return BOARD_ART.log[Math.min(t.uses, BOARD_ART.log.length - 1)]!;
+    case 'rock':
+      return BOARD_ART.rock[season];
+    case 'tree':
+      // Dormido: gris; si la red ya lo alcanza, empieza a despertar.
+      return t.alive ? BOARD_ART.tree[season] : t.net ? BOARD_ART.tree.waking : BOARD_ART.tree.grey;
+    default:
+      return null;
+  }
+}
+
+/** Dibuja una pieza llenando la casilla (suelo). */
+function drawTile(ctx: Ctx, T: number, img: CanvasImageSource, x: number, y: number) {
+  ctx.drawImage(img, x * T, y * T, T, T);
+}
+
+/** Dibuja un objeto apoyado en la base de su casilla, a lo ancho `scale`, conservando su proporción. */
+function drawObject(ctx: Ctx, T: number, img: CanvasImageSource, x: number, y: number, scale: number, base = 0.97) {
+  const [iw, ih] = size(img);
+  const w = T * scale;
+  const h = (w * ih) / iw;
+  ctx.drawImage(img, (x + 0.5) * T - w / 2, (y + base) * T - h, w, h);
+}
+
+/** Suelo pintado de todo el claro; devuelve false si falta alguna pieza (entonces va el vectorial). */
+function paintGroundArt(ctx: Ctx, T: number, game: GameState, art: Art, occupied: ReadonlySet<string>): boolean {
+  const pieces = game.tiles.map((t) => art.get(groundKey(t, art.season, occupied.has(`${t.x},${t.y}`))));
+  if (pieces.some((p) => !p)) return false;
+  ctx.fillStyle = rgba('leafDark');
+  ctx.fillRect(0, 0, W * T, H * T);
+  game.tiles.forEach((t, i) => drawTile(ctx, T, pieces[i]!, t.x, t.y));
+  return true;
+}
+
 /** Pinta el claro completo. Devuelve qué objeto se pintó en cada casilla. */
 export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
   const { game, valid, star, occupied, fatherSprite = false } = input;
+  const art: Art | null = input.art ? { get: input.art, season: SEASON_SLUGS[seasonIndex(game.day)] ?? 'spring' } : null;
   ctx.clearRect(0, 0, W * T, H * T);
   // Esquinas redondeadas como el marco (el canvas ya no las recorta: sobresale por arriba).
   ctx.save();
   roundRect(ctx, 0, 0, W * T, H * T, T * 0.16);
   ctx.clip();
-  paintGround(ctx, T, game);
-  paintNet(ctx, T, game);
+  const groundArt = art ? paintGroundArt(ctx, T, game, art, occupied) : false;
+  if (!groundArt) {
+    paintGround(ctx, T, game);
+    paintNet(ctx, T, game);
+  }
   const painted: Painted[] = [];
   for (const t of game.tiles) {
     if (t.kind === 'mother') paintMotherAura(ctx, T, t);
@@ -538,9 +605,22 @@ export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
       painted.push({ x: t.x, y: t.y, object: 'mother' });
       continue;
     }
-    // Si un miembro trabaja encima, su sprite ocupa la casilla: el objeto de abajo no se pinta.
+    // Si un miembro trabaja encima, su retrato ocupa la casilla: el objeto de abajo no se pinta.
     if (occupied.has(`${t.x},${t.y}`) || t.kind === 'soil') {
       painted.push({ x: t.x, y: t.y, object: 'none' });
+      continue;
+    }
+    // Con arte, la casa-hongo ya es su casilla de suelo.
+    if (t.kind === 'home' && groundArt) {
+      painted.push({ x: t.x, y: t.y, object: 'home', art: BOARD_ART.home });
+      continue;
+    }
+    const key = art ? objectKey(t, art.season) : null;
+    const img = key ? art!.get(key) : undefined;
+    if (img && key) {
+      const scale = t.kind === 'tree' ? 1.0 : t.kind === 'rock' ? 0.86 : 0.92;
+      drawObject(ctx, T, img, t.x, t.y, scale, t.kind === 'tree' ? 0.98 : 0.9);
+      painted.push({ x: t.x, y: t.y, object: t.kind, art: key });
       continue;
     }
     if (t.kind === 'log') paintLog(ctx, T, t);
@@ -553,7 +633,16 @@ export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
     const [x, y] = key.split(',').map(Number) as [number, number];
     paintValid(ctx, T, x, y);
   }
-  if (star && valid.has(`${star.x},${star.y}`)) paintStar(ctx, T, star.x, star.y);
+  if (star && valid.has(`${star.x},${star.y}`)) {
+    const img = art?.get(BOARD_ART.star);
+    if (img) {
+      ctx.save();
+      ctx.shadowColor = rgba('sun', 0.9);
+      ctx.shadowBlur = T * 0.2;
+      drawObject(ctx, T, img, star.x, star.y, 0.42, 0.52);
+      ctx.restore();
+    } else paintStar(ctx, T, star.x, star.y);
+  }
   ctx.restore();
   return painted;
 }

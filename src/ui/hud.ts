@@ -1,25 +1,27 @@
 import { es } from '../copy/es';
-import { DAYS, revivedCount, season, treeTotal } from '../rules';
+import { DAYS, revivedCount, season, seasonIndex, treeTotal } from '../rules';
+import { SEASON_SLUGS } from '../theme';
 import type { AppState, Store } from '../store';
-import { dayTag, iconArt, medallion, waxSeal, woodSign } from './art';
+import { dayTag, woodSign } from './art';
 import { el, setText } from './dom';
 
 /**
- * HUD en una cinta verde: día (de 12) y estación, nutrientes, esporas (abre reclutar) y árboles vivos
- * (del total del claro), más "?" (Libreta de campo).
+ * HUD sobre el tablón: día (de 12) con el ícono de la estación, pastillas pintadas de nutrientes,
+ * esporas (abre reclutar) y árboles vivos (del total del claro), más "?" (Libreta de campo).
  */
 export function mountHud(root: HTMLElement, store: Store) {
   const dayValue = el('strong', { class: 'hud__day-value' });
-  const dayCaption = el('span', { class: 'hud__day-caption' });
-  const day = el('div', { class: 'hud__day' }, dayTag(), dayValue, dayCaption);
+  const dayCaption = el('span');
+  const seasonIcon = el('span', { class: 'hud__season', 'aria-hidden': 'true' });
+  const day = el('div', { class: 'hud__day' }, dayTag(), dayValue, el('span', { class: 'hud__day-caption' }, seasonIcon, dayCaption));
 
+  // La pastilla pintada (ui/hud/pill-*) ya trae su ícono: el texto va a la derecha.
   const chip = (iconName: string, label: string, tag: 'div' | 'button' = 'div') => {
     const value = el('strong', { class: 'chip__value' });
     const caption = el('span', { class: 'chip__label' }, label);
     const node = el(
       tag,
-      { class: `chip${tag === 'button' ? ' chip--button' : ''}`, ...(tag === 'button' ? { type: 'button' } : {}) },
-      el('span', { class: 'chip__medal' }, medallion(), iconArt(iconName)),
+      { class: `chip chip--${iconName}${tag === 'button' ? ' chip--button' : ''}`, ...(tag === 'button' ? { type: 'button' } : {}) },
       el('span', { class: 'chip__text' }, value, caption),
     );
     return { node, value };
@@ -27,7 +29,7 @@ export function mountHud(root: HTMLElement, store: Store) {
   const nutrients = chip('nutrients', es.hud.nutrients);
   const spores = chip('spores', es.hud.recruitHint, 'button');
   const trees = chip('trees', es.hud.treesShort);
-  const help = el('button', { class: 'hud__help', type: 'button', 'aria-label': es.help.button }, waxSeal(), el('span', { class: 'hud__help-mark' }, '?'));
+  const help = el('button', { class: 'hud__help', type: 'button', 'aria-label': es.help.button });
   root.setAttribute('aria-label', es.hud.label);
   root.append(woodSign(), day, nutrients.node, spores.node, trees.node, help);
 
@@ -38,6 +40,7 @@ export function mountHud(root: HTMLElement, store: Store) {
     const g = state.game;
     setText(dayValue, `${es.hud.day} ${g.day}${es.hud.of(DAYS)}`);
     setText(dayCaption, season(g.day));
+    seasonIcon.dataset.season = SEASON_SLUGS[seasonIndex(g.day)] ?? 'spring';
     setText(nutrients.value, String(g.nutrients));
     setText(spores.value, String(g.spores));
     spores.node.setAttribute('aria-label', es.hud.sporesButton(g.spores));
