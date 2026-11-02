@@ -119,7 +119,7 @@ Todo control interactivo SHALL medir al menos 44 × 44 px y no SHALL depender de
 - THEN el miembro queda seleccionado sin zoom de la página
 
 ### Requirement: Retratos del gremio
-El dock, las fichas y el tablero SHALL usar los sprites de Blender de cada especie (`public/assets/characters/`): en el dock, el retrato en reposo; en la ficha, la pose feliz; en el tablero, la pose de trabajo sobre la casilla donde ese miembro trabajó hoy. La Gliophorus SHALL usar la variante de su estación. Maestra Bruna, sin modelo todavía, usa un placeholder de silueta.
+El dock, las fichas y el tablero SHALL usar los sprites de Blender de cada especie (`public/assets/characters/`): en el dock, el retrato en reposo; en la ficha, la pose feliz; en el tablero, la pose de trabajo sobre la casilla donde ese miembro trabajó hoy. La Gliophorus SHALL usar la variante de su estación. Maestra Bruna SHALL usar su propio sprite, más alto que el resto y sin deformarse.
 
 #### Scenario: Trabajó hoy
 - WHEN Bruno descompone un tronco
@@ -128,6 +128,10 @@ El dock, las fichas y el tablero SHALL usar los sprites de Blender de cada espec
 #### Scenario: Retratos en el dock
 - WHEN empieza la partida
 - THEN las tarjetas de Añil, Bruno y Rubí muestran sus retratos
+
+#### Scenario: La maga en el tablero
+- WHEN Maestra Bruna lanza un hechizo
+- THEN el tablero la muestra con el bastón en alto sobre la casilla del hechizo, más alta que los demás miembros
 
 ### Requirement: Estilo cozy
 La interfaz SHALL seguir la libreta de campo con un acabado más moderno: fondo de papel crema, cintas verdes de título, chips con íconos para día, nutrientes, esporas y árboles, tarjetas redondeadas con sombra suave, botón principal amarillo y tablero con marco de madera. Todos los colores y tipografías SHALL venir de `src/theme.ts`.
