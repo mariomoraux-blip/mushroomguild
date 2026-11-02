@@ -124,18 +124,18 @@ describe('Requirement: Tejer micelio (Lactarius indigo)', () => {
 });
 
 describe('Requirement: Descomponer (Champiñón)', () => {
-  it('primer uso: +3 nutrientes y el tronco sigue en pie', () => {
+  it('primer uso: +2 nutrientes y el tronco sigue en pie', () => {
     const { state } = act(newGame(), BRUNO, LOG_NEAR_HOME.x, LOG_NEAR_HOME.y);
-    expect(state.nutrients).toBe(5);
+    expect(state.nutrients).toBe(4);
     expect(tile(state, LOG_NEAR_HOME.x, LOG_NEAR_HOME.y)).toMatchObject({ kind: 'log', uses: 1 });
   });
 
-  it('Scenario: Segundo uso de un tronco — se suman 3 nutrientes y queda tierra sin micelio', () => {
+  it('Scenario: Segundo uso de un tronco — se suman 2 nutrientes y queda tierra sin micelio', () => {
     const s = setup({ uses: [{ ...LOG_NEAR_HOME, n: 1 }] });
     const { state, message } = pure(s, (s) => act(s, BRUNO, LOG_NEAR_HOME.x, LOG_NEAR_HOME.y));
-    expect(state.nutrients).toBe(s.nutrients + 3);
+    expect(state.nutrients).toBe(s.nutrients + 2);
     expect(tile(state, LOG_NEAR_HOME.x, LOG_NEAR_HOME.y)).toMatchObject({ kind: 'soil', net: false });
-    expect(message).toBe(es.log.logDone('Bruno', 3));
+    expect(message).toBe(es.log.logDone('Bruno', 2));
   });
 
   it('solo descompone troncos', () => {
@@ -160,37 +160,48 @@ describe('Requirement: Revivir árboles (Amanita muscaria)', () => {
 });
 
 describe('Requirement: Pasar la voz (Gliophorus psittacinus)', () => {
-  const withGlio = (o: Parameters<typeof setup>[0] = {}) => setup({ extraMembers: ['gliophorus'], ...o });
+  // Bruno trabajó hoy en el tronco junto al Hogar.
+  const afterBruno = (spores: number) => act(setup({ extraMembers: ['gliophorus'], spores }), BRUNO, LOG_NEAR_HOME.x, LOG_NEAR_HOME.y).state;
 
-  it('Scenario: Trueque — sobre un árbol vivo con 2 o más esporas, esporas −2 y nutrientes +3', () => {
-    const s = withGlio({ alive: [TREE], spores: 2, nutrients: 0 });
-    const { state, message } = pure(s, (s) => act(s, idOf(s, 'gliophorus'), TREE.x, TREE.y));
+  it('Scenario: Llamar a un compañero — Bruno vuelve a estar disponible y las esporas bajan en 1', () => {
+    const s = afterBruno(1);
+    const glio = idOf(s, 'gliophorus');
+    const { state, message } = pure(s, (s) => act(s, glio, LOG_NEAR_HOME.x, LOG_NEAR_HOME.y));
+    expect(state.members.find((m) => m.id === BRUNO)).toMatchObject({ used: false, at: null });
+    expect(state.members.find((m) => m.id === glio)?.used).toBe(true);
     expect(state.spores).toBe(0);
-    expect(state.nutrients).toBe(3);
-    expect(message).toBe(es.log.passedWord('extra-4', 2, 3));
+    expect(message).toBe(es.log.called('extra-4', 'Bruno'));
+    // Bruno puede descomponer otra vez el mismo día.
+    expect(act(state, BRUNO, LOG_NEAR_HOME.x, LOG_NEAR_HOME.y).state.nutrients).toBe(6);
   });
 
-  it('Scenario: Sin esporas — se rechaza con "Faltan esporas: pasar la voz cuesta 2."', () => {
-    const s = withGlio({ alive: [TREE], spores: 1 });
-    expect(reasonOf(s, idOf(s, 'gliophorus'), TREE)).toBe('Faltan esporas: pasar la voz cuesta 2.');
+  it('Scenario: Sin esporas — se rechaza con "Falta 1 espora: pasar la voz cuesta 1."', () => {
+    const s = afterBruno(0);
+    expect(reasonOf(s, idOf(s, 'gliophorus'), LOG_NEAR_HOME)).toBe('Falta 1 espora: pasar la voz cuesta 1.');
   });
 
-  it('Scenario: Pasar la voz desde cualquier árbol vivo — el trueque se aplica igual en un árbol lejos del Hogar', () => {
-    const s = withGlio({ alive: [FAR_TREE], spores: 3, nutrients: 1 });
-    const { state } = act(s, idOf(s, 'gliophorus'), FAR_TREE.x, FAR_TREE.y);
-    expect([state.spores, state.nutrients]).toEqual([1, 4]);
+  it('Scenario: Casilla sin compañero — se rechaza con el motivo de la Gliophorus', () => {
+    const s = afterBruno(3);
+    expect(reasonOf(s, idOf(s, 'gliophorus'), SOIL_NEAR_HOME)).toBe('La Gliophorus pasa la voz donde un compañero ya trabajó hoy.');
   });
 
-  it('Scenario: Fuera de un árbol vivo — se rechaza con "La Gliophorus solo pasa la voz desde un árbol vivo."', () => {
-    const s = withGlio({ spores: 5 });
-    const id = idOf(s, 'gliophorus');
-    const msg = 'La Gliophorus solo pasa la voz desde un árbol vivo.';
-    expect(reasonOf(s, id, SOIL_NEAR_HOME)).toBe(msg);
-    expect(reasonOf(s, id, TREE)).toBe(msg); // árbol gris
+  it('no llama a otra Gliophorus ni a Maestra Bruna, y su voz llega a cualquier casilla', () => {
+    const g = setup({ extraMembers: ['gliophorus', 'gliophorus'], mage: true, alive: [FAR_TREE], spores: 5 });
+    const [g1, g2] = g.members.filter((m) => m.species === 'gliophorus').map((m) => m.id) as [number, number];
+    const mageId = idOf(g, 'mago');
+    // Bruno trabaja en el tronco, la segunda Gliophorus lo llama (y queda en esa casilla) y la maga lanza Lluvia.
+    let s = act(g, BRUNO, LOG_NEAR_HOME.x, LOG_NEAR_HOME.y).state;
+    s = act(s, g2, LOG_NEAR_HOME.x, LOG_NEAR_HOME.y).state;
+    s = act(s, mageId, FAR_TREE.x, FAR_TREE.y).state;
+    expect(reasonOf(s, g1, FAR_TREE)).toBe(es.reasons.gliophorusNeedsWorker); // la maga trabajó allí
+    expect(reasonOf(s, g1, LOG_NEAR_HOME)).toBe(es.reasons.gliophorusNeedsWorker); // otra Gliophorus trabajó allí
+    // Lejos del Hogar: Rubí revive un árbol lejano y Chispa la llama desde cualquier lugar.
+    const far = act(setup({ extraMembers: ['gliophorus'], net: [{ x: 1, y: 1 }], nutrients: 6, spores: 1 }), RUBI, FAR_TREE.x, FAR_TREE.y).state;
+    expect(check(far, idOf(far, 'gliophorus'), FAR_TREE.x, FAR_TREE.y)).toEqual({ ok: true });
   });
 });
 
-describe('Requirement: Llegada dla maga (Conocybe arcana)', () => {
+describe('Requirement: Llegada de la maga (Conocybe arcana)', () => {
   it('Scenario: Segundo árbol revivido — si revive el día 4, al empezar el día 5 Maestra Bruna está y disponible', () => {
     // El primer árbol no lo trae.
     const first = endDay(act(setup({ day: 3, net: [SOIL_NEAR_TREE], nutrients: 3 }), RUBI, TREE.x, TREE.y).state).state;
@@ -351,7 +362,7 @@ describe('Requirement: Reclutar', () => {
     s = recruit(s, 'lactarius').state;
     s = recruit(s, 'gliophorus').state;
     s = recruit(s, 'champi').state;
-    expect(s.members.slice(3).map((m) => m.name)).toEqual(['Ola', 'Perica', 'Tomillo']);
+    expect(s.members.slice(3).map((m) => m.name)).toEqual(['Ola', 'Chispa', 'Tomillo']);
   });
 });
 
@@ -375,14 +386,14 @@ describe('Requirement: Estaciones', () => {
 });
 
 describe('Requirement: Victoria', () => {
-  it('Scenario: Bosque que aún no habla — con 1 árbol revivido se pide revivir al menos 2', () => {
-    const s = setup({ net: [SOIL_NEAR_MOTHER], alive: [TREE], nutrients: 6 });
-    expect(reasonOf(s, RUBI, MOTHER)).toBe(es.reasons.forestSilent(2));
-    expect(reasonOf(s, RUBI, MOTHER)).toContain('revive al menos 2 árboles');
+  it('Scenario: Bosque que aún no habla — con 2 árboles revividos se pide revivir al menos 3', () => {
+    const s = setup({ net: [SOIL_NEAR_MOTHER], alive: [TREE, OTHER_TREE], nutrients: 10 });
+    expect(reasonOf(s, RUBI, MOTHER)).toBe(es.reasons.forestSilent(3));
+    expect(reasonOf(s, RUBI, MOTHER)).toContain('revive al menos 3 árboles');
   });
 
-  it('con la red tocándolo, 6 nutrientes y 2 árboles revividos, despertar al Árbol Padre gana la partida', () => {
-    const s = setup({ day: 7, net: [SOIL_NEAR_MOTHER], alive: [TREE, OTHER_TREE], nutrients: 6 });
+  it('con la red tocándolo, 10 nutrientes y 3 árboles revividos, despertar al Árbol Padre gana la partida', () => {
+    const s = setup({ day: 7, net: [SOIL_NEAR_MOTHER], alive: [TREE, OTHER_TREE, FAR_TREE], nutrients: 10 });
     const { state } = pure(s, (s) => act(s, RUBI, MOTHER.x, MOTHER.y));
     expect(state.status).toBe('won');
     expect(state.wonDay).toBe(7);
@@ -391,9 +402,9 @@ describe('Requirement: Victoria', () => {
   });
 
   it('rechaza si la red no llega o faltan nutrientes', () => {
-    expect(reasonOf(setup({ alive: [TREE, OTHER_TREE], nutrients: 6 }), RUBI, MOTHER)).toBe(es.reasons.motherFar);
-    const poor = setup({ net: [SOIL_NEAR_MOTHER], alive: [TREE, OTHER_TREE], nutrients: 5 });
-    expect(reasonOf(poor, RUBI, MOTHER)).toBe(es.reasons.motherCost(6));
+    expect(reasonOf(setup({ alive: [TREE, OTHER_TREE, { x: 0, y: 3 }], nutrients: 10 }), RUBI, MOTHER)).toBe(es.reasons.motherFar);
+    const poor = setup({ net: [SOIL_NEAR_MOTHER], alive: [TREE, OTHER_TREE, FAR_TREE], nutrients: 9 });
+    expect(reasonOf(poor, RUBI, MOTHER)).toBe(es.reasons.motherCost(10));
   });
 });
 

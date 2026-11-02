@@ -19,11 +19,11 @@ Concept doc y GDD: documento "El Gremio de los Hongos · Fase 0" (Claude Docs), 
 - `src/rules/` es lógica pura: sin Phaser, sin DOM, sin `Math.random` sin semilla. Todo el estado del juego vive aquí.
 - `src/scenes/` solo dibuja el estado y traduce input en llamadas a `rules`. Nunca cambia el estado directamente.
 - Los textos visibles viven en `src/copy/es.ts`. Español neutro, tono cozy, frases cortas.
-- Assets en `public/assets/`. Presupuesto total ≤ 2 MB.
+- Assets en `public/assets/` (sprites de personajes en `public/assets/characters/`, fuente en `assets/sprites/`). Presupuesto total ≤ 2 MB.
 
 ## Móvil primero
 - El objetivo principal es un navegador de teléfono en vertical (360–430 px). El escritorio es una variante, no al revés.
-- Tablero vertical de 5×8, casillas ≥ 64 px a 390 px de ancho, dock del gremio abajo, HUD arriba.
+- Tablero vertical de 5×8 (un claro aleatorio por partida), casillas ≥ 64 px a 390 × 844, ≥ 56 px a 390 × 664 y nunca < 48 en vertical (≥ 44 en horizontal); dock del gremio abajo, HUD arriba.
 - Áreas táctiles ≥ 44 px, nada depende de hover, sin zoom por doble toque, la página no hace scroll durante la partida.
 - 60 fps en Android de gama media; `resolution` limitado a 2×; pausar al ocultar la pestaña.
 
@@ -42,4 +42,8 @@ Concept doc y GDD: documento "El Gremio de los Hongos · Fase 0" (Claude Docs), 
 `docs/prompts.md` tiene los prompts de cada cambio (planear, implementar, revisar, cerrar) y los transversales.
 
 ## Referencia
-`poc/` contiene la prueba de concepto (HTML + SVG + JS). Sus reglas (`poc/rules.js`) son la fuente para portar `src/rules/`. No edites `poc/`.
+`poc/` contiene la prueba de concepto (HTML + SVG + JS). Fue la fuente del port de `src/rules/` (cambio 001); desde el 006 las reglas se separaron (costos, Mensajera, claros aleatorios) y la fuente de verdad son las specs de `openspec/specs/`. No edites `poc/`.
+
+## URL de la app
+- Sin parámetros: claro aleatorio. `?seed=N`: repite un claro. `?map=clasico`: mapa del Capítulo 1 (lo usan las pruebas de humo).
+- Solo en desarrollo: `?debugState=fullGuild` (gremio completo con Maestra Bruna).

@@ -100,11 +100,11 @@ describe('Requirement: Feedback de acción inválida', () => {
   });
 
   it('Scenario: Sin trabajo disponible (Gliophorus psittacinus)', () => {
-    const g = setup({ spores: 2, alive: [{ x: 4, y: 6 }] });
-    const withPerica = reduce(init(g), { type: 'recruit', species: 'gliophorus' }).game;
-    const rested = { ...withPerica, spores: 1, members: withPerica.members.map((m) => ({ ...m, used: false })) };
-    const s = run(init(rested), { type: 'select', id: idOf(rested, 'gliophorus') });
-    expect(s.ui.notice.text).toBe('Perica: faltan esporas: pasar la voz cuesta 2.');
+    // Chispa recién reclutada; al día siguiente Bruno trabaja y no quedan esporas para pasarle la voz.
+    const withChispa = reduce(init(setup({ spores: 2 })), { type: 'recruit', species: 'gliophorus' }).game;
+    const nextDay = run(init(withChispa), { type: 'endDay' }, { type: 'select', id: BRUNO }, { type: 'tapTile', x: 1, y: 7 }).game;
+    const s = run(init(nextDay), { type: 'select', id: idOf(nextDay, 'gliophorus') });
+    expect(s.ui.notice.text).toBe('Chispa: falta 1 espora: pasar la voz cuesta 1.');
   });
 
   it('Scenario: Sin trabajo disponible (Maestra Bruna)', () => {
@@ -119,7 +119,7 @@ describe('Requirement: Feedback de acción inválida', () => {
     expect(idleReason(noSoil, ANIL)).toBe('noSoil');
     expect(idleReason(setup({ nutrients: 1 }), RUBI)).toBe('noNutrients');
     const glio = setup({ extraMembers: ['gliophorus'] });
-    expect(idleReason(glio, idOf(glio, 'gliophorus'))).toBe('noLiveTrees');
+    expect(idleReason(glio, idOf(glio, 'gliophorus'))).toBe('noWorkers');
     expect(idleReason(newGame(), ANIL)).toBeNull();
   });
 });
@@ -131,15 +131,15 @@ describe('Requirement: Estado visible', () => {
     store.subscribe((s) => seen.push(s.game.nutrients));
     store.dispatch({ type: 'select', id: BRUNO });
     store.dispatch({ type: 'tapTile', x: 1, y: 7 });
-    expect(store.getState().game.nutrients).toBe(5);
-    expect(seen.at(-1)).toBe(5);
+    expect(store.getState().game.nutrients).toBe(4);
+    expect(seen.at(-1)).toBe(4);
   });
 });
 
 describe('store: reclutar, terminar el día y fin de partida', () => {
   it('reclutar con esporas usa las reglas; sin esporas avisa el motivo', () => {
     const ok = reduce(init(setup({ spores: 2 })), { type: 'recruit', species: 'gliophorus' });
-    expect(ok.game.members.at(-1)?.name).toBe('Perica');
+    expect(ok.game.members.at(-1)?.name).toBe('Chispa');
     const no = reduce(init(), { type: 'recruit', species: 'gliophorus' });
     expect(no.ui.notice).toEqual({ text: es.reasons.recruitCost(2), tone: 'warn' });
   });

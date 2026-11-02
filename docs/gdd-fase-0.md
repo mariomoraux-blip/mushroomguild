@@ -1,6 +1,6 @@
 # El Gremio de los Hongos · Fase 0
 
-> Copia en Markdown del documento "El Gremio de los Hongos · Fase 0" (Claude Docs), versión del 1 de noviembre de 2026, por Mario Mora.
+> Copia en Markdown del documento "El Gremio de los Hongos · Fase 0" (Claude Docs), versión del 1 de noviembre de 2026, por Mario Mora, con las decisiones posteriores del 2 de noviembre (cambios 005 y 006: nombres, Chispa la Mensajera, claros aleatorios, dificultad e interfaz). Pendiente: llevar estos cambios al documento original.
 > El original es la fuente; si cambia, se actualiza este archivo. Las specs de `openspec/` son el contrato ejecutable: si este documento y una spec no coinciden, manda la spec hasta que un cambio de OpenSpec las alinee.
 
 ## Concept doc
@@ -35,7 +35,7 @@ Cualquier idea nueva se evalúa contra estos tres pilares. Si no sirve a ninguno
 La red de micelio es a la vez mecánica y progreso visible: define dónde puedes actuar y muestra cuánto has avanzado. Se apoya en algo real, las redes micorrícicas que conectan árboles.
 
 ### Alcance del vertical slice
-- **Incluye:** 1 capítulo, 1 mapa vertical de 5×8, 5 especies (4 reclutables y una maga única), 12 días en 4 estaciones, intro y final. Se juega en navegador de teléfono y de escritorio.
+- **Incluye:** 1 capítulo, claros aleatorios de 5×8 (un mapa nuevo en cada partida), 5 especies (4 reclutables y una maga única), 12 días en 4 estaciones, intro y final. Se juega en navegador de teléfono y de escritorio.
 - **Fuera de alcance:** guardado, varios niveles, IA rival, multijugador, monetización.
 
 ### Criterios de éxito
@@ -51,7 +51,7 @@ La partida es un loop diario de colocar, producir y expandir. Dura 12 días y se
 Cada día eliges a un miembro del gremio y una casilla. La acción gasta o produce nutrientes, y la red crece o un árbol revive. Al cerrar el día, los árboles vivos pagan esporas y nutrientes, y las esporas reclutan más gremio.
 
 ### Tablero
-Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol Padre arriba. La red crece hacia el árbol y el tablero cabe en un teléfono en vertical. Solo se actúa sobre casillas que tocan la red (adyacencia ortogonal). Es el mapa de la prueba de concepto rotado, así que el balance no cambia.
+Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol Padre arriba. La red crece hacia el árbol y el tablero cabe en un teléfono en vertical. Solo se actúa sobre casillas que tocan la red (adyacencia ortogonal). Cada partida genera un claro distinto (7 árboles grises, 5 troncos, 6 rocas, Hogar abajo y Árbol Padre arriba). El generador solo acepta claros que un jugador que sigue las pistas gana entre el día 8 y el 11. El mapa de la prueba de concepto, rotado, queda como "mapa clásico" para pruebas.
 
 | Casilla | Comportamiento |
 | --- | --- |
@@ -65,10 +65,10 @@ Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol P
 ### Especies
 | Especie | Rol | Disponibilidad | Acción | Efecto |
 | --- | --- | --- | --- | --- |
-| Champiñón | Descompositor | Inicial, reclutable | Descompone un tronco | +3 nutrientes |
+| Champiñón | Descompositor | Inicial, reclutable | Descompone un tronco | +2 nutrientes |
 | *Lactarius indigo* | Tejedor | Inicial, reclutable | Teje micelio en tierra | −1 nutriente, la red crece |
 | *Amanita muscaria* | Sanadora | Inicial, reclutable | Revive un árbol gris | −3 nutrientes; −6 en el Árbol Padre |
-| *Gliophorus psittacinus* | Mensajera | Reclutable | "Pasa la voz" desde un árbol vivo | −2 esporas, +3 nutrientes |
+| *Gliophorus psittacinus* | Mensajera | Reclutable | "Pasa la voz" a un compañero que ya trabajó hoy | −1 espora; ese compañero trabaja otra vez |
 | *Conocybe arcana* (ficticio) | Maga | Única; llega sola | Un hechizo por estación | Ver hechizos |
 
 Cada miembro actúa una vez por día. El gremio llega a 6 reclutables como máximo, y un recluta trabaja desde el día siguiente.
@@ -77,19 +77,19 @@ Cada miembro actúa una vez por día. El gremio llega a 6 reclutables como máxi
 - **Brote arcano:** convierte una roca vecina a la red en tierra con micelio. Abre atajos en el mapa.
 - **Lluvia de esporas:** sobre un árbol vivo, todos los árboles vivos dan ya su espora y su nutriente del amanecer.
 
-La Mensajera agrega la única decisión que faltaba: gastar esporas en crecer el gremio o convertirlas en nutrientes.
+La Mensajera, **Chispa**, convierte esporas en una segunda jugada: despierta a la Amanita para revivir otro árbol el mismo día o al Champiñón para descomponer otra vez. Agrega la decisión de gastar esporas en crecer el gremio o en repetir la mejor jugada.
 
 ### Economía
 | Recurso | Se gana | Se gasta |
 | --- | --- | --- |
-| Nutrientes | Tronco: +3 por uso · árbol vivo: +1 al amanecer · Mensajera: +3 · Lluvia de esporas | Tejer 1 · revivir 3 · Árbol Padre 6 |
-| Esporas | Árbol vivo: +1 al amanecer · Lluvia de esporas | Reclutar 2 · Mensajera 2 |
+| Nutrientes | Tronco: +2 por uso · árbol vivo: +1 al amanecer · Lluvia de esporas | Tejer 1 · revivir 3 · Árbol Padre 10 |
+| Esporas | Árbol vivo: +1 al amanecer · Lluvia de esporas | Reclutar 2 · Mensajera 1 |
 
 Inicio: 3 miembros (uno de cada especie), 2 nutrientes, 0 esporas. Los troncos son finitos; los árboles vivos son la fuente renovable. Esa tensión es el corazón del juego.
 
 ### Tiempo y victoria
 - 4 estaciones de 3 días. La estación cambia el color del follaje.
-- **Victoria:** la Amanita despierta al Árbol Padre. Requiere que toque la red, 6 nutrientes y al menos 2 árboles revividos.
+- **Victoria:** la Amanita despierta al Árbol Padre. Requiere que toque la red, 10 nutrientes y al menos 3 árboles revividos.
 - **Final suave:** si se acaba el invierno, el bosque espera la próxima primavera y se reintenta.
 
 ### Narrativa
@@ -110,7 +110,7 @@ Cada especie se reconoce por su silueta, sin depender del color: domo bajo, embu
 | Champiñón "Bruno" | Domo bajo y ancho | Café claro | Canasta | — |
 | *Lactarius indigo* "Añil" | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Suelta gotitas de látex azul; el micelio que teje brilla con destellos índigo |
 | *Amanita muscaria* "Rubí" | Domo alto con verrugas y falda en el tallo | Rojo y crema | Bolso con hojas que curan | — |
-| *Gliophorus psittacinus* "Perica" | Campana pequeña, viscosa y brillante | Verde loro que cambia | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
+| *Gliophorus psittacinus* "Chispa" | Campana pequeña, viscosa y brillante | Verde loro que cambia | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
 | *Conocybe arcana* "Maestra Bruna" | Cono alto y puntiagudo, doblado en la punta como sombrero de hechicera; la más alta | Violeta profundo con motas que brillan como estrellas | Bastón de ramita con una espora luminosa | Melena de hilos de micelio; brilla siempre un poco |
 
 *Conocybe* es un género real de sombrero cónico; *arcana* es inventado. La maga es el único personaje fantástico del elenco.
@@ -127,7 +127,8 @@ El invierno es el clímax emocional: cuando la luz se va, la red que tejiste es 
 
 #### Interfaz
 - **Libreta de campo:** paneles de papel crema con bordes suaves, botones y marcos de madera, etiquetas tipo cinta.
-- **Tipografía:** display redondeada y gruesa para títulos y números; cuerpo muy legible para el resto.
+- **Tipografía:** Fredoka (display redondeada y gruesa) para títulos y números; Nunito para el resto.
+- **Acabado (006):** fondo de papel crema, cintas verdes de título, chips con íconos, tarjetas redondeadas con sombra suave y botón principal amarillo, con *All About Poppy* y *Dine Together* como referentes.
 - **Fichas de criatura:** cada especie tiene una ficha con humor, al estilo de las chanterelles ("comestible: sí, si logras atraparla").
 - **Intro y finales:** globo de diálogo sobre papel, como en Fablevale.
 
@@ -169,14 +170,14 @@ En escritorio también se juega con teclado: Tab y Enter para elegir, Esc para c
 Fuera del slice inicial. Primera iteración: ambiente de bosque nocturno y un tono suave por acción, que arranca tras la primera interacción.
 
 ### Balance
-Medido por simulación con las reglas de la prueba de concepto:
+Medido por simulación (`tests/balance.test.ts`, 100 claros generados con semillas fijas):
 
-| Escenario | 3 especies | 5 especies |
-| --- | --- | --- |
-| Bot con criterio básico (3.000 partidas) | Gana 100 %, día 7 | Gana 100 %, día 7 |
-| Bot que juega al azar (4.000 partidas) | Gana 27 %, día 11 | Gana 19 %, día 11 |
+| Escenario | Resultado |
+| --- | --- |
+| Jugador que sigue las pistas (`playAdvised`) | Gana el 100 % de los claros aceptados, día medio ≈ 8,9 (entre el 8 y el 11) |
+| Bot que juega al azar (1.000 partidas) | Gana ≈ 17 % |
 
-Con criterio, las especies nuevas no aceleran ni frenan la partida: agregan opciones. Al azar se gana menos porque el bot desperdicia esporas en trueques y reclutas. Que un jugador atento gane siempre hacia el día 7 encaja con el tono cozy, pero hay que confirmarlo en el playtest: puede sentirse demasiado fácil.
+Con las reglas de la prueba de concepto, un jugador atento ganaba hacia el día 5–7 y el playtest lo confirmó: se sentía demasiado fácil. Desde el cambio 006 el Árbol Padre pide 3 árboles revividos y 10 nutrientes, cada tronco da +2 y el generador descarta claros regalados.
 
 Palancas de ajuste: coste de tejer, ganancia por tronco, número de troncos, días totales y nutriente diario por árbol.
 
@@ -191,7 +192,7 @@ El mayor riesgo no es técnico: es que la regla de adyacencia no se entienda sin
 | Los sprites de Blender se leen bien a 44 px | Render de prueba de un solo personaje antes de producir los tres | Volver a SVG para personajes; Blender solo para escenario |
 | Claude Code en la nube no ve ni juega el juego | Tests de reglas en Node y capturas automáticas con navegador sin interfaz | Tú haces el playtest manual al cerrar cada tarea |
 | El balance se rompe al agregar contenido | La simulación queda como test de regresión: bot al azar ≥ 20 % de victorias, partida guiada gana antes del día 9 | Ajustar las palancas del GDD, no reescribir reglas |
-| Un mapa fijo no invita a repetir | Preguntar en el playtest si jugarían otra vez | Mapa semialeatorio al backlog del capítulo 2 |
+| Un mapa fijo no invita a repetir | Resuelto en 006: cada partida es un claro aleatorio y justo | Ajustar `MAP_GEN` (árboles, troncos, rocas, días) |
 | La página pesa demasiado para el portafolio | Presupuesto de assets ≤ 2 MB y carga < 3 s | Comprimir sprites o bajar resolución |
 
 ## Decisiones técnicas

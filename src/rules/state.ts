@@ -4,11 +4,12 @@ import type { GameState, Member, Mutable, RecruitableSpecies, Tile } from './typ
 
 export type MutableState = Mutable<GameState> & { tiles: Mutable<Tile>[]; members: Mutable<Member>[] };
 
-export function newGame(): GameState {
+/** Partida nueva sobre un mapa (por defecto, el clásico del Capítulo 1). */
+export function newGame(map: readonly string[] = MAP): GameState {
   const tiles: Tile[] = [];
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      const ch = MAP[y]?.[x];
+      const ch = map[y]?.[x];
       const kind = ch === undefined ? undefined : KIND[ch];
       if (!kind) throw new Error(`Mapa inválido en (${x}, ${y})`);
       tiles.push({ x, y, kind, net: kind === 'home', uses: 0, alive: false });
@@ -76,6 +77,9 @@ export const touchesNet = (s: GameState, x: number, y: number): boolean => neigh
 export const revivedCount = (s: GameState): number => s.tiles.filter((t) => t.kind === 'tree' && t.alive).length;
 export const treeTotal = (s: GameState): number => s.tiles.filter((t) => t.kind === 'tree').length;
 export const member = (s: GameState, id: number): Member | undefined => s.members.find((m) => m.id === id);
+/** Compañero que ya trabajó hoy en (x, y) y al que la Gliophorus puede llamar (ni Gliophorus ni la maga). */
+export const workerAt = (s: GameState, x: number, y: number): Member | undefined =>
+  s.members.find((m) => m.used && m.at?.x === x && m.at?.y === y && m.species !== 'gliophorus' && m.species !== 'mago');
 export const mage = (s: GameState): Member | undefined => s.members.find((m) => m.species === 'mago');
 /** Miembros que cuentan en el límite del gremio (todos menos la maga). */
 export const recruitableCount = (s: GameState): number => s.members.filter((m) => m.species !== 'mago').length;

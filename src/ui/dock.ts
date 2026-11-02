@@ -1,7 +1,7 @@
 import { es } from '../copy/es';
 import { COST, DAYS, MAX_GUILD, magicSpent, recruitableCount, season, seasonIndex, DAYS_PER_SEASON, type Member } from '../rules';
 import { suggestedMember, type AppState, type Store } from '../store';
-import { el, hat, setText } from './dom';
+import { el, icon, portrait, setPortrait, setText } from './dom';
 
 /** Estado de la tarjeta: lista, descansa o (Maestra Bruna) cuándo vuelve su magia. */
 function status(state: AppState, m: Member): { text: string; ready: boolean } {
@@ -23,11 +23,11 @@ export function mountDock(root: HTMLElement, store: Store) {
     el('span', { class: 'card__meta' }, es.dock.recruitCost(COST.recruit)),
   );
   const endLabel = el('span', { class: 'end__label' });
-  const end = el('button', { class: 'end', type: 'button' }, el('span', { class: 'end__icon', 'aria-hidden': 'true' }, '▶'), endLabel);
+  const end = el('button', { class: 'end', type: 'button' }, icon('moon'), endLabel);
   root.setAttribute('aria-label', es.dock.label);
   root.append(cards, end);
 
-  const byId = new Map<number, { item: HTMLElement; button: HTMLButtonElement; status: HTMLElement }>();
+  const byId = new Map<number, { item: HTMLElement; button: HTMLButtonElement; status: HTMLElement; face: HTMLElement }>();
 
   cards.addEventListener('click', (e) => {
     const target = (e.target as HTMLElement).closest('button');
@@ -47,10 +47,11 @@ export function mountDock(root: HTMLElement, store: Store) {
       if (!card) {
         const sp = es.species[m.species];
         const statusNode = el('span', { class: 'card__status' });
+        const face = portrait(m.species);
         const button = el(
           'button',
           { class: `card card--${m.species}`, type: 'button', 'data-id': m.id },
-          hat(m.species),
+          face,
           el('span', { class: 'card__star', 'aria-hidden': 'true' }, '★'),
           el('span', { class: 'card__text' },
             el('span', { class: 'card__name' }, m.name, ' ', el('em', { class: 'card__species' }, sp.short)),
@@ -58,7 +59,7 @@ export function mountDock(root: HTMLElement, store: Store) {
             statusNode),
         );
         const item = el('div', { role: 'listitem', class: 'dock__item' }, button);
-        card = { item, button, status: statusNode };
+        card = { item, button, status: statusNode, face };
         byId.set(m.id, card);
       }
       if (cards.children[i] !== card.item) cards.insertBefore(card.item, cards.children[i] ?? null);
@@ -68,6 +69,7 @@ export function mountDock(root: HTMLElement, store: Store) {
       const star = suggested === m.id;
       setText(card.status, st.ready ? sp.action : st.text);
       card.button.classList.toggle('is-suggested', star);
+      setPortrait(card.face, m.species, st.ready && (star || state.ui.selected === m.id) ? 'feliz' : 'reposo', seasonIndex(g.day));
       card.button.setAttribute('aria-label', `${m.name}, ${sp.name}, ${sp.role}: ${sp.action}. ${st.text}.${star ? ` ★ ${es.advice.star}.` : ''}`);
       card.button.setAttribute('aria-pressed', String(state.ui.selected === m.id));
       card.button.classList.toggle('is-used', !st.ready);

@@ -1,8 +1,18 @@
+// Escenarios de las specs que se verifican aquí (openspec/specs/):
+// board-interaction › Móvil primero: "Teléfono en vertical", "Safari con barras", "Teléfono en horizontal" y
+//   "Escritorio" → "layout" (un proyecto por tamaño); "Gremio completo en el dock" → "gremio completo".
+// board-interaction › Objetivos táctiles: "Tocar un miembro con el pulgar" → "layout" (≥ 44 px) y "táctil".
+// board-interaction › Accesibilidad básica: "Jugar con teclado" → "teclado".
+// board-interaction › Retratos del gremio: "Retratos en el dock" y "Trabajó hoy" → "estilo cozy".
+// board-interaction › Estilo cozy: "Pantalla de juego" → "estilo cozy".
+// player-guidance › Libreta de campo: "Consultar la ayuda" → "Libreta de campo".
+// player-guidance › Meta visible: "Inicio" → "guía".
 import { expect, test, type Page } from '@playwright/test';
 
 const cell = (page: Page, x: number, y: number) => page.locator(`.cell[data-x="${x}"][data-y="${y}"]`);
 const valid = (page: Page) => page.locator('.cell[data-valid="true"]');
-const hudValue = (page: Page, i: number) => page.locator('.chip__value').nth(i);
+const nutrients = (page: Page) => page.locator('.chip__value').nth(0);
+const day = (page: Page) => page.locator('.hud__day-value');
 const isTouch = (name: string) => name !== 'escritorio-1280x800';
 
 const errors = new WeakMap<Page, string[]>();
@@ -33,7 +43,7 @@ async function noScrollNoZoom(page: Page) {
 }
 
 test('layout: tablero completo, casillas en rango y controles ≥ 44 px', async ({ page }, info) => {
-  await page.goto('/');
+  await page.goto('/?map=clasico');
   await expect(page.locator('#game canvas')).toBeVisible();
   const minTile = Number(info.project.metadata.minTile);
   const first = (await cell(page, 0, 0).boundingBox())!;
@@ -70,7 +80,7 @@ test('layout: tablero completo, casillas en rango y controles ≥ 44 px', async 
 
 test('táctil: elegir al Lactarius, tejer y terminar el día (con captura)', async ({ page }, info) => {
   test.skip(!isTouch(info.project.name), 'flujo táctil');
-  await page.goto('/');
+  await page.goto('/?map=clasico');
   await page.locator('[data-id="1"]').tap();
   await expect(valid(page)).toHaveCount(2);
   await expect(page.locator('#notice')).toHaveText('Añil: toca una casilla resaltada.');
@@ -79,9 +89,9 @@ test('táctil: elegir al Lactarius, tejer y terminar el día (con captura)', asy
   await expect(page.locator('#notice')).toHaveText('Muy lejos: la tierra debe tocar la red.');
   await expect(page.locator('[data-id="1"]')).toHaveAttribute('aria-pressed', 'true');
   await cell(page, 3, 7).tap();
-  await expect(hudValue(page, 1)).toHaveText('1');
+  await expect(nutrients(page)).toHaveText('1');
   await page.locator('.end').tap();
-  await expect(hudValue(page, 0)).toHaveText('2/12');
+  await expect(day(page)).toHaveText('Día 2/12');
   // Doble toque en el tablero: ni zoom ni scroll.
   await cell(page, 2, 3).tap();
   await cell(page, 2, 3).tap();
@@ -92,15 +102,15 @@ test('táctil: elegir al Lactarius, tejer y terminar el día (con captura)', asy
 });
 
 test('estado visible: el Champiñón descompone y el HUD suma nutrientes', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/?map=clasico');
   await page.locator('[data-id="2"]').click();
   await cell(page, 1, 7).click();
-  await expect(hudValue(page, 1)).toHaveText('5');
+  await expect(nutrients(page)).toHaveText('4');
 });
 
 test('teclado: Tab, Enter y Esc bastan para elegir, actuar y terminar el día', async ({ page }, info) => {
   test.skip(isTouch(info.project.name), 'teclado en escritorio');
-  await page.goto('/');
+  await page.goto('/?map=clasico');
   // Tab recorre el HUD (esporas, ayuda) y llega a las tarjetas del gremio.
   for (let i = 0; i < 6; i++) {
     await page.keyboard.press('Tab');
@@ -118,7 +128,7 @@ test('teclado: Tab, Enter y Esc bastan para elegir, actuar y terminar el día', 
   await expect(valid(page).first()).toBeFocused();
   expect(await page.evaluate(() => getComputedStyle(document.activeElement!).outlineStyle)).toBe('solid');
   await page.keyboard.press('Enter');
-  await expect(hudValue(page, 1)).toHaveText('1');
+  await expect(nutrients(page)).toHaveText('1');
   // Terminar el día.
   for (let i = 0; i < 10; i++) {
     if (await page.locator('.end').evaluate((b) => b === document.activeElement)) break;
@@ -126,7 +136,7 @@ test('teclado: Tab, Enter y Esc bastan para elegir, actuar y terminar el día', 
   }
   await expect(page.locator('.end')).toBeFocused();
   await page.keyboard.press('Enter');
-  await expect(hudValue(page, 0)).toHaveText('2/12');
+  await expect(day(page)).toHaveText('Día 2/12');
   await page.screenshot({ path: `docs/screenshots/002-${info.project.name}.png` });
 });
 
@@ -165,7 +175,7 @@ test('gremio completo: el dock se desplaza por dentro y la página no se mueve',
 });
 
 test('fichas de criatura: nombre científico, rol, acción y línea con humor', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/?map=clasico');
   await page.locator('.card--recruit').click();
   await page.getByRole('button', { name: 'Ficha de Champiñón' }).click();
   const dialog = page.getByRole('dialog');
@@ -177,7 +187,7 @@ test('fichas de criatura: nombre científico, rol, acción y línea con humor', 
 });
 
 test('Libreta de campo: no se abre sola y se consulta con "?"', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/?map=clasico');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'Ayuda: Libreta de campo' }).click();
   const dialog = page.getByRole('dialog');
@@ -188,7 +198,7 @@ test('Libreta de campo: no se abre sola y se consulta con "?"', async ({ page })
 });
 
 test('Ficha al seleccionar: primera vez por especie, "Entendido" mantiene la selección y "Ficha" la reabre', async ({ page }, info) => {
-  await page.goto('/');
+  await page.goto('/?map=clasico');
   await page.locator('[data-id="1"]').click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toContainText('Añil · Lactarius indigo');
@@ -211,8 +221,8 @@ test('Ficha al seleccionar: primera vez por especie, "Entendido" mantiene la sel
 });
 
 test('guía: ★ en el sugerido, camino hacia el árbol, meta marcada y esporas que abren reclutar', async ({ page }, info) => {
-  await page.goto('/');
-  await expect(page.locator('#notice')).toHaveText('Pista: Bruno puede descomponer un tronco junto a la red (+3 nutrientes).');
+  await page.goto('/?map=clasico');
+  await expect(page.locator('#notice')).toHaveText('Pista: Bruno puede descomponer un tronco junto a la red (+2 nutrientes).');
   await expect(page.locator('[data-id="2"]')).toHaveClass(/is-suggested/);
   await expect(cell(page, 2, 0)).toHaveAttribute('aria-label', /la meta/);
   // Tocar un tronco sin selección lo explica.
@@ -228,5 +238,50 @@ test('guía: ★ en el sugerido, camino hacia el árbol, meta marcada y esporas 
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: /Esporas: 0/ }).click();
   await expect(page.getByRole('dialog')).toContainText('Reclutar al gremio');
-  await expect(page.getByRole('dialog')).toContainText('Pasa la voz desde un árbol vivo');
+  await expect(page.getByRole('dialog')).toContainText('Pasa la voz: un compañero que ya trabajó hoy vuelve a trabajar');
+});
+
+test('claros aleatorios: cada partida cambia y ?seed= repite el mismo mapa', async ({ page }) => {
+  const layout = () => page.locator('.cell').evaluateAll((cs) => cs.map((c) => c.getAttribute('aria-label')!.split(',')[0]).join('|'));
+  await page.goto('/?seed=11');
+  const a = await layout();
+  await page.goto('/?seed=12');
+  const b = await layout();
+  await page.goto('/?seed=11');
+  expect(await layout()).toBe(a);
+  expect(b).not.toBe(a);
+  expect(a.split('|').filter((n) => n === 'Árbol gris')).toHaveLength(7);
+});
+
+test('estilo cozy: retratos en el dock, cinta verde y "Fin del día" amarillo', async ({ page }, info) => {
+  await page.goto('/?seed=7');
+  const imgs = page.locator('.dock__item .portrait img');
+  await expect(imgs).toHaveCount(3);
+  for (const img of await imgs.all()) expect(await img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
+  const css = await page.evaluate(() => ({
+    hud: getComputedStyle(document.querySelector('.hud')!).backgroundColor,
+    end: getComputedStyle(document.querySelector('.end')!).backgroundColor,
+    moss: getComputedStyle(document.documentElement).getPropertyValue('--moss'),
+    sun: getComputedStyle(document.documentElement).getPropertyValue('--sun'),
+  }));
+  const rgb = (hexColor: string) => {
+    const n = parseInt(hexColor.trim().slice(1), 16);
+    return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
+  expect(css.hud).toBe(rgb(css.moss));
+  expect(css.end).toBe(rgb(css.sun));
+  // Trabajó hoy: al descomponer, el sprite de Bruno aparece en el tablero.
+  const visibleSprites = () =>
+    page.evaluate(() => {
+      const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: { type: string; visible: boolean }[] } } } } };
+      return w.game.scene.getScene('Game').children.list.filter((o) => o.type === 'Image' && o.visible).length;
+    });
+  expect(await visibleSprites()).toBe(0);
+  await page.locator('[data-id="2"]').click();
+  await valid(page).first().click();
+  await expect.poll(visibleSprites).toBe(1);
+  if (info.project.name === 'vertical-390x844') {
+    await page.locator('[data-id="1"]').click();
+    await page.screenshot({ path: 'docs/screenshots/006-cozy-390x844.png' });
+  }
 });

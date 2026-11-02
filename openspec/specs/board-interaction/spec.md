@@ -38,8 +38,8 @@ Cuando el miembro seleccionado no tiene ninguna casilla válida, la bitácora SH
 | Lactarius indigo | No hay tierra libre junto a la red | "no hay tierra junto a la red." |
 | Amanita muscaria | Menos nutrientes que el costo de revivir | "faltan nutrientes." |
 | Amanita muscaria | No hay árboles grises junto a la red | "no hay árboles grises junto a la red." |
-| Gliophorus psittacinus | Menos esporas que el costo de pasar la voz | "faltan esporas: pasar la voz cuesta 2." |
-| Gliophorus psittacinus | No hay árboles vivos | "no hay árboles vivos todavía." |
+| Gliophorus psittacinus | Hay un compañero que ya trabajó hoy, pero menos esporas que el costo de pasar la voz | "falta 1 espora: pasar la voz cuesta 1." |
+| Gliophorus psittacinus | Nadie ha trabajado todavía hoy | "nadie ha trabajado todavía hoy. Pasa la voz después de que trabaje un compañero." |
 | Maestra Bruna | Ya lanzó un hechizo esta estación | "su magia vuelve con la próxima estación." |
 
 Maestra Bruna no tiene otro motivo de inactividad: cuando llega siempre hay árboles vivos.
@@ -61,15 +61,15 @@ Maestra Bruna no tiene otro motivo de inactividad: cuando llega siempre hay árb
 - THEN la bitácora dice "Rubí: no hay árboles grises junto a la red."
 
 #### Scenario: Sin trabajo disponible (Gliophorus psittacinus)
-- WHEN se selecciona a Perica con 1 espora y árboles vivos
-- THEN la bitácora dice "Perica: faltan esporas: pasar la voz cuesta 2."
+- WHEN se selecciona a Chispa, Bruno ya trabajó hoy y hay 0 esporas
+- THEN la bitácora dice "Chispa: falta 1 espora: pasar la voz cuesta 1."
 
 #### Scenario: Sin trabajo disponible (Maestra Bruna)
 - WHEN se selecciona a Maestra Bruna después de que ya lanzó un hechizo esta estación
 - THEN la bitácora dice "Maestra Bruna: su magia vuelve con la próxima estación."
 
 ### Requirement: Estado visible
-El HUD SHALL mostrar en todo momento día (de 12), estación, nutrientes, esporas y árboles vivos (de 5).
+El HUD SHALL mostrar en todo momento día (de 12), estación, nutrientes, esporas y árboles vivos (del total de árboles del claro).
 
 #### Scenario: Tras una acción
 - WHEN el Champiñón descompone un tronco
@@ -117,3 +117,21 @@ Todo control interactivo SHALL medir al menos 44 × 44 px y no SHALL depender de
 #### Scenario: Tocar un miembro con el pulgar
 - WHEN el jugador toca la tarjeta de un miembro en el dock
 - THEN el miembro queda seleccionado sin zoom de la página
+
+### Requirement: Retratos del gremio
+El dock, las fichas y el tablero SHALL usar los sprites de Blender de cada especie (`public/assets/characters/`): en el dock, el retrato en reposo; en la ficha, la pose feliz; en el tablero, la pose de trabajo sobre la casilla donde ese miembro trabajó hoy. La Gliophorus SHALL usar la variante de su estación. Maestra Bruna, sin modelo todavía, usa un placeholder de silueta.
+
+#### Scenario: Trabajó hoy
+- WHEN Bruno descompone un tronco
+- THEN el tablero muestra a Bruno trabajando sobre ese tronco hasta el amanecer
+
+#### Scenario: Retratos en el dock
+- WHEN empieza la partida
+- THEN las tarjetas de Añil, Bruno y Rubí muestran sus retratos
+
+### Requirement: Estilo cozy
+La interfaz SHALL seguir la libreta de campo con un acabado más moderno: fondo de papel crema, cintas verdes de título, chips con íconos para día, nutrientes, esporas y árboles, tarjetas redondeadas con sombra suave, botón principal amarillo y tablero con marco de madera. Todos los colores y tipografías SHALL venir de `src/theme.ts`.
+
+#### Scenario: Pantalla de juego
+- WHEN se abre el juego a 390 × 844
+- THEN el HUD es una cinta verde con el día y la estación y chips con íconos, y "Fin del día" es un botón amarillo

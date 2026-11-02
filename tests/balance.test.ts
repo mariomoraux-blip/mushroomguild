@@ -1,93 +1,46 @@
 import { describe, expect, it } from 'vitest';
-import { act, endDay, H, mulberry32, newGame, recruit, type GameState, type Point, type RecruitableSpecies, type SpeciesId } from '../src/rules';
-import { playGame, randomDay, smartDay } from './bots';
+import { generateMap, MAP, MAP_GEN, mulberry32, newGame, newRandomGame, playAdvised, TREES_FOR_MOTHER } from '../src/rules';
+import { playGame, randomDay } from './bots';
 
-const SEED = 2026;
-const GAMES = 2000;
+// Balance como test (game-rules › Dificultad medida). Semillas fijas: resultados reproducibles.
+const MAPS = 100;
+const RANDOM_GAMES_PER_MAP = 10;
 
-function simulate(day: (rng: () => number) => (s: GameState) => GameState) {
-  const rng = mulberry32(SEED);
-  let wins = 0;
-  let winDays = 0;
-  for (let i = 0; i < GAMES; i++) {
-    const s = playGame(newGame(), day(rng));
-    if (s.status === 'won') {
-      wins++;
-      winDays += s.wonDay!;
-    }
-  }
-  return { rate: wins / GAMES, avgDay: wins ? winDays / wins : Infinity };
-}
+describe('balance en claros generados', () => {
+  const maps = Array.from({ length: MAPS }, (_, i) => generateMap(i + 1));
 
-const report = (name: string, r: { rate: number; avgDay: number }) =>
-  console.info(`[balance] ${name}: victorias ${(r.rate * 100).toFixed(1)} % · día medio ${r.avgDay.toFixed(1)}`);
-
-// ─── Partida guiada ────────────────────────────────────────────────────────────
-// Escrita en coordenadas del PoC (mapa horizontal 8×5) y traducida al mapa vertical
-// con la rotación de design.md: (x, y) del PoC → (y, 7 - x).
-// Los miembros se nombran por especie y orden de llegada (Maestra Bruna llega el día 3 y corre los ids).
-const rotate = ({ x, y }: Point): Point => ({ x: y, y: H - 1 - x });
-
-type Who = readonly [species: SpeciesId, nth: number];
-type Step = readonly [who: Who, x: number, y: number] | readonly ['recruit', RecruitableSpecies];
-const ANIL: Who = ['lactarius', 1];
-const OLA: Who = ['lactarius', 2];
-const BRUNO: Who = ['champi', 1];
-const RUBI: Who = ['amanita', 1];
-
-const GUIDED: readonly (readonly Step[])[] = [
-  /* día 1 */ [[BRUNO, 0, 1], [ANIL, 1, 2], [RUBI, 2, 2]], // tronco junto al Hogar, tejer, revivir el árbol cercano
-  /* día 2 */ [[BRUNO, 0, 1], [ANIL, 1, 3], [RUBI, 1, 4]], // terminar el tronco, tejer, segundo árbol
-  /* día 3 */ [['recruit', 'lactarius'], [ANIL, 3, 2]], // llega Maestra Bruna; reclutar a Ola, tejer hacia el este
-  /* día 4 */ [[ANIL, 4, 2], [OLA, 4, 1], [BRUNO, 4, 3], [RUBI, 4, 0]], // tejer ×2, tronco, tercer árbol
-  /* día 5 */ [[ANIL, 5, 1], [OLA, 5, 0], [BRUNO, 4, 3]], // tejer ×2, terminar el tronco
-  /* día 6 */ [[ANIL, 6, 0], [OLA, 7, 0], [RUBI, 7, 1]], // la red llega al cuarto árbol, vecino del Árbol Padre
-  /* día 7 */ [[RUBI, 7, 2]], // despertar al Árbol Padre
-];
-
-function playGuided(): GameState {
-  let s = newGame();
-  for (const day of GUIDED) {
-    for (const step of day) {
-      if (step[0] === 'recruit') {
-        s = recruit(s, step[1]).state;
-      } else {
-        const [[species, nth], x, y] = step;
-        const id = s.members.filter((m) => m.species === species)[nth - 1]!.id;
-        const p = rotate({ x, y });
-        s = act(s, id, p.x, p.y).state;
-      }
-    }
-    if (s.status !== 'playing') break;
-    s = endDay(s).state;
-  }
-  return s;
-}
-
-describe('balance', () => {
-  it(`bot con criterio (semilla ${SEED}, ${GAMES} partidas): gana ≥ 95 % y en promedio antes del día 9`, () => {
-    const r = simulate(smartDay);
-    report('bot con criterio', r);
-    expect(r.rate).toBeGreaterThanOrEqual(0.95);
-    expect(r.avgDay).toBeLessThan(9);
+  it(`las pistas ganan los ${MAPS} mapas entre el día ${MAP_GEN.minDay} y el ${MAP_GEN.maxDay}, con día medio entre 8 y 10`, () => {
+    const days = maps.map((m) => {
+      const end = playAdvised(newGame(m));
+      expect(end.status).toBe('won');
+      return end.wonDay!;
+    });
+    const avg = days.reduce((a, b) => a + b, 0) / days.length;
+    console.info(`[balance] pistas: 100 % de victorias · día medio ${avg.toFixed(1)} · mapas de respaldo ${maps.filter((m) => m === MAP).length}`);
+    expect(Math.min(...days)).toBeGreaterThanOrEqual(MAP_GEN.minDay);
+    expect(Math.max(...days)).toBeLessThanOrEqual(MAP_GEN.maxDay);
+    expect(avg).toBeGreaterThanOrEqual(8);
+    expect(avg).toBeLessThanOrEqual(10);
   }, 120_000);
 
-  it(`bot al azar (semilla ${SEED}, ${GAMES} partidas): gana entre 15 % y 60 %`, () => {
-    const r = simulate(randomDay);
-    report('bot al azar', r);
-    expect(r.rate).toBeGreaterThanOrEqual(0.15);
-    expect(r.rate).toBeLessThanOrEqual(0.6);
+  it('el bot al azar gana entre el 5 % y el 30 %', () => {
+    const rng = mulberry32(2026);
+    let wins = 0;
+    for (const m of maps) for (let k = 0; k < RANDOM_GAMES_PER_MAP; k++) if (playGame(newGame(m), randomDay(rng)).status === 'won') wins++;
+    const rate = wins / (MAPS * RANDOM_GAMES_PER_MAP);
+    console.info(`[balance] bot al azar: victorias ${(rate * 100).toFixed(1)} %`);
+    expect(rate).toBeGreaterThanOrEqual(0.05);
+    expect(rate).toBeLessThanOrEqual(0.3);
   }, 120_000);
 
-  it('partida guiada: gana en el día 9 o antes', () => {
-    const s = playGuided();
-    console.info(`[balance] partida guiada: ${s.status} en el día ${s.wonDay ?? s.day}`);
-    expect(s.status).toBe('won');
-    expect(s.wonDay).toBeLessThanOrEqual(9);
+  it('el mapa clásico del Capítulo 1 también se gana siguiendo las pistas', () => {
+    const end = playAdvised(newGame());
+    console.info(`[balance] mapa clásico: ${end.status} el día ${end.wonDay ?? end.day}`);
+    expect(end.status).toBe('won');
   });
 
-  it('la rotación del PoC conserva el Hogar y el Árbol Padre', () => {
-    expect(rotate({ x: 0, y: 2 })).toEqual({ x: 2, y: 7 }); // Hogar
-    expect(rotate({ x: 7, y: 2 })).toEqual({ x: 2, y: 0 }); // Árbol Padre
+  it(`despertar al Árbol Padre exige ${TREES_FOR_MOTHER} árboles revividos`, () => {
+    expect(TREES_FOR_MOTHER).toBe(3);
+    expect(newRandomGame(7).status).toBe('playing');
   });
 });

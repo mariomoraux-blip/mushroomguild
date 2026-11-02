@@ -12,7 +12,7 @@ Estilo **ilustrado con contorno café**, formas redondas y rubor. La **luz cambi
 | Champiñón ("Bruno") | Descompositor | Domo bajo y ancho | Café claro | Canasta | — |
 | *Lactarius indigo* ("Añil") | Tejedor | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Gotitas de látex azul; el micelio que teje tiene destellos índigo |
 | *Amanita muscaria* ("Rubí") | Sanadora | Domo alto con verrugas y falda en el tallo | Rojo y crema | Bolso con hojas que curan | — |
-| *Gliophorus psittacinus* ("Perica") | Mensajera | Campana pequeña, viscosa y brillante | Verde loro | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
+| *Gliophorus psittacinus* ("Chispa") | Mensajera | Campana pequeña, viscosa y brillante | Verde loro | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
 | *Conocybe arcana* ("Maestra Bruna") | Maga | Cono alto con la punta doblada en rizo, como sombrero de hechicera; túnica larga; la más alta | Sombrero rojo amanita que degrada a blanco, punta naranja; túnica color tallo; motas doradas que brillan como estrellas | Bastón de ramita con una espora luminosa | Cabello rubio de hilos de micelio; brilla siempre un poco |
 
 Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña y cono alto deben distinguirse en negro sobre blanco a 56 px.
@@ -35,7 +35,8 @@ La saturación del progreso (gris → color según árboles revividos) se aplica
 
 ## Interfaz: libreta de campo
 - Paneles de papel crema con bordes suaves; botones y marcos de madera; etiquetas tipo cinta.
-- Display redondeada y gruesa para títulos y números; cuerpo de alta legibilidad.
+- Display redondeada y gruesa para títulos y números (**Fredoka**); cuerpo de alta legibilidad (**Nunito**). Se cargan de Google Fonts con respaldo de sistema.
+- Acabado cozy (006): fondo de papel crema, **cintas verdes** de título (HUD y hojas), **chips** con íconos de trazo, tarjetas redondeadas con sombra suave, **botón principal amarillo** y tablero con **marco de madera**. Referentes: *All About Poppy* (cintas, chips, tarjetas) y *Dine Together* (papel cálido, tinta café).
 - Fichas de criatura con humor para cada especie (ver `references/chanterelle-creature-sheet.jpg`).
 - Intro y finales con globo de diálogo sobre papel (ver `references/fablevale-ui.jpg`).
 
@@ -50,7 +51,14 @@ Valores de día; la gradación por estación (003) los oscurece hacia el inviern
 | Acento | `#E8A33D` | Selección, foco, casillas válidas |
 | Micelio | `#B9F0D6` | Red y líneas de micelio |
 | Destello índigo | `#4B5FD6` | Micelio tejido por el Lactarius indigo |
-| Tierra base | `#7A5C3E` | Fondo del tablero (de día) |
+| Tierra base | `#7A5C3E` | Juntas entre casillas del tablero (de día) |
+| Crema | `#FBF5E6` | Fondo de página y de las hojas |
+| Musgo | `#6E8B3D` | Cintas de título y HUD |
+| Musgo oscuro | `#55702C` | Borde de las cintas |
+| Sol | `#F4C64E` | Botón principal, casillas válidas y ★ |
+| Hoja | `#8DB255` | Follaje vivo y briznas |
+| Pradera | `#B5C285` | Casillas del tablero |
+| Piedra | `#9A9183` | Rocas y copas de los árboles dormidos |
 
 ## Layout móvil (vertical)
 ```
@@ -71,6 +79,12 @@ Valores de día; la gradación por estación (003) los oscurece hacia el inviern
 - El dock es una sola fila: las tarjetas se desplazan en horizontal dentro del dock, la siguiente asoma cortada y el orden es el de llegada. "Terminar el día" queda fijo fuera del desplazamiento.
 - Horizontal en teléfono: tablero a la izquierda, dock a la derecha, casillas ≥ 44 px.
 - Escritorio: el mismo layout centrado, con más aire; casillas ≤ 96 px.
+
+## Sprites en el juego
+- Los renders de Blender viven en `assets/sprites/` (fuente) y se copian a `public/assets/characters/` (lo que se publica): `<especie>-<pose>.png` con poses `reposo`, `trabajando` y `feliz`, a 176 × 128. La Gliophorus tiene una variante por estación (`gliophorus-<pose>-<estación>.png`).
+- Uso: retrato en reposo en el dock (feliz cuando está seleccionado o sugerido), pose feliz grande en la ficha y pose de trabajo en el tablero, sobre la casilla donde ese miembro trabajó hoy.
+- Maestra Bruna aún no tiene modelo: usa la silueta de cono como placeholder.
+- Presupuesto: los 21 sprites publicados pesan ≈ 300 KB (límite total de assets: 2 MB).
 
 ## Referencias (`references/`)
 | Archivo | Tomamos | Dejamos |

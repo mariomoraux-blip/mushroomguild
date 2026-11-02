@@ -1,13 +1,14 @@
 import { es } from '../copy/es';
-import { COST, MAX_GUILD, RECRUITABLE, recruitableCount, validTargets, type SpeciesId, type Spell } from '../rules';
+import { COST, MAX_GUILD, RECRUITABLE, recruitableCount, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
 import type { AppState, Sheet, Store } from '../store';
-import { el, hat } from './dom';
+import { el, portrait } from './dom';
 
 const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
 
 /** Hoja inferior: reclutar (con fichas), ficha de criatura o elegir hechizo. */
 export function mountSheet(root: HTMLElement, store: Store) {
   let shown: Sheet | null = null;
+  let currentSeason = 0;
   let opener: HTMLElement | null = null;
 
   root.addEventListener('click', (e) => {
@@ -35,6 +36,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
   };
 
   function recruitSheet(state: AppState) {
+    const season = currentSeason;
     const g = state.game;
     const can = g.status === 'playing' && g.spores >= COST.recruit && recruitableCount(g) < MAX_GUILD;
     const rows = SPECIES.map((sp) => {
@@ -46,7 +48,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
       return el(
         'li',
         { class: 'row' },
-        hat(sp),
+        portrait(sp, 'reposo', season),
         el('span', { class: 'row__text' },
           el('strong', {}, info.name), el('span', {}, ` · ${info.role}`),
           el('span', { class: 'row__verb' }, info.verb)),
@@ -59,6 +61,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
 
   /** Ficha de una especie (y de un miembro concreto, si se abrió al seleccionarlo). */
   function cardSheet(species: SpeciesId, memberName?: string) {
+    const season = currentSeason;
     const info = es.species[species];
     const g = es.guide[species];
     const S = es.card.sections;
@@ -68,7 +71,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
     return panel(
       title,
       el('div', { class: 'creature' },
-        el('div', { class: 'creature__head' }, hat(species), el('p', {}, el('em', {}, info.scientific), ` · ${info.role}`)),
+        el('div', { class: 'creature__head' }, portrait(species, 'feliz', season, 'lg'), el('p', {}, el('em', {}, info.scientific), ` · ${info.role}`)),
         el('p', {}, g.context),
         el('p', { class: 'creature__quip' }, es.quote(info.quip)),
         ...section(S.ability, g.ability),
@@ -83,6 +86,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
   }
 
   function helpSheet() {
+    const season = currentSeason;
     const h = es.help;
     const tiles = [es.tileHelp.mother, es.tileHelp.home, es.tileHelp.soil, es.tileHelp.log, es.tileHelp.tree, es.tileHelp.treeAlive, es.tileHelp.rock];
     return panel(
@@ -95,7 +99,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
         el('h3', {}, h.guildTitle),
         el('ul', { class: 'rows' },
           ...SPECIES.map((sp) =>
-            el('li', { class: 'row' }, hat(sp),
+            el('li', { class: 'row' }, portrait(sp, 'reposo', season),
               el('span', { class: 'row__text' },
                 el('strong', {}, sp === 'mago' ? es.mageName : es.species[sp].short), el('span', {}, ` · ${es.species[sp].role}`),
                 el('span', { class: 'row__verb' }, es.species[sp].verb))))),
@@ -120,6 +124,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
   }
 
   return (state: AppState) => {
+    currentSeason = seasonIndex(state.game.day);
     const sheet = state.ui.sheet;
     if (JSON.stringify(sheet) === JSON.stringify(shown)) return;
     const wasOpen = shown !== null;

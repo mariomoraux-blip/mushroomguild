@@ -11,7 +11,7 @@ El pilar 2 dice que el mundo cuenta la historia. Sin intro, final ni cambio de c
 
 ## Diseño
 - Un solo juego de assets; cada estación es una gradación de color (filtro de color de Phaser) solo sobre el escenario, no sobre personajes ni UI.
-- Saturación = 0,15 + 0,85 × (árboles vivos + Árbol Padre × 2) / 7, combinada con la gradación de la estación.
+- Saturación = 0,15 + 0,85 × (árboles vivos + Árbol Padre × 2) / (árboles del claro + 2), combinada con la gradación de la estación (desde el 006 cada claro es aleatorio, con 7 árboles).
 - Brillo del micelio por estación (0,2 → 1,0) y transición de luz de 600 ms al cambiar de estación.
 - Valores en `src/theme.ts`, según la tabla de `docs/art-direction.md`.
 - Cartas de intro y final con estilo de papel y globo de diálogo, legibles a 360 px.

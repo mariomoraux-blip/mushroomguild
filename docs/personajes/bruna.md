@@ -38,7 +38,7 @@ H = altura total (≈ 1,30–1,35 m): la más alta del gremio.
 | Sombrero, paso intermedio: coral | `#E57F66` | `#C0604C` |
 | Sombrero, paso intermedio: rosado | `#F4B9A6` | `#D69A88` |
 | Sombrero, arriba: blanco | `#FBF1E6` | `#DCCFC0` |
-| Punta en rizo: naranja de otoño (= Perico en otoño) | `#E87B2E` | `#B4511F` |
+| Punta en rizo: naranja de otoño (= Chispa en otoño) | `#E87B2E` | `#B4511F` |
 | Motas-estrella (doradas, para que se vean sobre el blanco) | `#F2C14E` | — |
 | Túnica color tallo (fibras verticales en la sombra) | `#E6D3B3` | `#C4AB86` (cuello en luz `#F2E6CF`) |
 | Cara y parte alta del tallo | `#F2E9D8` | `#D6C3A2` |

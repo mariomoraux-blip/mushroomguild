@@ -1,4 +1,4 @@
-# Hoja de personaje: *Gliophorus psittacinus* "Perico"
+# Hoja de personaje: *Gliophorus psittacinus* "Chispa"
 
 **Rol:** Mensajera · **Silueta:** campana pequeña, viscosa y brillante · **Accesorio:** saquito de cartas
 
@@ -96,7 +96,7 @@ Es la más pequeña del gremio: **0,60 m, el 75 % de Bruno**.
 | Añil | 0,84 m | 1,05× |
 | Bruno | 0,80 m | 1× |
 | Rubí | 0,76 m | 0,95× |
-| **Perico** | **0,60 m** | **0,75×** |
+| **Chispa** | **0,60 m** | **0,75×** |
 
 Es el mínimo razonable: más baja, el sombrero quedaría por debajo de ≈ 18 px de ancho a 56 px y se perderían el brillo y la cara.
 

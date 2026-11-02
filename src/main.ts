@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { es } from './copy/es';
 import { tileSize } from './layout';
 import { GameScene } from './scenes/GameScene';
-import type { SpeciesId } from './rules';
+import { newGame, newRandomGame, type SpeciesId } from './rules';
 import { createStore, initialState } from './store';
 import { applyTheme, color, renderResolution } from './theme';
 import { mountBoardOverlay } from './ui/board';
@@ -23,7 +23,12 @@ const storage = {
 };
 const SEEN = 'gremio.seenSpecies';
 const seen = (() => { try { return JSON.parse(storage.get(SEEN) ?? '[]') as SpeciesId[]; } catch { return []; } })();
-const store = createStore(initialState(debugGame() ?? undefined, seen));
+// Claro de la partida: aleatorio por defecto; `?seed=N` repite un mapa y `?map=clasico` usa el del Capítulo 1.
+const params = new URLSearchParams(location.search);
+const seedParam = Number(params.get('seed'));
+const seed = Number.isFinite(seedParam) && seedParam > 0 ? seedParam : (Date.now() % 2147483647) + 1;
+const firstGame = debugGame() ?? (params.get('map') === 'clasico' ? newGame() : newRandomGame(seed));
+const store = createStore(initialState(firstGame, seen));
 store.subscribe((state, prev) => {
   if (state.ui.seen !== prev.ui.seen) storage.set(SEEN, JSON.stringify(state.ui.seen));
 });
@@ -78,7 +83,7 @@ const game = new Phaser.Game({
 // ─── Tamaño: casillas que caben en el área del tablero (≤ 96 px), canvas a ≤ 2× ───────
 const area = $('board-area');
 const board = $('board');
-const BOARD_BORDER = 4; // 2 px por lado (styles.css › .board)
+const BOARD_BORDER = 12; // borde de 2 px + marco de madera de 4 px por lado (styles.css › .board)
 function resize() {
   const tile = tileSize(area.clientWidth - BOARD_BORDER, area.clientHeight - BOARD_BORDER);
   const w = tile * 5;

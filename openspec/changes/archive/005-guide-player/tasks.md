@@ -16,3 +16,6 @@
 - [x] 3.1 Tests de `advise` y del store para cada escenario
 - [x] 3.2 Playwright: "?", chip de esporas y ★; capturas a 390 × 844
 - [x] 3.3 Tests de la ficha (store y Playwright) y captura de la ficha a 390 × 844
+
+## Notas de cierre (2 de noviembre)
+- Se archiva junto con el 006, que ajusta pistas, ficha de la Mensajera y textos de reclutar a las reglas nuevas.

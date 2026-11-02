@@ -58,7 +58,7 @@ Para la ficha de criatura: "cuida de todos y siempre lleva una hoja de más".
 | Feliz | Da un saltito con una hoja en alto |
 
 ## Prueba de silueta
-Negro sobre blanco a 56 px, contra el domo bajo de Bruno (variante E) y el embudo de Añil (variante 8). Las siluetas de Perico y Maestra Bruna son bocetos: si cambian, hay que volver a medir.
+Negro sobre blanco a 56 px, contra el domo bajo de Bruno (variante E) y el embudo de Añil (variante 8). Las siluetas de Chispa y Maestra Bruna son bocetos: si cambian, hay que volver a medir.
 
 | Variante | Solape con Bruno | Perfil vs. Bruno | Peor solape con el resto |
 | --- | --- | --- | --- |

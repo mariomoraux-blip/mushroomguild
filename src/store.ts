@@ -77,8 +77,8 @@ export function adviceText(game: GameState, a: Advice): string {
       return es.advice.decompose(name);
     case 'weave':
       return a.toward === 'tree' ? es.advice.weaveTree(name) : es.advice.weaveMother(name);
-    case 'message':
-      return es.advice.message(name);
+    case 'call':
+      return es.advice.call(name, member(game, a.calledId)?.name ?? '');
     case 'spell':
       return es.advice.spell(name, es.spells[a.spell]);
     case 'endDay':

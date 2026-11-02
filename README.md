@@ -6,7 +6,7 @@ Juego cozy de colocación de trabajadores para navegador, mobile-first.
 - [`CLAUDE.md`](CLAUDE.md): instrucciones para el agente (stack, arquitectura, definición de terminado).
 - [`openspec/`](openspec/): especificaciones con OpenSpec. Empieza por [`openspec/project.md`](openspec/project.md); cada cambio vive en `openspec/changes/<id>/`.
 - [`docs/gdd-fase-0.md`](docs/gdd-fase-0.md): concept doc y GDD de la Fase 0.
-- [`docs/art-direction.md`](docs/art-direction.md): dirección de arte.
+- [`docs/art-direction.md`](docs/art-direction.md): dirección de arte; hojas de personaje en [`docs/personajes/`](docs/personajes/).
 - [`poc/`](poc/): prueba de concepto (referencia, no se edita).
 
 ## Preview en Vercel
@@ -28,3 +28,5 @@ npm run test       # reglas, store y balance (Vitest)
 npm run build      # build de producción en dist/
 npm run smoke      # prueba de humo con Playwright (capturas en docs/screenshots/)
 ```
+
+Cada partida genera un claro aleatorio. Para repetir uno, agrega `?seed=N` a la URL; `?map=clasico` carga el mapa del Capítulo 1.

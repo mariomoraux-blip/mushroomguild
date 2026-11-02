@@ -1,11 +1,12 @@
 import { validTargets } from './actions';
 import { COST, MAX_GUILD, TREES_FOR_MOTHER } from './config';
-import { magicSpent, motherTile, recruitableCount, revivedCount, touchesNet } from './state';
+import { magicSpent, motherTile, recruitableCount, revivedCount, touchesNet, workerAt } from './state';
 import type { GameState, Member, RecruitableSpecies, Spell, Tile } from './types';
 
 /** Siguiente paso sugerido al jugador (player-guidance). */
 export type Advice =
-  | { kind: 'awaken' | 'revive' | 'decompose' | 'message'; memberId: number; target: Tile }
+  | { kind: 'awaken' | 'revive' | 'decompose'; memberId: number; target: Tile }
+  | { kind: 'call'; memberId: number; target: Tile; calledId: number }
   | { kind: 'weave'; memberId: number; target: Tile; toward: 'tree' | 'mother' }
   | { kind: 'spell'; memberId: number; target: Tile; spell: Spell }
   | { kind: 'recruit'; species: RecruitableSpecies }
@@ -29,18 +30,41 @@ export function weaveGoal(s: GameState): { goal: Tile; toward: 'tree' | 'mother'
   return nearest ? { goal: nearest.t, toward: 'tree' } : { goal: mother, toward: 'mother' };
 }
 
-/** Especie que conviene reclutar (misma política que el bot con criterio de 001). */
+/**
+ * Especie que conviene reclutar: un segundo Lactarius mientras la red no llegue al Árbol Padre;
+ * después una Gliophorus (para repetir la mejor jugada del día); después otra Amanita.
+ */
 export function recruitPick(s: GameState): RecruitableSpecies {
-  const logNearNet = s.tiles.some((t) => t.kind === 'log' && touchesNet(s, t.x, t.y));
   const mother = motherTile(s);
-  if (s.nutrients < COST.revive && !logNearNet) return 'gliophorus';
-  if (!touchesNet(s, mother.x, mother.y)) return 'lactarius';
+  const count = (sp: string) => s.members.filter((m) => m.species === sp).length;
+  if (!touchesNet(s, mother.x, mother.y) && count('lactarius') < 2) return 'lactarius';
+  if (count('gliophorus') === 0) return 'gliophorus';
   return 'amanita';
 }
 
 /**
- * Siguiente paso sugerido. Prioridad: despertar al Árbol Padre > revivir > reclutar > descomponer >
- * tejer > pasar la voz > hechizo > terminar el día.
+ * A quién conviene que la Gliophorus le pase la voz: el compañero que ya trabajó hoy y que,
+ * despierto, tendría trabajo útil. Rango: 0 Amanita, 1 Champiñón, 2 Lactarius.
+ */
+function callOption(s: GameState, glio: Member): (Advice & { kind: 'call'; rank: number }) | null {
+  if (s.spores < COST.call) return null;
+  const rank: Record<string, number> = { amanita: 0, champi: 1, lactarius: 2 };
+  let best: (Advice & { kind: 'call'; rank: number }) | null = null;
+  for (const t of s.tiles) {
+    const w = workerAt(s, t.x, t.y);
+    if (!w || rank[w.species] === undefined) continue;
+    const awake: GameState = { ...s, spores: s.spores - COST.call, members: s.members.map((m) => (m.id === w.id ? { ...m, used: false } : m)) };
+    if (!validTargets(awake, w.id).length) continue;
+    const r = rank[w.species]!;
+    if (!best || r < best.rank) best = { kind: 'call', memberId: glio.id, target: t, calledId: w.id, rank: r };
+  }
+  return best;
+}
+
+/**
+ * Siguiente paso sugerido. Prioridad: despertar al Árbol Padre > revivir > hechizo > pasar la voz a una
+ * Amanita > reclutar > descomponer > pasar la voz a un Champiñón > tejer > pasar la voz a un Lactarius >
+ * terminar el día.
  */
 export function advise(s: GameState): Advice {
   if (s.status !== 'playing') return { kind: 'over' };
@@ -57,22 +81,6 @@ export function advise(s: GameState): Advice {
     const t = closest(targetsOf(m), mother);
     if (t) return { kind: 'revive', memberId: m.id, target: t };
   }
-  if (s.spores >= COST.recruit && recruitableCount(s) < MAX_GUILD) return { kind: 'recruit', species: recruitPick(s) };
-  for (const m of of('champi')) {
-    const t = closest(targetsOf(m), mother);
-    if (t) return { kind: 'decompose', memberId: m.id, target: t };
-  }
-  const { goal, toward } = weaveGoal(s);
-  for (const m of of('lactarius')) {
-    const t = closest(targetsOf(m), goal);
-    if (t) return { kind: 'weave', memberId: m.id, target: t, toward };
-  }
-  if (s.nutrients < COST.revive) {
-    for (const m of of('gliophorus')) {
-      const t = closest(targetsOf(m), mother);
-      if (t) return { kind: 'message', memberId: m.id, target: t };
-    }
-  }
   for (const m of of('mago')) {
     if (magicSpent(s)) break;
     const rock = closest(targetsOf(m, 'sprout'), mother);
@@ -80,5 +88,26 @@ export function advise(s: GameState): Advice {
     const tree = closest(targetsOf(m, 'rain'), mother);
     if (tree) return { kind: 'spell', memberId: m.id, target: tree, spell: 'rain' };
   }
+  const calls = of('gliophorus').map((g) => callOption(s, g)).filter((c) => c !== null);
+  const call = (maxRank: number): Advice | null => {
+    const c = calls.find((cc) => cc.rank <= maxRank);
+    return c ? { kind: 'call', memberId: c.memberId, target: c.target, calledId: c.calledId } : null;
+  };
+  const callAmanita = call(0);
+  if (callAmanita) return callAmanita;
+  if (s.spores >= COST.recruit && recruitableCount(s) < MAX_GUILD) return { kind: 'recruit', species: recruitPick(s) };
+  for (const m of of('champi')) {
+    const t = closest(targetsOf(m), mother);
+    if (t) return { kind: 'decompose', memberId: m.id, target: t };
+  }
+  const callChampi = call(1);
+  if (callChampi) return callChampi;
+  const { goal, toward } = weaveGoal(s);
+  for (const m of of('lactarius')) {
+    const t = closest(targetsOf(m), goal);
+    if (t) return { kind: 'weave', memberId: m.id, target: t, toward };
+  }
+  const callAny = call(2);
+  if (callAny) return callAny;
   return { kind: 'endDay' };
 }

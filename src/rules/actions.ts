@@ -12,6 +12,7 @@ import {
   seasonIndex,
   tile,
   touchesNet,
+  workerAt,
 } from './state';
 import {
   RuleError,
@@ -67,8 +68,8 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
       if (s.nutrients < COST.revive) return no(R.reviveCost(COST.revive));
       return yes;
     case 'gliophorus':
-      if (!isLiveTree(t)) return no(R.gliophorusNeedsTree);
-      if (s.spores < COST.message) return no(R.messageCost(COST.message));
+      if (!workerAt(s, x, y)) return no(R.gliophorusNeedsWorker);
+      if (s.spores < COST.call) return no(R.callCost(COST.call));
       return yes;
     case 'mago': {
       if (magicSpent(s)) return no(R.magicSpent);
@@ -108,10 +109,14 @@ export function act(s: GameState, id: number, x: number, y: number): ActionResul
         return { state: n, message: es.log.logDone(m.name, GAIN.log) };
       }
       return { state: n, message: es.log.logUsed(m.name, GAIN.log) };
-    case 'gliophorus':
-      n.spores -= COST.message;
-      n.nutrients += GAIN.message;
-      return { state: n, message: es.log.passedWord(m.name, COST.message, GAIN.message) };
+    case 'gliophorus': {
+      // Pasa la voz: el compañero que trabajó en esa casilla vuelve a estar listo.
+      const called = n.members.find((mm) => mm.id === workerAt(s, x, y)!.id)!;
+      n.spores -= COST.call;
+      called.used = false;
+      called.at = null;
+      return { state: n, message: es.log.called(m.name, called.name) };
+    }
     case 'mago': {
       n.lastSpellSeason = seasonIndex(n.day);
       if (spellFor(t) === 'sprout') {
