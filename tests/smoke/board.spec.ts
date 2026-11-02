@@ -422,6 +422,18 @@ test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page 
   await shot('victoria');
   await page.getByRole('button', { name: 'Ver el claro' }).click();
   await expect(card).toHaveCount(0);
+  // Partida terminada (017): el botón de fin de mes vuelve a la carta; también con teclado.
+  const end = page.getByRole('button', { name: 'Ver el final de la partida' });
+  await expect(end).toBeEnabled();
+  await expect(end).toHaveText('Ver final');
+  const size = { 'vertical-390x844': '390x844', 'horizontal-844x390': '844x390' }[info.project.name];
+  if (size) await page.screenshot({ path: `docs/screenshots/017-claro-terminado-${size}.png` });
+  await end.focus();
+  await page.keyboard.press('Enter');
+  await expect(card).toContainText('¡El bosque despertó!');
+  await page.getByRole('button', { name: 'Jugar de nuevo' }).click();
+  await expect(card).toHaveCount(0);
+  await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
   // Fin del invierno y "Jugar de nuevo".
   await page.goto('/?debugState=lastMonth');
   await page.locator('.end').click();

@@ -288,6 +288,8 @@ export const es = {
     endWinter: 'Terminar el invierno',
     endShort: 'Fin del mes',
     endWinterShort: 'Fin',
+    showEnd: 'Ver el final de la partida',
+    showEndShort: 'Ver final',
     recruit: 'Reclutar',
     recruitCost: (n: number) => `${n} esporas`,
   },
