@@ -200,22 +200,44 @@ button { font: inherit; color: inherit; }
 
 /* ─── Dock (011): medallones de madera con retrato, cinta con el nombre e insignia ── */
 .dock { height: var(--dock-h); display: flex; gap: var(--gap); min-width: 0; align-items: center; }
+.dock__rail { position: relative; flex: 1; min-width: 0; height: 100%; }
 .dock__cards {
-  flex: 1;
-  min-width: 0;
+  --dock-gap-min: 4px;
   height: 100%;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 2px 0;
+  gap: var(--dock-gap, var(--dock-gap-min));
+  /* El aro de madera sobresale 3 px del ancho de la tarjeta: el relleno evita que el borde lo corte. */
+  padding: 2px 4px 0;
+  scroll-padding-inline: 4px;
   overflow-x: auto;
   overscroll-behavior-x: contain; /* el scroll del dock no mueve la página */
-  scroll-snap-type: x proximity;
+  scroll-snap-type: x mandatory;
   scrollbar-width: none;
   touch-action: pan-x;
 }
 .dock__cards::-webkit-scrollbar { display: none; }
 .dock__item { flex: 0 0 auto; scroll-snap-align: start; }
+/* Flechas decorativas: avisan que hay más tarjetas de ese lado (se llega deslizando o con Tab). */
+.dock__more {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 26px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  translate: 0 -60%;
+  pointer-events: none;
+  border: 2px solid var(--ink);
+  border-radius: 9px;
+  background: var(--sun);
+}
+.dock__more::before { content: ''; width: 6px; height: 6px; border: solid var(--ink); border-width: 0 2.5px 2.5px 0; rotate: -45deg; translate: -1px 0; }
+.dock__more--start { left: -6px; }
+.dock__more--start::before { rotate: 135deg; translate: 1px 0; }
+.dock__more--end { right: -6px; }
+.dock__rail[data-more~='start'] .dock__more--start, .dock__rail[data-more~='end'] .dock__more--end { display: flex; }
 
 .card {
   position: relative;
@@ -667,9 +689,6 @@ button { font: inherit; color: inherit; }
 .title { width: min(420px, 100%); min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 12px; }
 .title__logo { margin: 4px 0 0; width: min(330px, 86%); }
 .title__logo-img { width: 100%; height: auto; display: block; filter: drop-shadow(0 6px 8px color-mix(in srgb, var(--ink) 45%, transparent)); }
-.title__cast { display: flex; align-items: flex-end; justify-content: center; margin-top: auto; }
-.title__cast .portrait--md { width: 72px; margin: 0 -6px; }
-.title__cast .portrait--md:nth-child(odd) { translate: 0 -8px; }
 .title__menu { width: min(300px, 100%); display: grid; gap: 12px; margin-bottom: 8px; }
 /* Cómo jugar */
 .howto { display: grid; gap: 14px; }
@@ -770,10 +789,9 @@ button { font: inherit; color: inherit; }
 /* ─── Horizontal en teléfono: tablero a la izquierda, HUD y dock a la derecha ─ */
 @media (orientation: landscape) and (max-height: 540px) {
   /* Pantallas (012) en dos columnas para que nada obligue a desplazar. */
-  .title { display: grid; grid-template-columns: 1fr minmax(240px, 300px); grid-template-rows: auto auto; align-content: center; column-gap: 24px; row-gap: 4px; width: min(760px, 100%); }
+  .title { display: grid; grid-template-columns: 1fr minmax(240px, 300px); grid-template-rows: auto; align-content: center; align-items: center; column-gap: 24px; row-gap: 4px; width: min(760px, 100%); }
   .title__logo { grid-column: 1; width: min(300px, 100%); justify-self: center; }
-  .title__cast { grid-column: 1; }
-  .title__menu { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+  .title__menu { grid-column: 2; margin: 0; }
   .screen__panel { width: min(760px, 100%); gap: 8px; }
   .screen__head { min-height: 48px; }
   .howto { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-rows: 1fr auto; column-gap: 16px; row-gap: 10px; align-items: center; }
@@ -807,7 +825,6 @@ button { font: inherit; color: inherit; }
 @media (orientation: landscape) {
   .screen { background-image: linear-gradient(color-mix(in srgb, var(--ink) 20%, transparent), transparent 30%, transparent 60%, color-mix(in srgb, var(--ink) 40%, transparent)), var(--art-bg-game-wide); }
   .title { justify-content: center; }
-  .title__cast { margin-top: 0; }
   .story[data-bg='intro'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 45%, transparent)), var(--art-bg-intro-wide); }
   .story[data-bg='victory'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 35%, transparent)), var(--art-bg-victory-wide); }
   /* El Árbol Padre queda al centro del fondo apaisado: la carta de final va a un costado. */

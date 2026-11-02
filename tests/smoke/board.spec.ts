@@ -177,21 +177,33 @@ test('Maestra Bruma: retrato pintado en el dock y más alta en el tablero', asyn
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/007-maga-390x844.png' });
 });
 
-test('gremio completo: el dock se desplaza por dentro y la página no se mueve', async ({ page }, info) => {
+test('gremio completo: el dock se desplaza por dentro, solo con tarjetas enteras, y la página no se mueve', async ({ page }, info) => {
   test.skip(info.project.name !== 'vertical-390x844', 'solo a 390 px de ancho');
   await page.goto('/?debugState=fullGuild');
   const cards = page.locator('.dock__cards');
   await expect(page.locator('.dock__item')).toHaveCount(7);
   const ids = () => page.locator('.dock__item .card').evaluateAll((bs) => bs.map((b) => b.getAttribute('data-id')));
   const order = await ids();
-  const right = await cards.evaluate((c) => (c.scrollWidth > c.clientWidth ? c.getBoundingClientRect().right : -1));
-  expect(right).toBeGreaterThan(0);
-  // La tarjeta siguiente asoma cortada en el borde del dock.
-  const peeking = await page
-    .locator('.dock__item')
-    .evaluateAll((items, edge) => items.some((i) => i.getBoundingClientRect().left < edge && i.getBoundingClientRect().right > edge), right);
-  expect(peeking).toBe(true);
+  expect(await cards.evaluate((c) => c.scrollWidth > c.clientWidth)).toBe(true);
+  // Ninguna tarjeta visible queda cortada por el borde (018); la flecha avisa de qué lado hay más.
+  const cut = () =>
+    cards.evaluate((c) => {
+      const r = c.getBoundingClientRect();
+      return [...c.children].filter((i) => {
+        const b = i.getBoundingClientRect();
+        return b.right > r.left + 1 && b.left < r.right - 1 && (b.left < r.left - 0.5 || b.right > r.right + 0.5);
+      }).length;
+    });
+  const rail = page.locator('.dock__rail');
+  expect(await cut()).toBe(0);
+  await expect(rail).toHaveAttribute('data-more', 'end');
+  await cards.evaluate((c) => c.scrollBy(70, 0));
+  await expect(rail).toHaveAttribute('data-more', 'start end');
+  await expect.poll(cut).toBe(0);
   await cards.evaluate((c) => c.scrollBy(400, 0));
+  await expect(rail).toHaveAttribute('data-more', 'start');
+  await expect.poll(cut).toBe(0);
+  await page.screenshot({ path: 'docs/screenshots/018-dock-390x844.png' });
   await expect(page.locator('.end')).toBeInViewport();
   await noScrollNoZoom(page);
   await page.locator('.end').click();
@@ -437,6 +449,24 @@ test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la f
   const screen = page.locator('#screen');
   await page.goto('/');
   await expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeFocused();
+  // Portada limpia (018): sin personajes y con el logo entero (ninguna fila del borde pintada).
+  await expect(screen.locator('.portrait')).toHaveCount(0);
+  const logo = screen.locator('.title__logo-img');
+  await expect.poll(() => logo.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+  const edge = await logo.evaluate((img: HTMLImageElement) => {
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth;
+    c.height = img.naturalHeight;
+    const ctx = c.getContext('2d')!;
+    ctx.drawImage(img, 0, 0);
+    const { data } = ctx.getImageData(0, 0, c.width, c.height);
+    const alpha = (x: number, y: number) => data[(y * c.width + x) * 4 + 3]!;
+    let painted = 0;
+    for (let x = 0; x < c.width; x++) painted += Number(alpha(x, 0) > 20) + Number(alpha(x, c.height - 1) > 20);
+    for (let y = 0; y < c.height; y++) painted += Number(alpha(0, y) > 20) + Number(alpha(c.width - 1, y) > 20);
+    return painted;
+  });
+  expect(edge).toBe(0);
   await shot('portada');
   // Cómo jugar: ‹ › y puntos; la flecha anterior está desactivada en el paso 1 y la siguiente en el 5.
   await page.getByRole('button', { name: 'Cómo jugar', exact: true }).click();

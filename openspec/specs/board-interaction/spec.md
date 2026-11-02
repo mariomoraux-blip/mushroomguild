@@ -111,7 +111,8 @@ El juego SHALL ser jugable de principio a fin en un navegador de teléfono en ve
 
 #### Scenario: Gremio completo en el dock
 - WHEN el gremio tiene 7 miembros (6 reclutables y Maestra Bruma) en una ventana de 390 px de ancho
-- THEN las tarjetas se desplazan en horizontal dentro del dock y la tarjeta siguiente asoma cortada
+- THEN las tarjetas se desplazan en horizontal dentro del dock, de tarjeta en tarjeta, y ninguna tarjeta visible queda cortada por el borde
+- AND una flecha en el borde indica de qué lado hay más tarjetas
 - AND "Terminar el mes" queda fijo fuera de ese desplazamiento
 - AND la página no se mueve
 - AND las tarjetas mantienen siempre el mismo orden (orden de llegada al gremio)
