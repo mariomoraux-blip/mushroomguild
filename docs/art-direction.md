@@ -39,6 +39,19 @@ La saturación del progreso (gris → color según árboles revividos) se aplica
 - Fichas de criatura con humor para cada especie (ver `references/chanterelle-creature-sheet.jpg`).
 - Intro y finales con globo de diálogo sobre papel (ver `references/fablevale-ui.jpg`).
 
+## Paleta base
+Valores de día; la gradación por estación (003) los oscurece hacia el invierno. Viven en `src/theme.ts`.
+
+| Token | Hex | Uso |
+| --- | --- | --- |
+| Papel | `#F3E9D2` | Paneles, fichas, HUD |
+| Madera | `#8B5E3C` | Botones, marcos, dock |
+| Tinta café | `#3B2A1E` | Contornos y texto (nunca negro) |
+| Acento | `#E8A33D` | Selección, foco, casillas válidas |
+| Micelio | `#B9F0D6` | Red y líneas de micelio |
+| Destello índigo | `#4B5FD6` | Micelio tejido por la Lactarius indigo |
+| Tierra base | `#7A5C3E` | Fondo del tablero (de día) |
+
 ## Layout móvil (vertical)
 ```
 ┌──────────────────────┐
@@ -48,14 +61,16 @@ La saturación del progreso (gris → color según árboles revividos) se aplica
 │                      │
 │   Tablero 5 × 8      │  ← Árbol Madre arriba
 │   casillas ≥ 64 px   │     Hogar abajo
-│                      │
+│   (≥ 56 a 390×664)   │
 ├──────────────────────┤
 │ aviso de bitácora    │
-│ [Ola][Bruno][Rubí] ▶ │  ← dock del gremio (pulgar)
-│ [ Terminar el día ]  │
-└──────────────────────┘
+│ [Añil][Bruno][Ru│ ▶  │  ← dock del gremio (pulgar): scroll horizontal;
+└──────────────────────┘     "Terminar el día" (▶) fijo en la misma fila
 ```
-Horizontal en teléfono: tablero a la izquierda, dock a la derecha. Escritorio: el mismo layout centrado, con más aire.
+- Vertical: casillas ≥ 64 px a 390 × 844, ≥ 56 px a 390 × 664 (Safari con barras) y nunca < 48 px. Sin dock plegable.
+- El dock es una sola fila: las tarjetas se desplazan en horizontal dentro del dock, la siguiente asoma cortada y el orden es el de llegada. "Terminar el día" queda fijo fuera del desplazamiento.
+- Horizontal en teléfono: tablero a la izquierda, dock a la derecha, casillas ≥ 44 px.
+- Escritorio: el mismo layout centrado, con más aire; casillas ≤ 96 px.
 
 ## Referencias (`references/`)
 | Archivo | Tomamos | Dejamos |
