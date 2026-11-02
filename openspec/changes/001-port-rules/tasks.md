@@ -10,12 +10,12 @@
 - [x] 2.2 `state.ts`: `newGame()` y selectores
 - [x] 2.3 `actions.ts`: `check`, `act`, `recruit`, `endDay`, `validTargets`, sin mutar el estado recibido
 - [x] 2.4 `src/copy/es.ts` con todos los mensajes de reglas
-- [ ] 2.5 Especies nuevas desde la spec: Gliophorus psittacinus (pasar la voz) y Conocybe arcana (llegada, Brote arcano, Lluvia de esporas, un hechizo por estación)
+- [x] 2.5 Especies nuevas desde la spec: Gliophorus psittacinus (pasar la voz) y Conocybe arcana (llegada, Brote arcano, Lluvia de esporas, un hechizo por estación)
 
 ## 3. Pruebas
-- [ ] 3.1 Un test por escenario de `specs/game-rules/spec.md`
-- [ ] 3.2 `balance.test.ts` con bot con criterio, bot al azar y partida guiada (umbrales en design.md)
-- [ ] 3.3 `npm run test` y `npm run build` en verde
+- [x] 3.1 Un test por escenario de `specs/game-rules/spec.md`
+- [x] 3.2 `balance.test.ts` con bot con criterio, bot al azar y partida guiada (umbrales en design.md)
+- [x] 3.3 `npm run test` y `npm run build` en verde
 
 ## 4. Cierre
 - [ ] 4.1 Pull request con captura de `BootScene` y resultado del test de balance
