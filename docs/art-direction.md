@@ -22,7 +22,7 @@ Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña y co
 - Tamaño en pantalla: ~56 px de alto en un teléfono de 390 px. Render a 2× (≈ 128 px).
 
 ## Luz por estación
-Un solo juego de assets; cada estación es una **gradación de color** (filtro de color de Phaser) sobre el escenario. Personajes y UI no se gradúan, con una excepción intencional: la Gliophorus cambia de tono con la estación (tinte del sprite).
+Un solo juego de assets; cada estación es una **gradación de color** (filtro de color de Phaser) sobre el escenario. Personajes y UI no se gradúan, con una excepción intencional: la Gliophorus cambia de tono con la estación (una variante de sprite por estación, renderizada desde Blender; el tinte que multiplica no llega del verde a las demás).
 
 | Estación | Días | Hora | Gradación | Micelio |
 | --- | --- | --- | --- | --- |

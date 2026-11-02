@@ -42,6 +42,24 @@ La dirección de arte dice "tinte del sprite". El tinte por defecto de Phaser mu
 
 Cualquiera de las dos pide actualizar esa línea de `art-direction.md`.
 
+**Decisión:** una variante de sprite por estación. Con el tinte que multiplica, desde la base verde `#4FB04A` no se llega a las otras estaciones: el rojo tendría que multiplicarse por ≈ 2,9 y multiplicar solo oscurece.
+
+## Modelo y sprites
+- `assets/blender/gliophorus-perico.blend`: modelo y poses en `poses_perico.py` (reposo; trabajando, entregando una carta; feliz). `estacion(...)` cambia la paleta del sombrero (y de la gota). Sombrero con el grupo `Toon4` de `gremio-base.blend`.
+- `assets/sprites/gliophorus-{reposo,trabajando,feliz}-{primavera,verano,otono,invierno}.png` (176 × 128) y copias `-56.png`. Los `gliophorus-{pose}.png` sin estación son idénticos a los de primavera.
+- Hoja de contacto: `perico-estaciones.png` (4 estaciones × 3 poses, arriba a 128 px recortado y abajo a 56 px).
+
+**Brillo a 56 px**, por estación (píxeles de brillo, % del sombrero, luminancia del brillo frente al resto del sombrero):
+
+| Estación | Píxeles | % | Luminancia |
+| --- | --- | --- | --- |
+| Primavera | 27–39 | 11–16 | 237–242 / 137–138 |
+| Verano | 30–40 | 13–16 | 240–243 / 178–179 |
+| Otoño | 30–41 | 13–17 | 233–235 / 133 |
+| Invierno | 25–31 | 11–14 | 234–235 / 138–140 |
+
+Se lee en las cuatro: una franja de ≈ 2 px de ancho más el punto de la cima. Verano es la de menos contraste (el amarillo ya es claro), pero el brillo sigue ≈ 60 puntos por encima. El borde húmedo queda en 1 px y apenas se nota a 56 px; a 128 px sí.
+
 ## Brillo húmedo en toon
 Sobre las 3 bandas de `Toon3` (sombra, base, luz), el sombrero suma:
 1. **Brillo especular duro** (4.ª banda): grupo `Toon4` = Glossy BSDF (rugosidad ≈ 0,15) → Shader to RGB → umbral → color de **brillo**. Una mancha alargada arriba a la izquierda (del lado de la luz) y un punto cerca de la cima. Mínimo 2 px a 56 px; si no, el sombrero se lee mate.
