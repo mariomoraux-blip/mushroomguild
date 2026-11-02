@@ -3,7 +3,7 @@
 Un claro de bosque pintado a mano que **abraza** la pantalla: follaje, flores y hongos en los bordes, materiales de **madera y pergamino** para la interfaz, y la **luz** como medida del progreso (el claro pasa de gris y lila a verde y dorado). Mobile-first en vertical.
 
 - **Fuente visual:** la propuesta [`docs/concept/propuesta-visual-v1.webp`](concept/propuesta-visual-v1.webp) (pantallas) y las hojas de piezas en [`assets/ui/source/`](../assets/ui/source/), todas de Mario (2 de noviembre). Son arte propio del proyecto, no referencias de terceros.
-- **Recortes:** las piezas de las seis hojas (v1, UI v2, tablero HD, tablero por estaciones, tablero v3, logo y fondos) están en `public/assets/` según la [organización de assets](#organización-de-assets): 115 archivos, 1.4 MB, con transparencia. Sirven como **placeholders**: la mayoría está por debajo de 2× y algunas traen texto horneado (ver [Inventario](#inventario-de-piezas)).
+- **Recortes:** las piezas de las seis hojas (v1, UI v2, tablero HD, tablero por estaciones, tablero v3, logo y fondos) están en `public/assets/` según la [organización de assets](#organización-de-assets): 119 archivos, 1.8 MB, con transparencia. Sirven como **placeholders**: la mayoría está por debajo de 2× y algunas traen texto horneado (ver [Inventario](#inventario-de-piezas)).
 - **Estado del juego:** hasta integrar estas piezas, el juego usa el bosque ilustrado procedural del cambio 008 (Canvas2D + SVG + shader). Esta dirección lo reemplaza pieza por pieza; lo que se conserva del 008 está en [Qué se conserva](#qué-se-conserva-del-008).
 
 ## Principios
@@ -149,7 +149,7 @@ La saturación del progreso (gris → color según árboles revividos) se aplica
 - **Piezas estirables:** marcos, pergamino, letrero, cinta y botones se entregan **en partes** (9 o 3 partes, con márgenes indicados) para que se estiren sin deformarse. Se usan con `border-image` o como capas.
 - **Estados por separado:** los brillos de casilla válida y seleccionada, y la ★, van como capas transparentes del mismo tamaño que la casilla.
 - **Sin texto horneado** (salvo el logo).
-- **Presupuesto:** propuesta de subir el límite de assets de 2 MB a **4 MB** en WebP, con carga diferida de portada, intro y victoria. Hoy hay ≈ 415 KB de UI y ≈ 400 KB de sprites.
+- **Presupuesto:** hoy hay 1.83 MB publicados (límite 2 MB): quedan unos 170 KB. Los fondos apaisados obligaron a recomprimir panorámicas, verticales y Árboles Padre pintados (WebP 75–80). Propuesta: subir el límite a **4 MB** con carga diferida de portada, intro y victoria, o retirar las variantes que no se usen.
 - **Gradación por estación (003):** se aplica sobre el escenario (casillas, objetos y fondos), no sobre personajes ni interfaz.
 
 ## Organización de assets
@@ -157,7 +157,8 @@ Lo que se publica vive en `public/assets/` (WebP). La fuente (Blender, renders a
 
 ```
 public/assets/
-├── backgrounds/        menu, intro, victory (verticales; faltan las apaisadas)
+├── backgrounds/        menu, intro, victory (verticales) · menu-landscape (16:9) ·
+│                       menu-wide, intro-wide, victory-wide (panorámicas ≈ 5,4:1)
 ├── board/
 │   ├── terrain/        grass, grass-b, grass-c, grass-autumn, grass-winter, dirt, sprout, sprout-seedling,
 │   │                   blocked, home, state-valid, state-selected
@@ -183,26 +184,31 @@ public/assets/
 - **Personajes:** la carpeta lleva el nombre del primer miembro de la especie (Añil = *Lactarius indigo*, Bruno = Champiñón, Rubí = *Amanita*, Chispa = *Gliophorus*, Maestra Bruna = *Conocybe arcana*); los reclutas de la misma especie usan el mismo arte. `rest`, `work` y `happy` son las poses de Blender (reposo, trabajando y feliz en el código); `portrait` es el retrato pintado para dock, fichas y "El gremio".
 - **Micelio por conectores:** la red puede dibujarse con piezas que unen casillas vecinas (`straight-h`, `straight-v`, `corner`, `cross`…) sobre `dirt`, o con el tile completo `net` sobre pasto. Falta la pieza en T; hoy `cross-b` es otra cruz.
 - **Estaciones:** pasto (`grass-autumn`, `grass-winter`), rocas (`rock-winter`), árboles (`autumn`, `winter`) y Árbol Padre (`*-painted` por estación) tienen variantes pintadas. Esto **contradice** el principio de "un solo juego de assets + gradación" (ver Luz por estación): hay que elegir entre variantes pintadas o gradación.
+- **Fondos por orientación:** vertical en el teléfono (`menu`, `intro`, `victory`); en horizontal y escritorio, `menu-landscape` (16:9) para la portada y las panorámicas `*-wide` como franja superior o inferior detrás del tablero, la intro y la victoria. Las panorámicas solo tienen 310 px de alto: estiradas a pantalla completa se ven borrosas, así que van como franja y no como fondo completo.
 - **Fuera del árbol propuesto:** el Hogar, los estados de casilla y `blocked` van en `board/terrain/`, y los logos y pastillas en `ui/hud/`.
 - **Código:** `src/theme.ts` arma las rutas (`assetUrl`, `spriteKey`, `CHARACTER_DIR`, `fatherKey`); ningún otro archivo escribe rutas de assets a mano.
 
 ## Inventario de piezas
-115 archivos publicados, 1.4 MB en total. "Listo" significa que el ancho alcanza para 2× a 390 px; los demás sirven para maquetar y hay que reexportarlos. Retirados en la v2 por traer texto horneado o baja resolución: las tarjetas con placa (`card`), `ribbon-hint`, `page-dots` y `rock-dark`.
+119 archivos publicados, 1.8 MB en total. "Listo" significa que el ancho alcanza para 2× a 390 px; los demás sirven para maquetar y hay que reexportarlos. Retirados en la v2 por traer texto horneado o baja resolución: las tarjetas con placa (`card`), `ribbon-hint`, `page-dots` y `rock-dark`.
 
 | Archivo | Origen | Tamaño | Peso | Estado |
 | --- | --- | --- | --- | --- |
-| `backgrounds/intro.webp` | logo y fondos | 465 × 631 | 85 KB | Baja resolución (objetivo 860 px de ancho) |
-| `backgrounds/menu.webp` | logo y fondos | 463 × 631 | 116 KB | Baja resolución (objetivo 860 px de ancho) |
-| `backgrounds/victory.webp` | logo y fondos | 466 × 631 | 126 KB | Baja resolución (objetivo 860 px de ancho) |
-| `board/father-tree/asleep-painted.webp` | tablero HD | 590 × 450 | 79 KB | Listo |
+| `backgrounds/menu-landscape.webp` | fondo apaisado | 1672 × 941 | 230 KB | Listo |
+| `backgrounds/menu-wide.webp` | panorámicas | 1670 × 310 | 112 KB | Listo como franja (310 px de alto); para pantalla completa haría falta ≥ 1080 px de alto |
+| `backgrounds/intro-wide.webp` | panorámicas | 1670 × 307 | 81 KB | Listo como franja (310 px de alto); para pantalla completa haría falta ≥ 1080 px de alto |
+| `backgrounds/victory-wide.webp` | panorámicas | 1670 × 312 | 108 KB | Listo como franja (310 px de alto); para pantalla completa haría falta ≥ 1080 px de alto |
+| `backgrounds/intro.webp` | logo y fondos | 465 × 631 | 70 KB | Baja resolución (objetivo 860 px de ancho) |
+| `backgrounds/menu.webp` | logo y fondos | 463 × 631 | 90 KB | Baja resolución (objetivo 860 px de ancho) |
+| `backgrounds/victory.webp` | logo y fondos | 466 × 631 | 96 KB | Baja resolución (objetivo 860 px de ancho) |
+| `board/father-tree/asleep-painted.webp` | tablero HD | 590 × 450 | 66 KB | Listo |
 | `board/father-tree/asleep.webp` | Blender | 176 × 192 | 6 KB | Listo |
-| `board/father-tree/autumn-painted.webp` | tablero v3 | 254 × 180 | 28 KB | Baja resolución (objetivo 380 px de ancho) |
-| `board/father-tree/awake-painted.webp` | tablero HD | 598 × 456 | 77 KB | Listo |
+| `board/father-tree/autumn-painted.webp` | tablero v3 | 254 × 180 | 24 KB | Baja resolución (objetivo 380 px de ancho) |
+| `board/father-tree/awake-painted.webp` | tablero HD | 598 × 456 | 68 KB | Listo |
 | `board/father-tree/awake.webp` | Blender | 176 × 192 | 8 KB | Listo |
-| `board/father-tree/green-painted.webp` | tablero estaciones | 314 × 247 | 38 KB | Baja resolución (objetivo 380 px de ancho) |
-| `board/father-tree/spring-painted.webp` | tablero v3 | 256 × 180 | 29 KB | Baja resolución (objetivo 380 px de ancho) |
-| `board/father-tree/summer-painted.webp` | tablero v3 | 249 × 180 | 27 KB | Baja resolución (objetivo 380 px de ancho) |
-| `board/father-tree/winter-painted.webp` | tablero v3 | 269 × 184 | 28 KB | Baja resolución (objetivo 380 px de ancho) |
+| `board/father-tree/green-painted.webp` | tablero estaciones | 314 × 247 | 32 KB | Baja resolución (objetivo 380 px de ancho) |
+| `board/father-tree/spring-painted.webp` | tablero v3 | 256 × 180 | 25 KB | Baja resolución (objetivo 380 px de ancho) |
+| `board/father-tree/summer-painted.webp` | tablero v3 | 249 × 180 | 23 KB | Baja resolución (objetivo 380 px de ancho) |
+| `board/father-tree/winter-painted.webp` | tablero v3 | 269 × 184 | 24 KB | Baja resolución (objetivo 380 px de ancho) |
 | `board/logs/log-rotten.webp` | tablero estaciones | 144 × 107 | 9 KB | Listo |
 | `board/logs/log-used.webp` | tablero HD | 226 × 159 | 16 KB | Listo |
 | `board/logs/log.webp` | tablero HD | 229 × 193 | 18 KB | Listo |
@@ -307,7 +313,7 @@ public/assets/
 | `ui/panels/ribbon.webp` | UI v2 | 178 × 73 | 6 KB | Baja resolución (objetivo 360 px de ancho) |
 | `ui/panels/sign.webp` | UI v2 | 180 × 83 | 8 KB | Baja resolución (objetivo 360 px de ancho) |
 
-**Faltan:** fondos apaisados (los envías aparte), fondos verticales a 860 × 1860 (hoy 465 × 631), conector de micelio en T, retratos a 280 px para la ficha grande, Chispa `portrait` por estación sin marco y el fin del invierno si debe distinguirse de la intro.
+**Faltan:** fondos verticales a 860 × 1860 (hoy 465 × 631), panorámicas más altas si se quieren a pantalla completa en horizontal, conector de micelio en T, retratos a 280 px para la ficha grande, Chispa `portrait` por estación sin marco y el fin del invierno si debe distinguirse de la intro.
 
 ## Qué se conserva del 008
 - La regla de **casilla ocupada** y el pintor como respaldo si una imagen no carga.
