@@ -10,7 +10,7 @@ Estilo **ilustrado con contorno café**, formas redondas y rubor. La **luz cambi
 | Especie (nombre) | Rol | Silueta | Color | Accesorio | Rasgo especial |
 | --- | --- | --- | --- | --- | --- |
 | Champiñón ("Bruno") | Descompositor | Domo bajo y ancho | Café claro | Canasta | — |
-| *Lactarius indigo* ("Añil") | Tejedora | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Gotitas de látex azul; el micelio que teje tiene destellos índigo |
+| *Lactarius indigo* ("Añil") | Tejedor | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Gotitas de látex azul; el micelio que teje tiene destellos índigo |
 | *Amanita muscaria* ("Rubí") | Sanadora | Domo alto con verrugas y falda en el tallo | Rojo y crema | Bolso con hojas que curan | — |
 | *Gliophorus psittacinus* ("Perico") | Mensajera | Campana pequeña, viscosa y brillante | Verde loro | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
 | *Conocybe arcana* ("Maese Bruma") | Mago | Cono alto y puntiagudo, doblado en la punta como sombrero de hechicero; el más alto | Violeta profundo con motas que brillan como estrellas | Bastón de ramita con una espora luminosa | Barba de hilos de micelio; brilla siempre un poco |

@@ -5,7 +5,7 @@
 ### Requirement: Selección de miembro
 Al seleccionar un miembro disponible, la interfaz SHALL resaltar solo las casillas donde su acción es válida.
 
-#### Scenario: Tejedora al inicio
+#### Scenario: Tejedor al inicio
 - WHEN el jugador selecciona a la Lactarius indigo en el día 1
 - THEN se resaltan las tierras adyacentes al Hogar y ninguna otra casilla
 

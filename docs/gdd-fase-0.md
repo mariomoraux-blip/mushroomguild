@@ -66,7 +66,7 @@ Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol M
 | Especie | Rol | Disponibilidad | Acción | Efecto |
 | --- | --- | --- | --- | --- |
 | Champiñón | Descompositor | Inicial, reclutable | Descompone un tronco | +3 nutrientes |
-| *Lactarius indigo* | Tejedora | Inicial, reclutable | Teje micelio en tierra | −1 nutriente, la red crece |
+| *Lactarius indigo* | Tejedor | Inicial, reclutable | Teje micelio en tierra | −1 nutriente, la red crece |
 | *Amanita muscaria* | Sanadora | Inicial, reclutable | Revive un árbol gris | −3 nutrientes; −6 en el Árbol Madre |
 | *Gliophorus psittacinus* | Mensajera | Reclutable | "Pasa la voz" desde un árbol vivo | −2 esporas, +3 nutrientes |
 | *Conocybe arcana* (ficticio) | Mago | Único; llega solo | Un hechizo por estación | Ver hechizos |

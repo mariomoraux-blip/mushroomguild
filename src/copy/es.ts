@@ -5,7 +5,7 @@ export const es = {
   title: 'El Gremio de los Hongos',
 
   species: {
-    ostra: { name: 'Ostra', role: 'Tejedora', verb: 'Teje micelio en tierra vecina a la red (1 nutriente).' },
+    ostra: { name: 'Ostra', role: 'Tejedor', verb: 'Teje micelio en tierra vecina a la red (1 nutriente).' },
     champi: { name: 'Champiñón', role: 'Descompositor', verb: 'Descompone un tronco vecino a la red (+3 nutrientes).' },
     amanita: { name: 'Amanita', role: 'Sanadora', verb: 'Revive un árbol gris vecino a la red (3 nutrientes).' },
   } satisfies Record<SpeciesId, { name: string; role: string; verb: string }>,
