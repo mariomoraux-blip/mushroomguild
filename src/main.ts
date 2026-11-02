@@ -17,7 +17,7 @@ document.title = es.title;
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const store = createStore(initialState(debugGame() ?? undefined));
 
-const renderHud = mountHud($('hud'));
+const renderHud = mountHud($('hud'), store);
 const renderDock = mountDock($('dock'), store);
 const overlay = mountBoardOverlay($('overlay'), store);
 const renderSheet = mountSheet($('sheet'), store);
@@ -39,6 +39,17 @@ store.subscribe((state, prev) => {
   if (picked && document.body.dataset.input === 'keyboard') overlay.focusFirstValid();
 });
 renderDom();
+
+// Libreta de campo: se abre sola en la primera visita (localStorage es solo una comodidad: puede fallar).
+const HELP_SEEN = 'gremio.helpSeen';
+const storage = {
+  get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } },
+  set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* sin almacenamiento */ } },
+};
+if (!storage.get(HELP_SEEN)) store.dispatch({ type: 'openSheet', sheet: { kind: 'help' } });
+store.subscribe((state, prev) => {
+  if (prev.ui.sheet?.kind === 'help' && state.ui.sheet?.kind !== 'help') storage.set(HELP_SEEN, '1');
+});
 
 // ─── Phaser: solo el tablero ──────────────────────────────────────────────────
 const scene = new GameScene(store);

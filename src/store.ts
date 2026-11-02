@@ -3,6 +3,7 @@
 import { es } from './copy/es';
 import {
   act,
+  advise,
   check,
   endDay,
   idleReason,
@@ -15,10 +16,11 @@ import {
   type RecruitableSpecies,
   type SpeciesId,
   type Spell,
+  type Advice,
   type Tile,
 } from './rules';
 
-export type Sheet = { kind: 'recruit' } | { kind: 'creature'; species: SpeciesId } | { kind: 'spell' };
+export type Sheet = { kind: 'recruit' } | { kind: 'creature'; species: SpeciesId } | { kind: 'spell' } | { kind: 'help' };
 
 export interface Notice {
   readonly text: string;
@@ -52,11 +54,55 @@ export type Action =
 const info = (text: string): Notice => ({ text, tone: 'info' });
 const warn = (text: string): Notice => ({ text, tone: 'warn' });
 
-/** Pista de la bitácora cuando no hay nada seleccionado. */
+/** Texto de la pista para un consejo de `advise()`. */
+export function adviceText(game: GameState, a: Advice): string {
+  const name = 'memberId' in a ? (member(game, a.memberId)?.name ?? '') : '';
+  switch (a.kind) {
+    case 'over':
+      return game.status === 'won' ? es.hints.won : es.hints.lost;
+    case 'awaken':
+      return es.advice.awaken(name);
+    case 'revive':
+      return es.advice.revive(name);
+    case 'recruit':
+      return es.advice.recruit(game.spores, es.species[a.species].short);
+    case 'decompose':
+      return es.advice.decompose(name);
+    case 'weave':
+      return a.toward === 'tree' ? es.advice.weaveTree(name) : es.advice.weaveMother(name);
+    case 'message':
+      return es.advice.message(name);
+    case 'spell':
+      return es.advice.spell(name, es.spells[a.spell]);
+    case 'endDay':
+      return es.advice.endDay;
+  }
+}
+
+/** Pista de la bitácora cuando no hay nada seleccionado: el siguiente paso sugerido. */
 export function idleHint(game: GameState): Notice {
-  if (game.status === 'won') return info(es.hints.won);
-  if (game.status === 'lost') return info(es.hints.lost);
-  return info(game.members.some((m) => !m.used) ? es.hints.pickMember : es.hints.allWorked);
+  return info(adviceText(game, advise(game)));
+}
+
+/** Miembro sugerido (★ en el dock), si el consejo es de un miembro. */
+export function suggestedMember(state: AppState): number | null {
+  const a = advise(state.game);
+  return 'memberId' in a ? a.memberId : null;
+}
+
+/** Casilla sugerida (★ en el tablero): solo con el miembro sugerido seleccionado (y su hechizo, si es el mago). */
+export function suggestedTile(state: AppState): Tile | null {
+  const a = advise(state.game);
+  if (!('memberId' in a) || a.memberId !== state.ui.selected) return null;
+  if (a.kind === 'spell' && a.spell !== state.ui.spell) return null;
+  return a.target;
+}
+
+function tileHelp(t: Tile): string {
+  if (t.kind === 'mother') return t.alive ? es.tileHelp.motherAwake : es.tileHelp.mother;
+  if (t.kind === 'tree') return t.alive ? es.tileHelp.treeAlive : es.tileHelp.tree;
+  if (t.kind === 'soil') return t.net ? es.tileHelp.soilNet : es.tileHelp.soil;
+  return es.tileHelp[t.kind];
 }
 
 export function initialState(game: GameState = newGame()): AppState {
@@ -88,7 +134,8 @@ export function reduce(state: AppState, action: Action): AppState {
       if (m.species === 'mago') {
         return { game, ui: { ...ui, selected: m.id, spell: null, sheet: { kind: 'spell' }, notice: info(es.hints.pickSpell(m.name)) } };
       }
-      return { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: info(es.hints.pickTile(m.name)) } };
+      const pick = suggestedMember(state) === m.id ? es.advice.pickTile(m.name) : es.hints.pickTile(m.name);
+      return { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: info(pick) } };
     }
     case 'chooseSpell': {
       const m = ui.selected === null ? undefined : member(game, ui.selected);
@@ -97,7 +144,10 @@ export function reduce(state: AppState, action: Action): AppState {
     }
     case 'tapTile': {
       if (game.status !== 'playing') return state;
-      if (ui.selected === null) return { game, ui: { ...ui, notice: idleHint(game) } };
+      if (ui.selected === null) {
+        const t = game.tiles.find((tt) => tt.x === action.x && tt.y === action.y);
+        return t ? { game, ui: { ...ui, notice: info(tileHelp(t)) } } : state;
+      }
       const m = member(game, ui.selected);
       if (!m) return state;
       if (m.species === 'mago' && !ui.spell) {
