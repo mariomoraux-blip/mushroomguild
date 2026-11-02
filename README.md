@@ -5,5 +5,6 @@ Juego cozy de colocación de trabajadores para navegador, mobile-first.
 ## Cómo está organizado
 - [`CLAUDE.md`](CLAUDE.md): instrucciones para el agente (stack, arquitectura, definición de terminado).
 - [`openspec/`](openspec/): especificaciones con OpenSpec. Empieza por [`openspec/project.md`](openspec/project.md); cada cambio vive en `openspec/changes/<id>/`.
+- [`docs/gdd-fase-0.md`](docs/gdd-fase-0.md): concept doc y GDD de la Fase 0.
 - [`docs/art-direction.md`](docs/art-direction.md): dirección de arte.
 - [`poc/`](poc/): prueba de concepto (referencia, no se edita).
