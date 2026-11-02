@@ -69,14 +69,15 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
       el('button', { class: 'round-btn round-btn--back', type: 'button', 'data-action': 'back', 'aria-label': es.howto.back }),
       el('h1', { class: 'screen__title', id: 'screen-title' }, title));
 
-  // Portada limpia (018): solo el logo y el menú; el gremio se presenta en la intro y en "El gremio".
+  // Portada limpia (018): solo el logo, el menú y la firma (020); el gremio se presenta en la intro y en "El gremio".
   function title() {
     return el('div', { class: 'title' },
       el('h1', { class: 'title__logo' }, img(SCREEN_ART.logo, 'title__logo-img'), el('span', { class: 'sr-only' }, es.title)),
       el('nav', { class: 'title__menu', 'aria-label': es.titleScreen.label },
         el('button', { class: 'menu-btn menu-btn--primary', type: 'button', 'data-action': 'play' }, el('span', { class: 'menu-btn__icon menu-btn__icon--play', 'aria-hidden': 'true' }), es.titleScreen.play),
         el('button', { class: 'menu-btn', type: 'button', 'data-action': 'howto' }, el('span', { class: 'menu-btn__icon menu-btn__icon--book', 'aria-hidden': 'true' }), es.titleScreen.howto),
-        el('button', { class: 'menu-btn', type: 'button', 'data-action': 'guild' }, el('span', { class: 'menu-btn__icon menu-btn__icon--guild', 'aria-hidden': 'true' }), es.titleScreen.guild)));
+        el('button', { class: 'menu-btn', type: 'button', 'data-action': 'guild' }, el('span', { class: 'menu-btn__icon menu-btn__icon--guild', 'aria-hidden': 'true' }), es.titleScreen.guild)),
+      el('p', { class: 'title__credit', lang: 'en' }, es.titleScreen.credit));
   }
 
   // Elige tu claro (019): tres botones grandes con el nombre, qué cambia y el multiplicador del puntaje.

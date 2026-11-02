@@ -211,6 +211,8 @@ export const es = {
     play: 'Nueva partida',
     howto: 'Cómo jugar',
     guild: 'El gremio',
+    /** Firma del autor (020): va tal cual, en inglés. */
+    credit: 'By Mario Mora for BerryLab',
   },
 
   howto: {
