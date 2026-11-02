@@ -6,7 +6,7 @@ import { el, setText } from './dom';
 
 /**
  * HUD del referente (011): día y estación en una pastilla verde, pastillas de crema con ícono pintado
- * para nutrientes, esporas (abre reclutar) y árboles vivos (del total del claro), y "?" amarillo (Libreta de campo).
+ * para nutrientes, esporas (abre reclutar) y árboles vivos (del total del claro), y "?" amarillo (Cómo jugar).
  */
 export function mountHud(root: HTMLElement, store: Store) {
   const dayValue = el('strong', { class: 'hud__day-value' });
@@ -32,7 +32,7 @@ export function mountHud(root: HTMLElement, store: Store) {
   root.append(day, nutrients.node, spores.node, trees.node, help);
 
   spores.node.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'recruit' } }));
-  help.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'help' } }));
+  help.addEventListener('click', () => store.dispatch({ type: 'openScreen', screen: { kind: 'howto', step: 0, back: 'game' } }));
 
   return (state: AppState) => {
     const g = state.game;

@@ -341,7 +341,7 @@ button { font: inherit; color: inherit; }
 .sheet {
   position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 40; /* sobre las pantallas (30) y las cartas (20): la ficha se abre también desde "El gremio" */
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -558,8 +558,183 @@ button { font: inherit; color: inherit; }
   box-shadow: inset 0 -4px 0 color-mix(in srgb, var(--wood) 45%, transparent), 0 4px 0 var(--ink);
 }
 
+/* ─── Pantallas (012): portada, "Cómo jugar" y "El gremio" ──────────────── */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: max(12px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  background:
+    linear-gradient(color-mix(in srgb, var(--ink) 20%, transparent), transparent 30%, transparent 60%, color-mix(in srgb, var(--ink) 40%, transparent)),
+    var(--art-bg-game) center / cover no-repeat,
+    var(--leafDark);
+}
+.screen[hidden] { display: none; }
+.screen__panel { width: min(420px, 100%); display: flex; flex-direction: column; gap: 14px; }
+.screen__head { position: relative; display: flex; align-items: center; justify-content: center; min-height: 52px; }
+.screen__head .round-btn--back { position: absolute; left: 0; top: 50%; translate: 0 -50%; }
+.screen__title {
+  margin: 0;
+  padding: 7px 22px 9px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--paper);
+  text-shadow: 0 2px 0 var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  background: linear-gradient(var(--wood), var(--bark));
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--peach) 40%, transparent), 0 4px 0 var(--ink);
+}
+.round-btn {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: center / contain no-repeat;
+  cursor: pointer;
+  filter: drop-shadow(0 3px 0 color-mix(in srgb, var(--ink) 50%, transparent));
+}
+.round-btn--back, .round-btn--prev { background-image: var(--art-btn-prev); }
+.round-btn--next { background-image: var(--art-btn-next); }
+.round-btn:disabled { opacity: 0.35; cursor: default; }
+.round-btn:active:not(:disabled) { transform: translateY(2px); }
+.menu-btn {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 22px 3px;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--paper);
+  text-shadow: 0 2px 0 var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 18px;
+  background: linear-gradient(var(--wood), var(--bark));
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--peach) 45%, transparent), 0 4px 0 var(--ink), 0 8px 12px color-mix(in srgb, var(--ink) 35%, transparent);
+  cursor: pointer;
+}
+.menu-btn--primary {
+  min-height: 60px;
+  font-size: 24px;
+  color: var(--ink);
+  text-shadow: 0 1px 0 var(--glow);
+  border-radius: 30px;
+  background: linear-gradient(var(--glow), var(--sun) 45%, var(--accent));
+  box-shadow: inset 0 -4px 0 color-mix(in srgb, var(--wood) 45%, transparent), inset 0 2px 0 color-mix(in srgb, var(--paper) 80%, transparent), 0 4px 0 var(--ink), 0 8px 12px color-mix(in srgb, var(--ink) 35%, transparent);
+}
+.menu-btn:active { transform: translateY(3px); }
+.menu-btn__icon { flex: 0 0 28px; height: 28px; background: center / contain no-repeat; }
+.menu-btn__icon--play { background-image: var(--art-play); }
+.menu-btn__icon--book { background-image: var(--art-book); }
+.menu-btn__icon--guild { background-image: var(--art-recruit); flex-basis: 36px; }
+/* Portada */
+.title { width: min(420px, 100%); min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 12px; }
+.title__logo { margin: 4px 0 0; width: min(330px, 86%); }
+.title__logo-img { width: 100%; height: auto; display: block; filter: drop-shadow(0 6px 8px color-mix(in srgb, var(--ink) 45%, transparent)); }
+.title__cast { display: flex; align-items: flex-end; justify-content: center; margin-top: auto; }
+.title__cast .portrait--md { width: 72px; margin: 0 -6px; }
+.title__cast .portrait--md:nth-child(odd) { translate: 0 -8px; }
+.title__menu { width: min(300px, 100%); display: grid; gap: 12px; margin-bottom: 8px; }
+/* Cómo jugar */
+.howto { display: grid; gap: 14px; }
+.howto__card {
+  min-height: 330px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 18px 20px;
+  text-align: center;
+  border: 2px solid var(--ink);
+  border-radius: 22px;
+  background: var(--grain), linear-gradient(var(--cream), var(--paper) 65%, var(--peach));
+  box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--wood) 30%, transparent), 0 10px 24px color-mix(in srgb, var(--ink) 50%, transparent);
+}
+.howto__count { margin: 0; font-size: 12px; font-weight: 800; color: var(--ink-soft); }
+.howto__art { flex: 1; min-height: 140px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.howto__img { max-height: 130px; max-width: 46%; object-fit: contain; filter: drop-shadow(0 4px 4px color-mix(in srgb, var(--ink) 30%, transparent)); }
+.howto__art--3 .howto__img { max-width: 31%; max-height: 104px; }
+.howto__art--1 .howto__img { max-width: 92%; max-height: 160px; }
+.howto__title { margin: 0; font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--moss); }
+.howto__text { margin: 0; font-size: 16px; font-weight: 700; line-height: 1.35; }
+.howto__nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.howto__dots { display: flex; gap: 2px; }
+.howto__dot { width: 32px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; position: relative; }
+.howto__dot::before { content: ''; position: absolute; inset: 16px 9px; border-radius: 50%; border: 2px solid var(--ink); background: var(--paper); }
+.howto__dot.is-active::before { background: var(--sun); inset: 14px 7px; }
+.screen__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.screen__actions .menu-btn { font-size: 17px; padding: 0 10px 3px; }
+.screen__actions .menu-btn--primary { min-height: 52px; font-size: 19px; }
+/* El gremio */
+.guild__intro { margin: 0; padding: 10px 14px; font-weight: 700; text-align: center; border: 2px solid var(--ink); border-radius: 16px; background: var(--grain), var(--paper); }
+.guild__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.guild__row {
+  width: 100%;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px 6px 8px;
+  text-align: left;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background: var(--grain), linear-gradient(var(--cream), var(--paper) 70%, var(--peach));
+  box-shadow: 0 4px 0 var(--ink), 0 8px 12px color-mix(in srgb, var(--ink) 30%, transparent);
+  cursor: pointer;
+}
+.guild__row:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.guild__medal {
+  flex: 0 0 56px;
+  height: 56px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--leaf) 55%, var(--glow)), var(--leafDark) 75%);
+  box-shadow: 0 0 0 3px var(--wood), 0 0 0 5px var(--ink);
+  margin: 4px;
+}
+.guild__medal .portrait { width: 48px; height: 46px; }
+.guild__text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.guild__text strong { font-family: var(--font-display); font-size: 17px; }
+.guild__role { font-family: var(--font-body); font-size: 13px; color: var(--moss); }
+.guild__verb { font-size: 13px; color: var(--ink-soft); line-height: 1.25; }
+.guild__chev { font-family: var(--font-display); font-size: 28px; color: var(--wood); }
+
 /* ─── Horizontal en teléfono: tablero a la izquierda, HUD y dock a la derecha ─ */
 @media (orientation: landscape) and (max-height: 540px) {
+  /* Pantallas (012) en dos columnas para que nada obligue a desplazar. */
+  .title { display: grid; grid-template-columns: 1fr minmax(240px, 300px); grid-template-rows: auto auto; align-content: center; column-gap: 24px; row-gap: 4px; width: min(760px, 100%); }
+  .title__logo { grid-column: 1; width: min(300px, 100%); justify-self: center; }
+  .title__cast { grid-column: 1; }
+  .title__menu { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+  .screen__panel { width: min(760px, 100%); gap: 8px; }
+  .screen__head { min-height: 48px; }
+  .howto { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-rows: 1fr auto; column-gap: 16px; row-gap: 10px; align-items: center; }
+  .howto__card { grid-row: 1 / span 2; min-height: 0; padding: 10px 14px 14px; gap: 4px; }
+  .howto__art { min-height: 0; }
+  .howto__img { max-height: 96px; }
+  .howto__art--3 .howto__img { max-height: 78px; }
+  .howto__art--1 .howto__img { max-height: 110px; }
+  .howto__title { font-size: 20px; }
+  .howto__text { font-size: 14px; }
+  .howto__nav { grid-column: 2; align-self: end; }
+  .screen__actions { grid-column: 2; align-self: start; }
+  .guild__list { grid-template-columns: 1fr 1fr; }
+  .guild__intro { padding: 6px 12px; }
   .app {
     max-width: none;
     grid-template-columns: auto minmax(0, 1fr);
@@ -577,6 +752,9 @@ button { font: inherit; color: inherit; }
 
 /* Pantallas apaisadas (horizontal y escritorio): fondo 16:9. */
 @media (orientation: landscape) {
+  .screen { background-image: linear-gradient(color-mix(in srgb, var(--ink) 20%, transparent), transparent 30%, transparent 60%, color-mix(in srgb, var(--ink) 40%, transparent)), var(--art-bg-game-wide); }
+  .title { justify-content: center; }
+  .title__cast { margin-top: 0; }
   .story[data-bg='intro'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 45%, transparent)), var(--art-bg-intro-wide); }
   .story[data-bg='victory'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 35%, transparent)), var(--art-bg-victory-wide); }
   body {

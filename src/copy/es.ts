@@ -187,8 +187,40 @@ export const es = {
   quote: (text: string) => `«${text}»`,
 
   /** Libreta de campo (ayuda). */
+  titleScreen: {
+    label: 'Portada',
+    play: 'Nueva partida',
+    howto: 'Cómo jugar',
+    guild: 'El gremio',
+  },
+
+  howto: {
+    title: 'Cómo jugar',
+    steps: [
+      { title: 'Elige un hongo', text: 'Toca un hongo del gremio: se resaltan las casillas donde puede trabajar.' },
+      { title: 'Trabaja junto a la red', text: 'Toca una casilla resaltada. Solo se trabaja junto a la red de micelio.' },
+      { title: 'Una vez por día', text: 'Cada hongo trabaja una vez por día. Después pulsa «Fin del día».' },
+      { title: 'Al amanecer', text: `Cada árbol vivo da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. Con ${COST.recruit} esporas reclutas otro hongo.` },
+      { title: 'Despierta al Árbol Padre', text: `Antes de que acabe el invierno: que la red lo toque, ${TREES_FOR_MOTHER} árboles revividos y ${COST.mother} nutrientes. Si dudas, sigue la ★.` },
+    ],
+    step: (n: number, total: number) => `Paso ${n} de ${total}`,
+    prev: 'Paso anterior',
+    next: 'Paso siguiente',
+    goTo: (n: number) => `Ir al paso ${n}`,
+    notebook: 'Libreta de campo',
+    back: 'Volver',
+    play: '¡A jugar!',
+  },
+
+  guild: {
+    title: 'El gremio',
+    intro: 'Cinco especies, un oficio cada una. Toca una para ver su ficha.',
+    open: (name: string) => `Ver la ficha de ${name}`,
+    back: 'Volver',
+  },
+
   help: {
-    button: 'Ayuda: Libreta de campo',
+    button: 'Ayuda: Cómo jugar',
     title: 'Libreta de campo',
     goalTitle: 'La meta',
     goal: `Despierta al Árbol Padre (arriba) antes de que acabe el invierno. Necesitas que la red lo toque, ${TREES_FOR_MOTHER} árboles revividos y ${COST.mother} nutrientes.`,

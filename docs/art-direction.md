@@ -101,10 +101,10 @@ FICHA                          EL GREMIO                      INTRO / VICTORIA
 ```
 - **Juego:** HUD con logo mini, pastilla del día y estación, tres pastillas de recurso y ayuda redonda. Árbol Padre grande sobre el tablero. Bitácora con la cinta "Pista del día". Dock con tarjetas verticales y "Fin del día" como pastilla amarilla a todo lo ancho, con ícono de luna.
   - **Pendiente de decidir:** el dock más alto y el logo restan alto al tablero. A 390 × 664 las casillas bajarían de 56 a unos 48 px (el mínimo de la spec es 56). Opciones: aceptar 48 en ese tamaño, ocultar el logo por debajo de 700 px de alto, o tarjetas más bajas.
-- **Portada** (cambio por definir): logo, los cinco personajes sobre el claro y menú: Nueva partida (principal), Cómo jugar, El gremio y Opciones (secundarios).
-- **Cómo jugar:** carrusel de 5 pasos en pergamino, con ‹ › y puntos. Reemplaza a la Libreta de campo como ayuda principal.
+- **Portada (012, hecho):** logo, los cinco personajes sobre el claro y menú: Nueva partida (pastilla amarilla con ▶), Cómo jugar y El gremio (madera). "Opciones" se sacó hasta que haya algo que ajustar. En apaisado, logo y elenco a la izquierda y menú a la derecha.
+- **Cómo jugar (012, hecho):** carrusel de 5 pasos en pergamino, cada uno con una ilustración de piezas publicadas, ‹ › (`ui/buttons/prev`, `next`), puntos y deslizar. Es la ayuda principal (el "?" la abre); la Libreta de campo queda como detalle.
 - **Ficha:** retrato grande, nombre, nombre científico y rol, contexto, frase entre comillas y secciones con etiqueta verde (Habilidad, Movimiento, Nutrientes…), como la ficha actual.
-- **El gremio:** lista de las cinco especies, cada fila con retrato, nombre, rol y una línea; abre la ficha.
+- **El gremio (012, hecho):** lista de las cinco especies, cada fila con su medallón, nombre, rol y una línea; abre la ficha encima.
 - **Intro (003, hecho):** fondo `backgrounds/intro` (bosque lila apagado), tres cartas de pergamino con letrero de madera ("El bosque se apaga", "Un gremio despierta", "Antes del invierno"), puntos de progreso, "Saltar" y "Siguiente"/"Comenzar". La llegada de Maestra Bruna usa la misma carta con su retrato.
 - **Victoria (003, hecho):** fondo `backgrounds/victory`, letrero "¡El bosque despertó!", texto y resumen (día, árboles, nutrientes, esporas); "Ver el claro" y "Jugar de nuevo" ("Ver resumen" se descartó: el resumen ya está en la carta). El fin del invierno usa el mismo layout con `backgrounds/intro`. En apaisado, las panorámicas `*-wide`.
 

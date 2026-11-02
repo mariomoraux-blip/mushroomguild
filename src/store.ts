@@ -31,6 +31,10 @@ export type Sheet =
 export type Story = { kind: 'intro'; step: number } | { kind: 'mage' } | { kind: 'won' } | { kind: 'lost' };
 export const INTRO_STEPS = 3;
 
+/** Pantallas fuera de la partida (012): portada, "Cómo jugar" (carrusel) y "El gremio". `back` dice a dónde vuelven. */
+export type Screen = { kind: 'title' } | { kind: 'howto'; step: number; back: 'title' | 'game' } | { kind: 'guild'; back: 'title' | 'game' };
+export const HOWTO_STEPS = 5;
+
 export interface Notice {
   readonly text: string;
   readonly tone: 'info' | 'warn';
@@ -42,8 +46,10 @@ export interface UiState {
   /** Hechizo elegido para Maestra Bruna. */
   readonly spell: Spell | null;
   readonly sheet: Sheet | null;
-  /** Carta de historia abierta sobre todo lo demás. */
+  /** Carta de historia abierta sobre el tablero. */
   readonly story: Story | null;
+  /** Pantalla abierta sobre la partida (las hojas, como la ficha, van encima). */
+  readonly screen: Screen | null;
   readonly notice: Notice;
   /** Especies cuya ficha ya se mostró al seleccionarlas (se recuerdan entre visitas). */
   readonly seen: readonly SpeciesId[];
@@ -63,6 +69,12 @@ export type Action =
   | { type: 'cancel' }
   | { type: 'openSheet'; sheet: Sheet }
   | { type: 'closeSheet' }
+  | { type: 'openScreen'; screen: Screen }
+  | { type: 'howtoStep'; step: number }
+  /** Vuelve de "Cómo jugar" o "El gremio" a donde se abrieron. */
+  | { type: 'closeScreen' }
+  /** "Nueva partida" en la portada: cierra la portada y abre la intro. */
+  | { type: 'play' }
   | { type: 'storyNext' }
   | { type: 'closeStory' }
   /** Partida nueva (la crea quien llama: el store no usa azar). */
@@ -122,9 +134,28 @@ function tileHelp(t: Tile): string {
   return es.tileHelp[t.kind];
 }
 
-export function initialState(game: GameState = newGame(), seen: readonly SpeciesId[] = [], intro = false): AppState {
-  return { game, ui: { selected: null, spell: null, sheet: null, story: intro ? { kind: 'intro', step: 0 } : null, notice: idleHint(game), seen } };
+/**
+ * Estado inicial. `title`: empieza en la portada (y "Nueva partida" abre la intro);
+ * `intro`: empieza directo en la intro.
+ */
+export function initialState(game: GameState = newGame(), seen: readonly SpeciesId[] = [], opts: { title?: boolean; intro?: boolean } | boolean = {}): AppState {
+  const o = typeof opts === 'boolean' ? { intro: opts } : opts;
+  return {
+    game,
+    ui: {
+      selected: null,
+      spell: null,
+      sheet: null,
+      story: o.intro && !o.title ? { kind: 'intro', step: 0 } : null,
+      screen: o.title ? { kind: 'title' } : null,
+      notice: idleHint(game),
+      seen,
+    },
+  };
 }
+
+/** Pantalla a la que se vuelve al cerrar "Cómo jugar" o "El gremio". */
+const backFrom = (screen: Screen | null): Screen | null => (screen && screen.kind !== 'title' && screen.back === 'title' ? { kind: 'title' } : null);
 
 /** Carta que abre un cambio del juego: final al ganar o al acabar el invierno; presentación al llegar la maga. */
 function storyFor(prev: GameState, next: GameState): Story | null {
@@ -224,13 +255,24 @@ export function reduce(state: AppState, action: Action): AppState {
       return { game: r.state, ui: advance(game, r.state, cleared(ui, info(r.message))) };
     }
     case 'cancel':
-      if (ui.story) return { game, ui: { ...ui, story: null } };
       if (ui.sheet) return afterSheet(state);
+      if (ui.story) return { game, ui: { ...ui, story: null } };
+      if (ui.screen && ui.screen.kind !== 'title') return { game, ui: { ...ui, screen: backFrom(ui.screen) } };
+      if (ui.screen) return state;
       return { game, ui: cleared(ui, ui.selected === null ? ui.notice : idleHint(game)) };
     case 'openSheet':
       return { game, ui: { ...ui, sheet: action.sheet } };
     case 'closeSheet':
       return afterSheet(state);
+    case 'openScreen':
+      return { game, ui: { ...cleared(ui, ui.notice), screen: action.screen } };
+    case 'howtoStep':
+      if (ui.screen?.kind !== 'howto') return state;
+      return { game, ui: { ...ui, screen: { ...ui.screen, step: Math.max(0, Math.min(HOWTO_STEPS - 1, action.step)) } } };
+    case 'closeScreen':
+      return ui.screen ? { game, ui: { ...ui, sheet: null, screen: backFrom(ui.screen) } } : state;
+    case 'play':
+      return { game, ui: { ...ui, sheet: null, screen: null, story: { kind: 'intro', step: 0 } } };
     case 'storyNext': {
       const st = ui.story;
       if (st?.kind !== 'intro' || st.step + 1 >= INTRO_STEPS) return { game, ui: { ...ui, story: null } };
@@ -239,7 +281,7 @@ export function reduce(state: AppState, action: Action): AppState {
     case 'closeStory':
       return ui.story ? { game, ui: { ...ui, story: null } } : state;
     case 'restart':
-      return { game: action.game, ui: { selected: null, spell: null, sheet: null, story: null, notice: idleHint(action.game), seen: ui.seen } };
+      return { game: action.game, ui: { selected: null, spell: null, sheet: null, story: null, screen: null, notice: idleHint(action.game), seen: ui.seen } };
   }
 }
 

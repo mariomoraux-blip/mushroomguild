@@ -88,6 +88,19 @@ export const BOARD_ART = {
   star: 'ui/icons/star',
 } as const;
 
+/** Arte de las pantallas fuera de la partida (012). Se usa como <img>, así se descarga solo al mostrarse. */
+export const SCREEN_ART = {
+  logo: 'ui/hud/logo',
+  /** Ilustración de cada paso de "Cómo jugar". */
+  howto: [
+    ['characters/anil/portrait', 'characters/bruno/portrait', 'characters/rubi/portrait'],
+    ['board/mycelium/net', 'board/logs/log'],
+    ['ui/icons/moon', 'board/trees/grey'],
+    ['board/trees/alive', 'ui/icons/spores'],
+    ['board/father-tree/awake-painted'],
+  ],
+} as const;
+
 /** Todas las claves de arte del tablero (para precargar). */
 export function boardArtKeys(): string[] {
   const keys = new Set<string>();
@@ -111,6 +124,9 @@ const UI_ART: Record<string, string> = {
   'btn-help': 'ui/buttons/help',
   'btn-close': 'ui/buttons/close',
   calendar: 'ui/icons/calendar',
+  play: 'ui/icons/play',
+  'btn-prev': 'ui/buttons/prev',
+  'btn-next': 'ui/buttons/next',
   nutrients: 'ui/icons/nutrients',
   spores: 'ui/icons/spores',
   trees: 'ui/icons/trees',

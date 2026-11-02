@@ -210,15 +210,20 @@ test('fichas de criatura: nombre científico, rol, acción y línea con humor', 
   await expect(dialog).toHaveCount(0);
 });
 
-test('Libreta de campo: no se abre sola y se consulta con "?"', async ({ page }) => {
+test('Libreta de campo: no se abre sola; "?" abre Cómo jugar y de ahí la libreta', async ({ page }) => {
   await page.goto('/?map=clasico');
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Ayuda: Libreta de campo' }).click();
+  await page.getByRole('button', { name: 'Ayuda: Cómo jugar' }).click();
+  await expect(page.locator('#screen')).toContainText('Elige un hongo');
+  await page.getByRole('button', { name: 'Libreta de campo' }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toContainText('Despierta al Árbol Padre');
   await expect(dialog).toContainText('Gliophorus · Mensajera');
-  await page.getByRole('button', { name: '¡A jugar!' }).click();
+  await page.getByRole('button', { name: '¡A jugar!' }).first().click();
   await expect(dialog).toHaveCount(0);
+  // "¡A jugar!" de Cómo jugar vuelve al tablero.
+  await page.locator('#screen').getByRole('button', { name: '¡A jugar!' }).click();
+  await expect(page.locator('#screen')).toBeHidden();
 });
 
 test('Ficha al seleccionar: primera vez por especie, "Entendido" mantiene la selección y "Ficha" la reabre', async ({ page }, info) => {
@@ -362,8 +367,9 @@ test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page 
   test.setTimeout(90_000);
   const shot = (name: string) => (info.project.name === 'vertical-390x844' ? page.screenshot({ path: `docs/screenshots/003-${name}-390x844.png` }) : undefined);
   const card = page.locator('#story [role="dialog"]');
-  // Intro: abre sola sin ?map/?seed; el foco va al botón principal; "Saltar" la cierra.
+  // Intro: tras "Nueva partida" en la portada; el foco va al botón principal; "Saltar" la cierra.
   await page.goto('/');
+  await page.getByRole('button', { name: 'Nueva partida' }).click();
   await expect(card).toBeVisible();
   await expect(card).toContainText('El bosque se apaga');
   await expect(page.locator('#story .story__btn--primary')).toBeFocused();
@@ -374,6 +380,7 @@ test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page 
   await expect(card).toHaveCount(0);
   // Esc también la cierra.
   await page.goto('/');
+  await page.getByRole('button', { name: 'Nueva partida' }).click();
   await page.keyboard.press('Escape');
   await expect(card).toHaveCount(0);
   // Llegada de Maestra Bruna al terminar el día.
@@ -399,4 +406,46 @@ test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page 
   await page.getByRole('button', { name: 'Jugar de nuevo' }).click();
   await expect(card).toHaveCount(0);
   await expect(page.locator('.hud__day-value')).toHaveText('Día 1/12');
+});
+
+test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la ficha)', async ({ page }, info) => {
+  const shot = (name: string) => (info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390' ? page.screenshot({ path: `docs/screenshots/012-${name}-${info.project.name}.png` }) : undefined);
+  const screen = page.locator('#screen');
+  await page.goto('/');
+  await expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeFocused();
+  await shot('portada');
+  // Cómo jugar: ‹ › y puntos; la flecha anterior está desactivada en el paso 1 y la siguiente en el 5.
+  await page.getByRole('button', { name: 'Cómo jugar', exact: true }).click();
+  await expect(screen).toContainText('Paso 1 de 5');
+  await expect(page.getByRole('button', { name: 'Paso anterior' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Paso siguiente' }).click();
+  await expect(screen).toContainText('Trabaja junto a la red');
+  await page.keyboard.press('ArrowRight');
+  await expect(screen).toContainText('Paso 3 de 5');
+  await page.getByRole('button', { name: 'Ir al paso 5' }).click();
+  await expect(screen).toContainText('Despierta al Árbol Padre');
+  await expect(page.getByRole('button', { name: 'Paso siguiente' })).toBeDisabled();
+  await shot('como-jugar');
+  // Esc vuelve a la portada.
+  await page.keyboard.press('Escape');
+  await expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeVisible();
+  // El gremio: cinco especies; tocar una abre su ficha encima.
+  await page.getByRole('button', { name: 'El gremio', exact: true }).click();
+  await expect(screen.locator('.guild__row')).toHaveCount(5);
+  await shot('gremio');
+  await page.getByRole('button', { name: 'Ver la ficha de Maestra Bruna' }).click();
+  await expect(page.getByRole('dialog')).toContainText('Conocybe arcana');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Volver' }).click();
+  // Nueva partida: intro y después el tablero.
+  await page.getByRole('button', { name: 'Nueva partida' }).click();
+  await expect(page.locator('#story')).toContainText('El bosque se apaga');
+  // Mientras hay carta, la partida es inerte.
+  expect(await page.locator('#app').evaluate((n) => (n as HTMLElement).inert)).toBe(true);
+  await page.getByRole('button', { name: 'Saltar' }).click();
+  await expect(screen).toBeHidden();
+  await expect(page.locator('.hud__day-value')).toHaveText('Día 1/12');
+  expect(await page.locator('#app').evaluate((n) => (n as HTMLElement).inert)).toBe(false);
+  await noScrollNoZoom(page);
 });

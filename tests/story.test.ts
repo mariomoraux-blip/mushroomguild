@@ -97,3 +97,38 @@ describe('Requirement: El color vuelve', () => {
     expect(progressSaturation(one)).toBeGreaterThan(progressSaturation(newGame()));
   });
 });
+
+describe('Requirement: Portada y pantallas (012)', () => {
+  const title = () => initialState(newGame(), [], { title: true });
+
+  it('empieza en la portada y "Nueva partida" abre la intro', () => {
+    expect(title().ui.screen).toEqual({ kind: 'title' });
+    expect(title().ui.story).toBeNull();
+    const played = run(title(), { type: 'play' });
+    expect(played.ui.screen).toBeNull();
+    expect(played.ui.story).toEqual({ kind: 'intro', step: 0 });
+  });
+
+  it('Cómo jugar avanza entre 5 pasos sin salirse del rango y vuelve a donde se abrió', () => {
+    const open = run(title(), { type: 'openScreen', screen: { kind: 'howto', step: 0, back: 'title' } });
+    expect(run(open, { type: 'howtoStep', step: -1 }).ui.screen).toMatchObject({ step: 0 });
+    expect(run(open, { type: 'howtoStep', step: 9 }).ui.screen).toMatchObject({ step: 4 });
+    expect(run(open, { type: 'closeScreen' }).ui.screen).toEqual({ kind: 'title' });
+    expect(run(open, { type: 'cancel' }).ui.screen).toEqual({ kind: 'title' });
+    const inGame = run(initialState(newGame()), { type: 'openScreen', screen: { kind: 'howto', step: 2, back: 'game' } });
+    expect(run(inGame, { type: 'closeScreen' }).ui.screen).toBeNull();
+  });
+
+  it('El gremio abre la ficha encima; Esc cierra primero la ficha y después la pantalla', () => {
+    const guild = run(title(), { type: 'openScreen', screen: { kind: 'guild', back: 'title' } }, { type: 'openSheet', sheet: { kind: 'creature', species: 'mago' } });
+    const once = run(guild, { type: 'cancel' });
+    expect(once.ui.sheet).toBeNull();
+    expect(once.ui.screen).toEqual({ kind: 'guild', back: 'title' });
+    expect(run(once, { type: 'cancel' }).ui.screen).toEqual({ kind: 'title' });
+  });
+
+  it('Esc en la portada no hace nada', () => {
+    const s = title();
+    expect(run(s, { type: 'cancel' })).toBe(s);
+  });
+});
