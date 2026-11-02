@@ -2,8 +2,8 @@
 
 Un claro de bosque pintado a mano que **abraza** la pantalla: follaje, flores y hongos en los bordes, materiales de **madera y pergamino** para la interfaz, y la **luz** como medida del progreso (el claro pasa de gris y lila a verde y dorado). Mobile-first en vertical.
 
-- **Fuente visual:** la propuesta [`docs/concept/propuesta-visual-v1.webp`](concept/propuesta-visual-v1.webp) (pantallas) y la hoja de piezas [`assets/ui/source/hoja-ui-v1.webp`](../assets/ui/source/hoja-ui-v1.webp), ambas de Mario (2 de noviembre). Son arte propio del proyecto, no referencias de terceros.
-- **Recortes:** las 51 piezas de la hoja ya están en `public/assets/` según la [organización de assets](#organización-de-assets) (≈ 415 KB, con transparencia). Sirven como **placeholders**: la mayoría está por debajo de 2× y algunas traen texto horneado (ver [Inventario](#inventario-de-piezas)).
+- **Fuente visual:** la propuesta [`docs/concept/propuesta-visual-v1.webp`](concept/propuesta-visual-v1.webp) (pantallas) y las hojas de piezas en [`assets/ui/source/`](../assets/ui/source/), todas de Mario (2 de noviembre). Son arte propio del proyecto, no referencias de terceros.
+- **Recortes:** las piezas de las seis hojas (v1, UI v2, tablero HD, tablero por estaciones, tablero v3, logo y fondos) están en `public/assets/` según la [organización de assets](#organización-de-assets): 115 archivos, 1.4 MB, con transparencia. Sirven como **placeholders**: la mayoría está por debajo de 2× y algunas traen texto horneado (ver [Inventario](#inventario-de-piezas)).
 - **Estado del juego:** hasta integrar estas piezas, el juego usa el bosque ilustrado procedural del cambio 008 (Canvas2D + SVG + shader). Esta dirección lo reemplaza pieza por pieza; lo que se conserva del 008 está en [Qué se conserva](#qué-se-conserva-del-008).
 
 ## Principios
@@ -153,94 +153,161 @@ La saturación del progreso (gris → color según árboles revividos) se aplica
 - **Gradación por estación (003):** se aplica sobre el escenario (casillas, objetos y fondos), no sobre personajes ni interfaz.
 
 ## Organización de assets
-Lo que se publica vive en `public/assets/` (WebP). La fuente (Blender, renders a tamaño completo, hojas originales) vive en `assets/`. Nombres en inglés, minúscula y guiones, como el código.
+Lo que se publica vive en `public/assets/` (WebP). La fuente (Blender, renders a tamaño completo, hojas originales) vive en `assets/`; las hojas pintadas están en `assets/ui/source/`. Nombres en inglés, minúscula y guiones, como el código.
 
 ```
 public/assets/
-├── backgrounds/        menu, intro, victory
+├── backgrounds/        menu, intro, victory (verticales; faltan las apaisadas)
 ├── board/
-│   ├── terrain/        grass, grass-b, sprout, home, state-valid, state-selected
-│   ├── trees/          grey, alive
-│   ├── logs/           log, log-used
-│   ├── rocks/          rock, rock-dark
-│   ├── mycelium/       net, net-b
-│   └── father-tree/    asleep, awake (Blender) · asleep-painted, awake-painted (hoja)
+│   ├── terrain/        grass, grass-b, grass-c, grass-autumn, grass-winter, dirt, sprout, sprout-seedling,
+│   │                   blocked, home, state-valid, state-selected
+│   ├── trees/          grey, waking, alive, autumn, winter
+│   ├── logs/           log, log-used, log-rotten
+│   ├── rocks/          rock, rock-tile, rock-winter
+│   ├── mycelium/       net, net-b, net-dirt · conectores node, straight-h, straight-v, corner, cross, cross-b, burst
+│   │                   · trazos thread-a, thread-b, thread-c, sparkles
+│   └── father-tree/    asleep, awake (Blender, en uso) · asleep-, green-, awake-painted y
+│                       spring-, summer-, autumn-, winter-painted (pintados)
 ├── characters/
-│   ├── anil/           rest, work, happy, card
-│   ├── bruno/          rest, work, happy, card
-│   ├── rubi/           rest, work, happy, card
-│   ├── chispa/         rest|work|happy-{spring,summer,autumn,winter}, card
-│   └── maestra-bruna/  rest, work, happy, card
+│   ├── anil/ bruno/ rubi/ maestra-bruna/   rest, work, happy (Blender) · portrait (pintado, sin placa)
+│   └── chispa/         rest|work|happy-{spring,summer,autumn,winter} (Blender) · portrait ·
+│                       frame-{spring,summer,autumn,winter} (retrato con marco de estación)
 ├── ui/
-│   ├── panels/         parchment, sign, ribbon-hint
-│   ├── buttons/        primary, secondary, prev, next, close, help, page-dots
-│   ├── hud/            logo, logo-small
-│   ├── icons/          nutrients, spores, trees, calendar, book, gear, play, star, season-*
+│   ├── panels/         parchment, sign, ribbon (sin texto)
+│   ├── buttons/        primary, secondary (sin texto), prev, next, close, help, dot, dot-active
+│   ├── hud/            logo, logo-small, pill-nutrients, pill-spores, pill-trees
+│   ├── icons/          nutrients, spores, trees, calendar, book, gear, play, star, moon, recruit, season-*
 │   └── frames/         forest, roots, roots-pieces
 └── atlas/              atlas generados (PNG/WebP + JSON de Phaser); no se editan a mano
 ```
-- **Personajes:** la carpeta lleva el nombre del primer miembro de la especie (Añil = *Lactarius indigo*, Bruno = Champiñón, Rubí = *Amanita*, Chispa = *Gliophorus*, Maestra Bruna = *Conocybe arcana*). Los reclutas de la misma especie usan el mismo arte. Las poses son `rest`, `work` y `happy` (en el código: reposo, trabajando y feliz) y `card` es el retrato pintado de la tarjeta.
-- **Fuera del árbol propuesto:** el Hogar (`home`) y los estados de casilla (`state-*`) van en `board/terrain/`, y los logos en `ui/hud/`. Si crecen, pasan a `board/home/` y `board/states/`.
-- **Código:** `src/theme.ts` arma las rutas (`assetUrl`, `spriteKey`, `CHARACTER_DIR`); ningún otro archivo escribe rutas de assets a mano.
+- **Personajes:** la carpeta lleva el nombre del primer miembro de la especie (Añil = *Lactarius indigo*, Bruno = Champiñón, Rubí = *Amanita*, Chispa = *Gliophorus*, Maestra Bruna = *Conocybe arcana*); los reclutas de la misma especie usan el mismo arte. `rest`, `work` y `happy` son las poses de Blender (reposo, trabajando y feliz en el código); `portrait` es el retrato pintado para dock, fichas y "El gremio".
+- **Micelio por conectores:** la red puede dibujarse con piezas que unen casillas vecinas (`straight-h`, `straight-v`, `corner`, `cross`…) sobre `dirt`, o con el tile completo `net` sobre pasto. Falta la pieza en T; hoy `cross-b` es otra cruz.
+- **Estaciones:** pasto (`grass-autumn`, `grass-winter`), rocas (`rock-winter`), árboles (`autumn`, `winter`) y Árbol Padre (`*-painted` por estación) tienen variantes pintadas. Esto **contradice** el principio de "un solo juego de assets + gradación" (ver Luz por estación): hay que elegir entre variantes pintadas o gradación.
+- **Fuera del árbol propuesto:** el Hogar, los estados de casilla y `blocked` van en `board/terrain/`, y los logos y pastillas en `ui/hud/`.
+- **Código:** `src/theme.ts` arma las rutas (`assetUrl`, `spriteKey`, `CHARACTER_DIR`, `fatherKey`); ningún otro archivo escribe rutas de assets a mano.
 
 ## Inventario de piezas
-Recortes de la hoja v1, con su ruta bajo `public/assets/`. "Listo" significa que el tamaño alcanza para 2×; "Placeholder" significa que sirve para maquetar pero hay que reexportarlo.
+115 archivos publicados, 1.4 MB en total. "Listo" significa que el ancho alcanza para 2× a 390 px; los demás sirven para maquetar y hay que reexportarlos. Retirados en la v2 por traer texto horneado o baja resolución: las tarjetas con placa (`card`), `ribbon-hint`, `page-dots` y `rock-dark`.
 
-| Archivo | Uso | Tamaño actual | En pantalla (CSS) | Objetivo 2× | Estado |
-| --- | --- | --- | --- | --- | --- |
-| `ui/hud/logo.webp` | Portada (y cartel del juego) | 319 × 216 (27 KB) | ≈ 260 × 175 | 520 × 350 | Placeholder (baja resolución) |
-| `ui/hud/logo-small.webp` | HUD del juego, esquina superior izquierda | 147 × 133 (11 KB) | ≈ 96 × 86 | 192 × 172 | Placeholder (baja resolución) |
-| `backgrounds/menu.webp` | Portada | 320 × 145 (20 KB) | 390 × 844 (vertical) | 860 × 1860 | Placeholder (baja resolución); Hoy es apaisado: hay que repintarlo en vertical |
-| `backgrounds/intro.webp` | Carta "El bosque se apaga" y fin del invierno | 323 × 145 (16 KB) | 390 × 844 (vertical) | 860 × 1860 | Placeholder (baja resolución); Ídem |
-| `backgrounds/victory.webp` | Pantalla "¡El bosque despertó!" | 355 × 145 (24 KB) | 390 × 844 (vertical) | 860 × 1860 | Placeholder (baja resolución); Ídem |
-| `ui/frames/forest.webp` | Marco de follaje alrededor de todas las pantallas | 281 × 255 (34 KB) | pantalla completa | 9 partes, esquinas de 240 px | Placeholder (rehacer como pieza) |
-| `ui/frames/roots.webp` | Referencia del marco del tablero | 241 × 241 (21 KB) | ≈ 380 × 600 | — | Placeholder (rehacer como pieza); Se usa partido en piezas |
-| `ui/frames/roots-pieces.webp` | Marco de raíces del tablero (9 partes) | 186 × 235 (17 KB) | esquinas ≈ 40 px | esquinas 96 px, tramos repetibles | Placeholder (rehacer como pieza) |
-| `board/terrain/grass.webp` | Casilla de pasto | 99 × 96 (5 KB) | 70 × 70 | 140 × 140 | Placeholder (baja resolución) |
-| `board/terrain/grass-b.webp` | Variante de pasto (alternar) | 91 × 87 (4 KB) | 70 × 70 | 140 × 140 | Placeholder (baja resolución) |
-| `board/mycelium/net.webp` | Casilla con micelio (red) | 100 × 96 (5 KB) | 70 × 70 | 140 × 140 | Placeholder (baja resolución) |
-| `board/mycelium/net-b.webp` | Variante de micelio | 89 × 87 (4 KB) | 70 × 70 | 140 × 140 | Placeholder (baja resolución) |
-| `board/terrain/state-valid.webp` | Estado: casilla válida (brillo amarillo) | 96 × 92 (4 KB) | 70 × 70 | 140 × 140 | Placeholder (baja resolución); Mejor como capa de brillo aparte |
-| `board/terrain/state-selected.webp` | Estado: casilla seleccionada / Hogar (brillo turquesa) | 96 × 92 (4 KB) | 70 × 70 | 140 × 140 | Placeholder (baja resolución); Ídem |
-| `board/terrain/sprout.webp` | Casilla creada por el Brote arcano | 89 × 96 (5 KB) | 70 × 70 | 140 × 140 | Placeholder (baja resolución) |
-| `board/rocks/rock.webp` | Roca con musgo (sobre pasto) | 96 × 96 (5 KB) | 70 × 70 | 140 × 140 | Placeholder (baja resolución) |
-| `board/rocks/rock-dark.webp` | Roca (variante de invierno / sombra) | 90 × 87 (4 KB) | 70 × 70 | 140 × 140 | Placeholder (baja resolución) |
-| `board/logs/log.webp` | Tronco entero | 89 × 77 (4 KB) | ≈ 62 × 54 | 124 × 108 | Placeholder (baja resolución) |
-| `board/logs/log-used.webp` | Tronco tras el primer uso | 84 × 77 (4 KB) | ≈ 62 × 54 | 124 × 108 | Placeholder (baja resolución) |
-| `board/trees/grey.webp` | Árbol dormido | 86 × 91 (4 KB) | ≈ 64 × 68 | 128 × 136 | Placeholder (baja resolución) |
-| `board/trees/alive.webp` | Árbol revivido | 92 × 92 (5 KB) | ≈ 64 × 68 | 128 × 136 | Placeholder (baja resolución) |
-| `board/terrain/home.webp` | Hogar del gremio | 124 × 131 (9 KB) | ≈ 66 × 70 | 132 × 140 | Listo |
-| `board/father-tree/asleep-painted.webp` | Árbol Padre dormido, versión pintada (en el juego se usa el de Blender, `asleep.webp`) | 239 × 180 (20 KB) | ≈ 190 × 140 | 380 × 280 | Placeholder (baja resolución) |
-| `board/father-tree/awake-painted.webp` | Árbol Padre despierto, versión pintada (en el juego se usa el de Blender, `awake.webp`) | 279 × 206 (26 KB) | ≈ 200 × 150 | 400 × 300 | Placeholder (baja resolución) |
-| `characters/anil/card.webp` | Retrato de Añil con placa | 153 × 193 (13 KB) | ≈ 70 × 92 (dock) | 140 × 184 | Listo; Texto horneado: separar retrato y placa |
-| `characters/bruno/card.webp` | Retrato de Bruno con placa | 135 × 191 (11 KB) | ≈ 70 × 92 | 140 × 184 | Listo; Ídem; bordes de la vecina |
-| `characters/rubi/card.webp` | Retrato de Rubí con placa | 129 × 197 (12 KB) | ≈ 70 × 92 | 140 × 184 | Listo; Ídem; bordes de la vecina |
-| `characters/chispa/card.webp` | Retrato de Chispa con placa | 108 × 188 (9 KB) | ≈ 70 × 92 | 140 × 184 | Placeholder (baja resolución); Ídem; falta variante por estación |
-| `characters/maestra-bruna/card.webp` | Retrato de Maestra Bruna con placa | 136 × 209 (12 KB) | ≈ 70 × 92 | 140 × 184 | Listo; Ídem |
-| `ui/panels/parchment.webp` | Hojas: Cómo jugar, ficha, El gremio, cartas | 188 × 222 (11 KB) | ≈ 360 × 520 | 9 partes, esquinas de 120 px | Placeholder (rehacer como pieza) |
-| `ui/panels/sign.webp` | Letrero colgante (títulos de hoja, HUD) | 177 × 90 (8 KB) | ≈ 180 × 60 | 3 partes, tramo repetible | Placeholder (rehacer como pieza) |
-| `ui/panels/ribbon-hint.webp` | Cinta "Pista del día" de la bitácora | 199 × 77 (8 KB) | ≈ 170 × 40 | 3 partes sin texto | Placeholder (rehacer como pieza); Texto horneado |
-| `ui/buttons/primary.webp` | Botón principal (amarillo) | 235 × 52 (4 KB) | ≈ 240 × 52 | 3 partes sin texto | Placeholder (rehacer como pieza); Texto horneado |
-| `ui/buttons/secondary.webp` | Botón secundario (crema) | 235 × 50 (4 KB) | ≈ 240 × 48 | 3 partes sin texto | Placeholder (rehacer como pieza); Texto horneado |
-| `ui/buttons/prev.webp` | Botón redondo ‹ | 49 × 49 (2 KB) | 44 × 44 | 88 × 88 | Placeholder (baja resolución) |
-| `ui/buttons/next.webp` | Botón redondo › | 50 × 49 (2 KB) | 44 × 44 | 88 × 88 | Placeholder (baja resolución) |
-| `ui/buttons/close.webp` | Botón redondo × | 49 × 49 (2 KB) | 44 × 44 | 88 × 88 | Placeholder (baja resolución) |
-| `ui/buttons/help.webp` | Botón redondo ? | 49 × 49 (2 KB) | 44 × 44 | 88 × 88 | Placeholder (baja resolución) |
-| `ui/buttons/page-dots.webp` | Paginación del carrusel | 143 × 20 (3 KB) | ≈ 110 × 14 | — | Placeholder (rehacer como pieza); Mejor en CSS/SVG |
-| `ui/icons/nutrients.webp` | Nutrientes | 57 × 59 (2 KB) | 24 × 24 | 64 × 64 | Placeholder (baja resolución) |
-| `ui/icons/spores.webp` | Esporas | 58 × 56 (2 KB) | 24 × 24 | 64 × 64 | Listo |
-| `ui/icons/trees.webp` | Árboles | 60 × 64 (2 KB) | 24 × 24 | 64 × 64 | Listo |
-| `ui/icons/calendar.webp` | Días (resumen) | 68 × 66 (3 KB) | 24 × 24 | 64 × 64 | Listo |
-| `ui/icons/book.webp` | Cómo jugar | 70 × 53 (3 KB) | 24 × 24 | 64 × 64 | Listo |
-| `ui/icons/gear.webp` | Opciones | 64 × 65 (3 KB) | 24 × 24 | 64 × 64 | Listo |
-| `ui/icons/play.webp` | Jugar / Comenzar | 47 × 52 (2 KB) | 20 × 20 | 48 × 48 | Listo |
-| `ui/icons/star.webp` | Sugerencia ★ / Hechizo | 58 × 56 (2 KB) | 24 × 24 | 64 × 64 | Listo |
-| `ui/icons/season-spring.webp` | Estación | 51 × 50 (2 KB) | 20 × 20 | 48 × 48 | Listo |
-| `ui/icons/season-summer.webp` | Estación | 45 × 52 (2 KB) | 20 × 20 | 48 × 48 | Listo |
-| `ui/icons/season-autumn.webp` | Estación | 50 × 57 (2 KB) | 20 × 20 | 48 × 48 | Listo |
-| `ui/icons/season-winter.webp` | Estación | 48 × 54 (2 KB) | 20 × 20 | 48 × 48 | Listo |
+| Archivo | Origen | Tamaño | Peso | Estado |
+| --- | --- | --- | --- | --- |
+| `backgrounds/intro.webp` | logo y fondos | 465 × 631 | 85 KB | Baja resolución (objetivo 860 px de ancho) |
+| `backgrounds/menu.webp` | logo y fondos | 463 × 631 | 116 KB | Baja resolución (objetivo 860 px de ancho) |
+| `backgrounds/victory.webp` | logo y fondos | 466 × 631 | 126 KB | Baja resolución (objetivo 860 px de ancho) |
+| `board/father-tree/asleep-painted.webp` | tablero HD | 590 × 450 | 79 KB | Listo |
+| `board/father-tree/asleep.webp` | Blender | 176 × 192 | 6 KB | Listo |
+| `board/father-tree/autumn-painted.webp` | tablero v3 | 254 × 180 | 28 KB | Baja resolución (objetivo 380 px de ancho) |
+| `board/father-tree/awake-painted.webp` | tablero HD | 598 × 456 | 77 KB | Listo |
+| `board/father-tree/awake.webp` | Blender | 176 × 192 | 8 KB | Listo |
+| `board/father-tree/green-painted.webp` | tablero estaciones | 314 × 247 | 38 KB | Baja resolución (objetivo 380 px de ancho) |
+| `board/father-tree/spring-painted.webp` | tablero v3 | 256 × 180 | 29 KB | Baja resolución (objetivo 380 px de ancho) |
+| `board/father-tree/summer-painted.webp` | tablero v3 | 249 × 180 | 27 KB | Baja resolución (objetivo 380 px de ancho) |
+| `board/father-tree/winter-painted.webp` | tablero v3 | 269 × 184 | 28 KB | Baja resolución (objetivo 380 px de ancho) |
+| `board/logs/log-rotten.webp` | tablero estaciones | 144 × 107 | 9 KB | Listo |
+| `board/logs/log-used.webp` | tablero HD | 226 × 159 | 16 KB | Listo |
+| `board/logs/log.webp` | tablero HD | 229 × 193 | 18 KB | Listo |
+| `board/mycelium/burst.webp` | tablero estaciones | 106 × 95 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
+| `board/mycelium/corner.webp` | tablero estaciones | 118 × 91 | 6 KB | Baja resolución (objetivo 140 px de ancho) |
+| `board/mycelium/cross-b.webp` | tablero estaciones | 121 × 103 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
+| `board/mycelium/cross.webp` | tablero estaciones | 118 × 102 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
+| `board/mycelium/net-b.webp` | tablero estaciones | 132 × 126 | 10 KB | Listo |
+| `board/mycelium/net-dirt.webp` | tablero estaciones | 124 × 104 | 8 KB | Baja resolución (objetivo 140 px de ancho) |
+| `board/mycelium/net.webp` | tablero HD | 226 × 234 | 17 KB | Listo |
+| `board/mycelium/node.webp` | tablero estaciones | 112 × 95 | 6 KB | Baja resolución (objetivo 140 px de ancho) |
+| `board/mycelium/sparkles.webp` | UI v2 | 62 × 68 | 2 KB | Baja resolución (objetivo 140 px de ancho) |
+| `board/mycelium/straight-h.webp` | tablero estaciones | 121 × 69 | 6 KB | Baja resolución (objetivo 140 px de ancho) |
+| `board/mycelium/straight-v.webp` | tablero estaciones | 80 × 103 | 5 KB | Baja resolución (objetivo 140 px de ancho) |
+| `board/mycelium/thread-a.webp` | UI v2 | 86 × 133 | 4 KB | Baja resolución (objetivo 140 px de ancho) |
+| `board/mycelium/thread-b.webp` | UI v2 | 141 × 125 | 7 KB | Listo |
+| `board/mycelium/thread-c.webp` | UI v2 | 133 × 118 | 6 KB | Listo |
+| `board/rocks/rock-tile.webp` | tablero HD | 219 × 232 | 18 KB | Listo |
+| `board/rocks/rock-winter.webp` | tablero estaciones | 124 × 114 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
+| `board/rocks/rock.webp` | tablero HD | 249 × 201 | 15 KB | Listo |
+| `board/terrain/blocked.webp` | tablero v3 | 156 × 151 | 13 KB | Listo |
+| `board/terrain/dirt.webp` | tablero estaciones | 126 × 106 | 8 KB | Listo |
+| `board/terrain/grass-autumn.webp` | tablero estaciones | 132 × 126 | 10 KB | Listo |
+| `board/terrain/grass-b.webp` | tablero estaciones | 128 × 119 | 9 KB | Listo |
+| `board/terrain/grass-c.webp` | tablero estaciones | 130 × 120 | 9 KB | Listo |
+| `board/terrain/grass-winter.webp` | tablero estaciones | 129 × 126 | 10 KB | Listo |
+| `board/terrain/grass.webp` | tablero HD | 230 × 229 | 20 KB | Listo |
+| `board/terrain/home.webp` | tablero HD | 253 × 243 | 21 KB | Listo |
+| `board/terrain/sprout-seedling.webp` | tablero v3 | 137 × 152 | 12 KB | Listo |
+| `board/terrain/sprout.webp` | tablero HD | 225 × 239 | 21 KB | Listo |
+| `board/terrain/state-selected.webp` | tablero HD | 234 × 232 | 18 KB | Listo |
+| `board/terrain/state-valid.webp` | tablero HD | 231 × 236 | 16 KB | Listo |
+| `board/trees/alive.webp` | tablero HD | 239 × 236 | 21 KB | Listo |
+| `board/trees/autumn.webp` | tablero estaciones | 169 × 144 | 11 KB | Listo |
+| `board/trees/grey.webp` | tablero HD | 230 × 239 | 19 KB | Listo |
+| `board/trees/waking.webp` | tablero estaciones | 164 × 147 | 11 KB | Listo |
+| `board/trees/winter.webp` | tablero estaciones | 166 × 147 | 13 KB | Listo |
+| `characters/anil/happy.webp` | Blender | 176 × 128 | 5 KB | Listo |
+| `characters/anil/portrait.webp` | UI v2 | 143 × 135 | 9 KB | Listo |
+| `characters/anil/rest.webp` | Blender | 176 × 128 | 5 KB | Listo |
+| `characters/anil/work.webp` | Blender | 176 × 128 | 5 KB | Listo |
+| `characters/bruno/happy.webp` | Blender | 176 × 128 | 3 KB | Listo |
+| `characters/bruno/portrait.webp` | UI v2 | 143 × 133 | 7 KB | Listo |
+| `characters/bruno/rest.webp` | Blender | 176 × 128 | 3 KB | Listo |
+| `characters/bruno/work.webp` | Blender | 176 × 128 | 3 KB | Listo |
+| `characters/chispa/frame-autumn.webp` | UI v2 | 102 × 108 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
+| `characters/chispa/frame-spring.webp` | UI v2 | 105 × 111 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
+| `characters/chispa/frame-summer.webp` | UI v2 | 103 × 112 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
+| `characters/chispa/frame-winter.webp` | UI v2 | 102 × 111 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
+| `characters/chispa/happy-autumn.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/chispa/happy-spring.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/chispa/happy-summer.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/chispa/happy-winter.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/chispa/portrait.webp` | UI v2 | 116 × 128 | 6 KB | Baja resolución (objetivo 140 px de ancho) |
+| `characters/chispa/rest-autumn.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/chispa/rest-spring.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/chispa/rest-summer.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/chispa/rest-winter.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/chispa/work-autumn.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/chispa/work-spring.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/chispa/work-summer.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/chispa/work-winter.webp` | Blender | 176 × 128 | 2 KB | Listo |
+| `characters/maestra-bruna/happy.webp` | Blender | 176 × 160 | 5 KB | Listo |
+| `characters/maestra-bruna/portrait.webp` | UI v2 | 119 × 141 | 8 KB | Baja resolución (objetivo 140 px de ancho) |
+| `characters/maestra-bruna/rest.webp` | Blender | 176 × 160 | 5 KB | Listo |
+| `characters/maestra-bruna/work.webp` | Blender | 176 × 160 | 5 KB | Listo |
+| `characters/rubi/happy.webp` | Blender | 176 × 128 | 4 KB | Listo |
+| `characters/rubi/portrait.webp` | UI v2 | 136 × 133 | 8 KB | Listo |
+| `characters/rubi/rest.webp` | Blender | 176 × 128 | 3 KB | Listo |
+| `characters/rubi/work.webp` | Blender | 176 × 128 | 4 KB | Listo |
+| `ui/buttons/close.webp` | UI v2 | 57 × 52 | 2 KB | Baja resolución (objetivo 88 px de ancho) |
+| `ui/buttons/dot-active.webp` | UI v2 | 19 × 20 | 1 KB | Baja resolución (objetivo 24 px de ancho) |
+| `ui/buttons/dot.webp` | UI v2 | 18 × 18 | 1 KB | Baja resolución (objetivo 24 px de ancho) |
+| `ui/buttons/help.webp` | UI v2 | 56 × 52 | 2 KB | Baja resolución (objetivo 88 px de ancho) |
+| `ui/buttons/next.webp` | UI v2 | 57 × 52 | 2 KB | Baja resolución (objetivo 88 px de ancho) |
+| `ui/buttons/prev.webp` | UI v2 | 57 × 52 | 2 KB | Baja resolución (objetivo 88 px de ancho) |
+| `ui/buttons/primary.webp` | UI v2 | 189 × 51 | 3 KB | Baja resolución (objetivo 480 px de ancho) |
+| `ui/buttons/secondary.webp` | UI v2 | 181 × 51 | 3 KB | Baja resolución (objetivo 480 px de ancho) |
+| `ui/frames/forest.webp` | UI v1 | 281 × 255 | 34 KB | Baja resolución (objetivo 400 px de ancho) |
+| `ui/frames/roots-pieces.webp` | UI v1 | 186 × 235 | 17 KB | Baja resolución (objetivo 400 px de ancho) |
+| `ui/frames/roots.webp` | UI v2 | 205 × 215 | 17 KB | Baja resolución (objetivo 400 px de ancho) |
+| `ui/hud/logo-small.webp` | logo y fondos | 319 × 252 | 31 KB | Listo |
+| `ui/hud/logo.webp` | logo y fondos | 608 × 354 | 69 KB | Listo |
+| `ui/hud/pill-nutrients.webp` | UI v2 | 112 × 58 | 3 KB | Baja resolución (objetivo 220 px de ancho) |
+| `ui/hud/pill-spores.webp` | UI v2 | 118 × 58 | 3 KB | Baja resolución (objetivo 220 px de ancho) |
+| `ui/hud/pill-trees.webp` | UI v2 | 117 × 58 | 3 KB | Baja resolución (objetivo 220 px de ancho) |
+| `ui/icons/book.webp` | UI v2 | 54 × 45 | 2 KB | Listo |
+| `ui/icons/calendar.webp` | UI v2 | 50 × 48 | 2 KB | Listo |
+| `ui/icons/gear.webp` | UI v2 | 55 × 54 | 3 KB | Listo |
+| `ui/icons/moon.webp` | UI v2 | 55 × 57 | 2 KB | Listo |
+| `ui/icons/nutrients.webp` | UI v2 | 46 × 47 | 2 KB | Listo |
+| `ui/icons/play.webp` | UI v2 | 42 × 49 | 2 KB | Baja resolución (objetivo 48 px de ancho) |
+| `ui/icons/recruit.webp` | UI v2 | 105 × 71 | 5 KB | Listo |
+| `ui/icons/season-autumn.webp` | UI v1 | 50 × 57 | 2 KB | Listo |
+| `ui/icons/season-spring.webp` | UI v1 | 51 × 50 | 2 KB | Listo |
+| `ui/icons/season-summer.webp` | UI v1 | 45 × 52 | 2 KB | Listo |
+| `ui/icons/season-winter.webp` | UI v1 | 48 × 54 | 2 KB | Listo |
+| `ui/icons/spores.webp` | UI v2 | 51 × 46 | 2 KB | Listo |
+| `ui/icons/star.webp` | UI v2 | 50 × 49 | 2 KB | Listo |
+| `ui/icons/trees.webp` | UI v2 | 50 × 54 | 2 KB | Listo |
+| `ui/panels/parchment.webp` | UI v2 | 189 × 210 | 12 KB | Baja resolución (objetivo 360 px de ancho) |
+| `ui/panels/ribbon.webp` | UI v2 | 178 × 73 | 6 KB | Baja resolución (objetivo 360 px de ancho) |
+| `ui/panels/sign.webp` | UI v2 | 180 × 83 | 8 KB | Baja resolución (objetivo 360 px de ancho) |
 
-**Faltan en la hoja:** tarjeta vertical del dock sin placa (o la placa como pieza aparte), pastilla de recurso del HUD, ícono de luna para "Fin del día", sobre o botón de reclutar, variante de Chispa por estación en retrato, casilla de tierra sin pasto (tronco ya consumido), fin del invierno (si debe distinguirse de la intro) y retrato de Maestra Bruna sin placa.
+**Faltan:** fondos apaisados (los envías aparte), fondos verticales a 860 × 1860 (hoy 465 × 631), conector de micelio en T, retratos a 280 px para la ficha grande, Chispa `portrait` por estación sin marco y el fin del invierno si debe distinguirse de la intro.
 
 ## Qué se conserva del 008
 - La regla de **casilla ocupada** y el pintor como respaldo si una imagen no carga.
