@@ -1,10 +1,10 @@
 // Puntaje, estrellas y resultado verificable (015 · scoring). Lógica pura: sin DOM ni reloj.
 import { act, endMonth, recruit } from './actions';
 import { playAdvised } from './autoplay';
-import { MAP, MAX_GUILD, MONTHS, REFERENCE_SECONDS_PER_MONTH, SCORE, SCORE_VERSION, STARS } from './config';
-import { generateMap } from './mapgen';
-import { newGame, recruitableCount } from './state';
-import type { GameState, LoggedAction, SpeciesId } from './types';
+import { LEVELS, MAX_GUILD, MONTHS, REFERENCE_SECONDS_PER_MONTH, SCORE, SCORE_VERSION, STARS } from './config';
+import { newRandomGame } from './mapgen';
+import { recruitableCount } from './state';
+import type { GameState, Level, LoggedAction, SpeciesId } from './types';
 
 /** Desglose del puntaje, por componente (en el orden en que se muestra). */
 export interface ScoreBreakdown {
@@ -21,8 +21,11 @@ export type ScoreKey = keyof ScoreBreakdown;
 export const SCORE_KEYS: readonly ScoreKey[] = ['victory', 'months', 'trees', 'reserves', 'guild', 'activity', 'variety', 'time'];
 
 export interface Score {
+  /** Suma del desglose por el multiplicador del nivel, redondeada (019). */
   readonly total: number;
   readonly breakdown: ScoreBreakdown;
+  /** Multiplicador del nivel de la partida (×1 en Brote). */
+  readonly multiplier: number;
 }
 
 /** Umbrales de estrellas de un claro: 90 % y 110 % de la partida de referencia del bot con criterio. */
@@ -39,6 +42,7 @@ export type Stars = 1 | 2 | 3;
 export interface ScoreResult {
   readonly scoringVersion: number;
   readonly mapId: string;
+  readonly level: Level;
   readonly wonMonth: number;
   readonly timeMs: number;
   readonly total: number;
@@ -64,7 +68,7 @@ export function speciesActed(s: GameState): ReadonlySet<SpeciesId> {
 export function score(final: GameState, timeMs: number): Score {
   if (final.status !== 'won' || final.wonMonth === null) {
     const zero: ScoreBreakdown = { victory: 0, months: 0, trees: 0, reserves: 0, guild: 0, activity: 0, variety: 0, time: 0 };
-    return { total: 0, breakdown: zero };
+    return { total: 0, breakdown: zero, multiplier: LEVELS[final.level].multiplier };
   }
   const acted = speciesActed(final);
   const seconds = Math.floor(Math.max(0, timeMs) / 1000);
@@ -78,19 +82,24 @@ export function score(final: GameState, timeMs: number): Score {
     variety: ALL_SPECIES.every((sp) => acted.has(sp)) ? SCORE.variety : 0,
     time: Math.min(SCORE.timeParS, Math.max(0, SCORE.timeParS - seconds)),
   };
-  return { total: SCORE_KEYS.reduce((sum, k) => sum + breakdown[k], 0), breakdown };
+  const multiplier = LEVELS[final.level].multiplier;
+  return { total: Math.round(SCORE_KEYS.reduce((sum, k) => sum + breakdown[k], 0) * multiplier), breakdown, multiplier };
 }
 
-/** Estado inicial del claro de un `mapId` (`clasico` o `seed-<n>`), o null si no se puede reconstruir. */
-export function startOf(mapId: string): GameState | null {
-  if (mapId === 'clasico') return newGame(MAP, 'clasico');
+/** Estado inicial del claro de un `mapId` (`clasico` o `seed-<n>`) en un nivel, o null si no se puede reconstruir. */
+export function startOf(mapId: string, level: Level = 'brote'): GameState | null {
+  if (mapId === 'clasico') return newRandomGame(0, level);
   const m = /^seed-(\d+)$/.exec(mapId);
-  return m ? newGame(generateMap(Number(m[1])), mapId) : null;
+  return m ? newRandomGame(Number(m[1]), level) : null;
 }
 
-/** Umbrales del claro: el bot con criterio juega una partida determinista desde `start` (25 s por mes). */
+/**
+ * Umbrales del claro: el bot con criterio juega una partida determinista (25 s por mes) sobre el claro de
+ * **Brote** de la misma semilla, así que son los mismos en los tres niveles (019).
+ */
 export function thresholds(start: GameState): Thresholds {
-  const ref = playAdvised(start);
+  const brote = start.level === 'brote' ? start : (startOf(start.mapId) ?? { ...start, level: 'brote' as const });
+  const ref = playAdvised(brote);
   const reference = ref.status === 'won' ? score(ref, ref.wonMonth! * REFERENCE_SECONDS_PER_MONTH * 1000).total : 0;
   // Sin referencia (un estado de depuración que el bot no gana), toda victoria vale 1 estrella.
   if (!reference) return { reference: 0, two: Infinity, three: Infinity };
@@ -102,9 +111,9 @@ export function stars(total: number, th: Thresholds): Stars {
   return total >= th.three ? 3 : total >= th.two ? 2 : 1;
 }
 
-/** Rejuega un registro de acciones desde el claro de `mapId`. Lanza si el claro no se puede reconstruir. */
-export function replay(mapId: string, log: readonly LoggedAction[]): GameState {
-  let s = startOf(mapId);
+/** Rejuega un registro de acciones desde el claro de `mapId` en `level`. Lanza si el claro no se puede reconstruir. */
+export function replay(mapId: string, level: Level, log: readonly LoggedAction[]): GameState {
+  let s = startOf(mapId, level);
   if (!s) throw new Error(`No se puede reconstruir el claro ${mapId}`);
   for (const a of log) {
     if (a.type === 'act') s = act(s, a.memberId, a.x, a.y).state;
@@ -120,6 +129,7 @@ export function scoreResult(final: GameState, timeMs: number, th: Thresholds): S
   return {
     scoringVersion: SCORE_VERSION,
     mapId: final.mapId,
+    level: final.level,
     wonMonth: final.wonMonth ?? final.month,
     timeMs,
     total: sc.total,

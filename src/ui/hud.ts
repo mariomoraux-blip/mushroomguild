@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { MONTHS, revivedCount, season, seasonIndex, treeTotal } from '../rules';
+import { hasFrost, MONTHS, revivedCount, season, seasonIndex, treeTotal } from '../rules';
 import { SEASON_SLUGS } from '../theme';
 import type { AppState, Store } from '../store';
 import { el, setText } from './dom';
@@ -12,9 +12,11 @@ import { el, setText } from './dom';
 export function mountHud(root: HTMLElement, store: Store) {
   const monthValue = el('strong', { class: 'hud__month-value' });
   // Segunda línea (015): ícono de la estación (su nombre como etiqueta accesible) y el cronómetro de juego activo.
+  // Con escarcha (019), un copo junto a la estación; la etiqueta del ícono dice estación, escarcha y nivel.
   const seasonIcon = el('span', { class: 'hud__season', role: 'img' });
+  const frost = el('span', { class: 'hud__frost', 'aria-hidden': 'true' });
   const time = el('span', { class: 'hud__time' }, '00:00');
-  const month = el('div', { class: 'hud__month' }, monthValue, el('span', { class: 'hud__month-caption' }, seasonIcon, time));
+  const month = el('div', { class: 'hud__month' }, monthValue, el('span', { class: 'hud__month-caption' }, seasonIcon, frost, time));
 
   const chip = (iconName: string, label: string, tag: 'div' | 'button' = 'div') => {
     const value = el('strong', { class: 'chip__value' });
@@ -45,7 +47,9 @@ export function mountHud(root: HTMLElement, store: Store) {
   const render = (state: AppState) => {
     const g = state.game;
     setText(monthValue, `${es.hud.month} ${g.month}${es.hud.of(MONTHS)}`);
-    seasonIcon.setAttribute('aria-label', season(g.month));
+    const frosty = hasFrost(g);
+    seasonIcon.setAttribute('aria-label', es.hud.season(season(g.month), frosty, es.levels.names[g.level]));
+    frost.hidden = !frosty;
     seasonIcon.dataset.season = SEASON_SLUGS[seasonIndex(g.month)] ?? 'spring';
     setText(nutrients.value, String(g.nutrients));
     setText(spores.value, String(g.spores));

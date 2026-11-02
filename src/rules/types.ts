@@ -5,6 +5,8 @@ export type RecruitableSpecies = Exclude<SpeciesId, 'mago'>;
 /** Hechizos de Maestra Bruma: Brote arcano y Lluvia de esporas. */
 export type Spell = 'sprout' | 'rain';
 export type GameStatus = 'playing' | 'won' | 'lost';
+/** Nivel de dificultad (019): Brote es el juego de siempre; Bosque y Ancestral suman presión. */
+export type Level = 'brote' | 'bosque' | 'ancestral';
 
 export interface Point {
   readonly x: number;
@@ -19,6 +21,10 @@ export interface Tile extends Point {
   readonly uses: number;
   /** Árbol (o Árbol Padre) revivido. */
   readonly alive: boolean;
+  /** Árbol gris marcado: se apaga al terminar el mes si nadie lo revive (019). */
+  readonly fading: boolean;
+  /** Árbol apagado: revivirlo cuesta `FADED_REVIVE` (019). */
+  readonly faded: boolean;
 }
 
 export interface Member {
@@ -40,6 +46,8 @@ export type LoggedAction =
 export interface GameState {
   /** Claro de la partida: `clasico`, `seed-<n>` (claro generado), `custom` (mapa de prueba) o `debug`. */
   readonly mapId: string;
+  /** Nivel de dificultad (019). */
+  readonly level: Level;
   /** Acciones aceptadas, en orden (015). */
   readonly log: readonly LoggedAction[];
   readonly tiles: readonly Tile[];

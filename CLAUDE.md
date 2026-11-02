@@ -45,5 +45,6 @@ Concept doc y GDD: documento "El Gremio de los Hongos · Fase 0" (Claude Docs), 
 `poc/` contiene la prueba de concepto (HTML + SVG + JS). Fue la fuente del port de `src/rules/` (cambio 001); desde el 006 las reglas se separaron (costos, Mensajera, claros aleatorios) y la fuente de verdad son las specs de `openspec/specs/`. No edites `poc/`.
 
 ## URL de la app
-- Sin parámetros: portada, y tras "Nueva partida", intro de 3 cartas y claro aleatorio. `?seed=N`: repite un claro. `?map=clasico`: mapa del Capítulo 1 (lo usan las pruebas de humo). Con `?seed`, `?map` o `?debugState` se entra directo al tablero (sin portada ni intro).
+- Sin parámetros: portada, y tras "Nueva partida", "Elige tu claro" (Brote, Bosque o Ancestral), la intro de 3 cartas la primera vez en cada nivel y un claro aleatorio. `?seed=N`: repite un claro. `?map=clasico`: mapa del Capítulo 1 (lo usan las pruebas de humo). `?nivel=brote|bosque|ancestral`: nivel. Con `?seed`, `?map`, `?nivel` o `?debugState` se entra directo al tablero (sin portada ni intro).
+- Los claros de Bosque y Ancestral salen de `src/rules/level-seeds.ts`: si cambian las reglas, `LEVELS` o el certificador, regenerarla con `npm run certify`.
 - Solo en desarrollo, `?debugState=`: `fullGuild` (gremio completo con Maestra Bruma), `fatherAwake`, `autumn`, `winter`, `mageNextMonth` (llega la maga al terminar el mes), `nearWin` (Rubí puede despertar al Árbol Padre) y `lastMonth` (mes 12).

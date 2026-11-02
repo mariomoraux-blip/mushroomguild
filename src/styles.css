@@ -105,6 +105,10 @@ button { font: inherit; color: inherit; }
 .hud__season[data-season='summer'] { background-image: var(--art-season-summer); }
 .hud__season[data-season='autumn'] { background-image: var(--art-season-autumn); }
 .hud__season[data-season='winter'] { background-image: var(--art-season-winter); }
+/* Escarcha activa (019): copo junto al ícono de la estación. */
+.hud__frost { flex: 0 0 auto; font-size: 12px; line-height: 1; color: var(--frost); text-shadow: 0 1px 0 var(--mossDark); }
+.hud__frost::before { content: '❄'; }
+.hud__frost[hidden] { display: none; }
 .chip {
   display: flex;
   flex-direction: column;
@@ -761,6 +765,31 @@ button { font: inherit; color: inherit; }
 .guild__verb { font-size: 13px; color: var(--ink-soft); line-height: 1.25; }
 .guild__chev { font-family: var(--font-display); font-size: 28px; color: var(--wood); }
 
+/* Elige tu claro (019) */
+.levels { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.level {
+  width: 100%;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 10px 16px;
+  text-align: left;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background: var(--grain), linear-gradient(var(--cream), var(--paper) 70%, var(--peach));
+  box-shadow: 0 4px 0 var(--ink), 0 8px 12px color-mix(in srgb, var(--ink) 30%, transparent);
+  cursor: pointer;
+}
+.level:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.level--bosque { background: var(--grain), linear-gradient(var(--cream), color-mix(in srgb, var(--meadow) 45%, var(--paper)) 70%, var(--peach)); }
+.level--ancestral { background: var(--grain), linear-gradient(var(--cream), color-mix(in srgb, var(--frost) 55%, var(--paper)) 70%, var(--peach)); }
+.level__text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.level__name { font-family: var(--font-display); font-size: 20px; color: var(--moss); }
+.level__line { font-size: 14px; font-weight: 700; color: var(--ink-soft); line-height: 1.3; }
+.level__mult { flex: 0 0 auto; padding: 3px 10px; font-family: var(--font-display); font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; border: 2px solid var(--ink); border-radius: 12px; background: var(--sun); }
+
 /* ─── Puntaje en la carta de victoria (015) ───────────────────────────────── */
 .score__stars { display: flex; justify-content: center; gap: 6px; margin: -2px 0 0; }
 /* La misma estrella pintada de la ★ del tablero (ui/icons/star); las no ganadas, en gris y más chicas. */
@@ -774,6 +803,7 @@ button { font: inherit; color: inherit; }
 .score__row { display: flex; justify-content: space-between; gap: 6px; }
 .score__row strong { font-variant-numeric: tabular-nums; }
 .score__row.is-zero { color: var(--ink-soft); }
+.score__row--level { grid-column: 1 / -1; margin-top: 2px; padding-top: 4px; border-top: 2px dashed color-mix(in srgb, var(--ink) 35%, transparent); font-weight: 800; }
 
 /* ─── Efectos (004): esporas que vuelan al contador ───────────────────────── */
 .fx-spore {

@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { revivedCount, SCORE_KEYS, seasonIndex, treeTotal, type SpeciesId } from '../rules';
+import { LEVELS, revivedCount, SCORE_KEYS, seasonIndex, treeTotal, type SpeciesId } from '../rules';
 import { formatClock } from '../clock';
 import { INTRO_STEPS, type AppState, type Story, type Store } from '../store';
 import { el, portrait } from './dom';
@@ -81,7 +81,11 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
             el('ul', { class: 'score__list', 'aria-label': es.scoring.title },
               ...SCORE_KEYS.map((k) =>
                 el('li', { class: `score__row${score.breakdown[k] ? '' : ' is-zero'}` },
-                  el('span', {}, es.scoring.breakdown[k]), el('strong', {}, String(score.breakdown[k]))))),
+                  el('span', {}, es.scoring.breakdown[k]), el('strong', {}, String(score.breakdown[k])))),
+              // Fila del nivel (019): el desglose suma el subtotal; el total ya va multiplicado.
+              ...(LEVELS[score.level].multiplier !== 1
+                ? [el('li', { class: 'score__row score__row--level' }, el('span', {}, es.scoring.level(es.levels.names[score.level])), el('strong', {}, es.scoring.multiplier(LEVELS[score.level].multiplier)))]
+                : [])),
           );
         } else {
           if (!won) body.push(el('p', { class: 'story__note' }, es.story.lostTip));

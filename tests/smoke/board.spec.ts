@@ -10,6 +10,8 @@
 // board-interaction › Retratos del gremio: "La maga en el tablero" → "Maestra Bruma: retrato propio…".
 // player-guidance › Libreta de campo: "Consultar la ayuda" → "Libreta de campo".
 // player-guidance › Meta visible: "Inicio" → "guía".
+// title-screens › Elige tu claro y player-guidance › Ancestral sin pistas, board-interaction › Árbol marcado y apagado
+//   y Escarcha en el HUD (019) → "Niveles".
 import { expect, test, type Page } from '@playwright/test';
 
 const cell = (page: Page, x: number, y: number) => page.locator(`.cell[data-x="${x}"][data-y="${y}"]`);
@@ -406,6 +408,7 @@ test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page 
   // Intro: tras "Nueva partida" en la portada; el foco va al botón principal; "Saltar" la cierra.
   await page.goto('/');
   await page.getByRole('button', { name: 'Nueva partida' }).click();
+  await page.locator('[data-level="brote"]').click();
   await expect(card).toBeVisible();
   await expect(card).toContainText('El bosque se apaga');
   await expect(page.locator('#story .story__btn--primary')).toBeFocused();
@@ -414,9 +417,11 @@ test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page 
   await expect(card).toContainText('Un gremio despierta');
   await page.getByRole('button', { name: 'Saltar' }).click();
   await expect(card).toHaveCount(0);
-  // Esc también la cierra.
+  // Esc también la cierra (en otro nivel: la intro sale solo la primera vez por nivel).
   await page.goto('/');
   await page.getByRole('button', { name: 'Nueva partida' }).click();
+  await page.locator('[data-level="bosque"]').click();
+  await expect(card).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(card).toHaveCount(0);
   // Llegada de Maestra Bruma al terminar el mes.
@@ -504,8 +509,9 @@ test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la f
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'Volver' }).click();
-  // Nueva partida: intro y después el tablero.
+  // Nueva partida: Elige tu claro, intro y después el tablero.
   await page.getByRole('button', { name: 'Nueva partida' }).click();
+  await page.locator('[data-level="brote"]').click();
   await expect(page.locator('#story')).toContainText('El bosque se apaga');
   // Mientras hay carta, la partida es inerte.
   expect(await page.locator('#app').evaluate((n) => (n as HTMLElement).inert)).toBe(true);
@@ -562,7 +568,7 @@ test('Puntaje: cronómetro que se pausa con una carta, carta de victoria con est
   // Cronómetro: en 00:00 hasta la primera acción; corre; se pausa con la carta de la maga.
   await page.goto('/?debugState=mageNextMonth');
   await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
-  await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', 'Primavera');
+  await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', 'Primavera · Brote');
   await page.waitForTimeout(1300);
   expect(await time()).toBe('00:00');
   await page.locator('.end').click(); // primera acción aceptada: terminar el mes → llega la maga
@@ -632,4 +638,77 @@ test('Portada: crédito del autor en letra pequeña, con contraste ≥ 4,5:1 y s
   }
   await noScrollNoZoom(page);
   if (info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390') await page.screenshot({ path: `docs/screenshots/020-credito-${info.project.name}.png` });
+});
+
+test('Niveles: Elige tu claro con teclado, Ancestral sin ★, árbol marcado, escarcha y Jugar de nuevo con el mismo nivel', async ({ page }, info) => {
+  test.setTimeout(120_000);
+  const size = info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390' ? info.project.name : null;
+  const shot = (name: string) => (size ? page.screenshot({ path: `docs/screenshots/019-${name}-${size}.png` }) : undefined);
+  const screen = page.locator('#screen');
+  const card = page.locator('#story [role="dialog"]');
+  // Teclado: Enter en "Nueva partida" abre los niveles con el foco en Brote; Esc vuelve a la portada.
+  await page.goto('/');
+  await expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(screen.locator('.level')).toHaveCount(3);
+  await expect(screen.locator('[data-level="brote"]')).toBeFocused();
+  for (const b of await screen.locator('.level').all()) expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await expect(screen).toContainText('Puntaje ×1,5');
+  await noScrollNoZoom(page);
+  await shot('elegir-nivel');
+  await page.keyboard.press('Escape');
+  await expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeFocused();
+  // Elegir Ancestral con Tab y Enter: intro la primera vez; después, el tablero sin ★ ni «Pista:».
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(screen.locator('[data-level="ancestral"]')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(card).toContainText('El bosque se apaga');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', 'Primavera · Ancestral');
+  await expect(page.locator('.card__badge[data-kind="star"]')).toHaveCount(0);
+  await expect(page.locator('#notice')).not.toContainText('Pista');
+  await page.locator('.card--champi').click();
+  await expect(page.locator('.cell[aria-label*="★"]')).toHaveCount(0);
+  // La próxima vez, el foco está en Ancestral y ya no hay intro.
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Nueva partida' }).click();
+  await expect(screen.locator('[data-level="ancestral"]')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(card).toHaveCount(0);
+  await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
+
+  // Bosque: al empezar el mes 6 se marca un árbol; al terminarlo se apaga y empieza el otoño con escarcha.
+  await page.goto('/?nivel=bosque&seed=1');
+  for (let m = 1; m < 6; m++) await page.locator('.end').click();
+  await expect(page.locator('#notice')).toContainText('Este árbol se apagará al terminar el mes si nadie lo revive.');
+  await expect(page.locator('.cell[aria-label*="se apagará al terminar el mes"]')).toHaveCount(1);
+  await shot('arbol-marcado');
+  await page.locator('.end').click();
+  await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', 'Otoño, con escarcha · Bosque');
+  await expect(page.locator('.hud__frost')).toBeVisible();
+  await expect(page.locator('.cell[aria-label*="apagado: revivirlo cuesta 7 nutrientes"]')).toHaveCount(1);
+  await expect(page.locator('.card--lactarius')).toHaveAttribute('aria-label', /Teje · −2 nutrientes/);
+  await shot('escarcha');
+  // "Jugar de nuevo" conserva el nivel.
+  for (let m = 7; m <= 12; m++) await page.locator('.end').click();
+  await page.getByRole('button', { name: 'Jugar de nuevo' }).click();
+  await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
+  await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', 'Primavera · Bosque');
+  await noScrollNoZoom(page);
+});
+
+test('Niveles: con movimiento reducido el árbol marcado no late', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  const page = await ctx.newPage();
+  await page.goto('/?nivel=bosque&seed=1');
+  for (let m = 1; m < 6; m++) await page.locator('.end').click();
+  await expect(page.locator('.cell[aria-label*="se apagará"]')).toHaveCount(1);
+  const alpha = () => page.evaluate(() => (window as unknown as { game: { scene: { getScene(k: string): { frostImage: { alpha: number } | null } } } }).game.scene.getScene('Game').frostImage?.alpha);
+  const first = await alpha();
+  await page.waitForTimeout(900);
+  expect(first).toBe(0.5);
+  expect(await alpha()).toBe(0.5);
+  await ctx.close();
 });

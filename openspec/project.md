@@ -11,13 +11,13 @@ Vertical slice jugable (Capítulo 1: El Claro Gris) para la sección Lab del por
 ## Capacidades
 | Capacidad | Qué cubre |
 | --- | --- |
-| `game-rules` | Tablero, especies, economía, meses y estaciones, victoria, dificultad medida |
+| `game-rules` | Tablero, especies, economía, meses y estaciones, victoria, niveles de dificultad (escarcha, árboles que se apagan) y dificultad medida |
 | `board-interaction` | Selección, casillas válidas, feedback, HUD, teclado, móvil y estilo |
 | `player-guidance` | Pistas con ★, fichas, Libreta de campo, reclutamiento visible |
 | `story-presentation` | Cartas de intro, llegada de la maga y finales; el color que vuelve |
-| `title-screens` | Portada, "Cómo jugar" y "El gremio" |
+| `title-screens` | Portada, "Elige tu claro", "Cómo jugar" y "El gremio" |
 | `visual-feedback` | Animaciones, partículas, luz de la red por estación, movimiento reducido, peso de la página |
-| `scoring` | Cronómetro, puntaje, estrellas por claro, resultado verificable y récord local |
+| `scoring` | Cronómetro, puntaje con multiplicador del nivel, estrellas por claro, resultado verificable y récord local |
 
 ## Convenciones
 - Requisitos con SHALL; escenarios con WHEN / THEN.
