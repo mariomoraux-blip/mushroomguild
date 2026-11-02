@@ -35,7 +35,7 @@ En el modelo, el ala de sombrilla tapaba la cara desde la cámara a ¾ (15° de 
 | Crema: verrugas, falda, tallo, láminas | `#F2E9D8` (= tallo de Bruno) |
 | Sombra de la crema | `#D6C3A2` (= sombra del tallo de Bruno) |
 
-Comunes a todo el elenco: contorno `--ink` `#3B2819`, rubor `#E8957A`.
+Comunes a todo el elenco: contorno `--ink` `#3B2A1E` (Tinta café de la paleta base), rubor `#E8957A`.
 El bolso es de cuero en los marrones de la canasta de Bruno (`#B98A5E`, sombra `#8C603D`); las hojas, `#7CC36A` con sombra `#5E9A4F`, como el musgo de Bruno.
 
 ## Accesorio de rol

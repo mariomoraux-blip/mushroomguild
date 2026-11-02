@@ -29,7 +29,7 @@ H = altura total.
 | Tallo y láminas | `#F2E9D8` |
 | Sombra de tallo y láminas | `#D6C3A2` |
 
-Comunes a todo el elenco (propuesta; aún no están en `theme.ts`): contorno `--ink` `#3B2819`, rubor `#E8957A`.
+Comunes a todo el elenco: contorno `--ink` `#3B2A1E` (Tinta café de la paleta base), rubor `#E8957A`.
 La canasta reutiliza la paleta: trama `#8C603D` sobre `#D9B68C`.
 
 ## Accesorio de rol

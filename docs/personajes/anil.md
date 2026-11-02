@@ -29,7 +29,7 @@ H = altura total.
 | Láminas y látex | `#3C7FDB` |
 | Tallo | `#D3DDEF` |
 
-Comunes a todo el elenco: contorno `--ink` `#3B2819`, rubor `#E8957A`.
+Comunes a todo el elenco: contorno `--ink` `#3B2A1E` (Tinta café de la paleta base), rubor `#E8957A`.
 El carrete reutiliza la madera de la canasta de Bruno (`#D9B68C` con trama `#8C603D`); el hilo es `#4A5FB0` con luz `#8FA6D8`.
 `capBlue` en `src/theme.ts` (`#9cb4c3`) es un gris azulado del PoC: no es el índigo de Añil.
 
