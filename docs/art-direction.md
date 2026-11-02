@@ -145,6 +145,12 @@ Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña y co
 La saturación del progreso (003, hecho) va de apagado (40 % de color) a color pleno según los árboles revividos; solo afecta al claro pintado.
 - Íconos de estación: `ui/icons/season-spring` (flor rosa), `-verano` (flor amarilla), `-otono` (hoja naranja), `-invierno` (copo). Van en la pastilla del día.
 
+## Movimiento (004)
+- **Cada jugada responde en ≤ 400 ms**, encima del estado ya pintado: tejer = el pasto se desvanece y un hilo dorado crece desde la red; descomponer = el tronco se encoge con astillas; revivir = estallido de hojas y luz; despertar = anillo de luz y halo que late detrás del Árbol Padre.
+- **Esporas al contador** al amanecer (una por árbol vivo, hasta 12) y saltito del contador.
+- **Motas** de luz sobre los árboles vivos, como máximo 40 partículas en pantalla; una sola textura de punto con mezcla aditiva, sin desenfoques por cuadro.
+- **Movimiento reducido:** nada se mueve; solo el estado final y el halo quieto.
+
 ## Producción y entrega
 - **Escala:** todo a **2× del tamaño en pantalla** a 390 px de ancho (columna "Objetivo 2×" del inventario). Los fondos se pintan en **vertical** (860 × 1860) con una zona segura central para el tablero o el pergamino.
 - **Formato:** WebP con transparencia (calidad 85–90); PNG solo como fuente. Fuente en `assets/` (Blender, renders, `assets/ui/source/`), publicado en `public/assets/` según la [organización de assets](#organización-de-assets), con nombres en inglés, minúscula y guiones: `<pieza>[-variante][-estado].webp`.

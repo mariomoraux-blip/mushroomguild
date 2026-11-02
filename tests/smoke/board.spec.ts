@@ -449,3 +449,43 @@ test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la f
   expect(await page.locator('#app').evaluate((n) => (n as HTMLElement).inert)).toBe(false);
   await noScrollNoZoom(page);
 });
+
+test('Efectos: animaciones al jugar, nada con movimiento reducido, y carga diferida de portada e historia', async ({ browser }) => {
+  for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion });
+    const page = await ctx.newPage();
+    const requested: string[] = [];
+    page.on('request', (r) => requested.push(r.url()));
+    await page.goto('/?map=clasico');
+    // En la partida no se descargan el logo ni los fondos de intro y victoria.
+    await expect(page.locator('.hud__day-value')).toHaveText('Día 1/12');
+    expect(requested.filter((u) => /ui\/hud\/logo|backgrounds\/(intro|victory)/.test(u))).toEqual([]);
+    // Cuenta, cuadro a cuadro dentro de la página, cuántos objetos de efecto hay (y el máximo visto).
+    await page.evaluate(() => {
+      type Obj = { type: string; texture?: { key: string } };
+      const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: Obj[] } } } }; fxNow: number; fxMax: number };
+      w.fxMax = 0;
+      const tick = () => {
+        w.fxNow = w.game.scene.getScene('Game').children.list.filter((o) => o.texture?.key === 'fx-dot' || o.type === 'Graphics').length;
+        w.fxMax = Math.max(w.fxMax, w.fxNow);
+        requestAnimationFrame(tick);
+      };
+      tick();
+    });
+    const fx = () =>
+      page.evaluate(() => {
+        const w = window as unknown as { fxNow: number; fxMax: number };
+        return { fxNow: w.fxNow, fxMax: w.fxMax };
+      });
+    await page.locator('[data-id="1"]').click();
+    await page.keyboard.press('Escape'); // cierra la ficha de primera vez
+    await page.locator('.cell[data-valid="true"]').first().click();
+    await page.waitForTimeout(800);
+    const { fxNow, fxMax } = await fx();
+    if (reducedMotion === 'reduce') expect(fxMax).toBe(0);
+    else expect(fxMax).toBeGreaterThan(0);
+    // Después de la animación no queda nada (≤ 400 ms y se limpia).
+    expect(fxNow).toBe(0);
+    await ctx.close();
+  }
+});

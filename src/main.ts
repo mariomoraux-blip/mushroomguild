@@ -12,6 +12,7 @@ import { mountHud } from './ui/hud';
 import { mountSheet } from './ui/sheet';
 import { mountStory } from './ui/story';
 import { mountScreens } from './ui/screens';
+import { mountFlyers } from './ui/flyers';
 import { debugGame } from './debug';
 import './styles.css';
 
@@ -100,9 +101,12 @@ const game = new Phaser.Game({
 // ─── Tamaño: casillas que caben en el área del tablero (≤ 96 px), canvas a ≤ 2× ───────
 const area = $('board-area');
 const board = $('board');
+let currentTile = 0;
+mountFlyers(store, board, () => currentTile);
 const BOARD_BORDER = 24; // marco de raíces de 12 px por lado (styles.css › .board)
 function resize() {
   const tile = tileSize(area.clientWidth - BOARD_BORDER, area.clientHeight - BOARD_BORDER);
+  currentTile = tile;
   const w = tile * 5;
   const h = tile * 8;
   board.style.width = `${w}px`;

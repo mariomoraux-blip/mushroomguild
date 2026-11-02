@@ -1,8 +1,13 @@
 import * as Phaser from 'phaser';
-import { H, W } from '../rules';
+import { diffEffects } from '../effects';
+import { H, seasonIndex, W } from '../rules';
+import { BoardFx } from './fx';
 import { paintBoard, progressSaturation } from './paint';
 import { highlighted, suggestedTile, type AppState, type Store } from '../store';
-import { BOARD_HEADROOM, boardArtKeys, boardArtUrl, FATHER_SCALE, fatherKey, portraitKey, renderResolution, SPRITE_SPECIES, spriteUrl } from '../theme';
+import { BOARD_HEADROOM, boardArtKeys, boardArtUrl, FATHER_SCALE, fatherKey, hex, portraitKey, renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteUrl, type ColorToken } from '../theme';
+
+/** Color de la silueta de respaldo si falta el retrato de una especie. */
+const SILHOUETTE: Readonly<Record<string, ColorToken>> = { champi: 'wood', lactarius: 'indigo', amanita: 'berry', gliophorus: 'leaf', mago: 'peach' };
 const BOARD_KEY = 'claro';
 
 /**
@@ -14,6 +19,8 @@ export class GameScene extends Phaser.Scene {
   private canvasTex: Phaser.Textures.CanvasTexture | null = null;
   private boardImage: Phaser.GameObjects.Image | null = null;
   private sprites = new Map<number, Phaser.GameObjects.Image>();
+  private silhouettes = new Map<number, Phaser.GameObjects.Graphics>();
+  private fx: BoardFx | null = null;
   private father: Phaser.GameObjects.Image | null = null;
   private tile = 0;
   private created = false;
@@ -33,7 +40,11 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     this.created = true;
-    const unsubscribe = this.store.subscribe((s) => this.draw(s));
+    this.fx = new BoardFx(this);
+    const unsubscribe = this.store.subscribe((s, prev) => {
+      this.draw(s);
+      if (s.game !== prev.game) this.fx?.play(diffEffects(prev.game, s.game), SEASON_SLUGS[seasonIndex(s.game.day)] ?? 'spring');
+    });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, unsubscribe);
     this.draw(this.store.getState());
   }
@@ -78,11 +89,13 @@ export class GameScene extends Phaser.Scene {
     this.boardImage?.setTexture(BOARD_KEY).setDisplaySize(T * W, T * H);
     this.drawFather(state, T);
     this.drawWorkers(state, T);
+    this.fx?.update(state.game, T);
   }
 
   /** Árbol Padre: dormido o despierto, apoyado en el borde inferior de su casilla y sobresaliendo hacia arriba. */
   private drawFather(state: AppState, T: number): void {
     const tile = state.game.tiles.find((t) => t.kind === 'mother');
+    this.fx?.fatherHalo(tile ?? null, Boolean(tile?.alive), T);
     const key = fatherKey(Boolean(tile?.alive));
     if (!tile || !this.textures.exists(key)) {
       this.father?.setVisible(false);
@@ -101,8 +114,12 @@ export class GameScene extends Phaser.Scene {
     for (const m of state.game.members) {
       if (!m.at) continue;
       const key = portraitKey(m.species);
-      if (!key || !this.textures.exists(key)) continue;
       seen.add(m.id);
+      if (!key || !this.textures.exists(key)) {
+        this.drawSilhouette(m.id, m.species, m.at, T);
+        continue;
+      }
+      this.silhouettes.get(m.id)?.setVisible(false);
       let img = this.sprites.get(m.id);
       if (!img) {
         img = this.add.image(0, 0, key).setOrigin(0.5, 1).setDepth(5);
@@ -114,5 +131,25 @@ export class GameScene extends Phaser.Scene {
       img.setTexture(key).setDisplaySize(w, (w * frame.height) / frame.width).setPosition((m.at.x + 0.5) * T, (m.at.y + 1) * T - T * 0.03).setVisible(true);
     }
     for (const [id, img] of this.sprites) if (!seen.has(id)) img.setVisible(false);
+    for (const [id, g] of this.silhouettes) if (!seen.has(id)) g.setVisible(false);
+  }
+
+  /** Respaldo si no cargó el retrato: sombrero redondo del color de la especie, con contorno. */
+  private drawSilhouette(id: number, species: string, at: { x: number; y: number }, T: number): void {
+    let g = this.silhouettes.get(id);
+    if (!g) {
+      g = this.add.graphics().setDepth(5);
+      this.silhouettes.set(id, g);
+    }
+    const cx = (at.x + 0.5) * T;
+    const base = (at.y + 0.92) * T;
+    g.clear().setVisible(true);
+    g.fillStyle(hex('paper')).lineStyle(T * 0.03, hex('ink'));
+    g.fillRoundedRect(cx - T * 0.13, base - T * 0.3, T * 0.26, T * 0.3, T * 0.06).strokeRoundedRect(cx - T * 0.13, base - T * 0.3, T * 0.26, T * 0.3, T * 0.06);
+    g.fillStyle(hex(SILHOUETTE[species] ?? 'wood'));
+    g.beginPath();
+    g.arc(cx, base - T * 0.3, T * 0.3, Math.PI, 0);
+    g.closePath();
+    g.fillPath().strokePath();
   }
 }

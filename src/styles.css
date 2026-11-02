@@ -739,6 +739,19 @@ button { font: inherit; color: inherit; }
 .guild__verb { font-size: 13px; color: var(--ink-soft); line-height: 1.25; }
 .guild__chev { font-family: var(--font-display); font-size: 28px; color: var(--wood); }
 
+/* ─── Efectos (004): esporas que vuelan al contador ───────────────────────── */
+.fx-spore {
+  position: fixed;
+  z-index: 15;
+  width: 22px;
+  height: 20px;
+  pointer-events: none;
+  background: var(--art-spores) center / contain no-repeat;
+  filter: drop-shadow(0 0 6px var(--glow));
+}
+.chip.is-bump { animation: chip-bump 0.32s ease-out; }
+@keyframes chip-bump { 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
 /* ─── Horizontal en teléfono: tablero a la izquierda, HUD y dock a la derecha ─ */
 @media (orientation: landscape) and (max-height: 540px) {
   /* Pantallas (012) en dos columnas para que nada obligue a desplazar. */
