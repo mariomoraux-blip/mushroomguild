@@ -10,7 +10,8 @@
 - [x] 2.3 Textos esperados con «Indi» en las pruebas de unidad y en `tests/smoke/board.spec.ts`
 
 ## 3. Docs
-- [x] 3.1 `docs/gdd-fase-0.md`, `docs/art-direction.md` y `docs/personajes/` (bruno, rubi, chispa, anil)
+- [x] 3.1 `docs/gdd-fase-0.md`, `docs/art-direction.md` y `docs/personajes/` (bruno, rubi, chispa, indi)
+- [x] 3.2 Renombrar archivos y carpetas `anil` → `indi` (assets publicados y fuente, `.blend`, hoja y siluetas) y sus rutas en `src/theme.ts`, `art-direction.md` y `rubi.md`
 
 ## 4. Cierre
 - [x] 4.1 `npm run test` (con `balance.test.ts`) y `npm run build` sin warnings

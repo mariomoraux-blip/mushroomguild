@@ -81,7 +81,7 @@ export type SeasonSlug = (typeof SEASON_SLUGS)[number];
 export const SPRITE_SPECIES = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'] as const;
 export const CHARACTER_DIR: Readonly<Record<string, string>> = {
   champi: 'bruno',
-  lactarius: 'anil',
+  lactarius: 'indi',
   amanita: 'rubi',
   gliophorus: 'chispa',
   mago: 'maestra-bruma',
@@ -125,7 +125,7 @@ export const SCREEN_ART = {
   logo: 'ui/hud/logo',
   /** Ilustración de cada paso de "Cómo jugar". */
   howto: [
-    ['characters/anil/portrait', 'characters/bruno/portrait', 'characters/rubi/portrait'],
+    ['characters/indi/portrait', 'characters/bruno/portrait', 'characters/rubi/portrait'],
     ['board/mycelium/net', 'board/logs/log'],
     ['ui/icons/moon', 'board/trees/grey'],
     ['board/trees/alive', 'ui/icons/spores'],

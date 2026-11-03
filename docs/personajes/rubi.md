@@ -70,12 +70,12 @@ Solape (IoU): menor es mejor. Perfil (diferencia de anchos fila por fila): mayor
 
 **Elegida: R1**, por decisión de dirección de arte, aunque es la más cercana a Bruno de todas las medidas. Cabe en el lienzo común de 128 px, cosa que la R3 no.
 
-Reforzar los detalles no cambia el solape de áreas, porque lo domina la masa del sombrero (medido: verrugas más grandes 0,64; tallo más fino 0,61; ambas cosas y falda más ancha 0,63). La diferencia con Bruno depende del contorno, así que hay que confirmarla a ojo con los sprites reales a 56 px, como se hizo con Indi (`silueta-56-bruno-anil.png`). Reglas para que no se pierda:
+Reforzar los detalles no cambia el solape de áreas, porque lo domina la masa del sombrero (medido: verrugas más grandes 0,64; tallo más fino 0,61; ambas cosas y falda más ancha 0,63). La diferencia con Bruno depende del contorno, así que hay que confirmarla a ojo con los sprites reales a 56 px, como se hizo con Indi (`silueta-56-bruno-indi.png`). Reglas para que no se pierda:
 - Verrugas del contorno de ≥ 5 unidades de radio (≈ 3 px a 56 px), para que el borde se lea irregular.
 - Tallo ≤ 0,4 H de ancho y falda claramente acampanada: la cintura estrecha bajo el sombrero es lo que Bruno no tiene.
 - Nada colgando a los costados.
 
-**Con los sprites reales** (cámara a ¾, 56 px, ver `silueta-56-bruno-rubi-anil.png`): solape con Bruno 0,63 en reposo, 0,60 trabajando y 0,71 feliz; con Indi, 0,49–0,56. En negro, Rubí se separa de Bruno por la cintura estrecha entre el sombrero de base plana y la falda; las verrugas apenas abultan el contorno a 56 px.
+**Con los sprites reales** (cámara a ¾, 56 px, ver `silueta-56-bruno-rubi-indi.png`): solape con Bruno 0,63 en reposo, 0,60 trabajando y 0,71 feliz; con Indi, 0,49–0,56. En negro, Rubí se separa de Bruno por la cintura estrecha entre el sombrero de base plana y la falda; las verrugas apenas abultan el contorno a 56 px.
 
 ### Contorno de referencia (variante R1)
 Unidades: x centrado en 0, suelo en y = 100; 100 unidades = 56 px.

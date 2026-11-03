@@ -182,7 +182,7 @@ public/assets/
 │   │                   · trazos thread-a, thread-b, thread-c, sparkles
 │   └── father-tree/    asleep-, awake-painted (en uso) · green-, spring-, summer-, autumn-, winter-painted
 ├── characters/
-│   ├── anil/ bruno/ rubi/ maestra-bruma/   portrait (pintado, sin placa)
+│   ├── indi/ bruno/ rubi/ maestra-bruma/   portrait (pintado, sin placa)
 │   └── chispa/         portrait ·
 │                       frame-{spring,summer,autumn,winter} (retrato con marco de estación)
 ├── ui/
@@ -256,7 +256,7 @@ public/assets/
 | `board/trees/grey.webp` | tablero HD | 230 × 239 | 19 KB | Listo |
 | `board/trees/waking.webp` | tablero estaciones | 164 × 147 | 11 KB | Listo |
 | `board/trees/winter.webp` | tablero estaciones | 166 × 147 | 13 KB | Listo |
-| `characters/anil/portrait.webp` | UI v2 | 143 × 135 | 9 KB | Listo |
+| `characters/indi/portrait.webp` | UI v2 | 143 × 135 | 9 KB | Listo |
 | `characters/bruno/portrait.webp` | UI v2 | 143 × 133 | 7 KB | Listo |
 | `characters/chispa/frame-autumn.webp` | UI v2 | 102 × 108 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
 | `characters/chispa/frame-spring.webp` | UI v2 | 105 × 111 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
