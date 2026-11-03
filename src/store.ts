@@ -6,12 +6,15 @@ import {
   advise,
   check,
   endMonth,
+  GAIN,
   idleReason,
   idleShort,
   LEVELS,
   member,
   newGame,
+  noWorkThisMonth,
   recruit,
+  revivedCount,
   RuleError,
   validTargets,
   type GameState,
@@ -128,10 +131,25 @@ export function adviceText(game: GameState, a: Advice): string {
 /** ¿El nivel de la partida muestra pistas? En Ancestral no hay ★ ni «Pista:» (019). */
 const hintsOn = (game: GameState): boolean => LEVELS[game.level].hints;
 
-/** Pista de la bitácora cuando no hay nada seleccionado: el siguiente paso sugerido (en Ancestral, solo elegir). */
+/** Aviso de mes vacío (024), o `null`. No es una pista: sale en todos los niveles. */
+const emptyMonth = (game: GameState): string | null =>
+  noWorkThisMonth(game) ? es.log.emptyMonth(revivedCount(game) * GAIN.treeNutrients) : null;
+
+/** Mensaje de la bitácora seguido del aviso de mes vacío, si lo hay. */
+const withEmptyMonth = (game: GameState, text: string): string => {
+  const e = emptyMonth(game);
+  return e ? `${text} ${e}` : text;
+};
+
+/**
+ * Pista de la bitácora cuando no hay nada seleccionado: el siguiente paso sugerido (en Ancestral, solo elegir).
+ * En un mes vacío, el aviso de mes vacío ocupa el lugar de «elegir» y de la pista de terminar el mes.
+ */
 export function idleHint(game: GameState): Notice {
-  if (!hintsOn(game)) return info(game.status === 'playing' ? es.hints.pickMember : adviceText(game, { kind: 'over' }));
-  return info(adviceText(game, advise(game)));
+  const e = emptyMonth(game);
+  if (!hintsOn(game)) return info(e ?? (game.status === 'playing' ? es.hints.pickMember : adviceText(game, { kind: 'over' })));
+  const a = advise(game);
+  return info(e && a.kind === 'endMonth' ? e : adviceText(game, a));
 }
 
 /** Miembro sugerido (★ en el dock), si el consejo es de un miembro. */
@@ -290,7 +308,7 @@ export function reduce(state: AppState, action: Action): AppState {
     case 'recruit': {
       try {
         const r = recruit(game, action.species);
-        return { game: r.state, ui: cleared(ui, info(r.message)) };
+        return { game: r.state, ui: cleared(ui, info(withEmptyMonth(r.state, r.message))) };
       } catch (e) {
         if (e instanceof RuleError) return { game, ui: { ...ui, notice: warn(e.message, e.short) } };
         throw e;
@@ -299,7 +317,7 @@ export function reduce(state: AppState, action: Action): AppState {
     case 'endMonth': {
       const r = endMonth(game);
       if (r.state === game) return state;
-      return { game: r.state, ui: advance(game, r.state, cleared(ui, info(r.message))) };
+      return { game: r.state, ui: advance(game, r.state, cleared(ui, info(withEmptyMonth(r.state, r.message)))) };
     }
     case 'cancel':
       // Esc o «atrás» sobre la ficha de Maestra Bruma la cierran del todo (022): solo "Entendido" pide el hechizo.

@@ -398,5 +398,10 @@ export const es = {
     frostStart: (n: number) => `Llegó la escarcha: tejer cuesta ${plural(n, 'nutriente')}.`,
     treeFading: 'Este árbol se apagará al terminar el mes si nadie lo revive.',
     treeFaded: (n: number) => `Un árbol se apagó: revivirlo ahora cuesta ${plural(n, 'nutriente')}.`,
+    /** Mes vacío (024): no es una pista, sale también en Ancestral. */
+    emptyMonth: (nutrients: number) =>
+      nutrients > 0
+        ? `Nadie tiene trabajo este mes. Termina el mes: la hojarasca traerá ${plural(nutrients, 'nutriente')}.`
+        : 'Nadie tiene trabajo este mes. Termina el mes.',
   },
 } as const;
