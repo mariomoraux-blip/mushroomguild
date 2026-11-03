@@ -24,12 +24,13 @@ import {
   type CheckResult,
   type GameState,
   type RecruitableSpecies,
+  type Resource,
   type Spell,
   type Tile,
 } from './types';
 
 const R = es.reasons;
-const no = (reason: string): CheckResult => ({ ok: false, reason });
+const no = (reason: string, short?: Resource): CheckResult => (short ? { ok: false, reason, short } : { ok: false, reason });
 const yes: CheckResult = { ok: true };
 
 const isLiveTree = (t: Tile) => t.kind === 'tree' && t.alive;
@@ -53,7 +54,7 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
       if (t.kind !== 'soil') return no(R.lactariusNeedsSoil);
       if (t.net) return no(R.alreadyNet);
       if (!near) return no(R.farSoil);
-      if (s.nutrients < weaveCost(s)) return no(hasFrost(s) ? R.noNutrientWeaveFrost(weaveCost(s)) : R.noNutrientWeave(weaveCost(s)));
+      if (s.nutrients < weaveCost(s)) return no(hasFrost(s) ? R.noNutrientWeaveFrost(weaveCost(s)) : R.noNutrientWeave(weaveCost(s)), 'nutrients');
       return yes;
     case 'champi':
       if (t.kind !== 'log') return no(R.champiNeedsLog);
@@ -63,17 +64,17 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
       if (t.kind === 'mother') {
         if (!near) return no(R.motherFar);
         if (revivedCount(s) < TREES_FOR_MOTHER) return no(R.forestSilent(TREES_FOR_MOTHER));
-        if (s.nutrients < COST.mother) return no(R.motherCost(COST.mother));
+        if (s.nutrients < COST.mother) return no(R.motherCost(COST.mother), 'nutrients');
         return yes;
       }
       if (t.kind !== 'tree') return no(R.amanitaNeedsTree);
       if (t.alive) return no(R.treeAlive);
       if (!near) return no(R.farTree);
-      if (s.nutrients < reviveCost(t)) return no(R.reviveCost(reviveCost(t)));
+      if (s.nutrients < reviveCost(t)) return no(R.reviveCost(reviveCost(t)), 'nutrients');
       return yes;
     case 'gliophorus':
       if (!workerAt(s, x, y)) return no(R.gliophorusNeedsWorker);
-      if (s.spores < COST.call) return no(R.callCost(COST.call));
+      if (s.spores < COST.call) return no(R.callCost(COST.call), 'spores');
       return yes;
     case 'mago': {
       if (magicSpent(s)) return no(R.magicSpent);
@@ -92,7 +93,7 @@ export function validTargets(s: GameState, id: number, spell?: Spell): Tile[] {
 /** Ejecuta la acción sobre una copia. Lanza `RuleError` si no es válida. */
 export function act(s: GameState, id: number, x: number, y: number): ActionResult {
   const c = check(s, id, x, y);
-  if (!c.ok) throw new RuleError(c.reason);
+  if (!c.ok) throw new RuleError(c.reason, c.short);
   const n = cloneState(s);
   const m = n.members.find((mm) => mm.id === id)!;
   const t = n.tiles.find((tt) => tt.x === x && tt.y === y)!;
@@ -159,7 +160,7 @@ export function recruit(s: GameState, species: RecruitableSpecies): ActionResult
   if (!RECRUITABLE.includes(species)) throw new RuleError(R.unknown);
   if (s.status !== 'playing') throw new RuleError(R.gameOver);
   if (recruitableCount(s) >= MAX_GUILD) throw new RuleError(R.guildFull);
-  if (s.spores < COST.recruit) throw new RuleError(R.recruitCost(COST.recruit));
+  if (s.spores < COST.recruit) throw new RuleError(R.recruitCost(COST.recruit), 'spores');
   const n = cloneState(s);
   n.spores -= COST.recruit;
   n.log.push({ type: 'recruit', species });

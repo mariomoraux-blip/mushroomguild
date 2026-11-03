@@ -194,7 +194,7 @@ export const es = {
 
   /** Libreta de campo (ayuda). */
   levels: {
-    title: 'Elige tu claro',
+    title: 'Elige tu dificultad',
     label: 'Niveles de dificultad',
     names: { brote: 'Brote', bosque: 'Bosque', ancestral: 'Ancestral' },
     lines: {
@@ -266,6 +266,8 @@ export const es = {
     allWorked: 'Todos trabajaron. Termina el mes.',
     pickTile: (name: string) => `${name}: toca una casilla resaltada.`,
     pickSpell: (name: string) => `${name}: elige un hechizo.`,
+    /** Primera vez con una especie (022): la ficha no se abre sola. */
+    meetCard: (name: string) => `Toca Ficha para conocer a ${name}.`,
     won: 'El bosque respira de nuevo.',
     lost: 'El invierno terminó.',
   },

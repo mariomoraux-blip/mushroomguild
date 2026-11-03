@@ -2,18 +2,27 @@ import { es } from '../copy/es';
 import { COST, MAX_GUILD, RECRUITABLE, recruitableCount, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
 import type { AppState, Sheet, Store } from '../store';
 import { el, portrait } from './dom';
+import { hideLayer, showLayer } from './motion';
 
 const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
 
-/** Hoja inferior: reclutar (con fichas), ficha de criatura o elegir hechizo. */
-export function mountSheet(root: HTMLElement, store: Store) {
+/**
+ * Hoja inferior: reclutar (con fichas), ficha de criatura o elegir hechizo.
+ * `tapBoard`: un toque en el fondo, sobre una casilla visible, con la ficha de un miembro abierta (022).
+ */
+export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number, y: number) => void) {
   let shown: Sheet | null = null;
   let currentSeason = 0;
   let opener: HTMLElement | null = null;
 
   root.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
-    if (t === root) return store.dispatch({ type: 'closeSheet' }); // tocar fuera del panel
+    if (t === root) {
+      // Tocar fuera del panel la cierra; si cae sobre una casilla y la hoja es la ficha de un miembro, también juega.
+      const cell = shown?.kind === 'member' ? document.elementsFromPoint(e.clientX, e.clientY).find((n) => n.classList.contains('cell')) : undefined;
+      if (cell instanceof HTMLElement) return tapBoard(Number(cell.dataset.x), Number(cell.dataset.y));
+      return store.dispatch({ type: 'closeSheet' });
+    }
     const b = t.closest('button');
     if (!b) return;
     const { action, species, spell } = b.dataset;
@@ -21,6 +30,8 @@ export function mountSheet(root: HTMLElement, store: Store) {
     if (action === 'recruit') store.dispatch({ type: 'recruit', species: species as (typeof RECRUITABLE)[number] });
     if (action === 'info') store.dispatch({ type: 'openSheet', sheet: { kind: 'creature', species: species as SpeciesId } });
     if (action === 'spell') store.dispatch({ type: 'chooseSpell', spell: spell as Spell });
+    const id = store.getState().ui.selected;
+    if (action === 'member' && id !== null) store.dispatch({ type: 'openSheet', sheet: { kind: 'member', id } });
   });
 
   const panel = (title: string, ...body: Node[]) => {
@@ -115,6 +126,8 @@ export function mountSheet(root: HTMLElement, store: Store) {
   function spellSheet(state: AppState) {
     const id = state.ui.selected!;
     const spells: Spell[] = ['sprout', 'rain'];
+    // La ficha de Maestra Bruma (022) se abre desde aquí: la hoja tapa el botón "Ficha" de la bitácora.
+    const isNew = !state.ui.seen.includes('mago');
     return panel(
       es.sheet.spellTitle,
       el('div', { class: 'spells' },
@@ -122,6 +135,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
           el('button', { class: 'btn btn--spell', type: 'button', 'data-action': 'spell', 'data-spell': sp, disabled: !validTargets(state.game, id, sp).length },
             el('strong', {}, es.spells[sp]),
             el('span', {}, es.spellHelp[sp])))),
+      el('button', { class: `btn btn--card${isNew ? ' is-new' : ''}`, type: 'button', 'data-action': 'member' }, es.card.openLabel(es.mageName)),
     );
   }
 
@@ -132,8 +146,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
     const wasOpen = shown !== null;
     shown = sheet;
     if (!sheet) {
-      root.hidden = true;
-      root.replaceChildren();
+      hideLayer(root);
       if (wasOpen) opener?.focus();
       return;
     }
@@ -149,7 +162,7 @@ export function mountSheet(root: HTMLElement, store: Store) {
       help: () => helpSheet(),
     };
     root.replaceChildren(views[sheet.kind]());
-    root.hidden = false;
+    showLayer(root);
     root.querySelector<HTMLElement>('.sheet__panel button:not([disabled])')?.focus();
   };
 }

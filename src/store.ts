@@ -7,6 +7,7 @@ import {
   check,
   endMonth,
   idleReason,
+  idleShort,
   LEVELS,
   member,
   newGame,
@@ -19,6 +20,7 @@ import {
   type SpeciesId,
   type Spell,
   type Advice,
+  type Resource,
   type Tile,
 } from './rules';
 
@@ -34,8 +36,8 @@ export type Story = { kind: 'intro'; step: number } | { kind: 'mage' } | { kind:
 export const INTRO_STEPS = 3;
 
 /**
- * Pantallas fuera de la partida (012): portada, "Elige tu claro" (019), "Cómo jugar" (carrusel) y "El gremio".
- * `back` dice a dónde vuelven; "Elige tu claro" siempre vuelve a la portada.
+ * Pantallas fuera de la partida (012): portada, "Elige tu dificultad" (019), "Cómo jugar" (carrusel) y "El gremio".
+ * `back` dice a dónde vuelven; "Elige tu dificultad" siempre vuelve a la portada.
  */
 export type Screen = { kind: 'title' } | { kind: 'level' } | { kind: 'howto'; step: number; back: 'title' | 'game' } | { kind: 'guild'; back: 'title' | 'game' };
 export const HOWTO_STEPS = 5;
@@ -43,6 +45,8 @@ export const HOWTO_STEPS = 5;
 export interface Notice {
   readonly text: string;
   readonly tone: 'info' | 'warn';
+  /** Recurso que faltó (022): su contador se tiñe en el HUD. */
+  readonly short?: Resource;
 }
 
 export interface UiState {
@@ -58,7 +62,7 @@ export interface UiState {
   /** Puntaje de la victoria (015), con si supera el récord guardado de su claro. */
   readonly result: { readonly score: ScoreResult; readonly newRecord: boolean } | null;
   readonly notice: Notice;
-  /** Especies cuya ficha ya se mostró al seleccionarlas (se recuerdan entre visitas). */
+  /** Especies cuya ficha ya se abrió alguna vez (se recuerdan entre visitas; las nuevas llevan un punto en "Ficha"). */
   readonly seen: readonly SpeciesId[];
 }
 
@@ -80,7 +84,7 @@ export type Action =
   | { type: 'howtoStep'; step: number }
   /** Vuelve de "Cómo jugar" o "El gremio" a donde se abrieron. */
   | { type: 'closeScreen' }
-  /** "Nueva partida" en la portada: abre "Elige tu claro" (019). */
+  /** "Nueva partida" en la portada: abre "Elige tu dificultad" (019). */
   | { type: 'play' }
   /** Nivel elegido: partida nueva (la crea quien llama), con la intro si es la primera vez en ese nivel. */
   | { type: 'start'; game: GameState; intro: boolean }
@@ -94,7 +98,7 @@ export type Action =
   | { type: 'scored'; score: ScoreResult; newRecord: boolean };
 
 const info = (text: string): Notice => ({ text, tone: 'info' });
-const warn = (text: string): Notice => ({ text, tone: 'warn' });
+const warn = (text: string, short?: Resource | null): Notice => (short ? { text, tone: 'warn', short } : { text, tone: 'warn' });
 
 /** Texto de la pista para un consejo de `advise()`. */
 export function adviceText(game: GameState, a: Advice): string {
@@ -202,10 +206,21 @@ function advance(game: GameState, next: GameState, ui: UiState): UiState {
   return story ? { ...ui, story } : ui;
 }
 
-/** Si es la primera vez que se selecciona esta especie, abre su ficha (y la marca como vista). */
-function withFirstCard(next: AppState, id: number, species: SpeciesId): AppState {
-  if (next.ui.seen.includes(species)) return next;
-  return { ...next, ui: { ...next.ui, sheet: { kind: 'member', id }, seen: [...next.ui.seen, species] } };
+/** Especie cuya ficha muestra una hoja (de miembro o de criatura), para marcarla como vista. */
+function sheetSpecies(game: GameState, sheet: Sheet): SpeciesId | null {
+  if (sheet.kind === 'creature') return sheet.species;
+  if (sheet.kind === 'member') return member(game, sheet.id)?.species ?? null;
+  return null;
+}
+
+/** Pista al seleccionar un miembro con casillas: la de la ★ si es el sugerido. */
+const pickHint = (state: AppState, id: number, name: string): string =>
+  suggestedMember(state) === id ? es.advice.pickTile(name) : es.hints.pickTile(name);
+
+/** ¿Está abierta la ficha de Maestra Bruma seleccionada, todavía sin hechizo? */
+function mageCardOpen(state: AppState): boolean {
+  const { game, ui } = state;
+  return ui.sheet?.kind === 'member' && ui.selected === ui.sheet.id && !ui.spell && member(game, ui.sheet.id)?.species === 'mago';
 }
 
 /** Al cerrar una hoja: la del hechizo cancela la selección; la ficha dla maga da paso a elegir el hechizo. */
@@ -243,13 +258,11 @@ export function reduce(state: AppState, action: Action): AppState {
       if (!m) return state;
       if (m.used) return { game, ui: { ...cleared(ui, warn(es.reasons.tired(m.name))) } };
       const idle = idleReason(game, m.id);
-      const pick = suggestedMember(state) === m.id ? es.advice.pickTile(m.name) : es.hints.pickTile(m.name);
-      const next: AppState = idle
-        ? { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: warn(es.idleLine(m.name, es.idle[idle])) } }
-        : m.species === 'mago'
-          ? { game, ui: { ...ui, selected: m.id, spell: null, sheet: { kind: 'spell' }, notice: info(es.hints.pickSpell(m.name)) } }
-          : { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: info(pick) } };
-      return withFirstCard(next, m.id, m.species);
+      // La ficha nunca se abre sola (022): la primera vez, la bitácora invita a tocar "Ficha" (que lleva un punto).
+      const pick = ui.seen.includes(m.species) ? pickHint(state, m.id, m.name) : es.hints.meetCard(m.name);
+      if (idle) return { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: warn(es.idleLine(m.name, es.idle[idle]), idleShort(idle)) } };
+      if (m.species === 'mago') return { game, ui: { ...ui, selected: m.id, spell: null, sheet: { kind: 'spell' }, notice: info(es.hints.pickSpell(m.name)) } };
+      return { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: info(pick) } };
     }
     case 'chooseSpell': {
       const m = ui.selected === null ? undefined : member(game, ui.selected);
@@ -258,6 +271,8 @@ export function reduce(state: AppState, action: Action): AppState {
     }
     case 'tapTile': {
       if (game.status !== 'playing') return state;
+      // Un toque en el tablero con la ficha de un miembro abierta la cierra y cuenta como toque (022).
+      if (ui.sheet?.kind === 'member') return reduce({ game, ui: { ...ui, sheet: null } }, action);
       if (ui.selected === null) {
         const t = game.tiles.find((tt) => tt.x === action.x && tt.y === action.y);
         return t ? { game, ui: { ...ui, notice: info(tileHelp(t)) } } : state;
@@ -268,7 +283,7 @@ export function reduce(state: AppState, action: Action): AppState {
         return { game, ui: { ...ui, sheet: { kind: 'spell' }, notice: info(es.hints.pickSpell(m.name)) } };
       }
       const c = check(game, m.id, action.x, action.y, ui.spell ?? undefined);
-      if (!c.ok) return { game, ui: { ...ui, notice: warn(c.reason) } };
+      if (!c.ok) return { game, ui: { ...ui, notice: warn(c.reason, c.short) } };
       const r = act(game, m.id, action.x, action.y);
       return { game: r.state, ui: advance(game, r.state, cleared(ui, info(r.message))) };
     }
@@ -277,7 +292,7 @@ export function reduce(state: AppState, action: Action): AppState {
         const r = recruit(game, action.species);
         return { game: r.state, ui: cleared(ui, info(r.message)) };
       } catch (e) {
-        if (e instanceof RuleError) return { game, ui: { ...ui, notice: warn(e.message) } };
+        if (e instanceof RuleError) return { game, ui: { ...ui, notice: warn(e.message, e.short) } };
         throw e;
       }
     }
@@ -287,13 +302,22 @@ export function reduce(state: AppState, action: Action): AppState {
       return { game: r.state, ui: advance(game, r.state, cleared(ui, info(r.message))) };
     }
     case 'cancel':
+      // Esc o «atrás» sobre la ficha de Maestra Bruma la cierran del todo (022): solo "Entendido" pide el hechizo.
+      if (mageCardOpen(state)) return { game, ui: cleared(ui, idleHint(game)) };
       if (ui.sheet) return afterSheet(state);
       if (ui.story) return { game, ui: { ...ui, story: null } };
       if (ui.screen && ui.screen.kind !== 'title') return { game, ui: { ...ui, screen: backFrom(ui.screen) } };
       if (ui.screen) return state;
       return { game, ui: cleared(ui, ui.selected === null ? ui.notice : idleHint(game)) };
-    case 'openSheet':
-      return { game, ui: { ...ui, sheet: action.sheet } };
+    case 'openSheet': {
+      const sp = sheetSpecies(game, action.sheet);
+      if (!sp || ui.seen.includes(sp)) return { game, ui: { ...ui, sheet: action.sheet } };
+      // Ya conoció a la especie: la invitación a "Ficha" de la bitácora vuelve a ser la pista de siempre.
+      const s = action.sheet;
+      const m = s.kind === 'member' && ui.selected === s.id ? member(game, s.id) : undefined;
+      const notice = m && m.species !== 'mago' && ui.notice.text === es.hints.meetCard(m.name) ? info(pickHint(state, m.id, m.name)) : ui.notice;
+      return { game, ui: { ...ui, sheet: s, seen: [...ui.seen, sp], notice } };
+    }
     case 'closeSheet':
       return afterSheet(state);
     case 'openScreen':

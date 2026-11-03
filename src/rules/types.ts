@@ -67,7 +67,10 @@ export interface GameState {
   readonly lastSpellSeason: number | null;
 }
 
-export type CheckResult = { readonly ok: true } | { readonly ok: false; readonly reason: string };
+/** Recurso del HUD que puede faltar para una acción (022: el contador se tiñe al rechazarla). */
+export type Resource = 'nutrients' | 'spores';
+
+export type CheckResult = { readonly ok: true } | { readonly ok: false; readonly reason: string; readonly short?: Resource };
 
 export interface ActionResult {
   readonly state: GameState;
@@ -76,7 +79,11 @@ export interface ActionResult {
 }
 
 export class RuleError extends Error {
-  constructor(reason: string) {
+  constructor(
+    reason: string,
+    /** Recurso que faltó, si fue eso. */
+    readonly short?: Resource,
+  ) {
     super(reason);
     this.name = 'RuleError';
   }

@@ -141,7 +141,7 @@ describe('store: reclutar, terminar el mes y fin de partida', () => {
     const ok = reduce(init(setup({ spores: 2 })), { type: 'recruit', species: 'gliophorus' });
     expect(ok.game.members.at(-1)?.name).toBe('Chispa');
     const no = reduce(init(), { type: 'recruit', species: 'gliophorus' });
-    expect(no.ui.notice).toEqual({ text: es.reasons.recruitCost(2), tone: 'warn' });
+    expect(no.ui.notice).toEqual({ text: es.reasons.recruitCost(2), tone: 'warn', short: 'spores' });
   });
 
   it('terminar el mes avanza el mes y muestra el cambio de mes', () => {
@@ -194,5 +194,52 @@ describe('Requirement: Pista y camino sugerido · Ancestral sin pistas (019)', (
   it('Scenario: Aviso de escarcha — al empezar el mes 7 en Ancestral (sin pistas) la bitácora avisa', () => {
     const s = reduce(initialState({ ...setup({ month: 6 }), level: 'ancestral' }), { type: 'endMonth' });
     expect(s.ui.notice.text).toContain('Llegó la escarcha: tejer cuesta 2 nutrientes.');
+  });
+});
+
+describe('Requirement: Cerrar capas (022)', () => {
+  it('Scenario: Tocar una casilla con la ficha abierta — se cierra y la jugada cuenta', () => {
+    const open = run(init(), { type: 'select', id: BRUNO }, { type: 'openSheet', sheet: { kind: 'member', id: BRUNO } });
+    const s = run(open, { type: 'tapTile', x: 1, y: 7 });
+    expect(s.ui.sheet).toBeNull();
+    expect(s.game.members.find((m) => m.id === BRUNO)?.used).toBe(true);
+  });
+
+  it('Scenario: Maestra Bruma con Esc — su ficha se cierra, queda sin seleccionar y no se piden hechizos', () => {
+    const g = setup({ mage: true, alive: [{ x: 4, y: 6 }] });
+    const mage = idOf(g, 'mago');
+    const card = run(init(g), { type: 'select', id: mage }, { type: 'openSheet', sheet: { kind: 'member', id: mage } });
+    const esc = run(card, { type: 'cancel' });
+    expect(esc.ui.sheet).toBeNull();
+    expect(esc.ui.selected).toBeNull();
+    // "Entendido" (cerrar la hoja) sí pide el hechizo.
+    expect(run(card, { type: 'closeSheet' }).ui.sheet).toEqual({ kind: 'spell' });
+  });
+
+  it('Esc en la ficha de un miembro la cierra y lo deja seleccionado', () => {
+    const s = run(init(), { type: 'select', id: BRUNO }, { type: 'openSheet', sheet: { kind: 'member', id: BRUNO } }, { type: 'cancel' });
+    expect(s.ui.sheet).toBeNull();
+    expect(s.ui.selected).toBe(BRUNO);
+  });
+});
+
+describe('Requirement: Rechazo en el lugar del toque (022)', () => {
+  it('Scenario: Sin nutrientes — la bitácora dice qué recurso falta', () => {
+    const s = run(init(setup({ nutrients: 0 })), { type: 'select', id: ANIL });
+    expect(s.ui.notice).toMatchObject({ tone: 'warn', short: 'nutrients' });
+  });
+
+  it('un toque inválido por distancia no culpa a ningún recurso', () => {
+    const s = run(init(), { type: 'select', id: ANIL }, { type: 'tapTile', x: 0, y: 0 });
+    expect(s.ui.notice.tone).toBe('warn');
+    expect(s.ui.notice.short).toBeUndefined();
+  });
+
+  it('revivir sin nutrientes suficientes culpa a los nutrientes', () => {
+    const g = setup({ nutrients: 2, net: [{ x: 2, y: 6 }, { x: 2, y: 5 }] });
+    const tree = g.tiles.find((t) => t.kind === 'tree' && !t.alive && Math.abs(t.x - 2) + Math.abs(t.y - 5) === 1);
+    if (!tree) return;
+    const s = run(init(g), { type: 'select', id: RUBI }, { type: 'tapTile', x: tree.x, y: tree.y });
+    expect(s.ui.notice).toMatchObject({ tone: 'warn', short: 'nutrients' });
   });
 });

@@ -2,7 +2,10 @@ import { es } from '../copy/es';
 import { LEVELS, revivedCount, SCORE_KEYS, seasonIndex, treeTotal, type SpeciesId } from '../rules';
 import { formatClock } from '../clock';
 import { INTRO_STEPS, type AppState, type Story, type Store } from '../store';
+import { reducedMotion } from '../scenes/fx';
+import { MOTION } from '../theme';
 import { el, portrait } from './dom';
+import { hideLayer, showLayer, turnCard } from './motion';
 
 /** Fondo pintado de cada carta (se descarga solo cuando la carta se muestra). */
 const BACKGROUND: Record<Story['kind'], 'intro' | 'victory'> = { intro: 'intro', mage: 'intro', won: 'victory', lost: 'intro' };
@@ -113,24 +116,78 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
     );
   }
 
+  /**
+   * Al terminar la partida (022), la carta espera: al ganar, `narrative` para que se vean el anillo, el halo y la ola
+   * dorada; al perder, `standard` mientras el claro baja la luz. Un toque o una tecla la traen antes (y no hacen nada
+   * más). Con movimiento reducido, `standard` y `fast`.
+   */
+  let held: { timer: number; state: AppState } | null = null;
+  let lastStatus = '';
+  const skip = (e: Event) => {
+    e.stopPropagation();
+    e.preventDefault();
+    release();
+  };
+  const stopHold = () => {
+    if (!held) return;
+    window.clearTimeout(held.timer);
+    window.removeEventListener('click', skip, true);
+    window.removeEventListener('keydown', skip, true);
+    held = null;
+  };
+  const release = () => {
+    const state = held?.state;
+    stopHold();
+    if (state) show(state);
+  };
+  const hold = (state: AppState, won: boolean) => {
+    const reduce = reducedMotion();
+    const ms = won ? (reduce ? MOTION.ms.standard : MOTION.ms.narrative) : reduce ? MOTION.ms.fast : MOTION.ms.standard;
+    held = { timer: window.setTimeout(release, ms), state };
+    window.addEventListener('click', skip, true);
+    window.addEventListener('keydown', skip, true);
+  };
+
   return (state: AppState) => {
+    const story = state.ui.story;
+    const ending = story?.kind === 'won' || story?.kind === 'lost';
+    const ended = lastStatus === 'playing' && state.game.status !== 'playing';
+    lastStatus = state.game.status;
+    // El fin del invierno sin ganar deja el claro en penumbra (022).
+    document.documentElement.classList.toggle('is-dusk', state.game.status === 'lost');
+    if (held) {
+      if (ending) return void (held.state = state); // el puntaje llega durante la espera
+      stopHold();
+    }
+    if (ended && ending) return hold(state, story.kind === 'won');
+    show(state);
+  };
+
+  function show(state: AppState) {
     const story = state.ui.story;
     // El puntaje llega justo después de la carta de victoria: también redibuja.
     const key = story ? JSON.stringify(story) + (state.ui.result ? `|${state.ui.result.score.total}|${state.ui.result.newRecord}` : '') : '';
     if (key === shown) return;
     if (!shown && story) opener = document.activeElement as HTMLElement | null;
+    const before = shown;
     shown = key;
     if (!story) {
-      root.hidden = true;
-      root.replaceChildren();
+      hideLayer(root);
       opener?.focus?.();
       opener = null;
       return;
     }
-    root.hidden = false;
+    // Entrada (022): la carta sube y se funde (la de Maestra Bruma, solemne); en la intro, cada carta nueva
+    // entra desde la derecha sobre la anterior. El puntaje que llega después redibuja sin volver a entrar.
+    const next = card(state, story);
+    const old = root.querySelector<HTMLElement>('.story__card:not(.is-out)');
+    const turning = old && before.startsWith('{"kind":"intro"') && story.kind === 'intro';
+    if (turning) turnCard(root, old, next);
+    else root.replaceChildren(next);
+    if (old && !turning && root.dataset.kind === story.kind) next.classList.add('is-still');
     root.dataset.kind = story.kind;
     root.dataset.bg = BACKGROUND[story.kind];
-    root.replaceChildren(card(state, story));
-    root.querySelector<HTMLButtonElement>('.story__btn--primary')?.focus();
-  };
+    showLayer(root);
+    next.querySelector<HTMLButtonElement>('.story__btn--primary')?.focus();
+  }
 }

@@ -114,7 +114,7 @@ describe('Requirement: El color vuelve', () => {
 describe('Requirement: Portada y pantallas (012)', () => {
   const title = () => initialState(newGame(), [], { title: true });
 
-  it('empieza en la portada y "Nueva partida" abre "Elige tu claro" (019); elegir un nivel abre la intro la primera vez', () => {
+  it('empieza en la portada y "Nueva partida" abre "Elige tu dificultad" (019); elegir un nivel abre la intro la primera vez', () => {
     expect(title().ui.screen).toEqual({ kind: 'title' });
     expect(title().ui.story).toBeNull();
     const played = run(title(), { type: 'play' });
@@ -128,7 +128,7 @@ describe('Requirement: Portada y pantallas (012)', () => {
     expect(run(played, { type: 'start', game, intro: false }).ui.story).toBeNull();
   });
 
-  it('Scenario: Volver a la portada — Esc en "Elige tu claro" vuelve a la portada', () => {
+  it('Scenario: Volver a la portada — Esc en "Elige tu dificultad" vuelve a la portada', () => {
     const levels = run(title(), { type: 'play' });
     expect(run(levels, { type: 'cancel' }).ui.screen).toEqual({ kind: 'title' });
     expect(run(levels, { type: 'closeScreen' }).ui.screen).toEqual({ kind: 'title' });

@@ -23,6 +23,7 @@ export const color = {
   glow: '#FFF4C2', // brillos, aura del Árbol Padre, luciérnagas
   stoneDark: '#6F675B', // sombra de rocas y copas dormidas
   frost: '#CFE8F5', // velo de escarcha: árbol marcado o apagado (019)
+  arcane: '#80E6E5', // magia de Maestra Bruma: el brillo de la punta de su bastón (022)
   neutral: '#808080', // gris sin tono: solo para desaturar el escenario (003, modo "saturation")
 } as const;
 
@@ -51,13 +52,31 @@ export const SEASON_SLUGS = ['spring', 'summer', 'autumn', 'winter'] as const;
  * primavera a lo más brillante del tablero en invierno (docs/art-direction.md › Luz por estación).
  */
 export const MYCELIUM_GLOW: readonly [number, number, number, number] = [0.2, 0.4, 0.65, 1];
+/**
+ * Movimiento (022): las cuatro duraciones y las cuatro curvas con nombre. Toda animación sale de aquí
+ * (en CSS, de `--motion-<duración>` y `--ease-<curva>`). Los bucles de ambiente (halo, escarcha, motas) van aparte.
+ */
+export const MOTION = {
+  ms: { instant: 90, fast: 180, standard: 280, narrative: 600 },
+  ease: {
+    /** Entradas: algo llega y se acomoda. */
+    settle: { css: 'cubic-bezier(.2,.8,.2,1)', phaser: 'Cubic.easeOut' },
+    /** Saltitos y firmas alegres: sobrepasa un poco (≤ 8 %) y vuelve. */
+    springy: { css: 'cubic-bezier(.34,1.45,.64,1)', phaser: 'Back.easeOut' },
+    /** Fundidos, estaciones, luz y Maestra Bruma. */
+    soft: { css: 'cubic-bezier(.45,0,.55,1)', phaser: 'Sine.easeInOut' },
+    /** Salidas: algo se va. */
+    leave: { css: 'cubic-bezier(.4,0,1,1)', phaser: 'Quad.easeIn' },
+  },
+} as const;
+
 /** Velo del árbol marcado (019): late entre estos alfas cada `FROST_PULSE_MS`; con movimiento reducido, fijo en `rest`. */
 export const FROST_PULSE = { min: 0.35, max: 0.6, rest: 0.5 } as const;
 export const FROST_PULSE_MS = 1600;
 /** Alfa del velo fijo del árbol apagado. */
 export const FROST_FADED = 0.5;
 /** Duración del cambio de luz al pasar de estación (ms). Con movimiento reducido es inmediato. */
-export const LIGHT_TRANSITION_MS = 600;
+export const LIGHT_TRANSITION_MS = MOTION.ms.narrative;
 export type SeasonSlug = (typeof SEASON_SLUGS)[number];
 export const SPRITE_SPECIES = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'] as const;
 export const CHARACTER_DIR: Readonly<Record<string, string>> = {
@@ -179,9 +198,11 @@ export function vec3(token: ColorToken): [number, number, number] {
 export const MAX_RESOLUTION = 2;
 export const renderResolution = (): number => Math.min(globalThis.devicePixelRatio || 1, MAX_RESOLUTION);
 
-/** Publica la paleta y las tipografías como variables CSS en :root. */
+/** Publica la paleta, las tipografías y el movimiento como variables CSS en :root. */
 export function applyTheme(root: HTMLElement = document.documentElement): void {
   for (const [k, v] of Object.entries(color)) root.style.setProperty(`--${k}`, v);
+  for (const [k, v] of Object.entries(MOTION.ms)) root.style.setProperty(`--motion-${k}`, `${v}ms`);
+  for (const [k, v] of Object.entries(MOTION.ease)) root.style.setProperty(`--ease-${k}`, v.css);
   root.style.setProperty('--font-display', font.display);
   root.style.setProperty('--font-body', font.body);
   // URL absoluta: una url() relativa dentro de una variable CSS se resuelve contra la hoja de estilos

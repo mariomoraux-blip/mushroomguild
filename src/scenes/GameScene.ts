@@ -4,7 +4,7 @@ import { H, seasonIndex, W } from '../rules';
 import { BoardFx } from './fx';
 import { paintBoard, paintMarked, paintMyceliumGlow, progressSaturation } from './paint';
 import { highlighted, suggestedTile, type AppState, type Store } from '../store';
-import { BOARD_HEADROOM, boardArtKeys, boardArtUrl, FATHER_SCALE, fatherKey, FROST_PULSE, FROST_PULSE_MS, hex, LIGHT_TRANSITION_MS, MYCELIUM_GLOW, portraitKey, renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteUrl, type ColorToken } from '../theme';
+import { BOARD_HEADROOM, boardArtKeys, boardArtUrl, FATHER_SCALE, fatherKey, FROST_PULSE, FROST_PULSE_MS, hex, LIGHT_TRANSITION_MS, MOTION, MYCELIUM_GLOW, portraitKey, renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteUrl, type ColorToken } from '../theme';
 
 /** Color de la silueta de respaldo si falta el retrato de una especie. */
 const SILHOUETTE: Readonly<Record<string, ColorToken>> = { champi: 'wood', lactarius: 'indigo', amanita: 'berry', gliophorus: 'leaf', mago: 'peach' };
@@ -39,6 +39,12 @@ export class GameScene extends Phaser.Scene {
   private readonly reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   private tile = 0;
   private created = false;
+  /** Ya se dibujó una vez: desde aquí, llegar a una casilla o seleccionar se anima (022). */
+  private drawn = false;
+  private lastSelected: number | null = null;
+  private lastMonth = 0;
+  /** Casilla donde se dibujó cada retrato (para saber cuándo llega a otra). */
+  private spots = new Map<number, string>();
 
   constructor(private readonly store: Store) {
     super('Game');
@@ -91,9 +97,21 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.setScroll(0, -Math.round(Math.round(BOARD_HEADROOM * this.tile) * renderResolution())); // igual que main.ts › resize
     const occupied = new Set(state.game.members.filter((m) => m.at).map((m) => `${m.at!.x},${m.at!.y}`));
     const star = suggestedTile(state);
+    const valid = highlighted(state);
+    // Al seleccionar (022), las casillas válidas aparecen en un fundido: antes de pintarlas se copia el claro.
+    const selected = state.ui.selected;
+    const reveal = this.drawn && selected !== null && selected !== this.lastSelected && valid.length > 0;
+    this.lastSelected = selected;
+    if (reveal) this.fx?.snapshot(tex.getSourceImage() as HTMLCanvasElement);
+    // Estación nueva al terminar el mes (022): el claro de antes se funde sobre el nuevo.
+    const month = state.game.month;
+    const season = seasonIndex(month);
+    if (this.drawn && month === this.lastMonth + 1 && season !== seasonIndex(this.lastMonth))
+      this.fx?.seasonFade(tex.getSourceImage() as HTMLCanvasElement, SEASON_SLUGS[season] ?? 'spring');
+    this.lastMonth = month;
     paintBoard(tex.getContext(), T, {
       game: state.game,
-      valid: new Set(highlighted(state).map((t) => `${t.x},${t.y}`)),
+      valid: new Set(valid.map((t) => `${t.x},${t.y}`)),
       star: star ? { x: star.x, y: star.y } : null,
       occupied,
       fatherSprite: this.textures.exists(fatherKey(false)) && this.textures.exists(fatherKey(true)),
@@ -105,8 +123,10 @@ export class GameScene extends Phaser.Scene {
     this.drawGlow(state, T);
     this.drawMarked(state, T);
     this.drawFather(state, T);
-    this.drawWorkers(state, T);
     this.fx?.update(state.game, T);
+    this.drawWorkers(state, T);
+    if (reveal) this.fx?.reveal(valid, star && valid.some((t) => t.x === star.x && t.y === star.y) ? star : null);
+    this.drawn = true;
   }
 
   /** Luz de la red: se repinta si cambia la red o la casilla; su alfa va a la intensidad de la estación. */
@@ -140,7 +160,7 @@ export class GameScene extends Phaser.Scene {
       this.glowImage.setAlpha(target);
       return;
     }
-    this.glowTween = this.tweens.add({ targets: this.glowImage, alpha: target, duration: LIGHT_TRANSITION_MS, ease: 'Sine.easeInOut' });
+    this.glowTween = this.tweens.add({ targets: this.glowImage, alpha: target, duration: LIGHT_TRANSITION_MS, ease: MOTION.ease.soft.phaser });
   }
 
   /** Velo del árbol marcado (019): se repinta si cambia el árbol o la casilla; su alfa late entre `FROST_PULSE`. */
@@ -168,7 +188,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     this.frostImage.setAlpha(FROST_PULSE.min);
-    this.frostTween = this.tweens.add({ targets: this.frostImage, alpha: FROST_PULSE.max, duration: FROST_PULSE_MS / 2, ease: 'Sine.easeInOut', yoyo: true, repeat: -1 });
+    this.frostTween = this.tweens.add({ targets: this.frostImage, alpha: FROST_PULSE.max, duration: FROST_PULSE_MS / 2, ease: MOTION.ease.soft.phaser, yoyo: true, repeat: -1 });
   }
 
   /** Árbol Padre: dormido o despierto, apoyado en el borde inferior de su casilla y sobresaliendo hacia arriba. */
@@ -207,9 +227,22 @@ export class GameScene extends Phaser.Scene {
       // Mismo ancho para todos; el alto sale de cada retrato, así Maestra Bruma se ve más alta sin deformarse.
       const w = T * 0.92;
       const frame = this.textures.getFrame(key);
+      const spot = `${m.at.x},${m.at.y}`;
+      const arrived = this.spots.get(m.id) !== spot;
+      this.spots.set(m.id, spot);
+      if (arrived) this.tweens.killTweensOf(img);
+      if (arrived || img.getData('leaving')) img.setAlpha(1).setAngle(0).setData('leaving', false);
       img.setTexture(key).setDisplaySize(w, (w * frame.height) / frame.width).setPosition((m.at.x + 0.5) * T, (m.at.y + 1) * T - T * 0.03).setVisible(true);
+      // Llega a la casilla con la firma de su especie (022).
+      if (arrived && this.drawn) this.fx?.arrive(img, m.species);
     }
-    for (const [id, img] of this.sprites) if (!seen.has(id)) img.setVisible(false);
+    // Quien ya no trabaja este mes deja su casilla en un fundido.
+    for (const [id, img] of this.sprites) {
+      if (seen.has(id)) continue;
+      this.spots.delete(id);
+      if (img.visible && this.drawn) this.fx?.leave(img);
+      else img.setVisible(false);
+    }
     for (const [id, g] of this.silhouettes) if (!seen.has(id)) g.setVisible(false);
   }
 

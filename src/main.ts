@@ -5,7 +5,7 @@ import { GameScene } from './scenes/GameScene';
 import { LEVEL_IDS, newRandomGame, randomSeed, scoreResult, thresholds, type Level, type SpeciesId } from './rules';
 import { formatClock, newClock, read, sync } from './clock';
 import { saveIfBest } from './records';
-import { clockShouldRun, createStore, initialState } from './store';
+import { clockShouldRun, createStore, initialState, type AppState } from './store';
 import { applyTheme, BOARD_HEADROOM, renderResolution } from './theme';
 import { mountAmbient } from './ui/ambient';
 import { mountBoardOverlay } from './ui/board';
@@ -30,7 +30,7 @@ const storage = {
 const readList = <T>(key: string): T[] => { try { return JSON.parse(storage.get(key) ?? '[]') as T[]; } catch { return []; } };
 const SEEN = 'gremio.seenSpecies';
 const seen = readList<SpeciesId>(SEEN);
-// Niveles (019): el último elegido (foco en "Elige tu claro") y los ya jugados (la intro sale solo la primera vez).
+// Niveles (019): el último elegido (foco en "Elige tu dificultad") y los ya jugados (la intro sale solo la primera vez).
 const LAST_LEVEL = 'gremio.lastLevel';
 const PLAYED_LEVELS = 'gremio.playedLevels';
 const isLevel = (v: string | null): v is Level => LEVEL_IDS.includes(v as Level);
@@ -46,13 +46,13 @@ const clasico = params.get('map') === 'clasico';
 const gameFor = (lv: Level, seed?: number) => newRandomGame(clasico ? 0 : (seed ?? randomSeed(lv, Date.now())), lv);
 const debug = debugGame();
 const firstGame = debug ?? gameFor(level, Number.isFinite(seedParam) && seedParam > 0 ? seedParam : undefined);
-// La portada ("Nueva partida" → "Elige tu claro" → intro) abre el juego normal; con `?map`, `?seed`, `?nivel`
+// La portada ("Nueva partida" → "Elige tu dificultad" → intro) abre el juego normal; con `?map`, `?seed`, `?nivel`
 // o `?debugState` se entra directo al tablero (pruebas y playtests).
 const title = !debug && !params.has('map') && !params.has('seed') && !params.has('nivel');
 const store = createStore(initialState(firstGame, seen, { title }));
 /** "Jugar de nuevo": mismo nivel, con el mapa clásico o un claro aleatorio nuevo. */
 const restart = () => store.dispatch({ type: 'restart', game: gameFor(store.getState().game.level) });
-/** Nivel elegido en "Elige tu claro": se recuerda, y la intro sale solo la primera vez en ese nivel. */
+/** Nivel elegido en "Elige tu dificultad": se recuerda, y la intro sale solo la primera vez en ese nivel. */
 const startLevel = (lv: Level) => {
   const played = readList<Level>(PLAYED_LEVELS);
   storage.set(LAST_LEVEL, lv);
@@ -87,7 +87,7 @@ setInterval(() => hud.setTime(formatClock(read(clock, now()))), 250);
 const hud = mountHud($('hud'), store);
 const renderDock = mountDock($('dock'), store);
 const overlay = mountBoardOverlay($('overlay'), store);
-const renderSheet = mountSheet($('sheet'), store);
+const renderSheet = mountSheet($('sheet'), store, (x, y) => overlay.tap(x, y));
 const renderStory = mountStory($('story'), store, restart);
 const renderScreens = mountScreens($('screen'), store, { pickLevel: startLevel, lastLevel });
 const notice = $('notice');
@@ -115,6 +115,8 @@ const renderDom = () => {
   // Botón "Ficha" del miembro seleccionado.
   const selected = state.ui.selected === null ? undefined : state.game.members.find((m) => m.id === state.ui.selected);
   cardBtn.hidden = !selected;
+  // Especie que todavía no conoció (022): punto «nuevo» y un latido en "Ficha".
+  cardBtn.classList.toggle('is-new', Boolean(selected && !state.ui.seen.includes(selected.species)));
   if (selected) cardBtn.setAttribute('aria-label', es.card.openLabel(selected.name));
 };
 store.subscribe((state, prev) => {
@@ -173,6 +175,31 @@ document.addEventListener('keydown', (e) => {
   }
 });
 document.addEventListener('pointerdown', () => (document.body.dataset.input = 'pointer'));
+
+// «Atrás» del teléfono (022): cada capa abierta (hoja, carta o pantalla que no es la portada) deja una sola entrada
+// en el historial, y «atrás» la cierra como Esc, sin salir del juego. Al cerrarla de otro modo, se consume la entrada.
+const hasLayer = ({ ui }: AppState) => Boolean(ui.sheet || ui.story || (ui.screen && ui.screen.kind !== 'title'));
+let pushed = false;
+let skipPop = false;
+const syncHistory = () => {
+  const open = hasLayer(store.getState());
+  if (open && !pushed) {
+    history.pushState({ layer: true }, '');
+    pushed = true;
+  } else if (!open && pushed) {
+    pushed = false;
+    skipPop = true;
+    history.back();
+  }
+};
+window.addEventListener('popstate', () => {
+  if (skipPop) return void (skipPop = false);
+  if (!pushed) return;
+  pushed = false;
+  store.dispatch({ type: 'cancel' }); // si queda otra capa abierta, `syncHistory` deja una entrada nueva
+});
+store.subscribe(syncHistory);
+syncHistory();
 // Safari ignora user-scalable=no al pellizcar.
 document.addEventListener('gesturestart', (e) => e.preventDefault());
 

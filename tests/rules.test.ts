@@ -354,7 +354,7 @@ describe('Requirement: Reclutar', () => {
   });
 
   it('sin esporas suficientes se rechaza', () => {
-    expect(() => recruit(setup({ spores: 1 }), 'lactarius')).toThrow(new RuleError(es.reasons.recruitCost(COST.recruit)));
+    expect(() => recruit(setup({ spores: 1 }), 'lactarius')).toThrow(new RuleError(es.reasons.recruitCost(COST.recruit), 'spores'));
   });
 
   it('los reclutas reciben los nombres en orden', () => {

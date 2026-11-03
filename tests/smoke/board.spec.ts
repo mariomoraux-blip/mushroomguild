@@ -10,7 +10,7 @@
 // board-interaction › Retratos del gremio: "La maga en el tablero" → "Maestra Bruma: retrato propio…".
 // player-guidance › Libreta de campo: "Consultar la ayuda" → "Libreta de campo".
 // player-guidance › Meta visible: "Inicio" → "guía".
-// title-screens › Elige tu claro y player-guidance › Ancestral sin pistas, board-interaction › Árbol marcado y apagado
+// title-screens › Elige tu dificultad y player-guidance › Ancestral sin pistas, board-interaction › Árbol marcado y apagado
 //   y Escarcha en el HUD (019) → "Niveles".
 import { expect, test, type Page } from '@playwright/test';
 
@@ -23,7 +23,7 @@ const isTouch = (name: string) => name !== 'escritorio-1280x800';
 const errors = new WeakMap<Page, string[]>();
 
 test.beforeEach(async ({ page }, info) => {
-  // La ficha de cada especie se abre sola la primera vez; salvo en su propia prueba, se dan por vistas.
+  // Las especies nuevas llevan un punto en "Ficha" (022); salvo en su propia prueba, se dan por vistas.
   if (!info.title.startsWith('Ficha')) {
     await page.addInitScript(() =>
       localStorage.setItem('gremio.seenSpecies', JSON.stringify(['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'])),
@@ -240,10 +240,16 @@ test('Libreta de campo: no se abre sola; "?" abre Cómo jugar y de ahí la libre
   await expect(page.locator('#screen')).toBeHidden();
 });
 
-test('Ficha al seleccionar: primera vez por especie, "Entendido" mantiene la selección y "Ficha" la reabre', async ({ page }, info) => {
+test('Ficha al seleccionar: nunca se abre sola, "Ficha" con punto la primera vez, "Entendido" mantiene la selección (022)', async ({ page }, info) => {
   await page.goto('/?map=clasico');
   await page.locator('[data-id="1"]').click();
   const dialog = page.getByRole('dialog');
+  await expect(dialog).toHaveCount(0);
+  await expect(valid(page)).toHaveCount(2);
+  await expect(page.locator('#notice')).toHaveText('Toca Ficha para conocer a Añil.');
+  const ficha = page.getByRole('button', { name: 'Ver la ficha de Añil' });
+  await expect(ficha).toHaveClass(/is-new/);
+  await ficha.click();
   await expect(dialog).toContainText('Añil · Lactarius indigo');
   await expect(dialog).toContainText('«Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.»');
   for (const h of ['Habilidad', 'Cómo usarlo', 'Movimiento', 'Nutrientes']) await expect(dialog.getByRole('heading', { name: h })).toBeVisible();
@@ -251,16 +257,11 @@ test('Ficha al seleccionar: primera vez por especie, "Entendido" mantiene la sel
   await page.getByRole('button', { name: 'Entendido' }).click();
   await expect(dialog).toHaveCount(0);
   await expect(valid(page)).toHaveCount(2);
-  // Segunda vez: no se abre sola.
-  await page.locator('[data-id="1"]').click();
-  await page.locator('[data-id="1"]').click();
-  await expect(dialog).toHaveCount(0);
-  await page.getByRole('button', { name: 'Ver la ficha de Añil' }).click();
-  await expect(page.getByRole('dialog')).toContainText('Añil · Lactarius indigo');
-  // Se recuerda entre visitas.
+  // Segunda vez: sin punto, y se recuerda entre visitas.
   await page.reload();
   await page.locator('[data-id="1"]').click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Ver la ficha de Añil' })).not.toHaveClass(/is-new/);
 });
 
 test('guía: ★ en el sugerido, camino hacia el árbol, meta marcada y esporas que abren reclutar', async ({ page }, info) => {
@@ -509,7 +510,7 @@ test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la f
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'Volver' }).click();
-  // Nueva partida: Elige tu claro, intro y después el tablero.
+  // Nueva partida: Elige tu dificultad, intro y después el tablero.
   await page.getByRole('button', { name: 'Nueva partida' }).click();
   await page.locator('[data-level="brote"]').click();
   await expect(page.locator('#story')).toContainText('El bosque se apaga');
@@ -532,14 +533,25 @@ test('Efectos: animaciones al jugar, nada con movimiento reducido, y carga difer
     // En la partida no se descargan el logo ni los fondos de intro y victoria.
     await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
     expect(requested.filter((u) => /ui\/hud\/logo|backgrounds\/(intro|victory)/.test(u))).toEqual([]);
-    // Cuenta, cuadro a cuadro dentro de la página, cuántos objetos de efecto hay (y el máximo visto).
+    // Phaser listo (la escena creó sus efectos y ya sabe el tamaño de casilla): antes, una jugada no se anima.
+    await page.waitForFunction(() => {
+      const w = window as unknown as { game?: { scene: { getScene: (k: string) => { fx?: { T: number } | null } | null } } };
+      return (w.game?.scene.getScene('Game')?.fx?.T ?? 0) > 0;
+    });
+    // Cuenta los objetos de efecto que entran a la escena (fxMax: sin depender de muestrear cuadros, que bajo carga
+    // se pierde una jugada de 280 ms) y, cuadro a cuadro, cuántos quedan vivos (fxNow).
     await page.evaluate(() => {
       type Obj = { type: string; texture?: { key: string } };
-      const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: Obj[] } } } }; fxNow: number; fxMax: number };
+      type Scene = { children: { list: Obj[] }; sys: { events: { on: (e: string, fn: (o: Obj) => void) => void } } };
+      const w = window as unknown as { game: { scene: { getScene: (k: string) => Scene } }; fxNow: number; fxMax: number };
+      const scene = w.game.scene.getScene('Game');
+      const isFx = (o: Obj) => o.texture?.key === 'fx-dot' || o.type === 'Graphics';
       w.fxMax = 0;
+      scene.sys.events.on('addedtoscene', (o) => {
+        if (isFx(o)) w.fxMax++;
+      });
       const tick = () => {
-        w.fxNow = w.game.scene.getScene('Game').children.list.filter((o) => o.texture?.key === 'fx-dot' || o.type === 'Graphics').length;
-        w.fxMax = Math.max(w.fxMax, w.fxNow);
+        w.fxNow = scene.children.list.filter(isFx).length;
         requestAnimationFrame(tick);
       };
       tick();
@@ -550,7 +562,6 @@ test('Efectos: animaciones al jugar, nada con movimiento reducido, y carga difer
         return { fxNow: w.fxNow, fxMax: w.fxMax };
       });
     await page.locator('[data-id="1"]').click();
-    await page.keyboard.press('Escape'); // cierra la ficha de primera vez
     await page.locator('.cell[data-valid="true"]').first().click();
     await page.waitForTimeout(800);
     const { fxNow, fxMax } = await fx();
@@ -599,7 +610,6 @@ test('Puntaje: cronómetro que se pausa con una carta, carta de victoria con est
   });
   await p2.goto('/?debugState=nearWin');
   await p2.locator('.card--amanita').click();
-  await p2.keyboard.press('Escape'); // la ficha de primera vez (sin almacenamiento, todas son nuevas)
   await p2.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
   await expect(p2.locator('#story .score__stars')).toBeVisible();
   await expect(p2.locator('#story .score__row')).toHaveCount(8);
@@ -644,7 +654,7 @@ test('Portada: crédito del autor fijo abajo, en letra pequeña, con contraste �
   if (info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390') await page.screenshot({ path: `docs/screenshots/021-credito-fijo-${info.project.name}.png` });
 });
 
-test('Niveles: Elige tu claro con teclado, Ancestral sin ★, árbol marcado, escarcha y Jugar de nuevo con el mismo nivel', async ({ page }, info) => {
+test('Niveles: Elige tu dificultad con teclado, Ancestral sin ★, árbol marcado, escarcha y Jugar de nuevo con el mismo nivel', async ({ page }, info) => {
   test.setTimeout(120_000);
   const size = info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390' ? info.project.name : null;
   const shot = (name: string) => (size ? page.screenshot({ path: `docs/screenshots/019-${name}-${size}.png` }) : undefined);
@@ -710,9 +720,155 @@ test('Niveles: con movimiento reducido el árbol marcado no late', async ({ brow
   for (let m = 1; m < 6; m++) await page.locator('.end').click();
   await expect(page.locator('.cell[aria-label*="se apagará"]')).toHaveCount(1);
   const alpha = () => page.evaluate(() => (window as unknown as { game: { scene: { getScene(k: string): { frostImage: { alpha: number } | null } } } }).game.scene.getScene('Game').frostImage?.alpha);
+  await expect.poll(alpha).toBe(0.5); // la capa aparece en el cuadro siguiente al mes nuevo
   const first = await alpha();
   await page.waitForTimeout(900);
   expect(first).toBe(0.5);
   expect(await alpha()).toBe(0.5);
+  await ctx.close();
+});
+
+test('Movimiento (022): atrás cierra la ficha, rechazo en la casilla, «±n» en el HUD y pasar la voz', async ({ page }, info) => {
+  await page.goto('/');
+  await page.goto('/?map=clasico');
+  // «Atrás» con la ficha abierta la cierra y sigue la partida.
+  await page.locator('[data-id="2"]').click();
+  await page.getByRole('button', { name: 'Ver la ficha de Bruno' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page).toHaveURL(/map=clasico/);
+  await expect(page.locator('[data-id="2"]')).toHaveAttribute('aria-pressed', 'true');
+  // Jugada válida: el contador de nutrientes dice «+2».
+  await cell(page, 1, 7).click();
+  await expect(page.locator('.chip--nutrients .chip__delta')).toHaveText('+2');
+  // Toque inválido: aro en la casilla tocada.
+  await page.locator('[data-id="1"]').click();
+  await cell(page, 0, 0).click();
+  await expect(cell(page, 0, 0)).toHaveClass(/is-reject/);
+  // Captura con el aro todavía visible (y la «+2» del contador).
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/022-rechazo-390x844.png' });
+  // Miembro cansado: su «Zz» se mece.
+  await page.locator('[data-id="2"]').click();
+  await expect(page.locator('[data-id="2"]')).toHaveClass(/is-tired/);
+  // Pasar la voz: la tarjeta del llamado despierta.
+  await page.goto('/?map=clasico&debugState=fullGuild');
+  while (await page.locator('#story:not([hidden]):not(.is-leaving)').count()) await page.locator('.story__btn--primary').click();
+  await page.locator('.card--champi').first().click();
+  await page.locator('.cell[data-valid="true"]').first().click();
+  const bruno = await page.locator('.card--champi').first().getAttribute('data-id');
+  await page.locator('.card--gliophorus').first().click();
+  await page.locator('.cell[data-valid="true"]').first().click();
+  await expect(page.locator(`.card[data-id="${bruno}"]`)).toHaveClass(/is-called/);
+  // Esc sobre la ficha de Maestra Bruma la cierra del todo.
+  await page.locator('.card--mago').click();
+  await page.locator('#sheet [data-action="member"]').click();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('.card--mago')).toHaveAttribute('aria-pressed', 'false');
+});
+
+
+test('Movimiento P1 (022): capas que entran y salen, intro, selección, gremio, mes nuevo, estación y finales', async ({ page }, info) => {
+  test.setTimeout(90_000);
+  type W = { store: { getState(): { ui: { story: unknown } } }; game: { scene: { getScene(k: string): { fx?: { T: number }; sys: { events: { on(e: string, fn: (o: { texture?: { key: string } }) => void): void } } } } }; added: string[] };
+  const ready = () => page.waitForFunction(() => ((window as unknown as W).game?.scene.getScene('Game')?.fx?.T ?? 0) > 0);
+  const watch = () => page.evaluate(() => {
+    const w = window as unknown as W;
+    w.added = [];
+    w.game.scene.getScene('Game').sys.events.on('addedtoscene', (o) => w.added.push(o.texture?.key ?? ''));
+  });
+  const added = (key: string) => page.evaluate((k) => (window as unknown as W).added.filter((a) => a === k).length, key);
+  // Hojas: suben al abrir y bajan al cerrar sin atrapar toques.
+  await page.goto('/?map=clasico');
+  await ready();
+  await page.locator('.card--recruit').click();
+  await expect.poll(() => page.locator('#sheet .sheet__panel').evaluate((n) => getComputedStyle(n).animationName)).toBe('layer-in');
+  const leaving = await page.evaluate(() => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    const s = document.querySelector('#sheet')!;
+    return { cls: s.className, pe: getComputedStyle(s).pointerEvents };
+  });
+  expect(leaving).toEqual({ cls: 'sheet is-leaving', pe: 'none' });
+  await expect(page.locator('#sheet')).toBeHidden();
+  // Selección: la tarjeta hace su firma y las casillas válidas aparecen en un fundido (recortes del claro anterior).
+  await watch();
+  await page.locator('[data-id="1"]').click();
+  await expect(page.locator('[data-id="1"]')).toHaveClass(/is-picked/);
+  await expect.poll(() => added('fx-cover')).toBeGreaterThan(0);
+  // Mes nuevo: la luna gira, los retratos se van y vuelan esporas y hojas; en el mes 4 cambia la estación.
+  await valid(page).first().click();
+  await page.locator('.end').click();
+  await expect(page.locator('.end')).toHaveClass(/is-turning/);
+  await expect(page.locator('[data-id="1"]')).toHaveClass(/is-waking/);
+  await page.locator('.end').click();
+  await page.locator('.end').click();
+  await expect(month(page)).toHaveText('Mes 4/12');
+  await expect(page.locator('.hud__season')).toHaveClass(/is-new-season/);
+  await expect.poll(() => added('fx-season')).toBe(1);
+  // Intro: la carta nueva entra desde la derecha sobre la anterior, que es una copia muda.
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Nueva partida' }).click();
+  await page.locator('[data-level="brote"]').click();
+  await expect(page.locator('#story [role="dialog"]')).toBeVisible();
+  const turn = await page.evaluate(() => {
+    document.querySelector<HTMLElement>('#story [data-action="next"]')!.click();
+    return [...document.querySelectorAll('#story .story__card')].map((c) => `${c.className}|${c.getAttribute('role')}`);
+  });
+  expect(turn).toEqual(['story__card is-out|null', 'story__card is-in|dialog']);
+  await expect(page.locator('#story .story__card')).toHaveCount(1);
+  // Maestra Bruma: al cerrar su carta, su tarjeta entra al dock con su halo; quien se recluta entra creciendo.
+  await page.goto('/?debugState=mageNextMonth');
+  await page.locator('.end').click();
+  await expect(page.locator('#story')).toContainText('Llegó Maestra Bruma');
+  await page.getByRole('button', { name: 'Seguir' }).click();
+  await expect(page.locator('.card--mago')).toHaveClass(/is-arriving/);
+  await page.locator('.end').click();
+  await page.locator('.card--recruit').click();
+  await page.locator('#sheet [data-action="recruit"]').first().click();
+  await expect(page.locator('.dock__item').nth(4).locator('.card')).toHaveClass(/is-joining/);
+  // Victoria: la carta espera para que se vea despertar al Árbol Padre; un toque la trae antes.
+  // Todo dentro de la página: los temporizadores corren en orden y no dependen de la carga de la máquina.
+  for (const skip of [false, true]) {
+    await page.goto('/?debugState=nearWin');
+    await ready();
+    const held = await page.evaluate(async (skip) => {
+      type S = { getState(): { game: { members: { id: number; species: string }[]; tiles: { kind: string; x: number; y: number }[] } }; dispatch(a: object): void };
+      const store = (window as unknown as { store: S }).store;
+      const story = document.querySelector<HTMLElement>('#story')!;
+      const g = store.getState().game;
+      store.dispatch({ type: 'select', id: g.members.find((m) => m.species === 'amanita')!.id });
+      const mother = g.tiles.find((t) => t.kind === 'mother')!;
+      store.dispatch({ type: 'tapTile', x: mother.x, y: mother.y });
+      const start = story.hidden;
+      if (skip) document.querySelector('.board-area')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      else await new Promise((r) => setTimeout(r, 300));
+      return { start, later: story.hidden };
+    }, skip);
+    expect(held).toEqual({ start: true, later: !skip });
+    await expect(page.locator('#story [role="dialog"]')).toBeVisible();
+    if (!skip && info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/022-victoria-390x844.png' });
+  }
+  // Fin del invierno: el claro baja la luz y después entra la carta.
+  await page.goto('/?debugState=lastMonth');
+  await page.locator('.end').click();
+  await expect(page.locator('html')).toHaveClass(/is-dusk/);
+  await expect(page.locator('#story')).toContainText('Llegó el invierno');
+});
+
+test('Movimiento P1 (022) con movimiento reducido: fundidos cortos y la victoria espera menos', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  const page = await ctx.newPage();
+  await page.goto('/?map=clasico');
+  await page.locator('.card--recruit').click();
+  const style = await page.locator('#sheet .sheet__panel').evaluate((n) => ({ name: getComputedStyle(n).animationName, ms: parseFloat(getComputedStyle(n).animationDuration) * 1000 }));
+  expect(style).toEqual({ name: 'fade-in', ms: 180 });
+  await page.keyboard.press('Escape');
+  await page.locator('[data-id="1"]').click();
+  await expect(page.locator('[data-id="1"]')).toHaveCSS('transform', 'none');
+  await page.goto('/?debugState=nearWin');
+  await page.locator('.card--amanita').click();
+  await page.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
+  await expect(page.locator('#story [role="dialog"]')).toBeVisible();
   await ctx.close();
 });
