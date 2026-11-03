@@ -713,6 +713,28 @@ test('Niveles: Elige tu dificultad con teclado, Ancestral sin ★, árbol marcad
   await noScrollNoZoom(page);
 });
 
+test('Mes vacío: el reporte de Ancestral (semilla 745) avisa que nadie tiene trabajo, sin «Pista:»', async ({ page }, info) => {
+  // Las jugadas del jugador en los meses 1 a 3 (iguales a la línea ganadora del certificador, 024).
+  await page.goto('/?nivel=ancestral&seed=745');
+  const months: [string, number, number][][] = [
+    [['champi', 2, 7], ['lactarius', 4, 7]],
+    [['champi', 2, 7], ['lactarius', 4, 6], ['amanita', 4, 5]],
+    [['lactarius', 2, 7]],
+  ];
+  for (const moves of months) {
+    for (const [species, x, y] of moves) {
+      await page.locator(`.card--${species}`).click();
+      await cell(page, x, y).click();
+    }
+    await page.locator('.end').click();
+  }
+  await expect(page.locator('.hud__month-value')).toHaveText('Mes 4/12');
+  await expect(page.locator('#notice')).toContainText('Nadie tiene trabajo este mes. Termina el mes: la hojarasca traerá 1 nutriente.');
+  await expect(page.locator('#notice')).not.toContainText('Pista');
+  await noScrollNoZoom(page);
+  if (info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390') await page.screenshot({ path: `docs/screenshots/024-mes-vacio-${info.project.name}.png` });
+});
+
 test('Niveles: con movimiento reducido el árbol marcado no late', async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
   const page = await ctx.newPage();
