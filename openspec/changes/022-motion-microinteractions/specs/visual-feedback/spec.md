@@ -71,7 +71,7 @@ Cuando una acción no es posible, además del motivo en la bitácora, la interfa
 El rechazo nunca vibra, nunca sacude más de 3 px y, si se repite, reinicia la animación sin acumularla.
 
 #### Scenario: Casilla inválida
-- WHEN el jugador tiene a Añil seleccionado y toca una tierra lejos de la red
+- WHEN el jugador tiene a Indi seleccionado y toca una tierra lejos de la red
 - THEN la casilla tocada muestra el aro de rechazo y la bitácora dice "Muy lejos: la tierra debe tocar la red."
 
 #### Scenario: Miembro cansado
@@ -79,14 +79,14 @@ El rechazo nunca vibra, nunca sacude más de 3 px y, si se repite, reinicia la a
 - THEN la «Zz» de su tarjeta se mece y la bitácora dice que descansa
 
 #### Scenario: Sin nutrientes
-- WHEN el jugador selecciona a Añil con menos nutrientes que el costo de tejer
+- WHEN el jugador selecciona a Indi con menos nutrientes que el costo de tejer
 - THEN el contador de nutrientes se tiñe `berry` un momento
 
 ### Requirement: Cambios en el HUD
 Cada vez que una jugada, un hechizo o el mes nuevo cambia nutrientes, esporas, árboles o el mes, ese contador SHALL dar un saltito (`fast`). Nutrientes, esporas y árboles SHALL mostrar además una etiqueta con la diferencia («+2», «−1»): entra en `fast`, se lee y sube 8 px mientras se funde (`fast` + 2 × `standard` en total), y el número se tiñe `leaf` si sube o `berry` si baja. Las esporas que vuelan ponen su etiqueta al llegar la primera. Empezar o cargar una partida no anima los contadores.
 
 #### Scenario: Costo de tejer
-- WHEN Añil teje micelio
+- WHEN Indi teje micelio
 - THEN el contador de nutrientes salta y muestra «−1» (o «−2» con escarcha)
 
 #### Scenario: Ganancia de descomponer
@@ -123,7 +123,7 @@ Las hojas, fichas y cartas de historia SHALL entrar subiendo 24 px con un fundid
 Al pulsar «Fin del mes», la luna del botón SHALL girar media vuelta, los retratos SHALL dejar sus casillas con un fundido y las tarjetas del gremio SHALL despertar de a una, con 40 ms entre cada una (la «Zz» se va con un saltito).
 
 #### Scenario: Gremio listo
-- WHEN termina el mes con Añil, Bruno y Rubí cansados
+- WHEN termina el mes con Indi, Bruno y Rubí cansados
 - THEN los tres retratos dejan el tablero y sus tarjetas despiertan una tras otra
 
 ### Requirement: Cambio de estación visible

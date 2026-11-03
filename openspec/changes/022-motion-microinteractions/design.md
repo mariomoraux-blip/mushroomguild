@@ -30,7 +30,7 @@ En el código no hay ninguna otra transición ni animación CSS. La regla global
 | 1 | Portada, «Nueva partida», «Elige tu dificultad» | Corte seco en las tres pantallas (0 animaciones). Solo se mueve el fondo vivo | Sí, pero se siente estática |
 | 2 | Intro: entrada, cambio de carta, «Saltar» | Corte seco en todo | Sí; el cambio de carta pasa desapercibido (los puntos son lo único que cambia de lugar) |
 | 3 | Seleccionar miembro | Pose «feliz» (200 ms). Las casillas válidas y la ★ aparecen de golpe. **La primera vez por especie, la ficha tapa el tablero** | A medias: el jugador cree que tocó «ver ficha» (problema 2) |
-| 4a | Tejer (Añil) | Animación del 004, hilo **dorado** (no hay destello índigo) | Sí |
+| 4a | Tejer (Indi) | Animación del 004, hilo **dorado** (no hay destello índigo) | Sí |
 | 4b | Descomponer (Bruno) | Animación del 004 | Sí |
 | 4c | Revivir (Rubí) | Animación del 004 | Sí |
 | 4d | Pasar la voz (Chispa) | **Nada** en el tablero; en el dock, la «Zz» del compañero desaparece de golpe | **No**: no se ve a quién se liberó |
@@ -111,7 +111,7 @@ Con `reducedMotion: 'reduce'`, 0 animaciones y 0 tweens tras una jugada: la regl
 | Especie | Carácter | Llegada a la casilla | Seleccionada en el dock |
 | --- | --- | --- | --- |
 | Bruno · Champiñón | Trabajador | Cae 6 px y aplasta una vez, firme (`standard`, `springy`) | Doble saltito corto (2 × `fast`) |
-| Añil · Lactarius indigo | Delicado | Se funde y baja flotando (`standard`, `soft`); el hilo de tejer nace con un **destello índigo** (`color.indigo`) que se vuelve dorado | Se mece ±2° una vez (`standard`, `soft`) |
+| Indi · Lactarius indigo | Delicado | Se funde y baja flotando (`standard`, `soft`); el hilo de tejer nace con un **destello índigo** (`color.indigo`) que se vuelve dorado | Se mece ±2° una vez (`standard`, `soft`) |
 | Rubí · Amanita muscaria | Cuidadosa | Se agacha un 5 % (`instant`) y se acomoda (`standard`, `settle`) | Asoma 4 px y se queda (`fast`, `settle`) |
 | Chispa · Gliophorus psittacinus | Parlanchina | Doble meneo ±4° (2 × `fast`, `springy`) | Meneo rápido y su corona brilla |
 | Maestra Bruma | Solemne | Aparece en un fundido con halo `arcane` suave, sin rebote (`narrative`, `soft`) | Sube 3 px despacio (`standard`, `soft`) |

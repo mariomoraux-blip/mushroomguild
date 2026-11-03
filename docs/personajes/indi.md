@@ -1,4 +1,4 @@
-# Hoja de personaje: *Lactarius indigo* "Añil"
+# Hoja de personaje: *Lactarius indigo* "Indi"
 
 **Rol:** Tejedor · **Silueta:** embudo poco profundo de borde muy ondulado (variante 8, "Ondas marcadas") · **Accesorio:** carrete de hilo índigo
 
@@ -31,7 +31,7 @@ H = altura total.
 
 Comunes a todo el elenco: contorno `--ink` `#3B2A1E` (Tinta café de la paleta base), rubor `#E8957A`.
 El carrete reutiliza la madera de la canasta de Bruno (`#D9B68C` con trama `#8C603D`); el hilo es `#4A5FB0` con luz `#8FA6D8`.
-`capBlue` en `src/theme.ts` (`#9cb4c3`) es un gris azulado del PoC: no es el índigo de Añil.
+`capBlue` en `src/theme.ts` (`#9cb4c3`) es un gris azulado del PoC: no es el índigo de Indi.
 
 ## Accesorio de rol
 Carrete de madera con pestañas e hilo índigo enrollado, a la izquierda del espectador (lado opuesto a la canasta de Bruno). Del carrete sale un hilo fino hasta el suelo con destellos índigo: el micelio que teje. A 56 px el hilo desaparece; es detalle para 128 px.

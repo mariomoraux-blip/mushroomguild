@@ -45,7 +45,7 @@ export const es = {
   /** Nombres de los miembros, en orden de llegada. */
   memberNames: {
     champi: ['Bruno', 'Tomillo', 'Migas', 'Trufo'],
-    lactarius: ['Añil', 'Ola', 'Nube', 'Brisa'],
+    lactarius: ['Indi', 'Ola', 'Nube', 'Brisa'],
     amanita: ['Rubí', 'Cereza', 'Lunar', 'Pimienta'],
     gliophorus: ['Chispa', 'Pluma', 'Trina', 'Gota'],
   } satisfies Record<RecruitableSpecies, readonly string[]>,

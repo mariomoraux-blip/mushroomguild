@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { act, endMonth, newGame, newRandomGame, validTargets, type GameState } from '../src/rules';
 import { diffEffects } from '../src/effects';
-import { ANIL, BRUNO, idOf, RUBI, setup } from './helpers';
+import { INDI, BRUNO, idOf, RUBI, setup } from './helpers';
 
 const first = (g: GameState, id: number) => validTargets(g, id)[0]!;
 const kinds = (prev: GameState, next: GameState) => diffEffects(prev, next).map((e) => e.kind);
@@ -9,8 +9,8 @@ const kinds = (prev: GameState, next: GameState) => diffEffects(prev, next).map(
 describe('Requirement: Respuesta a cada acción', () => {
   it('Scenario: Tejer — el micelio nuevo crece desde una casilla vecina de la red', () => {
     const g = newGame();
-    const t = first(g, ANIL);
-    const fx = diffEffects(g, act(g, ANIL, t.x, t.y).state);
+    const t = first(g, INDI);
+    const fx = diffEffects(g, act(g, INDI, t.x, t.y).state);
     expect(fx).toHaveLength(1);
     const [weave] = fx;
     expect(weave).toMatchObject({ kind: 'weave', at: { x: t.x, y: t.y } });

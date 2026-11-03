@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
 import { act, check, cloneState, endMonth, FADED_REVIVE, LEVEL_IDS, LEVELS, mulberry32, newGame, newRandomGame, tile, weaveCost, type GameState, type Level, type Point } from '../src/rules';
 import { randomMonth } from './bots';
-import { ANIL, RUBI, setup, type Setup } from './helpers';
+import { INDI, RUBI, setup, type Setup } from './helpers';
 
 // 019 · Niveles de dificultad, sobre el mapa clásico (Hogar en (2,7)).
 const at = (level: Level, o: Setup = {}): GameState => ({ ...setup(o), level });
@@ -68,13 +68,13 @@ describe('Requirement: Escarcha', () => {
 
   it('Scenario: Tejer con escarcha — la casilla entra a la red y cuesta 2', () => {
     const s = at('bosque', { month: 7, nutrients: 3 });
-    const n = act(s, ANIL, 3, 7).state;
+    const n = act(s, INDI, 3, 7).state;
     expect(tile(n, 3, 7)!.net).toBe(true);
     expect(n.nutrients).toBe(1);
   });
 
   it('Scenario: Tejer sin nutrientes suficientes con escarcha', () => {
-    expect(check(at('bosque', { month: 7, nutrients: 1 }), ANIL, 3, 7)).toEqual({ ok: false, reason: 'Faltan 2 nutrientes para tejer con escarcha.', short: 'nutrients' });
+    expect(check(at('bosque', { month: 7, nutrients: 1 }), INDI, 3, 7)).toEqual({ ok: false, reason: 'Faltan 2 nutrientes para tejer con escarcha.', short: 'nutrients' });
   });
 
   it('Scenario: Invierno en Bosque — tejer vuelve a costar 1; en Ancestral, el invierno sigue con escarcha y no se anuncia otra vez', () => {

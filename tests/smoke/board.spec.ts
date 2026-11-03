@@ -88,7 +88,7 @@ test('táctil: elegir al Lactarius, tejer y terminar el mes (con captura)', asyn
   await page.goto('/?map=clasico');
   await page.locator('[data-id="1"]').tap();
   await expect(valid(page)).toHaveCount(2);
-  await expect(page.locator('#notice')).toHaveText('Añil: toca una casilla resaltada.');
+  await expect(page.locator('#notice')).toHaveText('Indi: toca una casilla resaltada.');
   // Toque en una casilla no válida: motivo exacto y sigue seleccionado.
   await cell(page, 0, 0).tap();
   await expect(page.locator('#notice')).toHaveText('Muy lejos: la tierra debe tocar la red.');
@@ -101,7 +101,7 @@ test('táctil: elegir al Lactarius, tejer y terminar el mes (con captura)', asyn
   await cell(page, 2, 3).tap();
   await cell(page, 2, 3).tap();
   await noScrollNoZoom(page);
-  // Captura con Añil seleccionado el mes 2.
+  // Captura con Indi seleccionado el mes 2.
   await page.locator('[data-id="1"]').tap();
   await page.screenshot({ path: `docs/screenshots/002-${info.project.name}.png` });
 });
@@ -246,11 +246,11 @@ test('Ficha al seleccionar: nunca se abre sola, "Ficha" con punto la primera vez
   const dialog = page.getByRole('dialog');
   await expect(dialog).toHaveCount(0);
   await expect(valid(page)).toHaveCount(2);
-  await expect(page.locator('#notice')).toHaveText('Toca Ficha para conocer a Añil.');
-  const ficha = page.getByRole('button', { name: 'Ver la ficha de Añil' });
+  await expect(page.locator('#notice')).toHaveText('Toca Ficha para conocer a Indi.');
+  const ficha = page.getByRole('button', { name: 'Ver la ficha de Indi' });
   await expect(ficha).toHaveClass(/is-new/);
   await ficha.click();
-  await expect(dialog).toContainText('Añil · Lactarius indigo');
+  await expect(dialog).toContainText('Indi · Lactarius indigo');
   await expect(dialog).toContainText('«Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.»');
   for (const h of ['Habilidad', 'Cómo usarlo', 'Movimiento', 'Nutrientes']) await expect(dialog.getByRole('heading', { name: h })).toBeVisible();
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/005-ficha-390x844.png' });
@@ -261,7 +261,7 @@ test('Ficha al seleccionar: nunca se abre sola, "Ficha" con punto la primera vez
   await page.reload();
   await page.locator('[data-id="1"]').click();
   await expect(dialog).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Ver la ficha de Añil' })).not.toHaveClass(/is-new/);
+  await expect(page.getByRole('button', { name: 'Ver la ficha de Indi' })).not.toHaveClass(/is-new/);
 });
 
 test('guía: ★ en el sugerido, camino hacia el árbol, meta marcada y esporas que abren reclutar', async ({ page }, info) => {

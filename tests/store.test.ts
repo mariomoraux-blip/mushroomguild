@@ -7,35 +7,35 @@ import type { GameState, SpeciesId } from '../src/rules';
 // Fichas ya vistas: estos escenarios (002) no prueban la ficha al seleccionar (005).
 const ALL: SpeciesId[] = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'];
 const init = (g?: GameState) => initialState(g, ALL);
-import { ANIL, BRUNO, idOf, RUBI, setup } from './helpers';
+import { INDI, BRUNO, idOf, RUBI, setup } from './helpers';
 
 const pts = (s: AppState) => highlighted(s).map(({ x, y }) => ({ x, y }));
 const run = (s: AppState, ...actions: Parameters<typeof reduce>[1][]) => actions.reduce(reduce, s);
 
 describe('Requirement: Selección de miembro', () => {
   it('Scenario: Tejedor al inicio — se resaltan las tierras adyacentes al Hogar y ninguna otra', () => {
-    const s = run(init(), { type: 'select', id: ANIL });
+    const s = run(init(), { type: 'select', id: INDI });
     expect(pts(s)).toEqual([
       { x: 2, y: 6 },
       { x: 3, y: 7 },
     ]);
-    expect(s.ui.notice).toEqual({ text: es.hints.pickTile('Añil'), tone: 'info' });
+    expect(s.ui.notice).toEqual({ text: es.hints.pickTile('Indi'), tone: 'info' });
   });
 
   it('Scenario: Deseleccionar — tocar de nuevo o Esc no deja selección ni resaltado', () => {
-    const selected = run(init(), { type: 'select', id: ANIL });
-    for (const again of [run(selected, { type: 'select', id: ANIL }), run(selected, { type: 'cancel' })]) {
+    const selected = run(init(), { type: 'select', id: INDI });
+    for (const again of [run(selected, { type: 'select', id: INDI }), run(selected, { type: 'cancel' })]) {
       expect(again.ui.selected).toBeNull();
       expect(pts(again)).toEqual([]);
     }
   });
 
   it('tocar una casilla resaltada ejecuta la acción y limpia la selección', () => {
-    const s = run(init(), { type: 'select', id: ANIL }, { type: 'tapTile', x: 3, y: 7 });
+    const s = run(init(), { type: 'select', id: INDI }, { type: 'tapTile', x: 3, y: 7 });
     expect(tile(s.game, 3, 7)?.net).toBe(true);
     expect(s.game.nutrients).toBe(1);
     expect(s.ui.selected).toBeNull();
-    expect(s.ui.notice.text).toBe(es.log.wove('Añil'));
+    expect(s.ui.notice.text).toBe(es.log.wove('Indi'));
   });
 });
 
@@ -73,9 +73,9 @@ describe('Requirement: Hechizos dla maga', () => {
 
 describe('Requirement: Feedback de acción inválida', () => {
   it('Scenario: Toque en una casilla no válida — motivo exacto de check() y el miembro sigue seleccionado', () => {
-    const s = run(init(), { type: 'select', id: ANIL }, { type: 'tapTile', x: 0, y: 0 });
+    const s = run(init(), { type: 'select', id: INDI }, { type: 'tapTile', x: 0, y: 0 });
     expect(s.ui.notice).toEqual({ text: 'Muy lejos: la tierra debe tocar la red.', tone: 'warn' });
-    expect(s.ui.selected).toBe(ANIL);
+    expect(s.ui.selected).toBe(INDI);
   });
 
   // Mapa vertical: el único tronco junto al Hogar es (1, 7); si ya es tierra, no hay troncos junto a la red.
@@ -90,8 +90,8 @@ describe('Requirement: Feedback de acción inválida', () => {
   });
 
   it('Scenario: Sin trabajo disponible (Lactarius indigo)', () => {
-    const s = run(init(setup({ nutrients: 0 })), { type: 'select', id: ANIL });
-    expect(s.ui.notice.text).toBe('Añil: faltan nutrientes.');
+    const s = run(init(setup({ nutrients: 0 })), { type: 'select', id: INDI });
+    expect(s.ui.notice.text).toBe('Indi: faltan nutrientes.');
   });
 
   it('Scenario: Sin trabajo disponible (Amanita muscaria)', () => {
@@ -116,11 +116,11 @@ describe('Requirement: Feedback de acción inválida', () => {
   it('idleReason cubre las claves restantes de la tabla y devuelve null si hay trabajo', () => {
     // Toda la tierra convertida en roca: el Lactarius no tiene dónde tejer.
     const noSoil = { ...newGame(), tiles: newGame().tiles.map((t) => (t.kind === 'soil' ? { ...t, kind: 'rock' as const } : t)) };
-    expect(idleReason(noSoil, ANIL)).toBe('noSoil');
+    expect(idleReason(noSoil, INDI)).toBe('noSoil');
     expect(idleReason(setup({ nutrients: 1 }), RUBI)).toBe('noNutrients');
     const glio = setup({ extraMembers: ['gliophorus'] });
     expect(idleReason(glio, idOf(glio, 'gliophorus'))).toBe('noWorkers');
-    expect(idleReason(newGame(), ANIL)).toBeNull();
+    expect(idleReason(newGame(), INDI)).toBeNull();
   });
 });
 
@@ -153,14 +153,14 @@ describe('store: reclutar, terminar el mes y fin de partida', () => {
   it('con la partida terminada no se puede seleccionar ni actuar', () => {
     const lost = reduce(init(setup({ month: 12 })), { type: 'endMonth' });
     expect(lost.game.status).toBe('lost');
-    expect(reduce(lost, { type: 'select', id: ANIL })).toBe(lost);
+    expect(reduce(lost, { type: 'select', id: INDI })).toBe(lost);
     expect(reduce(lost, { type: 'endMonth' })).toBe(lost);
   });
 
   it('un miembro cansado no queda seleccionado y se avisa', () => {
-    const s = run(init(setup({ used: [ANIL] })), { type: 'select', id: ANIL });
+    const s = run(init(setup({ used: [INDI] })), { type: 'select', id: INDI });
     expect(s.ui.selected).toBeNull();
-    expect(s.ui.notice).toEqual({ text: es.reasons.tired('Añil'), tone: 'warn' });
+    expect(s.ui.notice).toEqual({ text: es.reasons.tired('Indi'), tone: 'warn' });
   });
 });
 
@@ -225,12 +225,12 @@ describe('Requirement: Cerrar capas (022)', () => {
 
 describe('Requirement: Rechazo en el lugar del toque (022)', () => {
   it('Scenario: Sin nutrientes — la bitácora dice qué recurso falta', () => {
-    const s = run(init(setup({ nutrients: 0 })), { type: 'select', id: ANIL });
+    const s = run(init(setup({ nutrients: 0 })), { type: 'select', id: INDI });
     expect(s.ui.notice).toMatchObject({ tone: 'warn', short: 'nutrients' });
   });
 
   it('un toque inválido por distancia no culpa a ningún recurso', () => {
-    const s = run(init(), { type: 'select', id: ANIL }, { type: 'tapTile', x: 0, y: 0 });
+    const s = run(init(), { type: 'select', id: INDI }, { type: 'tapTile', x: 0, y: 0 });
     expect(s.ui.notice.tone).toBe('warn');
     expect(s.ui.notice.short).toBeUndefined();
   });

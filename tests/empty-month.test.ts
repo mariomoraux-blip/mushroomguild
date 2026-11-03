@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
 import { act, advise, certify, endMonth, newGame, newRandomGame, noWorkThisMonth, recruit, validTargets, type GameState } from '../src/rules';
 import { initialState, reduce } from '../src/store';
-import { ANIL, BRUNO, RUBI } from './helpers';
+import { INDI, BRUNO, RUBI } from './helpers';
 
 // Reporte de producción (024): Ancestral, semilla 745. El jugador hizo lo mismo que la línea ganadora del
 // certificador y en el mes 4 nadie del gremio tenía trabajo.
@@ -10,9 +10,9 @@ import { ANIL, BRUNO, RUBI } from './helpers';
 function report(closeLast = true): GameState {
   let s = newRandomGame(745, 'ancestral');
   const moves: [number, number, number][][] = [
-    [[BRUNO, 2, 7], [ANIL, 4, 7]],
-    [[BRUNO, 2, 7], [ANIL, 4, 6], [RUBI, 4, 5]],
-    [[ANIL, 2, 7]],
+    [[BRUNO, 2, 7], [INDI, 4, 7]],
+    [[BRUNO, 2, 7], [INDI, 4, 6], [RUBI, 4, 5]],
+    [[INDI, 2, 7]],
   ];
   moves.forEach((month, i) => {
     for (const [id, x, y] of month) s = act(s, id, x, y).state;
@@ -36,8 +36,8 @@ describe('Requirement: Aviso de mes vacío', () => {
   });
 
   it('no es un mes vacío si alguien ya actuó este mes', () => {
-    // Clásico: Bruno descompone el tronco junto al Hogar y Añil teje; a Rubí no le queda ningún árbol.
-    const s = act(act(newGame(), BRUNO, 1, 7).state, ANIL, 3, 7).state;
+    // Clásico: Bruno descompone el tronco junto al Hogar y Indi teje; a Rubí no le queda ningún árbol.
+    const s = act(act(newGame(), BRUNO, 1, 7).state, INDI, 3, 7).state;
     expect(validTargets(s, RUBI)).toHaveLength(0);
     expect(noWorkThisMonth(s)).toBe(false);
   });

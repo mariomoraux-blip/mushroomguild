@@ -10,7 +10,7 @@ Hoja previa a Blender, según [Dirección de arte](../art-direction.md). Referen
   - **Verrugas:** contorno irregular frente al domo liso de Bruno.
   - **Tallo esbelto:** la mitad de ancho que el barril de Bruno, con falda a ⅓ de su altura.
   - **Base bulbosa** con rebordes de volva, frente a la base cortada en plano de Bruno.
-  - **Sin nada al costado:** el bolso va por delante; el costado derecho es de la canasta de Bruno y el izquierdo, del carrete de Añil.
+  - **Sin nada al costado:** el bolso va por delante; el costado derecho es de la canasta de Bruno y el izquierdo, del carrete de Indi.
 
 ## Proporciones
 H = altura total (≈ 0,76 m).
@@ -39,7 +39,7 @@ Comunes a todo el elenco: contorno `--ink` `#3B2A1E` (Tinta café de la paleta b
 El bolso es de cuero en los marrones de la canasta de Bruno (`#B98A5E`, sombra `#8C603D`); las hojas, `#7CC36A` con sombra `#5E9A4F`, como el musgo de Bruno.
 
 ## Accesorio de rol
-Bolso en bandolera: la correa cruza el pecho en diagonal y el bolso descansa en la cadera delantera, con hojas que curan asomando. Va por delante a propósito: queda dentro de la silueta y no ocupa el costado de la canasta de Bruno ni el del carrete de Añil.
+Bolso en bandolera: la correa cruza el pecho en diagonal y el bolso descansa en la cadera delantera, con hojas que curan asomando. Va por delante a propósito: queda dentro de la silueta y no ocupa el costado de la canasta de Bruno ni el del carrete de Indi.
 
 ## Expresión base
 Dulce y atenta: ojos de punto, sonrisa pequeña y suave, el rubor más marcado del elenco.
@@ -58,24 +58,24 @@ Para la ficha de criatura: "cuida de todos y siempre lleva una hoja de más".
 | Feliz | Da un saltito con una hoja en alto |
 
 ## Prueba de silueta
-Negro sobre blanco a 56 px, contra el domo bajo de Bruno (variante E) y el embudo de Añil (variante 8). Las siluetas de Chispa y Maestra Bruma son bocetos: si cambian, hay que volver a medir.
+Negro sobre blanco a 56 px, contra el domo bajo de Bruno (variante E) y el embudo de Indi (variante 8). Las siluetas de Chispa y Maestra Bruma son bocetos: si cambian, hay que volver a medir.
 
 | Variante | Solape con Bruno | Perfil vs. Bruno | Peor solape con el resto |
 | --- | --- | --- | --- |
-| **R1 · Sombrilla** | 0,62 | 0,36 | Añil 0,53 |
-| R2 · Domo alto | 0,47 | 0,51 | Añil 0,61 |
-| R3 · Huevo | 0,35 | 0,64 | Añil 0,50 |
+| **R1 · Sombrilla** | 0,62 | 0,36 | Indi 0,53 |
+| R2 · Domo alto | 0,47 | 0,51 | Indi 0,61 |
+| R3 · Huevo | 0,35 | 0,64 | Indi 0,50 |
 
 Solape (IoU): menor es mejor. Perfil (diferencia de anchos fila por fila): mayor es mejor.
 
 **Elegida: R1**, por decisión de dirección de arte, aunque es la más cercana a Bruno de todas las medidas. Cabe en el lienzo común de 128 px, cosa que la R3 no.
 
-Reforzar los detalles no cambia el solape de áreas, porque lo domina la masa del sombrero (medido: verrugas más grandes 0,64; tallo más fino 0,61; ambas cosas y falda más ancha 0,63). La diferencia con Bruno depende del contorno, así que hay que confirmarla a ojo con los sprites reales a 56 px, como se hizo con Añil (`silueta-56-bruno-anil.png`). Reglas para que no se pierda:
+Reforzar los detalles no cambia el solape de áreas, porque lo domina la masa del sombrero (medido: verrugas más grandes 0,64; tallo más fino 0,61; ambas cosas y falda más ancha 0,63). La diferencia con Bruno depende del contorno, así que hay que confirmarla a ojo con los sprites reales a 56 px, como se hizo con Indi (`silueta-56-bruno-indi.png`). Reglas para que no se pierda:
 - Verrugas del contorno de ≥ 5 unidades de radio (≈ 3 px a 56 px), para que el borde se lea irregular.
 - Tallo ≤ 0,4 H de ancho y falda claramente acampanada: la cintura estrecha bajo el sombrero es lo que Bruno no tiene.
 - Nada colgando a los costados.
 
-**Con los sprites reales** (cámara a ¾, 56 px, ver `silueta-56-bruno-rubi-anil.png`): solape con Bruno 0,63 en reposo, 0,60 trabajando y 0,71 feliz; con Añil, 0,49–0,56. En negro, Rubí se separa de Bruno por la cintura estrecha entre el sombrero de base plana y la falda; las verrugas apenas abultan el contorno a 56 px.
+**Con los sprites reales** (cámara a ¾, 56 px, ver `silueta-56-bruno-rubi-indi.png`): solape con Bruno 0,63 en reposo, 0,60 trabajando y 0,71 feliz; con Indi, 0,49–0,56. En negro, Rubí se separa de Bruno por la cintura estrecha entre el sombrero de base plana y la falda; las verrugas apenas abultan el contorno a 56 px.
 
 ### Contorno de referencia (variante R1)
 Unidades: x centrado en 0, suelo en y = 100; 100 unidades = 56 px.

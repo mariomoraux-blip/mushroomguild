@@ -19,7 +19,7 @@ import {
   W,
   type GameState,
 } from '../src/rules';
-import { ANIL, BRUNO, idOf, RUBI, setup } from './helpers';
+import { INDI, BRUNO, idOf, RUBI, setup } from './helpers';
 
 // Coordenadas del mapa vertical (config.ts)
 const HOME = { x: 2, y: 7 };
@@ -55,7 +55,7 @@ describe('Requirement: Tablero inicial', () => {
     expect(s.spores).toBe(0);
     expect(s.status).toBe('playing');
     expect(s.members.map((m) => m.species)).toEqual(['lactarius', 'champi', 'amanita']);
-    expect(s.members.map((m) => m.name)).toEqual(['Añil', 'Bruno', 'Rubí']);
+    expect(s.members.map((m) => m.name)).toEqual(['Indi', 'Bruno', 'Rubí']);
     expect(s.members.every((m) => !m.used)).toBe(true);
     expect(s.members.some((m) => m.species === 'mago')).toBe(false);
     const net = s.tiles.filter((t) => t.net);
@@ -78,15 +78,15 @@ describe('Requirement: Alcance de la red', () => {
   it('Scenario: Casilla lejana — la acción se rechaza con "Muy lejos: … debe tocar la red."', () => {
     const s = setup({ nutrients: 9 });
     const far = /^Muy lejos: .+ debe tocar la red\.$/;
-    expect(reasonOf(s, ANIL, FAR_SOIL)).toMatch(far);
+    expect(reasonOf(s, INDI, FAR_SOIL)).toMatch(far);
     expect(reasonOf(s, BRUNO, FAR_LOG)).toMatch(far);
     expect(reasonOf(s, RUBI, FAR_TREE)).toMatch(far);
-    expect(() => act(s, ANIL, FAR_SOIL.x, FAR_SOIL.y)).toThrow(RuleError);
+    expect(() => act(s, INDI, FAR_SOIL.x, FAR_SOIL.y)).toThrow(RuleError);
   });
 
   it('validTargets solo ofrece casillas que tocan la red', () => {
     const s = newGame();
-    expect(validTargets(s, ANIL).map(({ x, y }) => ({ x, y }))).toEqual([
+    expect(validTargets(s, INDI).map(({ x, y }) => ({ x, y }))).toEqual([
       { x: 2, y: 6 },
       SOIL_NEAR_HOME,
     ]);
@@ -96,30 +96,30 @@ describe('Requirement: Alcance de la red', () => {
 
 describe('Requirement: Una acción por mes', () => {
   it('Scenario: Miembro cansado — se rechaza indicando que descansa hasta el mes siguiente', () => {
-    const { state } = act(newGame(), ANIL, SOIL_NEAR_HOME.x, SOIL_NEAR_HOME.y);
-    expect(reasonOf(state, ANIL, { x: 2, y: 6 })).toBe(es.reasons.tired('Añil'));
-    expect(reasonOf(state, ANIL, { x: 2, y: 6 })).toContain('Descansa hasta el mes siguiente');
+    const { state } = act(newGame(), INDI, SOIL_NEAR_HOME.x, SOIL_NEAR_HOME.y);
+    expect(reasonOf(state, INDI, { x: 2, y: 6 })).toBe(es.reasons.tired('Indi'));
+    expect(reasonOf(state, INDI, { x: 2, y: 6 })).toContain('Descansa hasta el mes siguiente');
   });
 });
 
 describe('Requirement: Tejer micelio (Lactarius indigo)', () => {
   it('Scenario: Tejer con nutrientes — la casilla pasa a la red y los nutrientes bajan en 1', () => {
     const s = newGame();
-    const { state, message } = pure(s, (s) => act(s, ANIL, SOIL_NEAR_HOME.x, SOIL_NEAR_HOME.y));
+    const { state, message } = pure(s, (s) => act(s, INDI, SOIL_NEAR_HOME.x, SOIL_NEAR_HOME.y));
     expect(tile(state, SOIL_NEAR_HOME.x, SOIL_NEAR_HOME.y)?.net).toBe(true);
     expect(state.nutrients).toBe(s.nutrients - 1);
-    expect(message).toBe(es.log.wove('Añil'));
+    expect(message).toBe(es.log.wove('Indi'));
   });
 
   it('Scenario: Tejer sin nutrientes — se rechaza con "Falta 1 nutriente para tejer."', () => {
     const s = setup({ nutrients: 0 });
-    expect(reasonOf(s, ANIL, SOIL_NEAR_HOME)).toBe('Falta 1 nutriente para tejer.');
+    expect(reasonOf(s, INDI, SOIL_NEAR_HOME)).toBe('Falta 1 nutriente para tejer.');
   });
 
   it('no teje fuera de la tierra libre ni sobre micelio existente', () => {
     const s = setup({ net: [SOIL_NEAR_HOME] });
-    expect(reasonOf(s, ANIL, LOG_NEAR_HOME)).toBe(es.reasons.lactariusNeedsSoil);
-    expect(reasonOf(s, ANIL, SOIL_NEAR_HOME)).toBe(es.reasons.alreadyNet);
+    expect(reasonOf(s, INDI, LOG_NEAR_HOME)).toBe(es.reasons.lactariusNeedsSoil);
+    expect(reasonOf(s, INDI, SOIL_NEAR_HOME)).toBe(es.reasons.alreadyNet);
   });
 });
 
@@ -322,7 +322,7 @@ describe('Requirement: Hechizos', () => {
 
 describe('Requirement: Cambio de mes', () => {
   it('Scenario: Dos árboles vivos — se suman 2 esporas y 2 nutrientes, y el mes avanza en 1', () => {
-    const s = setup({ alive: [TREE, OTHER_TREE], nutrients: 4, spores: 1, used: [ANIL, BRUNO, RUBI] });
+    const s = setup({ alive: [TREE, OTHER_TREE], nutrients: 4, spores: 1, used: [INDI, BRUNO, RUBI] });
     const { state } = pure(s, endMonth);
     expect(state.spores).toBe(3);
     expect(state.nutrients).toBe(6);
@@ -398,7 +398,7 @@ describe('Requirement: Victoria', () => {
     expect(state.status).toBe('won');
     expect(state.wonMonth).toBe(7);
     expect(state.nutrients).toBe(0);
-    expect(reasonOf(state, ANIL, SOIL_NEAR_HOME)).toBe(es.reasons.gameOver);
+    expect(reasonOf(state, INDI, SOIL_NEAR_HOME)).toBe(es.reasons.gameOver);
   });
 
   it('rechaza si la red no llega o faltan nutrientes', () => {

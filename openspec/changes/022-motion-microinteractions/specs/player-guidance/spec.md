@@ -18,17 +18,17 @@ Cada miembro SHALL tener una ficha: nombre del miembro y especie, rol, un contex
 Seleccionar a un miembro SHALL seleccionarlo siempre, sin abrir la ficha sola: el tablero queda visible con sus casillas resaltadas. La bitácora SHALL ofrecer un botón "Ficha" que la abre; para Maestra Bruma, el botón "Ver la ficha de Maestra Bruma" está en la hoja de hechizos, que tapa la bitácora. La primera vez que se selecciona cada especie, el botón SHALL llevar un punto «nuevo» y latir una vez, y la bitácora SHALL decir "Toca Ficha para conocer a <nombre>." en lugar de la pista. Al cerrar la ficha con "Entendido", el miembro SHALL seguir seleccionado con sus casillas resaltadas (para Maestra Bruma, se pide después el hechizo). Las especies ya vistas (con la ficha abierta al menos una vez) se recuerdan entre visitas.
 
 #### Scenario: Primera vez con el Tejedor
-- WHEN el jugador selecciona a Añil por primera vez
-- THEN Añil queda seleccionado con sus casillas válidas resaltadas y no se abre ninguna ficha
-- AND el botón "Ficha" lleva el punto «nuevo» y la bitácora dice "Toca Ficha para conocer a Añil."
+- WHEN el jugador selecciona a Indi por primera vez
+- THEN Indi queda seleccionado con sus casillas válidas resaltadas y no se abre ninguna ficha
+- AND el botón "Ficha" lleva el punto «nuevo» y la bitácora dice "Toca Ficha para conocer a Indi."
 
 #### Scenario: Abrir la ficha
-- WHEN el jugador toca "Ficha" con Añil seleccionado
-- THEN se abre la ficha "Añil · Lactarius indigo" con la frase "«Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.»" y las secciones Habilidad, Cómo usarlo, Movimiento y Nutrientes
-- AND al pulsar "Entendido" Añil sigue seleccionado y sus casillas válidas se ven resaltadas
+- WHEN el jugador toca "Ficha" con Indi seleccionado
+- THEN se abre la ficha "Indi · Lactarius indigo" con la frase "«Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.»" y las secciones Habilidad, Cómo usarlo, Movimiento y Nutrientes
+- AND al pulsar "Entendido" Indi sigue seleccionado y sus casillas válidas se ven resaltadas
 
 #### Scenario: Segunda vez
-- WHEN el jugador vuelve a seleccionar a Añil después de haber visto su ficha
+- WHEN el jugador vuelve a seleccionar a Indi después de haber visto su ficha
 - THEN el botón "Ficha" no lleva el punto y la bitácora muestra la pista de siempre
 
 #### Scenario: La Sanadora explica qué árboles cura
