@@ -1,8 +1,11 @@
 import { es } from '../copy/es';
-import { hasFrost, MONTHS, revivedCount, season, seasonIndex, treeTotal } from '../rules';
+import { diffEffects } from '../effects';
+import { hasFrost, MONTHS, revivedCount, season, seasonIndex, treeTotal, type GameState } from '../rules';
+import { reducedMotion } from '../scenes/fx';
 import { SEASON_SLUGS } from '../theme';
-import type { AppState, Store } from '../store';
+import type { AppState, Notice, Store } from '../store';
 import { el, setText } from './dom';
+import { countChange, replay } from './motion';
 
 /**
  * HUD del referente (011): mes y estación en una pastilla verde, pastillas de crema con ícono pintado
@@ -30,10 +33,10 @@ export function mountHud(root: HTMLElement, store: Store) {
   };
   const nutrients = chip('nutrients', es.hud.nutrients);
   const spores = chip('spores', es.hud.recruitHint, 'button');
-  const trees = chip('trees', es.hud.treesShort);
+  const treesChip = chip('trees', es.hud.treesShort);
   const help = el('button', { class: 'hud__help', type: 'button', 'aria-label': es.help.button });
   root.setAttribute('aria-label', es.hud.label);
-  root.append(month, nutrients.node, spores.node, trees.node, help);
+  root.append(month, nutrients.node, spores.node, treesChip.node, help);
 
   spores.node.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'recruit' } }));
   help.addEventListener('click', () => store.dispatch({ type: 'openScreen', screen: { kind: 'howto', step: 0, back: 'game' } }));
@@ -44,17 +47,43 @@ export function mountHud(root: HTMLElement, store: Store) {
   };
   setTime('00:00');
 
+  const chips = { nutrients: nutrients.node, spores: spores.node };
+  let last: GameState | null = null;
+  let lastNotice: Notice | null = null;
+  /**
+   * Cambios de una jugada, un hechizo o el mes nuevo (022): saltito y «±n» en cada contador. Las esporas y las hojas
+   * que vuelan (`flyers.ts`) ponen su propia etiqueta al llegar. Cargar o empezar una partida no anima (el registro no crece en uno).
+   */
+  const animate = (prev: GameState, g: GameState) => {
+    if (g.log.length !== prev.log.length + 1) return;
+    const flying = reducedMotion() ? undefined : diffEffects(prev, g).find((e) => e.kind === 'spores');
+    if (g.nutrients !== prev.nutrients && !flying?.leaves) countChange(nutrients.node, g.nutrients - prev.nutrients);
+    if (g.spores !== prev.spores && !flying) countChange(spores.node, g.spores - prev.spores);
+    const trees = revivedCount(g) - revivedCount(prev);
+    if (trees) countChange(treesChip.node, trees);
+    if (g.month !== prev.month) replay(month, 'is-bump');
+  };
+
   const render = (state: AppState) => {
     const g = state.game;
+    if (last && g !== last) animate(last, g);
+    last = g;
+    // Rechazo por falta de recursos: el contador que falta se tiñe.
+    const n = state.ui.notice;
+    if (n !== lastNotice && n.short && lastNotice) replay(chips[n.short], 'is-short');
+    lastNotice = n;
     setText(monthValue, `${es.hud.month} ${g.month}${es.hud.of(MONTHS)}`);
     const frosty = hasFrost(g);
     seasonIcon.setAttribute('aria-label', es.hud.season(season(g.month), frosty, es.levels.names[g.level]));
     frost.hidden = !frosty;
-    seasonIcon.dataset.season = SEASON_SLUGS[seasonIndex(g.month)] ?? 'spring';
+    const slug = SEASON_SLUGS[seasonIndex(g.month)] ?? 'spring';
+    // Estación nueva (022): el ícono cambia en un fundido, junto con el claro.
+    if (seasonIcon.dataset.season && seasonIcon.dataset.season !== slug) replay(seasonIcon, 'is-new-season');
+    seasonIcon.dataset.season = slug;
     setText(nutrients.value, String(g.nutrients));
     setText(spores.value, String(g.spores));
     spores.node.setAttribute('aria-label', es.hud.sporesButton(g.spores));
-    setText(trees.value, `${revivedCount(g)}${es.hud.of(treeTotal(g))}`);
+    setText(treesChip.value, `${revivedCount(g)}${es.hud.of(treeTotal(g))}`);
   };
   return { render, setTime };
 }

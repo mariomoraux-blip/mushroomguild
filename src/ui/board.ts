@@ -3,6 +3,7 @@ import { tileToScreen } from '../layout';
 import { H, W, type Tile } from '../rules';
 import { highlighted, suggestedTile, type AppState, type Store } from '../store';
 import { el } from './dom';
+import { replay } from './motion';
 
 function tileName(t: Tile): string {
   if (t.kind === 'mother') return t.alive ? es.tiles.motherAwake : es.tiles.mother;
@@ -27,9 +28,18 @@ export function mountBoardOverlay(root: HTMLElement, store: Store) {
   }
   root.addEventListener('click', (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.cell');
-    if (b) store.dispatch({ type: 'tapTile', x: Number(b.dataset.x), y: Number(b.dataset.y) });
+    if (!b) return;
+    const before = store.getState();
+    store.dispatch({ type: 'tapTile', x: Number(b.dataset.x), y: Number(b.dataset.y) });
+    rejected(before, b);
   });
   root.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  /** Rechazo en el lugar del toque (022): el juego no cambió y la bitácora dio un motivo. */
+  const rejected = (before: AppState, b: HTMLElement) => {
+    const after = store.getState();
+    if (after.game === before.game && after.ui.notice !== before.ui.notice && after.ui.notice.tone === 'warn') replay(b, 'is-reject');
+  };
 
   let tile = 0;
   const place = (size: number) => {
@@ -64,5 +74,13 @@ export function mountBoardOverlay(root: HTMLElement, store: Store) {
   /** Lleva el foco a la primera casilla válida (flujo de teclado). */
   const focusFirstValid = () => buttons.find((b) => b.dataset.valid === 'true')?.focus();
 
-  return { place, render, focusFirstValid };
+  /** Toque que llega desde fuera de la capa (el fondo de una hoja abierta): mismo camino que un toque en la casilla. */
+  const tap = (x: number, y: number) => {
+    const b = buttons[y * W + x];
+    const before = store.getState();
+    store.dispatch({ type: 'tapTile', x, y });
+    if (b) rejected(before, b);
+  };
+
+  return { place, render, focusFirstValid, tap };
 }

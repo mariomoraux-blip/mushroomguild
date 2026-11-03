@@ -16,7 +16,7 @@ describe('Requirement: Pista y camino sugerido', () => {
   it('Scenario: Camino hacia un árbol — la ★ de Añil es la tierra que acerca la red al árbol gris más cercano', () => {
     const afterLog = act(newGame(), BRUNO, 1, 7).state;
     expect(weaveGoal(afterLog)).toMatchObject({ toward: 'tree', goal: { x: 2, y: 5 } });
-    const s = reduce(initialState(afterLog), { type: 'select', id: ANIL });
+    const s = reduce(initialState(afterLog, ['lactarius']), { type: 'select', id: ANIL });
     expect(at(suggestedTile(s))).toEqual({ x: 2, y: 6 });
     expect(s.ui.notice.text).toBe(es.advice.pickTile('Añil'));
   });
@@ -97,10 +97,20 @@ describe('Requirement: Cómo reclutar', () => {
 });
 
 describe('Requirement: Ficha al seleccionar un hongo', () => {
-  it('Scenario: Primera vez con el Tejedor — se abre su ficha y al cerrarla sigue seleccionado', () => {
+  it('Scenario: Primera vez con el Tejedor — queda seleccionado, sin ficha, y la bitácora invita a "Ficha" (022)', () => {
     const s = reduce(initialState(newGame()), { type: 'select', id: ANIL });
+    expect(s.ui.sheet).toBeNull();
+    expect(s.ui.selected).toBe(ANIL);
+    expect(highlighted(s)).toHaveLength(2);
+    expect(s.ui.seen).not.toContain('lactarius');
+    expect(s.ui.notice.text).toBe('Toca Ficha para conocer a Añil.');
+  });
+
+  it('Scenario: Abrir la ficha — "Entendido" mantiene la selección y la especie queda vista', () => {
+    const s = reduce(reduce(initialState(newGame()), { type: 'select', id: ANIL }), { type: 'openSheet', sheet: { kind: 'member', id: ANIL } });
     expect(s.ui.sheet).toEqual({ kind: 'member', id: ANIL });
     expect(s.ui.seen).toContain('lactarius');
+    expect(s.ui.notice.text).toBe(es.hints.pickTile('Añil')); // Añil no es la sugerida al empezar
     expect(es.quote(es.species.lactarius.quip)).toBe('«Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.»');
     const closed = reduce(s, { type: 'closeSheet' });
     expect(closed.ui.sheet).toBeNull();
@@ -108,13 +118,12 @@ describe('Requirement: Ficha al seleccionar un hongo', () => {
     expect(highlighted(closed)).toHaveLength(2);
   });
 
-  it('Scenario: Segunda vez — la ficha no se abre sola', () => {
-    const first = reduce(reduce(initialState(newGame()), { type: 'select', id: ANIL }), { type: 'closeSheet' });
-    const again = reduce(reduce(first, { type: 'select', id: ANIL }), { type: 'select', id: ANIL });
-    expect(again.ui.selected).toBe(ANIL);
+  it('Scenario: Segunda vez — la pista de siempre', () => {
+    const seen = reduce(initialState(newGame()), { type: 'openSheet', sheet: { kind: 'creature', species: 'lactarius' } });
+    expect(seen.ui.seen).toContain('lactarius');
+    const again = reduce(reduce(seen, { type: 'closeSheet' }), { type: 'select', id: ANIL });
     expect(again.ui.sheet).toBeNull();
-    // El botón "Ficha" la vuelve a abrir.
-    expect(reduce(again, { type: 'openSheet', sheet: { kind: 'member', id: ANIL } }).ui.sheet).toEqual({ kind: 'member', id: ANIL });
+    expect(again.ui.notice.text).toBe(es.hints.pickTile('Añil'));
   });
 
   it('cada especie tiene habilidad, cómo usarlo, movimiento y nutrientes', () => {
@@ -141,8 +150,10 @@ describe('Requirement: Ficha al seleccionar un hongo', () => {
     expect(es.guide.mago.powers).toContain('Brote arcano');
     expect(es.guide.mago.powers).toContain('Lluvia de esporas');
     const g = setup({ mage: true, alive: [{ x: 4, y: 6 }] });
-    const card = reduce(initialState(g), { type: 'select', id: idOf(g, 'mago') });
-    expect(card.ui.sheet).toEqual({ kind: 'member', id: idOf(g, 'mago') });
+    const spells = reduce(initialState(g), { type: 'select', id: idOf(g, 'mago') });
+    expect(spells.ui.sheet).toEqual({ kind: 'spell' });
+    // Su ficha se abre desde la hoja de hechizos; "Entendido" vuelve a pedir el hechizo.
+    const card = reduce(spells, { type: 'openSheet', sheet: { kind: 'member', id: idOf(g, 'mago') } });
     expect(reduce(card, { type: 'closeSheet' }).ui.sheet).toEqual({ kind: 'spell' });
   });
 });

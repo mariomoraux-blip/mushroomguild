@@ -1,7 +1,12 @@
 import { es } from '../copy/es';
-import { COST, MONTHS, MAX_GUILD, magicSpent, recruitableCount, season, seasonIndex, MONTHS_PER_SEASON, weaveCost, type Member } from '../rules';
+import { COST, MONTHS, MAX_GUILD, magicSpent, recruitableCount, season, seasonIndex, MONTHS_PER_SEASON, weaveCost, type GameState, type Member } from '../rules';
+import { reducedMotion } from '../scenes/fx';
 import { suggestedMember, type AppState, type Store } from '../store';
 import { el, portrait, setPortrait, setText } from './dom';
+import { replay } from './motion';
+
+/** Entre tarjeta y tarjeta que despierta al empezar el mes (022). */
+const WAKE_STAGGER = 40;
 
 /** Estado de la tarjeta: lista, descansa o (Maestra Bruma) cuándo vuelve su magia. */
 function status(state: AppState, m: Member): { text: string; ready: boolean } {
@@ -62,16 +67,51 @@ export function mountDock(root: HTMLElement, store: Store) {
   new ResizeObserver(fit).observe(cards);
 
   let shown = 0;
+  let last: GameState | null = null;
+  let lastSelected: number | null = null;
+  let lastSeason: number | null = null;
+  /** Animaciones del dock (022) que esperan a que se cierre la carta de historia que las taparía. */
+  let queued: { id: number; cls: string; delay: number }[] = [];
   const byId = new Map<number, { item: HTMLElement; button: HTMLButtonElement; badge: HTMLElement; face: HTMLElement }>();
 
   cards.addEventListener('click', (e) => {
     const target = (e.target as HTMLElement).closest('button');
     if (!target) return;
     if (target.dataset.action === 'recruit') store.dispatch({ type: 'openSheet', sheet: { kind: 'recruit' } });
-    else if (target.dataset.id) store.dispatch({ type: 'select', id: Number(target.dataset.id) });
+    else if (target.dataset.id) {
+      const id = Number(target.dataset.id);
+      const tired = store.getState().game.members.find((m) => m.id === id)?.used;
+      store.dispatch({ type: 'select', id });
+      // Miembro cansado (022): su «Zz» se mece donde se tocó.
+      if (tired && store.getState().game.status === 'playing') replay(target, 'is-tired');
+    }
   });
   // Con la partida terminada, el mismo botón vuelve a la carta de final (017): nunca queda sin salida.
   end.addEventListener('click', () => store.dispatch(store.getState().game.status === 'playing' ? { type: 'endMonth' } : { type: 'showEnd' }));
+
+  /**
+   * Movimiento del dock (022): quien se suma entra creciendo (Maestra Bruma, con un fundido y su halo); al empezar
+   * el mes, las tarjetas que descansaban despiertan de a una (40 ms) y la luna del botón gira media vuelta.
+   */
+  const animate = (prev: GameState, g: GameState) => {
+    const was = new Map(prev.members.map((m) => [m.id, m]));
+    if (g.month >= prev.month)
+      for (const m of g.members) if (!was.has(m.id)) queued.push({ id: m.id, cls: m.species === 'mago' ? 'is-arriving' : 'is-joining', delay: 0 });
+    if (g.month > prev.month) {
+      replay(end, 'is-turning');
+      g.members.filter((m) => was.get(m.id)?.used && !m.used).forEach((m, i) => queued.push({ id: m.id, cls: 'is-waking', delay: i * WAKE_STAGGER }));
+    }
+  };
+  const flush = () => {
+    for (const { id, cls, delay } of queued) {
+      const card = byId.get(id);
+      if (!card) continue;
+      card.button.style.setProperty('--wake-delay', `${delay}ms`);
+      replay(card.button, cls);
+      if (cls !== 'is-waking') card.item.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' });
+    }
+    queued = [];
+  };
 
   return (state: AppState) => {
     const g = state.game;
@@ -104,10 +144,14 @@ export function mountDock(root: HTMLElement, store: Store) {
       card.badge.dataset.kind = star ? 'star' : st.ready ? 'none' : 'rest';
       card.button.classList.toggle('is-suggested', star);
       setPortrait(card.face, m.species, st.ready && (star || state.ui.selected === m.id) ? 'feliz' : 'reposo', seasonIndex(g.month));
+      // La corona de Chispa cambia con la estación (022): la nueva se funde.
+      if (m.species === 'gliophorus' && lastSeason !== null && lastSeason !== seasonIndex(g.month)) replay(card.face, 'is-new-season');
       // El Tejedor dice el costo de este mes (con escarcha, 2).
       const action = m.species === 'lactarius' ? es.weaveAction(weaveCost(g)) : sp.action;
       card.button.setAttribute('aria-label', `${m.name}, ${sp.name}, ${sp.role}: ${action}. ${st.text}.${star ? ` ★ ${es.advice.star}.` : ''}`);
       card.button.setAttribute('aria-pressed', String(state.ui.selected === m.id));
+      // Al seleccionarla, la tarjeta sube y el retrato hace la firma de su especie.
+      if (state.ui.selected === m.id && lastSelected !== m.id) replay(card.button, 'is-picked');
       card.button.classList.toggle('is-used', !st.ready);
       card.button.disabled = !playing;
     });
@@ -116,12 +160,17 @@ export function mountDock(root: HTMLElement, store: Store) {
       shown = cards.children.length;
       fit();
     }
+    if (last && g !== last) animate(last, g);
+    last = g;
+    lastSelected = state.ui.selected;
+    lastSeason = seasonIndex(g.month);
+    if (!state.ui.story) flush();
     // El botón abre la hoja aunque no alcance (allí están las fichas); si no se puede reclutar, solo se atenúa.
     recruit.disabled = !playing;
     recruit.classList.toggle('is-used', g.spores < COST.recruit || recruitableCount(g) >= MAX_GUILD);
 
-    const last = g.month >= MONTHS;
-    setText(endLabel, !playing ? es.dock.showEndShort : last ? es.dock.endWinterShort : es.dock.endShort);
-    end.setAttribute('aria-label', !playing ? es.dock.showEnd : last ? es.dock.endWinter : es.dock.endMonth);
+    const lastMonth = g.month >= MONTHS;
+    setText(endLabel, !playing ? es.dock.showEndShort : lastMonth ? es.dock.endWinterShort : es.dock.endShort);
+    end.setAttribute('aria-label', !playing ? es.dock.showEnd : lastMonth ? es.dock.endWinter : es.dock.endMonth);
   };
 }

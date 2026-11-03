@@ -11,8 +11,13 @@ export type Effect =
   | { kind: 'revive'; at: Point }
   /** El Árbol Padre despertó. */
   | { kind: 'awaken'; at: Point }
-  /** Esporas ganadas: al empezar el mes (desde los árboles vivos) o por la Lluvia de esporas (desde el árbol del hechizo). */
-  | { kind: 'spores'; from: Point[]; amount: number };
+  /**
+   * Esporas ganadas: al empezar el mes (desde los árboles vivos) o por la Lluvia de esporas (desde el árbol del hechizo).
+   * `leaves`: nutrientes (hojarasca) que llegan de los mismos árboles en la misma jugada (022); 0 si no hay.
+   */
+  | { kind: 'spores'; from: Point[]; amount: number; leaves: number }
+  /** Pasar la voz (022): Chispa, en `at`, liberó al miembro `memberId`, que vuelve a estar listo este mes. */
+  | { kind: 'call'; at: Point; memberId: number };
 
 const key = (p: Point) => `${p.x},${p.y}`;
 
@@ -33,13 +38,19 @@ export function diffEffects(prev: GameState, next: GameState): Effect[] {
       effects.push({ kind: 'weave', at: t, from: from && { x: from.x, y: from.y }, before: b });
     }
   }
+  if (next.month === prev.month) {
+    const was = new Map(prev.members.map((m) => [m.id, m]));
+    const caller = next.members.find((m) => m.species === 'gliophorus' && m.used && m.at && !was.get(m.id)?.used);
+    const called = next.members.find((m) => !m.used && was.get(m.id)?.used);
+    if (caller?.at && called) effects.push({ kind: 'call', at: { x: caller.at.x, y: caller.at.y }, memberId: called.id });
+  }
   const gained = next.spores - prev.spores;
   if (gained > 0) {
     const alive = (g: GameState) => g.tiles.filter((t) => (t.kind === 'tree' || t.kind === 'mother') && t.alive);
     // Al empezar el mes salen de cada árbol vivo; de mes (Lluvia de esporas), del árbol donde la maga lanzó el hechizo.
     const mage = next.members.find((m) => m.species === 'mago' && m.at);
     const from = next.month > prev.month ? alive(prev) : mage?.at ? [mage.at] : alive(next);
-    if (from.length) effects.push({ kind: 'spores', from: from.map(({ x, y }) => ({ x, y })), amount: gained });
+    if (from.length) effects.push({ kind: 'spores', from: from.map(({ x, y }) => ({ x, y })), amount: gained, leaves: Math.max(0, next.nutrients - prev.nutrients) });
   }
   return effects;
 }

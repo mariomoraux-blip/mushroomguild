@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { act, endMonth, newGame, newRandomGame, validTargets, type GameState } from '../src/rules';
 import { diffEffects } from '../src/effects';
-import { ANIL, BRUNO, RUBI, setup } from './helpers';
+import { ANIL, BRUNO, idOf, RUBI, setup } from './helpers';
 
 const first = (g: GameState, id: number) => validTargets(g, id)[0]!;
 const kinds = (prev: GameState, next: GameState) => diffEffects(prev, next).map((e) => e.kind);
@@ -40,6 +40,26 @@ describe('Requirement: Respuesta a cada acción', () => {
     const g = setup({ alive: [{ x: tree.x, y: tree.y }] });
     const fx = diffEffects(g, endMonth(g).state).find((e) => e.kind === 'spores');
     expect(fx).toMatchObject({ kind: 'spores', from: [{ x: tree.x, y: tree.y }] });
+  });
+
+  it('Scenario: Mes nuevo con árboles vivos — la hojarasca sale de los mismos árboles (022)', () => {
+    const tree = newGame().tiles.find((t) => t.kind === 'tree')!;
+    const g = setup({ alive: [{ x: tree.x, y: tree.y }] });
+    const next = endMonth(g).state;
+    const fx = diffEffects(g, next).find((e) => e.kind === 'spores');
+    expect(next.nutrients).toBeGreaterThan(g.nutrients);
+    expect(fx).toMatchObject({ leaves: next.nutrients - g.nutrients });
+  });
+
+  it('Scenario: Pasar la voz — Chispa libera a Bruno desde su casilla (022)', () => {
+    const g = setup({ spores: 1, extraMembers: ['gliophorus'] });
+    const log = first(g, BRUNO);
+    const worked = act(g, BRUNO, log.x, log.y).state;
+    const chispa = idOf(worked, 'gliophorus');
+    const called = act(worked, chispa, log.x, log.y).state;
+    expect(diffEffects(worked, called)).toContainEqual({ kind: 'call', at: { x: log.x, y: log.y }, memberId: BRUNO });
+    // El mes nuevo despierta a todos, pero no es pasar la voz.
+    expect(kinds(worked, endMonth(worked).state)).not.toContain('call');
   });
 
   it('otra partida (reinicio) o el mismo estado no producen efectos', () => {

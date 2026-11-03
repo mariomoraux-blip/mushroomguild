@@ -77,7 +77,7 @@ Contraste mínimo de texto: Tinta sobre Pergamino, Crema o Sol (todos ≥ 7:1). 
 - **Marco:** raíces trenzadas con hojas (`ui/frames/roots`, como `border-image` de 12 px por lado, en uso), y el marco de bosque alrededor de la pantalla (pendiente).
 
 ## Pantallas (390 × 844)
-- **Elige tu claro (019):** tres tarjetas de pergamino como las filas de «El gremio» (≥ 76 px de alto), con el nombre del nivel en Fredoka musgo, una línea de qué cambia y el multiplicador en una pastilla Sol. Bosque tiñe el degradé con pradera y Ancestral con escarcha. Capturas en `docs/screenshots/019-*`.
+- **Elige tu dificultad (019):** tres tarjetas de pergamino como las filas de «El gremio» (≥ 76 px de alto), con el nombre del nivel en Fredoka musgo, una línea de qué cambia y el multiplicador en una pastilla Sol. Bosque tiñe el degradé con pradera y Ancestral con escarcha. Capturas en `docs/screenshots/019-*`.
 ```
 JUEGO                          PORTADA                        CÓMO JUGAR (carrusel de 5)
 ┌────────────────────────┐     ┌────────────────────────┐     ┌────────────────────────┐

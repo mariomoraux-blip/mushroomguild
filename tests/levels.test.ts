@@ -74,7 +74,7 @@ describe('Requirement: Escarcha', () => {
   });
 
   it('Scenario: Tejer sin nutrientes suficientes con escarcha', () => {
-    expect(check(at('bosque', { month: 7, nutrients: 1 }), ANIL, 3, 7)).toEqual({ ok: false, reason: 'Faltan 2 nutrientes para tejer con escarcha.' });
+    expect(check(at('bosque', { month: 7, nutrients: 1 }), ANIL, 3, 7)).toEqual({ ok: false, reason: 'Faltan 2 nutrientes para tejer con escarcha.', short: 'nutrients' });
   });
 
   it('Scenario: Invierno en Bosque — tejer vuelve a costar 1; en Ancestral, el invierno sigue con escarcha y no se anuncia otra vez', () => {
@@ -102,7 +102,7 @@ describe('Requirement: Árboles que se apagan', () => {
     const s = cloneState(state);
     s.tiles.find((t) => t.x === 0 && t.y === 0)!.net = true;
     s.nutrients = FADED_REVIVE - 1;
-    expect(check(s, RUBI, FAR.x, FAR.y)).toEqual({ ok: false, reason: es.reasons.reviveCost(FADED_REVIVE) });
+    expect(check(s, RUBI, FAR.x, FAR.y)).toEqual({ ok: false, reason: es.reasons.reviveCost(FADED_REVIVE), short: 'nutrients' });
     s.nutrients = FADED_REVIVE;
     const n = act(s, RUBI, FAR.x, FAR.y).state;
     expect(tile(n, FAR.x, FAR.y)).toMatchObject({ alive: true, net: true, faded: false });

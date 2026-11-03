@@ -3,6 +3,7 @@ import { LEVEL_IDS, LEVELS, RECRUITABLE, seasonIndex, type Level, type SpeciesId
 import { HOWTO_STEPS, type AppState, type Screen, type Store } from '../store';
 import { assetUrl, SCREEN_ART } from '../theme';
 import { el, portrait } from './dom';
+import { hideLayer, showLayer } from './motion';
 
 const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
 const img = (key: string, cls: string) => el('img', { class: cls, src: assetUrl(key), alt: '', draggable: 'false', decoding: 'async' });
@@ -22,7 +23,7 @@ export interface LevelPicker {
 }
 
 /**
- * Pantallas fuera de la partida (012): portada (Nueva partida, Cómo jugar, El gremio), "Elige tu claro" (019),
+ * Pantallas fuera de la partida (012): portada (Nueva partida, Cómo jugar, El gremio), "Elige tu dificultad" (019),
  * "Cómo jugar" (carrusel de 5 pasos con ‹ ›, puntos y deslizar) y "El gremio" (las cinco especies; abre su ficha).
  * Solo dibuja `ui.screen` y despacha acciones; Esc vuelve (main.ts › cancel).
  */
@@ -80,7 +81,7 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
       el('p', { class: 'title__credit', lang: 'en' }, es.titleScreen.credit));
   }
 
-  // Elige tu claro (019): tres botones grandes con el nombre, qué cambia y el multiplicador del puntaje.
+  // Elige tu dificultad (019): tres botones grandes con el nombre, qué cambia y el multiplicador del puntaje.
   function levelScreen() {
     return el('div', { class: 'screen__panel' },
       header(es.levels.title),
@@ -140,15 +141,16 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
     const kindChanged = (shown ? (JSON.parse(shown) as Screen).kind : '') !== (screen?.kind ?? '');
     shown = key;
     if (!screen) {
-      root.hidden = true;
-      root.replaceChildren();
+      hideLayer(root);
       return;
     }
-    root.hidden = false;
+    showLayer(root);
     root.dataset.kind = screen.kind;
     const focused = (document.activeElement as HTMLElement | null)?.dataset;
     const refocus = focused?.action === 'step' ? `[data-action="step"][data-step="${focused.step}"]` : null;
     root.replaceChildren(screen.kind === 'title' ? title() : screen.kind === 'level' ? levelScreen() : screen.kind === 'howto' ? howto(screen) : guild(state));
+    // Entrada (022): el panel sube al cambiar de pantalla, no al pasar de paso en el carrusel.
+    if (kindChanged) root.querySelector('.screen__panel')?.classList.add('is-entering');
     // Foco: el botón principal al entrar; en el carrusel, se mantiene en el control que se usó.
     const target =
       (!kindChanged && refocus && root.querySelector<HTMLElement>(refocus)) ||

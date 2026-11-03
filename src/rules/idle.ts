@@ -1,10 +1,13 @@
 import { validTargets } from './actions';
 import { COST } from './config';
 import { magicSpent, member, touchesNet, weaveCost, workerAt } from './state';
-import type { GameState } from './types';
+import type { GameState, Resource } from './types';
 
 /** Motivo por el que un miembro no tiene ninguna casilla válida (clave; el texto vive en es.ts). */
 export type IdleReason = 'noLogs' | 'noNutrients' | 'noSoil' | 'noGreyTrees' | 'noSpores' | 'noWorkers' | 'magicSpent';
+
+/** Recurso que falta detrás de un motivo de inactividad, si es eso (022). */
+export const idleShort = (r: IdleReason): Resource | null => (r === 'noNutrients' ? 'nutrients' : r === 'noSpores' ? 'spores' : null);
 
 /**
  * Por qué el miembro `id` no tiene ninguna casilla válida, o `null` si tiene trabajo.

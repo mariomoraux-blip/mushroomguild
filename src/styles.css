@@ -145,7 +145,10 @@ button { font: inherit; color: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: filter var(--motion-standard) var(--ease-soft);
 }
+/* Fin del invierno sin ganar (022): el claro baja la luz antes de la carta. */
+.is-dusk .board-area { filter: brightness(0.72) saturate(0.8); }
 .board {
   position: relative;
   border: 12px solid transparent;
@@ -312,7 +315,8 @@ button { font: inherit; color: inherit; }
 .card__badge[data-kind='rest'] { display: flex; font-size: 10px; color: var(--paper); background: var(--indigo); }
 .card__badge--plus { display: flex; font-size: 17px; color: var(--ink); background: var(--sun); }
 .card[aria-pressed='true'] .card__medal { box-shadow: 0 0 0 4px var(--sun), 0 0 0 6px var(--ink), 0 0 16px 6px color-mix(in srgb, var(--glow) 85%, transparent); }
-.card[aria-pressed='true'] { transform: translateY(-3px); }
+.card { --wake-delay: 0s; transition: transform var(--motion-fast) var(--ease-settle); }
+.card[aria-pressed='true'] { transform: translateY(-4px); }
 .card.is-used .card__medal { filter: saturate(0.3) brightness(0.85); }
 .card:disabled { cursor: default; }
 .card:focus-visible { outline: 0; }
@@ -345,7 +349,7 @@ button { font: inherit; color: inherit; }
 
 /* ─── Retratos pintados y siluetas de respaldo ───────────────── */
 .portrait { flex: 0 0 auto; display: inline-flex; align-items: flex-end; justify-content: center; }
-.portrait img { width: 100%; height: auto; display: block; pointer-events: none; transition: transform 0.2s ease-out; transform-origin: 50% 100%; }
+.portrait img { width: 100%; height: auto; display: block; pointer-events: none; transition: transform var(--motion-fast) var(--ease-settle); transform-origin: 50% 100%; }
 .portrait[data-pose='happy'] img { transform: translateY(-2px) scale(1.06); }
 /* En el dock la altura es fija: Maestra Bruma (retrato más alto) se ajusta al medallón en vez de agrandarlo. */
 .portrait--sm { width: 52px; height: 48px; }
@@ -477,6 +481,8 @@ button { font: inherit; color: inherit; }
 .btn--icon { padding: 0; width: var(--touch); font-size: 19px; border-radius: 50%; }
 .btn--wide { width: 100%; min-height: 52px; margin-top: 16px; font-size: 19px; border-radius: 26px; }
 .spells { display: grid; gap: 10px; margin-top: 4px; }
+/* Ficha de Maestra Bruma desde la hoja de hechizos (022): botón de madera, como "Ficha" en la bitácora. */
+.btn--card { display: block; margin: 12px auto 0; }
 .btn--spell {
   display: grid;
   gap: 2px;
@@ -604,7 +610,8 @@ button { font: inherit; color: inherit; }
 .story__dot.is-active { background: var(--sun); }
 .story__actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
 .story__btn { flex: 1 1 120px; max-width: 200px; height: 48px; font-size: 16px; font-family: var(--font-display); font-weight: 700; border-radius: 24px; }
-.story__btn--primary {
+.story__btn--primary,
+.story__btn.is-primary {
   color: var(--ink);
   background: linear-gradient(var(--glow), var(--sun) 45%, var(--accent));
   box-shadow: inset 0 -4px 0 color-mix(in srgb, var(--wood) 45%, transparent), 0 4px 0 var(--ink);
@@ -781,7 +788,7 @@ button { font: inherit; color: inherit; }
 .guild__verb { font-size: 13px; color: var(--ink-soft); line-height: 1.25; }
 .guild__chev { font-family: var(--font-display); font-size: 28px; color: var(--wood); }
 
-/* Elige tu claro (019) */
+/* Elige tu dificultad (019) */
 .levels { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
 .level {
   width: 100%;
@@ -831,8 +838,158 @@ button { font: inherit; color: inherit; }
   background: var(--art-spores) center / contain no-repeat;
   filter: drop-shadow(0 0 6px var(--glow));
 }
-.chip.is-bump { animation: chip-bump 0.32s ease-out; }
-@keyframes chip-bump { 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+.fx-leaf {
+  position: fixed;
+  z-index: 15;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  background: var(--art-nutrients) center / contain no-repeat;
+  filter: drop-shadow(0 0 4px var(--glow));
+}
+
+/* ─── Movimiento (022): duraciones y curvas de theme.ts › MOTION (--motion-*, --ease-*) ─ */
+/* Cada animación tiene su versión reducida en el bloque de prefers-reduced-motion (solo color y opacidad). */
+.chip { position: relative; }
+.chip.is-bump, .hud__month.is-bump { animation: chip-bump var(--motion-fast) var(--ease-settle); }
+@keyframes chip-bump { 40% { transform: scale(1.1); } 100% { transform: scale(1); } }
+/* «+2» / «−1» del contador que cambió: entra, se lee y sube 8 px mientras se funde. */
+.chip__delta {
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  padding: 0 4px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 15px;
+  color: var(--leafDark);
+  border-radius: 8px;
+  background: var(--cream);
+  pointer-events: none;
+  opacity: 0;
+  animation: delta-rise calc(var(--motion-fast) + 2 * var(--motion-standard)) var(--ease-settle);
+}
+.chip__delta[data-sign='-'] { color: var(--berry); }
+@keyframes delta-rise { 0% { opacity: 0; transform: translateY(3px); } 25%, 60% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
+.chip.is-gain .chip__value { animation: tint-gain calc(var(--motion-fast) + 2 * var(--motion-standard)) var(--ease-soft); }
+.chip.is-cost .chip__value { animation: tint-cost calc(var(--motion-fast) + 2 * var(--motion-standard)) var(--ease-soft); }
+@keyframes tint-gain { 0%, 50% { color: var(--leafDark); } }
+@keyframes tint-cost { 0%, 50% { color: var(--berry); } }
+/* Rechazo en el lugar del toque: aro en la casilla, «Zz» que se mece, recurso que falta. */
+.cell.is-reject::after,
+.chip.is-short::after,
+.card.is-called::before,
+.card.is-arriving::before {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+}
+.cell.is-reject::after {
+  inset: 7%;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--berry) 60%, transparent), 0 0 0 2px color-mix(in srgb, var(--berry) 25%, transparent);
+  animation: reject-ring calc(var(--motion-fast) + var(--motion-standard)) var(--ease-soft);
+}
+@keyframes reject-ring { 25% { opacity: 1; transform: translateX(-2px); } 50% { transform: translateX(2px); } 70% { opacity: 1; transform: translateX(0); } }
+.chip.is-short::after {
+  inset: 0;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--berry) 30%, transparent);
+  animation: flash-fade calc(var(--motion-fast) + var(--motion-standard)) var(--ease-soft);
+}
+@keyframes flash-fade { 30%, 60% { opacity: 1; } }
+.card.is-tired .card__badge { animation: zz-sway calc(2 * var(--motion-fast)) var(--ease-soft); }
+@keyframes zz-sway { 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
+/* Pasar la voz: notitas de Chispa hasta la tarjeta del llamado, que despierta con un saltito y un aro. */
+.fx-note {
+  position: fixed;
+  z-index: 15;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--sun);
+  text-shadow: 0 1.5px 0 var(--ink), 0 0 6px var(--glow);
+  pointer-events: none;
+}
+.card.is-called { animation: card-wake var(--motion-fast) var(--ease-springy); }
+@keyframes card-wake { 50% { transform: translateY(-6px); } }
+.card.is-called::before {
+  left: 50%;
+  top: var(--medal-top, 6px);
+  width: 50px;
+  height: 50px;
+  translate: -50% 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px var(--sun), 0 0 14px 6px var(--glow);
+  animation: flash-fade calc(var(--motion-fast) + var(--motion-standard)) var(--ease-soft);
+}
+/* Dock (022): firma de cada especie al seleccionarla (design.md › Firma por especie), quien se suma y el mes nuevo. */
+.card .portrait { transform-origin: 50% 100%; }
+.card--champi.is-picked .portrait { animation: sig-hops calc(2 * var(--motion-fast)) var(--ease-settle); }
+.card--lactarius.is-picked .portrait { animation: sig-sway var(--motion-standard) var(--ease-soft); }
+.card--amanita[aria-pressed='true'] .portrait { transform: translateY(-4px); transition: transform var(--motion-fast) var(--ease-settle); }
+.card--gliophorus.is-picked .portrait { animation: sig-wiggle var(--motion-fast) var(--ease-springy); }
+.card--gliophorus.is-picked .card__medal { animation: sig-glow var(--motion-standard) var(--ease-soft); }
+.card--mago[aria-pressed='true'] .portrait { transform: translateY(-3px); transition: transform var(--motion-standard) var(--ease-soft); }
+@keyframes sig-hops { 25%, 75% { transform: translateY(-4px); } 50% { transform: none; } }
+@keyframes sig-sway { 30% { transform: rotate(-2deg); } 70% { transform: rotate(2deg); } }
+@keyframes sig-wiggle { 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }
+@keyframes sig-glow { 40% { filter: brightness(1.25); } }
+/* Reclutar: entra creciendo, ya con «Zz». Maestra Bruma llega en un fundido solemne con su halo, sin rebote. */
+.card.is-joining { animation: join-in var(--motion-standard) var(--ease-springy); }
+@keyframes join-in { from { opacity: 0; transform: scale(0.8); } }
+.card.is-arriving { animation: fade-in var(--motion-narrative) var(--ease-soft); }
+.card.is-arriving::before {
+  left: 50%;
+  top: var(--medal-top, 6px);
+  width: 50px;
+  height: 50px;
+  translate: -50% 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px var(--arcane), 0 0 16px 8px color-mix(in srgb, var(--arcane) 70%, transparent);
+  animation: flash-fade calc(2 * var(--motion-narrative)) var(--ease-soft);
+}
+/* Estación nueva: el ícono del HUD y la corona de Chispa se funden a la nueva, junto con el claro. */
+.hud__season.is-new-season, .portrait.is-new-season img { animation: fade-in var(--motion-narrative) var(--ease-soft); }
+/* Mes nuevo: las tarjetas despiertan de a una con un saltito y la luna del botón gira media vuelta. */
+.card.is-waking { animation: card-wake var(--motion-fast) var(--ease-springy) var(--wake-delay) backwards; }
+.end.is-turning .end__moon { animation: moon-turn var(--motion-standard) var(--ease-soft); }
+@keyframes moon-turn { from { transform: rotate(-180deg); } }
+/* Ficha de una especie que aún no se vio (022): punto «nuevo» y un latido al aparecer. */
+.btn.is-new { position: relative; animation: new-pulse var(--motion-standard) var(--ease-springy); }
+.btn.is-new::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--cream);
+  border-radius: 50%;
+  background: var(--berry);
+}
+@keyframes new-pulse { 50% { transform: scale(1.08); } }
+/* Capas (022): hojas, cartas y pantallas suben 24 px y se funden con el fondo; al cerrar, bajan y salen sin atrapar toques. */
+:is(.sheet, .story, .screen):not([hidden]) { animation: fade-in var(--motion-standard) var(--ease-settle); }
+.sheet__panel, .story__card, .screen__panel.is-entering { animation: layer-in var(--motion-standard) var(--ease-settle); }
+.story[data-kind='mage'] .story__card { animation: layer-in var(--motion-narrative) var(--ease-soft); }
+.story__card.is-still { animation: none; }
+/* Intro: la carta nueva entra desde la derecha mientras la anterior sale a la izquierda; el punto activo crece. */
+.story__card.is-in { animation: card-in var(--motion-standard) var(--ease-settle); }
+.story__card.is-out { pointer-events: none; animation: card-out var(--motion-fast) var(--ease-leave) forwards; }
+.story__dot.is-active { animation: dot-in var(--motion-fast) var(--ease-springy); }
+:is(.sheet, .story, .screen).is-leaving { pointer-events: none; animation: fade-out var(--motion-fast) var(--ease-leave) forwards; }
+.sheet.is-leaving .sheet__panel, .story.is-leaving .story__card, .screen.is-leaving .screen__panel { animation: layer-out var(--motion-fast) var(--ease-leave) forwards; }
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes fade-out { to { opacity: 0; } }
+@keyframes layer-in { from { opacity: 0; transform: translateY(24px); } }
+@keyframes layer-out { to { opacity: 0; transform: translateY(24px); } }
+@keyframes card-in { from { opacity: 0; transform: translateX(12px); } }
+@keyframes card-out { to { opacity: 0; transform: translateX(-12px); } }
+@keyframes dot-in { from { transform: scale(0.5); } }
 
 /* ─── Horizontal en teléfono: tablero a la izquierda, HUD y dock a la derecha ─ */
 @media (orientation: landscape) and (max-height: 540px) {
@@ -865,8 +1022,8 @@ button { font: inherit; color: inherit; }
 
 /* Pantallas bajas (Safari con barras, 390 × 664): dock y bitácora compactos para que la casilla no baje de 56 px. */
 @media (max-height: 720px) {
-  :root { --dock-h: 62px; --notice-h: 44px; }
-  .card__medal { margin-top: 3px; }
+  :root { --dock-h: 62px; --notice-h: 44px; --medal-top: 3px; }
+  .card__medal { margin-top: var(--medal-top); }
 }
 
 /* Pantallas apaisadas (horizontal y escritorio): fondo 16:9. */
@@ -886,7 +1043,19 @@ button { font: inherit; color: inherit; }
   }
 }
 
+/* Movimiento reducido (022): sin desplazamiento, escala, rotación ni rebotes; quedan los cambios de color y opacidad. */
 @media (prefers-reduced-motion: reduce) {
-  * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+  * { scroll-behavior: auto !important; transition: none !important; }
   .end:active, .btn:active, .card[aria-pressed='true'] { transform: none; }
+  .chip.is-bump, .hud__month.is-bump, .card.is-called, .btn.is-new { animation: none; }
+  .chip__delta { animation-name: flash-fade; animation-duration: calc(var(--motion-fast) + 2 * var(--motion-standard)); }
+  .cell.is-reject::after { animation-name: flash-fade; }
+  .card.is-tired .card__badge { animation-name: zz-blink; }
+  @keyframes zz-blink { 50% { opacity: 0.4; } }
+  :is(.sheet, .story, .screen):not([hidden]),
+  .sheet__panel, .story__card, .screen__panel.is-entering, .story[data-kind='mage'] .story__card, .story__card.is-in { animation-name: fade-in; animation-duration: var(--motion-fast); }
+  .story__dot.is-active, .card.is-picked .portrait, .card.is-picked .card__medal, .card.is-waking, .end.is-turning .end__moon { animation: none; }
+  .card[aria-pressed='true'] .portrait { transform: none; }
+  .card.is-joining, .card.is-arriving, .hud__season.is-new-season, .portrait.is-new-season img { animation-name: fade-in; animation-duration: var(--motion-fast); }
+  .story__card.is-out, .sheet.is-leaving .sheet__panel, .story.is-leaving .story__card, .screen.is-leaving .screen__panel { animation-name: fade-out; }
 }
