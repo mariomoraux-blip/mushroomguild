@@ -109,7 +109,7 @@ Cada especie se reconoce por su silueta, sin depender del color: domo bajo, embu
 | Especie | Silueta | Color | Accesorio | Rasgo especial |
 | --- | --- | --- | --- | --- |
 | Champiñón "Bruno" | Domo bajo y ancho | Café claro | Canasta | — |
-| *Lactarius indigo* "Añil" | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Suelta gotitas de látex azul; el micelio que teje brilla con destellos índigo |
+| *Lactarius indigo* "Indi" | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Suelta gotitas de látex azul; el micelio que teje brilla con destellos índigo |
 | *Amanita muscaria* "Rubí" | Domo alto con verrugas y falda en el tallo | Rojo y crema | Bolso con hojas que curan | — |
 | *Gliophorus psittacinus* "Chispa" | Campana pequeña, viscosa y brillante | Verde loro que cambia | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
 | *Conocybe arcana* "Maestra Bruma" | Cono alto y puntiagudo, doblado en la punta como sombrero de hechicera; la más alta | Violeta profundo con motas que brillan como estrellas | Bastón de ramita con una espora luminosa | Melena de hilos de micelio; brilla siempre un poco |

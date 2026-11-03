@@ -220,7 +220,7 @@ export class BoardFx {
         tw.add({ targets: img, y: { from: y - T * 0.09, to: y }, duration: MOTION.ms.standard, ease: E.springy.phaser });
         tw.add({ targets: img, scaleX: scaleX * 1.05, scaleY: scaleY * 0.92, duration: MOTION.ms.instant, delay: MOTION.ms.fast, yoyo: true, ease: E.soft.phaser });
         break;
-      case 'lactarius': // Añil: se funde y baja flotando.
+      case 'lactarius': // Indi: se funde y baja flotando.
         tw.add({ targets: img, alpha: { from: 0, to: 1 }, y: { from: y - T * 0.08, to: y }, duration: MOTION.ms.standard, ease: E.soft.phaser });
         break;
       case 'amanita': // Rubí: se agacha un 5 % y se acomoda.
@@ -266,7 +266,7 @@ export class BoardFx {
 
   /**
    * Tejer: el pasto de antes se desvanece y un hilo crece desde la casilla vecina de la red. Nace con un destello
-   * índigo (Añil) que se vuelve dorado (022). El Brote arcano (una roca) abre antes un aro `arcane` lento y la roca se funde.
+   * índigo (Indi) que se vuelve dorado (022). El Brote arcano (una roca) abre antes un aro `arcane` lento y la roca se funde.
    */
   private weave(e: Extract<Effect, { kind: 'weave' }>, season: SeasonSlug): void {
     const T = this.T;

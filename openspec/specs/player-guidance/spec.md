@@ -21,12 +21,12 @@ La primera vez que el jugador selecciona a un miembro de cada especie, el juego 
 Al cerrar la ficha con "Entendido", el miembro SHALL seguir seleccionado con sus casillas resaltadas (para Maestra Bruma, se pide después el hechizo). Las siguientes selecciones de esa especie no SHALL abrir la ficha sola: la bitácora SHALL ofrecer un botón "Ficha" para volver a verla. Las especies ya vistas se recuerdan entre visitas.
 
 #### Scenario: Primera vez con el Tejedor
-- WHEN el jugador selecciona a Añil por primera vez
-- THEN se abre la ficha "Añil · Lactarius indigo" con la frase "«Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.»" y las secciones Habilidad, Cómo usarlo, Movimiento y Nutrientes
-- AND al pulsar "Entendido" Añil sigue seleccionado y sus casillas válidas se ven resaltadas
+- WHEN el jugador selecciona a Indi por primera vez
+- THEN se abre la ficha "Indi · Lactarius indigo" con la frase "«Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.»" y las secciones Habilidad, Cómo usarlo, Movimiento y Nutrientes
+- AND al pulsar "Entendido" Indi sigue seleccionado y sus casillas válidas se ven resaltadas
 
 #### Scenario: Segunda vez
-- WHEN el jugador vuelve a seleccionar a Añil
+- WHEN el jugador vuelve a seleccionar a Indi
 - THEN la ficha no se abre sola y la bitácora tiene el botón "Ficha" que la muestra
 
 #### Scenario: La Sanadora explica qué árboles cura
@@ -62,7 +62,7 @@ El juego SHALL proponer un siguiente paso con `advise(state)`, con esta priorida
 - THEN la pista sugiere que Chispa le pase la voz a Rubí, con la ★ en la casilla donde Rubí trabajó
 
 #### Scenario: Camino hacia un árbol
-- WHEN Bruno ya descompuso el tronco el mes 1 y el jugador selecciona a Añil
+- WHEN Bruno ya descompuso el tronco el mes 1 y el jugador selecciona a Indi
 - THEN la casilla con ★ es la tierra que acerca la red al árbol gris más cercano
 
 #### Scenario: Nadie más puede trabajar
@@ -79,11 +79,11 @@ Cada tarjeta del dock SHALL mostrar el rol y la acción con su costo actual (con
 
 #### Scenario: Tarjeta de el Tejedor
 - WHEN empieza la partida
-- THEN la tarjeta de Añil dice "Tejedor" y "Teje · −1 nutriente"
+- THEN la tarjeta de Indi dice "Tejedor" y "Teje · −1 nutriente"
 
 #### Scenario: Tejedor con escarcha
 - WHEN hay escarcha
-- THEN la tarjeta de Añil dice "Teje · −2 nutrientes"
+- THEN la tarjeta de Indi dice "Teje · −2 nutrientes"
 
 #### Scenario: Tocar un tronco
 - WHEN no hay miembro seleccionado y el jugador toca un tronco caído

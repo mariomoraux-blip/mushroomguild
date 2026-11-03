@@ -82,19 +82,19 @@ Contraste mínimo de texto: Tinta sobre Pergamino, Crema o Sol (todos ≥ 7:1). 
 JUEGO                          PORTADA                        CÓMO JUGAR (carrusel de 5)
 ┌────────────────────────┐     ┌────────────────────────┐     ┌────────────────────────┐
 │[logo] [Mes][🍃][✳][🌳][?]│     │      [   LOGO   ]      │     │ (letrero) Cómo jugar  × │
-│      (Árbol Padre)      │     │  Añil Bruno Rubí Chispa│     │ pergamino:              │
+│      (Árbol Padre)      │     │  Indi Bruno Rubí Chispa│     │ pergamino:              │
 │  ┌ marco de raíces ┐    │     │        Bruma           │     │ ① Elige un miembro      │
 │  │ tablero 5 × 8    │   │     │ [▶ Nueva partida ]     │     │ ② Toca junto a la red   │
 │  │                  │   │     │ [📖 Cómo jugar   ]     │     │ ③ Cada especie, 1 acción│
 │  └──────────────────┘   │     │ [🍄 El gremio    ]     │     │ ④ Cada mes, esporas     │
 │ (cinta) Pista del mes…  │     │ [⚙ Opciones     ]     │     │ ⑤ Despierta al Árbol    │
-│ [Añil][Bruno][Rubí]…    │     │  (marco de bosque)     │     │   ● ○ ○ ○ ○        [›]  │
+│ [Indi][Bruno][Rubí]…    │     │  (marco de bosque)     │     │   ● ○ ○ ○ ○        [›]  │
 │ [ ☾  Fin del mes     ]  │     └────────────────────────┘     └────────────────────────┘
 └────────────────────────┘
 FICHA                          EL GREMIO                      INTRO / VICTORIA
 ┌────────────────────────┐     ┌────────────────────────┐     ┌────────────────────────┐
 │ ×   (retrato grande)    │     │ (letrero) El gremio   × │     │  fondo pintado          │
-│       Bruno             │     │ [retrato] Añil·Tejedor ›│     │  (letrero) título       │
+│       Bruno             │     │ [retrato] Indi·Tejedor ›│     │  (letrero) título       │
 │ Agaricus · Descompositor│     │ [retrato] Bruno·…      ›│     │  pergamino: texto       │
 │ contexto · «frase»      │     │ [retrato] Rubí·…       ›│     │  [Mes][Árboles]…        │
 │ [Habilidad] [Movimiento]│     │ [retrato] Chispa·…     ›│     │  [Ver resumen][Jugar ↻] │
@@ -118,7 +118,7 @@ FICHA                          EL GREMIO                      INTRO / VICTORIA
 | Especie (nombre) | Rol | Silueta | Color | Accesorio | Rasgo especial |
 | --- | --- | --- | --- | --- | --- |
 | Champiñón ("Bruno") | Descompositor | Domo bajo y ancho | Café claro | Canasta | — |
-| *Lactarius indigo* ("Añil") | Tejedor | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Gotitas de látex azul; el micelio que teje tiene destellos índigo |
+| *Lactarius indigo* ("Indi") | Tejedor | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Gotitas de látex azul; el micelio que teje tiene destellos índigo |
 | *Amanita muscaria* ("Rubí") | Sanadora | Domo alto con verrugas y falda en el tallo | Rojo y crema | Bolso con hojas que curan | — |
 | *Gliophorus psittacinus* ("Chispa") | Mensajera | Campana pequeña, viscosa y brillante | Verde loro | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
 | *Conocybe arcana* ("Maestra Bruma") | Maga | Cono alto con la punta doblada en rizo, como sombrero de hechicera; túnica larga; la más alta | Sombrero rojo amanita que degrada a blanco, punta naranja; túnica color tallo; motas doradas que brillan como estrellas | Bastón de ramita con una espora luminosa | Cabello rubio de hilos de micelio; brilla siempre un poco |
@@ -193,7 +193,7 @@ public/assets/
 │   └── frames/         forest, roots, roots-pieces
 └── atlas/              atlas generados (PNG/WebP + JSON de Phaser); no se editan a mano
 ```
-- **Personajes:** la carpeta lleva el nombre del primer miembro de la especie (Añil = *Lactarius indigo*, Bruno = Champiñón, Rubí = *Amanita*, Chispa = *Gliophorus*, Maestra Bruma = *Conocybe arcana*); los reclutas de la misma especie usan el mismo arte. `portrait` es el retrato pintado para tablero, dock, fichas y "El gremio"; los sprites de Blender son fuente (`assets/sprites/webp/`).
+- **Personajes:** la carpeta lleva el nombre del primer miembro de la especie (Indi = *Lactarius indigo*, Bruno = Champiñón, Rubí = *Amanita*, Chispa = *Gliophorus*, Maestra Bruma = *Conocybe arcana*); los reclutas de la misma especie usan el mismo arte. `portrait` es el retrato pintado para tablero, dock, fichas y "El gremio"; los sprites de Blender son fuente (`assets/sprites/webp/`).
 - **Micelio:** se dibuja con el tile completo `net`/`net-b` (decisión del 010). Los conectores (`straight-h`, `straight-v`, `corner`, `cross`…) sobre `dirt` quedan publicados para un efecto futuro (p. ej. el hilo que se teje); falta la pieza en T.
 - **Estaciones:** pasto (`grass-autumn`, `grass-winter`), rocas (`rock-winter`) y árboles (`autumn`, `winter`) cambian por estación (010). El Árbol Padre por estación (`spring-`…`winter-painted`) muestra un árbol vivo y verde, que se confunde con "despierto": por ahora el Padre usa solo `asleep-painted` y `awake-painted`.
 - **Fondos por orientación:** vertical en el teléfono (`menu`, `intro`, `victory`); en horizontal y escritorio, los 16:9 a pantalla completa (`menu-landscape` en la portada y la partida, `intro-landscape` en la intro, `victory-landscape` en la victoria). La panorámica `menu-wide` solo tiene 310 px de alto: estirada a pantalla completa se ve borrosa, así que solo sirve como franja.

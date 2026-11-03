@@ -52,7 +52,7 @@ Para la ficha de criatura: "el panadero del bosque: huele a tierra mojada y nunc
 | Feliz | Levanta la canasta |
 
 ## Prueba de silueta
-Negro sobre blanco a 56 px, contra embudo (Añil, variante 6), domo alto con falda (Rubí), campana (Chispa) y cono alto (Maestra Bruma). Las siluetas de comparación son bocetos a partir de referentes, no diseños finales: si cambian, hay que volver a medir.
+Negro sobre blanco a 56 px, contra embudo (Indi, variante 6), domo alto con falda (Rubí), campana (Chispa) y cono alto (Maestra Bruma). Las siluetas de comparación son bocetos a partir de referentes, no diseños finales: si cambian, hay que volver a medir.
 
 | Variante | Peor solape (IoU, menor es mejor) | Más parecida a | Diferencia de perfil mínima (mayor es mejor) |
 | --- | --- | --- | --- |
@@ -64,9 +64,9 @@ Negro sobre blanco a 56 px, contra embudo (Añil, variante 6), domo alto con fal
 
 **Elegida: E.** Empata con C en números, pero C es más ancha arriba (ala levantada), igual que el embudo; E es más ancha en la base del sombrero y conserva las formas redondas.
 
-Para que no se confunda con Añil:
-- El tallo de Bruno nace ancho bajo el ala; el de Añil se estrecha en ▽. No engordar el cuello de Añil ni adelgazar el de Bruno.
-- La canasta de Bruno va del lado contrario al carrete de Añil.
+Para que no se confunda con Indi:
+- El tallo de Bruno nace ancho bajo el ala; el de Indi se estrecha en ▽. No engordar el cuello de Indi ni adelgazar el de Bruno.
+- La canasta de Bruno va del lado contrario al carrete de Indi.
 
 ### Contorno de referencia (variante E)
 Unidades: x centrado en 0, suelo en y = 100; 100 unidades = 56 px.

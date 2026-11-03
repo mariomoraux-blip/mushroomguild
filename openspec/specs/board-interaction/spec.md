@@ -53,8 +53,8 @@ Maestra Bruma no tiene otro motivo de inactividad: cuando llega siempre hay árb
 - THEN la bitácora dice "Bruno: no hay troncos junto a la red. Teje hacia uno."
 
 #### Scenario: Sin trabajo disponible (Lactarius indigo)
-- WHEN se selecciona a Añil con 0 nutrientes
-- THEN la bitácora dice "Añil: faltan nutrientes."
+- WHEN se selecciona a Indi con 0 nutrientes
+- THEN la bitácora dice "Indi: faltan nutrientes."
 
 #### Scenario: Sin trabajo disponible (Amanita muscaria)
 - WHEN se selecciona a Rubí con nutrientes suficientes y ningún árbol gris junto a la red
@@ -138,7 +138,7 @@ El tablero, el dock y las fichas SHALL usar el retrato pintado de cada especie (
 
 #### Scenario: Retratos en el dock
 - WHEN empieza la partida
-- THEN el dock muestra los medallones de Añil, Bruno y Rubí con sus retratos pintados y sus nombres
+- THEN el dock muestra los medallones de Indi, Bruno y Rubí con sus retratos pintados y sus nombres
 
 #### Scenario: La maga en el tablero
 - WHEN Maestra Bruma lanza un hechizo

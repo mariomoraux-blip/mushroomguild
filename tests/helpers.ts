@@ -49,6 +49,6 @@ export const idOf = (s: GameState, species: string, nth = 1): number =>
   s.members.filter((m) => m.species === species)[nth - 1]!.id;
 
 // Ids del gremio inicial.
-export const ANIL = 1; // Lactarius indigo
+export const INDI = 1; // Lactarius indigo
 export const BRUNO = 2; // Champiñón
 export const RUBI = 3; // Amanita muscaria
