@@ -35,6 +35,8 @@ export interface Member {
   readonly used: boolean;
   /** Casilla donde actuó este mes. */
   readonly at: Point | null;
+  /** Se quedó sin comer al terminar un mes frío (028): descansa este mes. */
+  readonly hungry?: boolean;
 }
 
 /** Acción registrada (015): permite rejugar una partida y verificar su puntaje. */

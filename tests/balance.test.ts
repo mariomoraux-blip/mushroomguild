@@ -64,8 +64,8 @@ describe('estrellas por claro (015)', () => {
 
 // 019 · Dificultad por nivel, sobre las semillas 1 a 100 de la tabla certificada (`level-seeds.ts`).
 const TARGETS = {
-  bosque: { hints: [0.75, 0.9], random: 0.1 },
-  ancestral: { hints: [0.4, 0.6], random: 0.05 },
+  bosque: { hints: [0.55, 0.7], random: 0.1 }, // 028: invierno duro
+  ancestral: { hints: [0.2, 0.35], random: 0.05 },
 } as const;
 
 describe.each(['bosque', 'ancestral'] as const)('balance en %s', (level) => {
@@ -73,7 +73,8 @@ describe.each(['bosque', 'ancestral'] as const)('balance en %s', (level) => {
   const starts = seeds.map((seed) => newRandomGame(seed, level));
 
   it('el bot experto gana todos los claros aceptados', () => {
-    expect(seeds.length).toBeGreaterThanOrEqual(95);
+    // 028: con el invierno duro, Ancestral certifica 94 de las 100 primeras (967 de 1001 en toda la tabla).
+    expect(seeds.length).toBeGreaterThanOrEqual(90);
     for (const start of starts) expect(certify(start)?.status).toBe('won');
   }, 120_000);
 
@@ -93,15 +94,19 @@ describe.each(['bosque', 'ancestral'] as const)('balance en %s', (level) => {
     expect(rate).toBeLessThanOrEqual(TARGETS[level].random);
   }, 120_000);
 
-  it('generar un claro tarda menos de 75 ms en Node (300 ms con la CPU ×4), dentro y fuera de la tabla', () => {
-    let slowest = 0;
-    for (const seed of [...seeds.slice(0, 30), 5001, 5002, 5003, 5004, 5005]) {
-      const t0 = performance.now();
-      newRandomGame(seed, level);
-      slowest = Math.max(slowest, performance.now() - t0);
-    }
-    console.info(`[balance] ${level} · generar un claro: máx ${slowest.toFixed(1)} ms (Node)`);
-    expect(slowest).toBeLessThan(75);
+  it('generar un claro tarda menos de 75 ms en Node (300 ms con la CPU ×4) en la tabla y menos de 200 ms fuera de ella', () => {
+    const slowest = (list: readonly number[]) =>
+      Math.max(...list.map((seed) => {
+        const t0 = performance.now();
+        newRandomGame(seed, level);
+        return performance.now() - t0;
+      }));
+    const inTable = slowest(seeds.slice(0, 30));
+    // Fuera de la tabla (solo con ?seed= mayor que 1000) el bot experto juega cada intento (028: más rechazos).
+    const outside = slowest([5001, 5002, 5003, 5004, 5005]);
+    console.info(`[balance] ${level} · generar un claro: máx ${inTable.toFixed(1)} ms en la tabla, ${outside.toFixed(1)} ms fuera (Node)`);
+    expect(inTable).toBeLessThan(75);
+    expect(outside).toBeLessThan(200);
   });
 
   it('el claro es el de Brote con las rocas del nivel sobre casillas de tierra', () => {

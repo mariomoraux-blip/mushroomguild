@@ -15,6 +15,8 @@ function status(state: AppState, m: Member): { text: string; ready: boolean } {
     const next = (seasonIndex(g.month) + 1) * MONTHS_PER_SEASON + 1;
     return { text: next > MONTHS ? es.dock.magicGone : es.dock.magicBack(season(next)), ready: false };
   }
+  // Se quedó sin comer en un mes frío (028): descansa, y lo dice.
+  if (m.hungry) return { text: es.dock.hungry, ready: false };
   return m.used ? { text: es.dock.resting, ready: false } : { text: es.dock.ready, ready: true };
 }
 

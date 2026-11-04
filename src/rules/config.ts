@@ -8,7 +8,7 @@ export const MONTHS_PER_SEASON = 3;
 export const MAX_GUILD = 6;
 export const START_NUTRIENTS = 2;
 export const START_SPORES = 0;
-export const COST = { weave: 1, revive: 3, mother: 10, call: 1 } as const;
+export const COST = { weave: 1, revive: 3, call: 1 } as const;
 /**
  * Costo en esporas de cada recluta (027): el primero 3, el segundo 5, el tercero 7. Hay un valor por cupo
  * (`MAX_GUILD − STARTING_GUILD`); los miembros iniciales y Maestra Bruma no cuentan como reclutados.
@@ -23,23 +23,30 @@ export const TREES_FOR_MAGE = 2;
 /**
  * Niveles de dificultad (019). `rocks`: rocas del claro; `frost`: estaciones (0 = Primavera … 3 = Invierno)
  * con escarcha; `fading`: meses que empiezan marcando un árbol gris que se apaga al terminarlos;
- * `hints`: se muestran las pistas; `multiplier`: del puntaje. Ninguna regla de nivel quita progreso.
+ * `upkeep`: temporadas frías, en que el gremio come `UPKEEP` al terminar cada mes (028); `sporeless`: estaciones en que
+ * los árboles no dan esporas (028); `mother`: nutrientes para despertar al Árbol Padre (028);
+ * `hints`: se muestran las pistas; `multiplier`: del puntaje. Ninguna regla de nivel quita progreso del tablero.
  */
 export interface LevelRules {
   readonly rocks: number;
   readonly frost: readonly number[];
   readonly fading: readonly number[];
+  readonly upkeep: readonly number[];
+  readonly sporeless: readonly number[];
+  readonly mother: number;
   readonly hints: boolean;
   readonly multiplier: number;
 }
 export const LEVELS: Readonly<Record<Level, LevelRules>> = {
-  brote: { rocks: 6, frost: [], fading: [], hints: true, multiplier: 1 },
-  bosque: { rocks: 8, frost: [2], fading: [6], hints: true, multiplier: 1.5 },
-  ancestral: { rocks: 10, frost: [2, 3], fading: [3, 6, 9], hints: false, multiplier: 2 },
+  brote: { rocks: 6, frost: [], fading: [], upkeep: [], sporeless: [], mother: 10, hints: true, multiplier: 1 },
+  bosque: { rocks: 8, frost: [2], fading: [6], upkeep: [3], sporeless: [3], mother: 12, hints: true, multiplier: 1.5 },
+  ancestral: { rocks: 10, frost: [2, 3], fading: [3, 6, 9], upkeep: [3], sporeless: [3], mother: 12, hints: false, multiplier: 2 },
 };
 export const LEVEL_IDS: readonly Level[] = ['brote', 'bosque', 'ancestral'];
 /** Costo de tejer con escarcha. */
 export const FROST_WEAVE = 2;
+/** Nutrientes que come el gremio, en total, al terminar un mes de temporada fría (028). */
+export const UPKEEP = 1;
 /** Costo de revivir un árbol apagado. */
 export const FADED_REVIVE = 7;
 /** Sal del rng que agrega las rocas de Bosque y Ancestral sobre el claro de Brote de la misma semilla. */
@@ -65,7 +72,7 @@ export const SCORE = {
   timeParS: 480, // 1 punto por segundo por debajo de 8:00
 } as const;
 /** Versión de la fórmula: cambia la clave del récord guardado y el `ScoreResult`. */
-export const SCORE_VERSION = 3;
+export const SCORE_VERSION = 4;
 /** Estrellas por claro: 2 desde el 90 % y 3 desde el 110 % del puntaje del bot con criterio en ese claro. */
 export const STARS = { two: 0.9, three: 1.1 } as const;
 /** Segundos de juego por mes que se suponen para la partida de referencia del bot. */

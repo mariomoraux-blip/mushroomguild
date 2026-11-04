@@ -9,8 +9,10 @@ import {
   GAIN,
   idleReason,
   idleShort,
+  isCold,
   LEVELS,
   member,
+  motherCost,
   newGame,
   noWorkThisMonth,
   recruit,
@@ -35,7 +37,15 @@ export type Sheet =
   | { kind: 'help' };
 
 /** Carta de historia (003): intro de 3 pasos, llegada de Maestra Bruma o final. */
-export type Story = { kind: 'intro'; step: number } | { kind: 'mage' } | { kind: 'won' } | { kind: 'lost' };
+/** Carta de historia. `then`: la que sigue al cerrarla (028: la del frío después de la de la maga). */
+export type Story =
+  | { kind: 'intro'; step: number }
+  | { kind: 'mage'; then?: Story }
+  | { kind: 'cold' }
+  | { kind: 'won' }
+  | { kind: 'lost' };
+/** Al cerrar una carta: la que sigue, si hay. */
+const nextStory = (st: Story | null): Story | null => (st && 'then' in st && st.then) || null;
 export const INTRO_STEPS = 3;
 
 /**
@@ -168,8 +178,8 @@ export function suggestedTile(state: AppState): Tile | null {
   return a.target;
 }
 
-function tileHelp(t: Tile): string {
-  if (t.kind === 'mother') return t.alive ? es.tileHelp.motherAwake : es.tileHelp.mother;
+function tileHelp(g: GameState, t: Tile): string {
+  if (t.kind === 'mother') return t.alive ? es.tileHelp.motherAwake : es.tileHelp.mother(motherCost(g));
   if (t.kind === 'tree') return t.alive ? es.tileHelp.treeAlive : t.faded ? es.tileHelp.treeFaded : t.fading ? es.tileHelp.treeFading : es.tileHelp.tree;
   if (t.kind === 'soil') return t.net ? es.tileHelp.soilNet : es.tileHelp.soil;
   return es.tileHelp[t.kind];
@@ -209,13 +219,18 @@ export function clockShouldRun(state: AppState, visible: boolean): boolean {
 const backFrom = (screen: Screen | null): Screen | null =>
   screen && (screen.kind === 'level' || (screen.kind !== 'title' && screen.back === 'title')) ? { kind: 'title' } : null;
 
-/** Carta que abre un cambio del juego: final al ganar o al acabar el invierno; presentación al llegar la maga. */
+/**
+ * Carta que abre un cambio del juego: final al ganar o al acabar el invierno; presentación al llegar la maga;
+ * aviso al empezar las temporadas frías (028), después de la de la maga si llegan juntas.
+ */
 function storyFor(prev: GameState, next: GameState): Story | null {
   if (prev.status === 'playing' && next.status === 'won') return { kind: 'won' };
   if (prev.status === 'playing' && next.status === 'lost') return { kind: 'lost' };
+  if (next.status !== 'playing') return null;
   const mages = (g: GameState) => g.members.filter((m) => m.species === 'mago').length;
-  if (next.status === 'playing' && mages(next) > mages(prev)) return { kind: 'mage' };
-  return null;
+  const cold: Story | null = next.month > prev.month && isCold(next) && !isCold(prev) ? { kind: 'cold' } : null;
+  if (mages(next) > mages(prev)) return cold ? { kind: 'mage', then: cold } : { kind: 'mage' };
+  return cold;
 }
 
 /** Aplica un nuevo estado del juego y abre la carta de historia que corresponda. */
@@ -293,7 +308,7 @@ export function reduce(state: AppState, action: Action): AppState {
       if (ui.sheet?.kind === 'member') return reduce({ game, ui: { ...ui, sheet: null } }, action);
       if (ui.selected === null) {
         const t = game.tiles.find((tt) => tt.x === action.x && tt.y === action.y);
-        return t ? { game, ui: { ...ui, notice: info(tileHelp(t)) } } : state;
+        return t ? { game, ui: { ...ui, notice: info(tileHelp(game, t)) } } : state;
       }
       const m = member(game, ui.selected);
       if (!m) return state;
@@ -323,7 +338,7 @@ export function reduce(state: AppState, action: Action): AppState {
       // Esc o «atrás» sobre la ficha de Maestra Bruma la cierran del todo (022): solo "Entendido" pide el hechizo.
       if (mageCardOpen(state)) return { game, ui: cleared(ui, idleHint(game)) };
       if (ui.sheet) return afterSheet(state);
-      if (ui.story) return { game, ui: { ...ui, story: null } };
+      if (ui.story) return { game, ui: { ...ui, story: nextStory(ui.story) } };
       if (ui.screen && ui.screen.kind !== 'title') return { game, ui: { ...ui, screen: backFrom(ui.screen) } };
       if (ui.screen) return state;
       return { game, ui: cleared(ui, ui.selected === null ? ui.notice : idleHint(game)) };
@@ -355,7 +370,7 @@ export function reduce(state: AppState, action: Action): AppState {
       return { game, ui: { ...ui, story: { kind: 'intro', step: st.step + 1 } } };
     }
     case 'closeStory':
-      return ui.story ? { game, ui: { ...ui, story: null } } : state;
+      return ui.story ? { game, ui: { ...ui, story: nextStory(ui.story) } } : state;
     case 'showEnd':
       return game.status === 'playing' || ui.story ? state : { game, ui: { ...cleared(ui, ui.notice), story: { kind: game.status } } };
     case 'restart':

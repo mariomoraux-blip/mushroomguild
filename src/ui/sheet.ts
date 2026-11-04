@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { canRecruit, MAX_GUILD, RECRUITABLE, recruitCost, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
+import { canRecruit, MAX_GUILD, motherCost, RECRUITABLE, recruitCost, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
 import type { AppState, Sheet, Store } from '../store';
 import { el, portrait } from './dom';
 import { recipesFor, RECIPE_STAGGER } from './recipe';
@@ -101,12 +101,13 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
   function helpSheet() {
     const season = currentSeason;
     const h = es.help;
-    const tiles = [es.tileHelp.mother, es.tileHelp.home, es.tileHelp.soil, es.tileHelp.log, es.tileHelp.tree, es.tileHelp.treeFading, es.tileHelp.treeFaded, es.tileHelp.treeAlive, es.tileHelp.rock];
+    const mother = motherCost(store.getState().game);
+    const tiles = [es.tileHelp.mother(mother), es.tileHelp.home, es.tileHelp.soil, es.tileHelp.log, es.tileHelp.tree, es.tileHelp.treeFading, es.tileHelp.treeFaded, es.tileHelp.treeAlive, es.tileHelp.rock];
     return panel(
       h.title,
       el('div', { class: 'help' },
         el('h3', {}, h.goalTitle),
-        el('p', {}, h.goal),
+        el('p', {}, h.goal(mother)),
         el('h3', {}, h.howTitle),
         el('ol', {}, ...h.how.map((step) => el('li', {}, step))),
         el('h3', {}, h.guildTitle),

@@ -118,7 +118,7 @@ El Árbol Padre SHALL marcarse como meta en el tablero en todo momento, y las ca
 - THEN el Árbol Padre tiene el aro de meta y su etiqueta accesible dice que es la meta
 
 ### Requirement: Avisos de la presión
-En los niveles con escarcha o árboles que se apagan, la bitácora SHALL avisar, en todos esos niveles (también en Ancestral, porque no son pistas): al empezar una estación con escarcha, que tejer cuesta 2 nutrientes; al marcar un árbol, que se apagará al terminar el mes si nadie lo revive; y al apagarse, que revivirlo cuesta 7. Tocar un árbol marcado o apagado sin miembro seleccionado SHALL explicar su estado y su costo.
+En los niveles con escarcha, árboles que se apagan o invierno duro, la bitácora SHALL avisar, en todos esos niveles (también en Ancestral, porque no son pistas): al empezar una estación con escarcha, que tejer cuesta 2 nutrientes; al marcar un árbol, que se apagará al terminar el mes si nadie lo revive; al apagarse, que revivirlo cuesta 7; al terminar un mes de invierno, lo que comió el gremio o quién se quedó con hambre; y al empezar una estación sin esporas, que los árboles ya no dan esporas. Tocar un árbol marcado o apagado sin miembro seleccionado SHALL explicar su estado y su costo. Un hongo con hambre SHALL decir «Con hambre» en el dock en vez de «Descansa». La meta, la Libreta y la ficha de la Amanita SHALL decir los nutrientes del Árbol Padre del nivel.
 
 #### Scenario: Aviso del árbol marcado
 - WHEN empieza el mes 6 en Bosque
@@ -127,6 +127,10 @@ En los niveles con escarcha o árboles que se apagan, la bitácora SHALL avisar,
 #### Scenario: Aviso de escarcha
 - WHEN empieza el mes 7 en Ancestral
 - THEN la bitácora dice "Llegó la escarcha: tejer cuesta 2 nutrientes."
+
+#### Scenario: Hongo con hambre
+- WHEN un hongo se queda sin comer al terminar un mes de invierno
+- THEN la bitácora lo nombra y su tarjeta del dock dice "Con hambre"
 
 ### Requirement: Aviso de mes vacío
 Cuando hay miembros listos, ninguno tiene una casilla válida y en el mes todavía nadie actuó (reclutar no cuenta), la bitácora SHALL decir que nadie tiene trabajo este mes y cuántos nutrientes traerá la hojarasca al terminarlo: «Nadie tiene trabajo este mes. Termina el mes: la hojarasca traerá N nutrientes.», o «Nadie tiene trabajo este mes. Termina el mes.» si no hay árboles vivos. El aviso SHALL mostrarse en todos los niveles, también en Ancestral, porque describe el estado y no sugiere ningún miembro ni casilla. Tocar un miembro SHALL seguir mostrando su motivo de inactividad.
