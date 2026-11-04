@@ -104,6 +104,12 @@ export const magicSpent = (s: GameState): boolean => s.lastSpellSeason === seaso
 export const hasFrost = (s: GameState): boolean => LEVELS[s.level].frost.includes(seasonIndex(s.month));
 /** Costo de tejer ahora: más caro con escarcha (019). */
 export const weaveCost = (s: GameState): number => (hasFrost(s) ? FROST_WEAVE : COST.weave);
+/** Nutrientes para despertar al Árbol Padre en el nivel (028). */
+export const motherCost = (s: GameState): number => LEVELS[s.level].mother;
+/** El mes es de una temporada fría del nivel: al terminarlo, el gremio come (028). */
+export const isCold = (s: GameState, month = s.month): boolean => LEVELS[s.level].upkeep.includes(seasonIndex(month));
+/** En este mes los árboles no dan esporas (028). */
+export const isSporeless = (s: GameState, month = s.month): boolean => LEVELS[s.level].sporeless.includes(seasonIndex(month));
 /** Costo de revivir un árbol: más caro si está apagado (019). */
 export const reviveCost = (t: Tile): number => (t.faded ? FADED_REVIVE : COST.revive);
 

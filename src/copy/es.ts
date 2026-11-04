@@ -1,4 +1,4 @@
-import { COST, FADED_REVIVE, FROST_WEAVE, GAIN, LOG_USES, RECRUIT_COSTS, TREES_FOR_MOTHER } from '../rules/config';
+import { COST, FADED_REVIVE, FROST_WEAVE, GAIN, LEVELS, LOG_USES, RECRUIT_COSTS, TREES_FOR_MOTHER, UPKEEP } from '../rules/config';
 import type { IdleReason } from '../rules/idle';
 import type { Level, RecruitableSpecies, SpeciesId } from '../rules/types';
 
@@ -6,6 +6,8 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 /** «3, 5 y 7». */
 const listY = (items: readonly (string | number)[]) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} y ${items.at(-1)}`);
 /** Curva de reclutar (027): «cuesta 3, luego 5 y luego 7». */
+/** Nutrientes del Árbol Padre fuera de la partida (028): el de Brote y el de los niveles difíciles. */
+const motherNutrients = `${LEVELS.brote.mother} nutrientes (${LEVELS.bosque.mother} en Bosque y Ancestral)`;
 const recruitCurve = `cuesta ${listY(RECRUIT_COSTS.map((n, i) => (i === 0 ? n : `luego ${n}`)))}`;
 const times = (m: number) => `×${String(m).replace('.', ',')}`;
 
@@ -126,7 +128,7 @@ export const es = {
   /** Qué es cada casilla (al tocarla sin miembro elegido). */
   tileHelp: {
     home: 'Hogar del gremio: aquí empieza la red de micelio.',
-    mother: `Árbol Padre: la meta. Llévale la red y despiértalo con la Amanita (${TREES_FOR_MOTHER} árboles vivos y ${COST.mother} nutrientes).`,
+    mother: (n: number) => `Árbol Padre: la meta. Llévale la red y despiértalo con la Amanita (${TREES_FOR_MOTHER} árboles vivos y ${n} nutrientes).`,
     motherAwake: 'Árbol Padre: despierto. ¡El bosque respira!',
     soil: 'Tierra: el Lactarius teje micelio aquí para extender la red.',
     soilNet: 'Tierra tejida: ya es parte de la red. Se trabaja en las casillas vecinas.',
@@ -183,8 +185,8 @@ export const es = {
       ability: 'Revive árboles grises y despierta al Árbol Padre.',
       howTo: 'Tócala y después toca un árbol resaltado que toque la red.',
       movement: 'No camina: cura los árboles vecinos a la red. Teje la red hasta un árbol para poder curarlo.',
-      nutrients: `Gasta ${COST.revive} nutrientes por árbol, ${FADED_REVIVE} por un árbol apagado y ${COST.mother} en el Árbol Padre.`,
-      heals: `Los árboles grises (copa gris y tronco), por ${COST.revive} nutrientes: al revivir entran a la red y al empezar cada mes dan ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. El Árbol Padre (aro dorado, arriba): se despierta cuando la red lo toca, hay ${TREES_FOR_MOTHER} árboles revividos y ${COST.mother} nutrientes. Despertarlo es ganar. En Bosque y Ancestral, un árbol con escarcha se apaga al terminar el mes si nadie lo revive; apagado, revivirlo cuesta ${FADED_REVIVE}.`,
+      nutrients: `Gasta ${COST.revive} nutrientes por árbol, ${FADED_REVIVE} por un árbol apagado y ${motherNutrients} en el Árbol Padre.`,
+      heals: `Los árboles grises (copa gris y tronco), por ${COST.revive} nutrientes: al revivir entran a la red y al empezar cada mes dan ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. El Árbol Padre (aro dorado, arriba): se despierta cuando la red lo toca, hay ${TREES_FOR_MOTHER} árboles revividos y ${motherNutrients}. Despertarlo es ganar. En Bosque y Ancestral, un árbol con escarcha se apaga al terminar el mes si nadie lo revive; apagado, revivirlo cuesta ${FADED_REVIVE}.`,
     },
     gliophorus: {
       context: 'Corre la voz por los hilos de micelio más rápido que el viento. Cuando ella avisa, nadie se queda dormido.',
@@ -235,7 +237,7 @@ export const es = {
       { title: 'Trabaja junto a la red', text: 'Toca una casilla resaltada. Solo se trabaja junto a la red de micelio.' },
       { title: 'Una vez por mes', text: 'Cada hongo trabaja una vez por mes. Después pulsa «Fin del mes».' },
       { title: 'Al empezar el mes', text: `Cada árbol vivo da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. Con esporas reclutas otro hongo: ${recruitCurve}.` },
-      { title: 'Despierta al Árbol Padre', text: `Antes de que acabe el invierno: que la red lo toque, ${TREES_FOR_MOTHER} árboles revividos y ${COST.mother} nutrientes. Si dudas, sigue la ★.` },
+      { title: 'Despierta al Árbol Padre', text: `Antes de que acabe el invierno: que la red lo toque, ${TREES_FOR_MOTHER} árboles revividos y ${motherNutrients}. Si dudas, sigue la ★.` },
     ],
     step: (n: number, total: number) => `Paso ${n} de ${total}`,
     prev: 'Paso anterior',
@@ -257,7 +259,7 @@ export const es = {
     button: 'Ayuda: Cómo jugar',
     title: 'Libreta de campo',
     goalTitle: 'La meta',
-    goal: `Despierta al Árbol Padre (arriba) antes de que acabe el invierno. Necesitas que la red lo toque, ${TREES_FOR_MOTHER} árboles revividos y ${COST.mother} nutrientes.`,
+    goal: (n: number) => `Despierta al Árbol Padre (arriba) antes de que acabe el invierno. Necesitas que la red lo toque, ${TREES_FOR_MOTHER} árboles revividos y ${n} nutrientes.`,
     howTitle: 'Cómo se juega',
     how: [
       'Toca un hongo del gremio: se resaltan las casillas donde puede trabajar.',
@@ -269,7 +271,7 @@ export const es = {
     tilesTitle: 'Las casillas',
     tip: 'Si no sabes qué hacer, sigue la ★: marca el hongo sugerido y la casilla que acerca la red a tu meta.',
     levelsTitle: 'Bosque y Ancestral',
-    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. Nunca se pierde lo que ya lograste. En Ancestral no hay ★.`,
+    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente) y los árboles no dan esporas. El Árbol Padre pide ${LEVELS.bosque.mother} nutrientes. Nunca se pierde la red ni los árboles vivos. En Ancestral no hay ★.`,
     start: '¡A jugar!',
   },
 
@@ -325,6 +327,7 @@ export const es = {
     label: 'Gremio',
     ready: 'Lista',
     resting: 'Descansa',
+    hungry: 'Con hambre',
     magicBack: (season: string) => `Magia: vuelve en ${season.toLowerCase()}`,
     magicGone: 'Magia: agotada',
     endMonth: 'Terminar el mes',
@@ -353,6 +356,14 @@ export const es = {
     mageText: 'El bosque volvió a hablar, y alguien escuchó.',
     mageSpells: 'Una vez por estación lanza uno de sus hechizos:',
     mageOk: 'Seguir',
+    coldTitle: 'Llega el frío',
+    coldText: 'Llegó el invierno y el gremio tiene más hambre.',
+    coldRules: [
+      `Al terminar cada mes, el gremio come ${plural(UPKEEP, 'nutriente')}.`,
+      'Si no hay, el primero en llegar al gremio se queda con hambre y descansa el mes siguiente.',
+      'Los árboles ya no dan esporas.',
+    ],
+    coldOk: 'Seguir',
     wonTitle: '¡El bosque despertó!',
     wonText: (month: number) => `El Árbol Padre despertó en el mes ${month}.`,
     lostTitle: 'Llegó el invierno',
@@ -410,10 +421,14 @@ export const es = {
     winterEnd: 'Llegó el final del invierno.',
     newMonth: (month: number) => `Empieza el mes ${month}.`,
     treesGave: (spores: number, nutrients: number) =>
-      `Los árboles dieron ${plural(spores, 'espora')} y ${plural(nutrients, 'nutriente')}.`,
+      spores ? `Los árboles dieron ${plural(spores, 'espora')} y ${plural(nutrients, 'nutriente')}.` : `Los árboles dieron ${plural(nutrients, 'nutriente')}.`,
     seasonStart: (season: string) => `Comienza ${season.toLowerCase()}.`,
     mageArrives: 'El bosque volvió a hablar, y alguien escuchó. Llega Maestra Bruma.',
     frostStart: (n: number) => `Llegó la escarcha: tejer cuesta ${plural(n, 'nutriente')}.`,
+    /** Temporadas frías (028): avisos, salen también en Ancestral. */
+    guildAte: (n: number) => `El gremio comió ${plural(n, 'nutriente')}.`,
+    hungry: (names: readonly string[]) => `${listY(names)} ${names.length > 1 ? 'se quedaron' : 'se quedó'} sin comer: ${names.length > 1 ? 'descansan' : 'descansa'} este mes.`,
+    sporelessStart: 'Llegó el invierno: los árboles ya no dan esporas.',
     treeFading: 'Este árbol se apagará al terminar el mes si nadie lo revive.',
     treeFaded: (n: number) => `Un árbol se apagó: revivirlo ahora cuesta ${plural(n, 'nutriente')}.`,
     /** Mes vacío (024): no es una pista, sale también en Ancestral. */

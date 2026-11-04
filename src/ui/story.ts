@@ -8,11 +8,11 @@ import { el, portrait } from './dom';
 import { hideLayer, showLayer, turnCard } from './motion';
 
 /** Fondo pintado de cada carta (se descarga solo cuando la carta se muestra). */
-const BACKGROUND: Record<Story['kind'], 'intro' | 'victory'> = { intro: 'intro', mage: 'intro', won: 'victory', lost: 'intro' };
+const BACKGROUND: Record<Story['kind'], 'intro' | 'victory'> = { intro: 'intro', mage: 'intro', cold: 'intro', won: 'victory', lost: 'intro' };
 const GUILD: SpeciesId[] = ['lactarius', 'champi', 'amanita'];
 
 /**
- * Cartas de historia (003): intro de 3 cartas con "Saltar", llegada de Maestra Bruma y los dos finales.
+ * Cartas de historia (003): intro de 3 cartas con "Saltar", llegada de Maestra Bruma, el frío (028) y los dos finales.
  * Modal accesible: el foco va al botón principal y vuelve al juego al cerrar; Esc cierra (main.ts › cancel).
  */
 export function mountStory(root: HTMLElement, store: Store, onRestart: () => void) {
@@ -64,6 +64,16 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
             ...(['sprout', 'rain'] as const).map((sp) => el('li', {}, el('strong', {}, es.spells[sp]), ` · ${es.spellHelp[sp]}`))),
         );
         actions.push(button('close', es.story.mageOk, true));
+        break;
+      case 'cold':
+        // Llega el frío (028): el gremio inicial, cansado, y las reglas de las temporadas frías.
+        title = es.story.coldTitle;
+        art = el('div', { class: 'story__cast' }, ...GUILD.map((sp) => portrait(sp, 'reposo', season, 'md')));
+        body.push(
+          el('p', { class: 'story__text' }, es.story.coldText),
+          el('ul', { class: 'story__spells' }, ...es.story.coldRules.map((r) => el('li', {}, r))),
+        );
+        actions.push(button('close', es.story.coldOk, true));
         break;
       case 'won':
       case 'lost': {

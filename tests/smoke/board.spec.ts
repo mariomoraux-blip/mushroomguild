@@ -11,6 +11,7 @@
 // player-guidance › Libreta de campo: "Consultar la ayuda" → "Libreta de campo".
 // player-guidance › Meta visible: "Inicio" → "guía".
 // player-guidance › Recetas visuales: "Ficha de Bruno", "Libreta con las cinco recetas" y "Movimiento reducido" → "Recetas (026)".
+// story-presentation › Llega el frío y player-guidance › Avisos de la presión (hongo con hambre) → "Invierno duro (028)".
 // title-screens › Elige tu dificultad y player-guidance › Ancestral sin pistas, board-interaction › Árbol marcado y apagado
 //   y Escarcha en el HUD (019) → "Niveles".
 import { expect, test, type Page } from '@playwright/test';
@@ -707,7 +708,11 @@ test('Niveles: Elige tu dificultad con teclado, Ancestral sin ★, árbol marcad
   await expect(page.locator('.card--lactarius')).toHaveAttribute('aria-label', /Teje · −2 nutrientes/);
   await shot('escarcha');
   // "Jugar de nuevo" conserva el nivel.
-  for (let m = 7; m <= 12; m++) await page.locator('.end').click();
+  for (let m = 7; m <= 12; m++) {
+    await page.locator('.end').click();
+    // Al empezar el invierno (mes 10) aparece la carta «Llega el frío» (028).
+    if (m === 9) await card.getByRole('button', { name: 'Seguir' }).click();
+  }
   await page.getByRole('button', { name: 'Jugar de nuevo' }).click();
   await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
   await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', 'Primavera · Bosque');
@@ -984,4 +989,33 @@ test('Reclutar (027): cada recluta cuesta más (3, 5 y 7) y la hoja dice cuánto
   // Esc cierra la hoja (teclado).
   await page.keyboard.press('Escape');
   await expect(sheet).toHaveCount(0);
+});
+
+test('Invierno duro (028): carta «Llega el frío» al empezar el invierno en Bosque y el primero del gremio con hambre en el dock', async ({ page }, info) => {
+  await page.goto('/?map=clasico&nivel=bosque');
+  const start = (patch: object) =>
+    page.evaluate((p) => {
+      type S = { getState(): { game: object }; dispatch(a: object): void };
+      const store = (window as unknown as { store: S }).store;
+      store.dispatch({ type: 'start', game: { ...store.getState().game, ...p }, intro: false });
+    }, patch);
+  await start({ month: 9 });
+  await page.locator('.end').click();
+  const card = page.locator('#story [role="dialog"]');
+  await expect(card).toBeVisible();
+  await expect(card).toContainText('Llega el frío');
+  await expect(card).toContainText('el gremio come 1 nutriente');
+  await expect(card).toContainText('Los árboles ya no dan esporas.');
+  const overflow = await card.evaluate((n) => n.scrollWidth - n.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/028-frio-390x844.png' });
+  await page.keyboard.press('Escape');
+  await expect(card).toHaveCount(0);
+  // Un mes de invierno sin nutrientes: Indi, el primero en llegar, se queda con hambre; los demás trabajan.
+  await start({ month: 11, nutrients: 0 });
+  await page.locator('.end').click();
+  await expect(page.locator('#notice')).toContainText('sin comer');
+  await expect(page.locator('[data-id="1"]')).toHaveAttribute('aria-label', /Con hambre/);
+  await expect(page.locator('[data-id="1"]')).toHaveClass(/is-used/);
+  await expect(page.locator('[data-id="2"]')).not.toHaveClass(/is-used/);
 });

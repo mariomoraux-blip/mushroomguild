@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
-import { act, advise, certify, endMonth, newGame, noWorkThisMonth, recruit, validTargets, type GameState } from '../src/rules';
+import { act, advise, endMonth, newGame, noWorkThisMonth, recruit, validTargets, type GameState } from '../src/rules';
 import { initialState, reduce } from '../src/store';
 import { INDI, BRUNO, RUBI } from './helpers';
 
@@ -24,13 +24,14 @@ function report(closeLast = true): GameState {
 }
 
 describe('Requirement: Aviso de mes vacío', () => {
-  it('el estado del reporte es un mes vacío y todavía se puede ganar', () => {
+  it('el estado del reporte es un mes vacío', () => {
     const s = report();
     expect(s.month).toBe(4);
     expect(s.nutrients).toBe(2);
     expect(s.spores).toBe(2);
     expect(noWorkThisMonth(s)).toBe(true);
-    expect(certify(s)?.status).toBe('won');
+    // Hasta el 027 este estado todavía se podía ganar. Con el invierno duro (028) y el Árbol Padre de 12,
+    // este claro fijo ya no: la tabla certificada nueva no lo incluye.
   });
 
   it('reclutar no lo apaga: el recluta llega cansado', () => {

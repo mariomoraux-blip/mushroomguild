@@ -1,11 +1,14 @@
 import { es } from '../copy/es';
-import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MONTHS, GAIN, LOG_USES, MAX_GUILD, RECRUITABLE, TREES_FOR_MAGE, TREES_FOR_MOTHER } from './config';
+import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MONTHS, GAIN, UPKEEP, LOG_USES, MAX_GUILD, RECRUITABLE, TREES_FOR_MAGE, TREES_FOR_MOTHER } from './config';
 import {
   addMage,
   addMember,
   cloneState,
   farthestGreyTree,
   hasFrost,
+  isCold,
+  isSporeless,
+  motherCost,
   magicSpent,
   member,
   recruitableCount,
@@ -65,7 +68,7 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
       if (t.kind === 'mother') {
         if (!near) return no(R.motherFar);
         if (revivedCount(s) < TREES_FOR_MOTHER) return no(R.forestSilent(TREES_FOR_MOTHER));
-        if (s.nutrients < COST.mother) return no(R.motherCost(COST.mother), 'nutrients');
+        if (s.nutrients < motherCost(s)) return no(R.motherCost(motherCost(s)), 'nutrients');
         return yes;
       }
       if (t.kind !== 'tree') return no(R.amanitaNeedsTree);
@@ -138,7 +141,7 @@ export function act(s: GameState, id: number, x: number, y: number): ActionResul
     }
     case 'amanita':
       if (t.kind === 'mother') {
-        n.nutrients -= COST.mother;
+        n.nutrients -= motherCost(s);
         t.alive = true;
         t.net = true;
         n.status = 'won';
@@ -191,19 +194,43 @@ export function endMonth(s: GameState): ActionResult {
       parts.push(es.log.treeFaded(FADED_REVIVE));
     }
   }
+  const cold = isCold(s);
   n.month++;
   const trees = revivedCount(n);
-  n.spores += trees * GAIN.treeSpores;
+  // Invierno sin esporas (028): los árboles solo dan nutrientes.
+  const spores = isSporeless(n) ? 0 : trees * GAIN.treeSpores;
+  n.spores += spores;
   n.nutrients += trees * GAIN.treeNutrients; // hojarasca
   n.members.forEach((m) => {
     m.used = false;
     m.at = null;
+    delete m.hungry;
   });
+  // Temporadas frías (028): después de lo que dan los árboles, el gremio come `UPKEEP` en total. Si no alcanza,
+  // el primero en llegar (nunca la maga) se queda con hambre y descansa este mes.
+  let ate = 0;
+  const hungry: string[] = [];
+  if (cold) {
+    if (n.nutrients >= UPKEEP) {
+      n.nutrients -= UPKEEP;
+      ate = UPKEEP;
+    } else {
+      const first = n.members.find((m) => m.species !== 'mago');
+      if (first) {
+        first.used = true;
+        first.hungry = true;
+        hungry.push(first.name);
+      }
+    }
+  }
   const now = season(n.month);
   parts.unshift(es.log.newMonth(n.month));
-  if (trees) parts.push(es.log.treesGave(trees * GAIN.treeSpores, trees * GAIN.treeNutrients));
+  if (trees) parts.push(es.log.treesGave(spores, trees * GAIN.treeNutrients));
+  if (ate) parts.push(es.log.guildAte(ate));
+  if (hungry.length) parts.push(es.log.hungry(hungry));
   if (now !== before) parts.push(es.log.seasonStart(now));
   if (hasFrost(n) && !hasFrost(s)) parts.push(es.log.frostStart(FROST_WEAVE));
+  if (isSporeless(n) && !isSporeless(s)) parts.push(es.log.sporelessStart);
   if (LEVELS[n.level].fading.includes(n.month)) {
     const next = farthestGreyTree(n);
     if (next) {
