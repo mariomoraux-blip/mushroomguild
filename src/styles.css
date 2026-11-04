@@ -736,9 +736,17 @@ button { font: inherit; color: inherit; }
 }
 .howto__count { margin: 0; font-size: 12px; font-weight: 800; color: var(--ink-soft); }
 .howto__art { flex: 1; min-height: 140px; display: flex; align-items: center; justify-content: center; gap: 4px; }
-.howto__img { max-height: 130px; max-width: 46%; object-fit: contain; filter: drop-shadow(0 4px 4px color-mix(in srgb, var(--ink) 30%, transparent)); }
-.howto__art--3 .howto__img { max-width: 31%; max-height: 104px; }
-.howto__art--1 .howto__img { max-width: 92%; max-height: 160px; }
+/* Miniaturas de la interfaz (029): las mismas piezas del juego, quietas y sin toque. */
+.howto-ui { --recipe-tile: 64px; display: flex; align-items: center; justify-content: center; gap: 10px; pointer-events: none; }
+.howto-ui--dock { gap: 14px; align-items: flex-end; }
+.howto-ui--dock .card { flex: 0 0 auto; }
+.howto-ui--dock .card[aria-pressed='true'] { transform: translateY(-6px); }
+.howto-ui--tiles { gap: 8px; }
+.howto-ui__chips { display: flex; flex-direction: column; gap: 6px; }
+.howto-ui__chips--hud { gap: 8px; }
+.howto-ui__chips--hud .chip { width: 82px; }
+.howto-ui--goal { gap: 12px; }
+.howto-ui__father { width: 150px; max-width: 46vw; height: auto; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--sun) 80%, transparent)) drop-shadow(0 4px 4px color-mix(in srgb, var(--ink) 30%, transparent)); }
 .howto__title { margin: 0; font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--moss); }
 .howto__text { margin: 0; font-size: 16px; font-weight: 700; line-height: 1.35; }
 .howto__nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -1072,9 +1080,8 @@ button { font: inherit; color: inherit; }
   .howto { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-rows: 1fr auto; column-gap: 16px; row-gap: 10px; align-items: center; }
   .howto__card { grid-row: 1 / span 2; min-height: 0; padding: 10px 14px 14px; gap: 4px; }
   .howto__art { min-height: 0; }
-  .howto__img { max-height: 96px; }
-  .howto__art--3 .howto__img { max-height: 78px; }
-  .howto__art--1 .howto__img { max-height: 110px; }
+  .howto-ui { --recipe-tile: 52px; }
+  .howto-ui__father { width: 112px; }
   .howto__title { font-size: 20px; }
   .howto__text { font-size: 14px; }
   .howto__nav { grid-column: 2; align-self: end; }
