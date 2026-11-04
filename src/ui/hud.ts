@@ -1,6 +1,6 @@
 import { es } from '../copy/es';
 import { diffEffects } from '../effects';
-import { hasFrost, MONTHS, revivedCount, season, seasonIndex, treeTotal, type GameState } from '../rules';
+import { hasFrost, MONTHS, recruitCost, revivedCount, season, seasonIndex, treeTotal, type GameState } from '../rules';
 import { reducedMotion } from '../scenes/fx';
 import { SEASON_SLUGS } from '../theme';
 import type { AppState, Notice, Store } from '../store';
@@ -82,7 +82,7 @@ export function mountHud(root: HTMLElement, store: Store) {
     seasonIcon.dataset.season = slug;
     setText(nutrients.value, String(g.nutrients));
     setText(spores.value, String(g.spores));
-    spores.node.setAttribute('aria-label', es.hud.sporesButton(g.spores));
+    spores.node.setAttribute('aria-label', es.hud.sporesButton(g.spores, recruitCost(g)));
     setText(treesChip.value, `${revivedCount(g)}${es.hud.of(treeTotal(g))}`);
   };
   return { render, setTime };

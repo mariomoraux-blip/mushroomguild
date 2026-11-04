@@ -1,11 +1,9 @@
 // Bots sembrados para balance.test.ts. Solo usan la API pública de las reglas.
 import {
   act,
-  COST,
+  canRecruit,
   endMonth,
-  MAX_GUILD,
   recruit,
-  recruitableCount,
   RECRUITABLE,
   validTargets,
   type GameState,
@@ -23,8 +21,6 @@ export function shuffle<T>(rng: Rng, list: readonly T[]): T[] {
   }
   return a;
 }
-
-const canRecruit = (s: GameState) => s.spores >= COST.recruit && recruitableCount(s) < MAX_GUILD;
 
 /** Juega una partida completa: `month` decide lo que pasa en cada mes y luego se termina el mes. */
 export function playGame(start: GameState, month: (s: GameState) => GameState): GameState {

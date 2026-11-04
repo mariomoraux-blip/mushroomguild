@@ -1,6 +1,6 @@
 import { validTargets } from './actions';
-import { COST, MAX_GUILD, STARTING_GUILD, TREES_FOR_MOTHER } from './config';
-import { magicSpent, motherTile, neighbors, recruitableCount, revivedCount, touchesNet, workerAt } from './state';
+import { COST, STARTING_GUILD, TREES_FOR_MOTHER } from './config';
+import { magicSpent, motherTile, neighbors, recruitableCount, recruitCost, revivedCount, touchesNet, workerAt } from './state';
 import type { GameState, Member, RecruitableSpecies, Spell, Tile } from './types';
 
 /** Siguiente paso sugerido al jugador (player-guidance). */
@@ -97,7 +97,11 @@ function callOption(s: GameState, glio: Member): (Advice & { kind: 'call'; rank:
   return best;
 }
 
-const canRecruit = (s: GameState) => s.spores >= COST.recruit && recruitableCount(s) < MAX_GUILD;
+/** Hay cupo y esporas para el próximo recluta (027: el costo sube con cada uno). */
+export const canRecruit = (s: GameState): boolean => {
+  const cost = recruitCost(s);
+  return cost !== null && s.spores >= cost;
+};
 
 /**
  * Falta el rol del siguiente paso (015): un compañero que ya trabajó este mes (Amanita o Champiñón) tendría

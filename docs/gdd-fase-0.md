@@ -84,7 +84,7 @@ La Mensajera, **Chispa**, convierte esporas en una segunda jugada: despierta a l
 | Recurso | Se gana | Se gasta |
 | --- | --- | --- |
 | Nutrientes | Tronco: +2 por uso · árbol vivo: +1 al empezar el mes · Lluvia de esporas | Tejer 1 · revivir 3 · Árbol Padre 10 |
-| Esporas | Árbol vivo: +1 al empezar el mes · Lluvia de esporas | Reclutar 2 · Mensajera 1 |
+| Esporas | Árbol vivo: +1 al empezar el mes · Lluvia de esporas | Reclutar 3, 5 y 7 (sube con cada recluta) · Mensajera 1 |
 
 Inicio: 3 miembros (uno de cada especie), 2 nutrientes, 0 esporas. Los troncos son finitos; los árboles vivos son la fuente renovable. Esa tensión es el corazón del juego.
 

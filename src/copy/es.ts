@@ -1,8 +1,12 @@
-import { COST, FADED_REVIVE, FROST_WEAVE, GAIN, LOG_USES, TREES_FOR_MOTHER } from '../rules/config';
+import { COST, FADED_REVIVE, FROST_WEAVE, GAIN, LOG_USES, RECRUIT_COSTS, TREES_FOR_MOTHER } from '../rules/config';
 import type { IdleReason } from '../rules/idle';
 import type { Level, RecruitableSpecies, SpeciesId } from '../rules/types';
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+/** «3, 5 y 7». */
+const listY = (items: readonly (string | number)[]) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} y ${items.at(-1)}`);
+/** Curva de reclutar (027): «cuesta 3, luego 5 y luego 7». */
+const recruitCurve = `cuesta ${listY(RECRUIT_COSTS.map((n, i) => (i === 0 ? n : `luego ${n}`)))}`;
 const times = (m: number) => `×${String(m).replace('.', ',')}`;
 
 // Textos visibles del juego. Español neutro, tono cozy, frases cortas.
@@ -230,7 +234,7 @@ export const es = {
       { title: 'Elige un hongo', text: 'Toca un hongo del gremio: se resaltan las casillas donde puede trabajar.' },
       { title: 'Trabaja junto a la red', text: 'Toca una casilla resaltada. Solo se trabaja junto a la red de micelio.' },
       { title: 'Una vez por mes', text: 'Cada hongo trabaja una vez por mes. Después pulsa «Fin del mes».' },
-      { title: 'Al empezar el mes', text: `Cada árbol vivo da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. Con ${COST.recruit} esporas reclutas otro hongo.` },
+      { title: 'Al empezar el mes', text: `Cada árbol vivo da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. Con esporas reclutas otro hongo: ${recruitCurve}.` },
       { title: 'Despierta al Árbol Padre', text: `Antes de que acabe el invierno: que la red lo toque, ${TREES_FOR_MOTHER} árboles revividos y ${COST.mother} nutrientes. Si dudas, sigue la ★.` },
     ],
     step: (n: number, total: number) => `Paso ${n} de ${total}`,
@@ -259,7 +263,7 @@ export const es = {
       'Toca un hongo del gremio: se resaltan las casillas donde puede trabajar.',
       'Toca una casilla resaltada. Solo se trabaja junto a la red de micelio.',
       'Cada hongo trabaja una vez por mes. Después pulsa «Fin del mes».',
-      `Al empezar el mes, cada árbol vivo da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. Con ${COST.recruit} esporas reclutas otro hongo.`,
+      `Al empezar el mes, cada árbol vivo da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. Con esporas reclutas otro hongo: ${recruitCurve}.`,
     ],
     guildTitle: 'El gremio',
     tilesTitle: 'Las casillas',
@@ -287,7 +291,8 @@ export const es = {
     of: (n: number) => `/${n}`,
     nutrients: 'nutrientes',
     spores: 'esporas',
-    sporesButton: (n: number) => `Esporas: ${n}. Abrir reclutar.`,
+    sporesButton: (n: number, cost: number | null) =>
+      cost === null ? `Esporas: ${n}. Gremio completo. Abrir reclutar.` : `Esporas: ${n}. El próximo recluta cuesta ${cost}. Abrir reclutar.`,
     recruitHint: 'esporas +',
     trees: 'árboles vivos',
     treesShort: 'árboles',
@@ -330,6 +335,7 @@ export const es = {
     showEndShort: 'Ver final',
     recruit: 'Reclutar',
     recruitCost: (n: number) => `${n} esporas`,
+    recruitFull: 'gremio completo',
   },
 
   story: {
@@ -361,7 +367,10 @@ export const es = {
   sheet: {
     close: 'Cerrar',
     recruitTitle: 'Reclutar al gremio',
-    recruitHelp: (cost: number, max: number) => `Cuesta ${cost} esporas. Hasta ${max} miembros; el recluta trabaja desde el mes siguiente.`,
+    recruitHelp: (cost: number | null, max: number) =>
+      cost === null
+        ? `El gremio está completo: ${max} miembros.`
+        : `El próximo recluta cuesta ${cost} esporas; cada uno cuesta más (${listY(RECRUIT_COSTS)}). Hasta ${max} miembros; trabaja desde el mes siguiente.`,
     recruitAction: 'Reclutar',
     info: (name: string) => `Ficha de ${name}`,
     mageArrives: 'Llega sola, al empezar el mes siguiente al segundo árbol revivido.',

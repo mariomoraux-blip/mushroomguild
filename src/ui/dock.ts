@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { COST, MONTHS, MAX_GUILD, magicSpent, recruitableCount, season, seasonIndex, MONTHS_PER_SEASON, weaveCost, type GameState, type Member } from '../rules';
+import { canRecruit, MONTHS, magicSpent, recruitCost, season, seasonIndex, MONTHS_PER_SEASON, weaveCost, type GameState, type Member } from '../rules';
 import { reducedMotion } from '../scenes/fx';
 import { suggestedMember, type AppState, type Store } from '../store';
 import { el, portrait, setPortrait, setText } from './dom';
@@ -32,7 +32,6 @@ export function mountDock(root: HTMLElement, store: Store) {
     el('span', { class: 'card__badge card__badge--plus', 'aria-hidden': 'true' }, '+'),
     el('span', { class: 'card__name' }, es.dock.recruit),
   );
-  recruit.setAttribute('aria-label', `${es.dock.recruit}: ${es.dock.recruitCost(COST.recruit)}`);
   const endLabel = el('span', { class: 'end__label' });
   const end = el('button', { class: 'end', type: 'button' }, el('span', { class: 'end__moon', 'aria-hidden': 'true' }), endLabel);
   const more = (side: 'start' | 'end') => el('span', { class: `dock__more dock__more--${side}`, 'aria-hidden': 'true' });
@@ -167,7 +166,9 @@ export function mountDock(root: HTMLElement, store: Store) {
     if (!state.ui.story) flush();
     // El botón abre la hoja aunque no alcance (allí están las fichas); si no se puede reclutar, solo se atenúa.
     recruit.disabled = !playing;
-    recruit.classList.toggle('is-used', g.spores < COST.recruit || recruitableCount(g) >= MAX_GUILD);
+    recruit.classList.toggle('is-used', !canRecruit(g));
+    const cost = recruitCost(g);
+    recruit.setAttribute('aria-label', `${es.dock.recruit}: ${cost === null ? es.dock.recruitFull : es.dock.recruitCost(cost)}`);
 
     const lastMonth = g.month >= MONTHS;
     setText(endLabel, !playing ? es.dock.showEndShort : lastMonth ? es.dock.endWinterShort : es.dock.endShort);

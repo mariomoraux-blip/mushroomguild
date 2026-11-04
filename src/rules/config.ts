@@ -8,7 +8,12 @@ export const MONTHS_PER_SEASON = 3;
 export const MAX_GUILD = 6;
 export const START_NUTRIENTS = 2;
 export const START_SPORES = 0;
-export const COST = { weave: 1, revive: 3, mother: 10, recruit: 2, call: 1 } as const;
+export const COST = { weave: 1, revive: 3, mother: 10, call: 1 } as const;
+/**
+ * Costo en esporas de cada recluta (027): el primero 3, el segundo 5, el tercero 7. Hay un valor por cupo
+ * (`MAX_GUILD − STARTING_GUILD`); los miembros iniciales y Maestra Bruma no cuentan como reclutados.
+ */
+export const RECRUIT_COSTS = [3, 5, 7] as const;
 export const GAIN = { log: 2, treeSpores: 1, treeNutrients: 1 } as const;
 export const LOG_USES = 2;
 export const TREES_FOR_MOTHER = 3;
@@ -60,7 +65,7 @@ export const SCORE = {
   timeParS: 480, // 1 punto por segundo por debajo de 8:00
 } as const;
 /** Versión de la fórmula: cambia la clave del récord guardado y el `ScoreResult`. */
-export const SCORE_VERSION = 2;
+export const SCORE_VERSION = 3;
 /** Estrellas por claro: 2 desde el 90 % y 3 desde el 110 % del puntaje del bot con criterio en ese claro. */
 export const STARS = { two: 0.9, three: 1.1 } as const;
 /** Segundos de juego por mes que se suponen para la partida de referencia del bot. */

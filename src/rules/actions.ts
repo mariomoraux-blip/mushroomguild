@@ -9,6 +9,7 @@ import {
   magicSpent,
   member,
   recruitableCount,
+  recruitCost,
   reviveCost,
   revivedCount,
   season,
@@ -160,9 +161,10 @@ export function recruit(s: GameState, species: RecruitableSpecies): ActionResult
   if (!RECRUITABLE.includes(species)) throw new RuleError(R.unknown);
   if (s.status !== 'playing') throw new RuleError(R.gameOver);
   if (recruitableCount(s) >= MAX_GUILD) throw new RuleError(R.guildFull);
-  if (s.spores < COST.recruit) throw new RuleError(R.recruitCost(COST.recruit), 'spores');
+  const cost = recruitCost(s)!;
+  if (s.spores < cost) throw new RuleError(R.recruitCost(cost), 'spores');
   const n = cloneState(s);
-  n.spores -= COST.recruit;
+  n.spores -= cost;
   n.log.push({ type: 'recruit', species });
   const m = addMember(n, species);
   m.used = true;
