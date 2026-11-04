@@ -2,6 +2,7 @@ import { es } from '../copy/es';
 import { COST, MAX_GUILD, RECRUITABLE, recruitableCount, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
 import type { AppState, Sheet, Store } from '../store';
 import { el, portrait } from './dom';
+import { recipesFor, RECIPE_STAGGER } from './recipe';
 import { hideLayer, showLayer } from './motion';
 
 const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
@@ -86,7 +87,8 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
         el('p', {}, g.context),
         el('p', { class: 'creature__quip' }, es.quote(info.quip)),
         ...section(S.ability, g.ability),
-        ...section(S.howTo, g.howTo),
+        // Cómo usarlo (026): la receta visual de la especie sobre el texto.
+        el('h3', {}, S.howTo), ...recipesFor(species, season), el('p', {}, g.howTo),
         ...section(S.movement, g.movement),
         ...section(S.nutrients, g.nutrients),
         ...section(S.heals, 'heals' in g ? g.heals : undefined),
@@ -108,12 +110,14 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
         el('h3', {}, h.howTitle),
         el('ol', {}, ...h.how.map((step) => el('li', {}, step))),
         el('h3', {}, h.guildTitle),
+        // El gremio (026): cada especie con su receta visual, escalonadas al abrir.
         el('ul', { class: 'rows' },
-          ...SPECIES.map((sp) =>
-            el('li', { class: 'row' }, el('span', { class: 'medal' }, portrait(sp, 'reposo', season)),
+          ...SPECIES.map((sp, i) =>
+            el('li', { class: 'row row--recipe' }, el('span', { class: 'medal' }, portrait(sp, 'reposo', season)),
               el('span', { class: 'row__text' },
                 el('strong', {}, sp === 'mago' ? es.mageName : es.species[sp].short), el('span', { class: 'row__role' }, ` · ${es.species[sp].role}`),
-                el('span', { class: 'row__verb' }, es.species[sp].verb))))),
+                el('span', { class: 'row__verb' }, es.species[sp].verb)),
+              ...recipesFor(sp, season, i * RECIPE_STAGGER)))),
         el('h3', {}, h.tilesTitle),
         el('ul', { class: 'help__tiles' }, ...tiles.map((t) => el('li', {}, t))),
         el('h3', {}, h.levelsTitle),
