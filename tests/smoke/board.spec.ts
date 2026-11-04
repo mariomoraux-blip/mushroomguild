@@ -10,6 +10,7 @@
 // board-interaction › Retratos del gremio: "La maga en el tablero" → "Maestra Bruma: retrato propio…".
 // player-guidance › Libreta de campo: "Consultar la ayuda" → "Libreta de campo".
 // player-guidance › Meta visible: "Inicio" → "guía".
+// player-guidance › Recetas visuales: "Ficha de Bruno", "Libreta con las cinco recetas" y "Movimiento reducido" → "Recetas (026)".
 // title-screens › Elige tu dificultad y player-guidance › Ancestral sin pistas, board-interaction › Árbol marcado y apagado
 //   y Escarcha en el HUD (019) → "Niveles".
 import { expect, test, type Page } from '@playwright/test';
@@ -892,5 +893,40 @@ test('Movimiento P1 (022) con movimiento reducido: fundidos cortos y la victoria
   await page.locator('.card--amanita').click();
   await page.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
   await expect(page.locator('#story [role="dialog"]')).toBeVisible();
+  await ctx.close();
+});
+
+test('Recetas (026): «Cómo usarlo» de la ficha y la Libreta muestran qué hace cada hongo, sin desbordarse', async ({ page }, info) => {
+  await page.goto('/?map=clasico');
+  await page.locator('.card--recruit').click();
+  await page.getByRole('button', { name: 'Ficha de Champiñón' }).click();
+  const dialog = page.getByRole('dialog');
+  const bruno = dialog.getByRole('img', { name: /^Antes: la red y un tronco resaltado/ });
+  await expect(bruno).toHaveCount(1);
+  await expect(bruno.locator('.recipe__chip')).toHaveText('+2');
+  await expect(bruno.locator('.recipe__after > *').first()).toHaveCSS('animation-name', 'recipe-pop');
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/026-ficha-390x844.png' });
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Ayuda: Cómo jugar' }).click();
+  await page.getByRole('button', { name: 'Libreta de campo' }).click();
+  const recipes = page.getByRole('dialog').locator('.recipe');
+  await expect(recipes).toHaveCount(6);
+  for (const name of [/la red creció/, /el tronco usado/, /el árbol vivo/, /compañero cansado/, /^Brote arcano/, /^Lluvia de esporas/])
+    await expect(page.getByRole('dialog').getByRole('img', { name })).toHaveCount(1);
+  // Ninguna receta se sale de su caja (las piezas no se recortan a 360 px ni en horizontal).
+  const overflow = await recipes.evaluateAll((ns) => ns.map((n) => n.scrollWidth - n.clientWidth));
+  expect(overflow.every((o) => o <= 0)).toBe(true);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/026-libreta-390x844.png' });
+});
+
+test('Recetas (026) con movimiento reducido: quietas desde el principio', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  const page = await ctx.newPage();
+  await page.addInitScript(() => localStorage.setItem('gremio.seenSpecies', JSON.stringify(['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'])));
+  await page.goto('/?map=clasico');
+  await page.getByRole('button', { name: 'Ayuda: Cómo jugar' }).click();
+  await page.getByRole('button', { name: 'Libreta de campo' }).click();
+  const names = await page.locator('.recipe__arrow, .recipe__after > *').evaluateAll((ns) => [...new Set(ns.map((n) => getComputedStyle(n).animationName))]);
+  expect(names).toEqual(['none']);
   await ctx.close();
 });

@@ -958,6 +958,76 @@ button { font: inherit; color: inherit; }
 .card.is-waking { animation: card-wake var(--motion-fast) var(--ease-springy) var(--wake-delay) backwards; }
 .end.is-turning .end__moon { animation: moon-turn var(--motion-standard) var(--ease-soft); }
 @keyframes moon-turn { from { transform: rotate(-180deg); } }
+/* Recetas visuales (026): «antes → después» con las piezas del tablero; el después entra una vez con un saltito. */
+.recipe {
+  --recipe-tile: 48px;
+  --recipe-delay: 0ms;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--mycelium) 22%, transparent);
+}
+.recipe + .recipe { margin-top: 6px; }
+.recipe__side { display: flex; align-items: center; gap: 6px; }
+.recipe__tile {
+  position: relative;
+  flex: none;
+  width: var(--recipe-tile);
+  height: var(--recipe-tile);
+  overflow: hidden;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  background: center / cover no-repeat;
+}
+.recipe__tile img { position: absolute; left: 4%; bottom: 0; width: 92%; height: auto; pointer-events: none; }
+.recipe__tile.is-valid { box-shadow: 0 0 0 3px var(--sun); }
+.recipe__member { position: relative; display: flex; }
+.recipe__member .medal { flex-basis: 40px; height: 40px; margin: 4px; }
+.recipe__member .medal .portrait { width: 36px; height: 34px; }
+.recipe__member.is-tired .medal { filter: saturate(0.3) brightness(0.85); }
+.recipe__zz {
+  position: absolute;
+  top: -2px;
+  right: -6px;
+  padding: 0 4px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  color: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  background: var(--indigo);
+}
+.recipe__arrow { flex: none; font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--wood); }
+.recipe__chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 7px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--leafDark);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  background: var(--cream);
+}
+.recipe__chip[data-sign='-'] { color: var(--berry); }
+.recipe--titled { flex-wrap: wrap; }
+.recipe__title { flex: 1 0 100%; font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--moss); }
+.recipe__chip img { width: 16px; height: 16px; }
+.row--recipe { flex-wrap: wrap; }
+.row--recipe .recipe { flex: 1 0 100%; margin: 0; }
+.recipe__arrow { animation: recipe-arrow var(--motion-fast) var(--ease-settle) var(--recipe-delay) backwards; }
+.recipe__after > * { animation: recipe-pop var(--motion-standard) var(--ease-springy) calc(var(--motion-fast) + var(--recipe-delay)) backwards; }
+@keyframes recipe-arrow { from { opacity: 0; transform: translateX(-4px); } }
+@keyframes recipe-pop { from { opacity: 0; transform: scale(0.8); } }
+@media (min-width: 380px) { .recipe { --recipe-tile: 52px; } }
 /* Ficha de una especie que aún no se vio (022): punto «nuevo» y un latido al aparecer. */
 .btn.is-new { position: relative; animation: new-pulse var(--motion-standard) var(--ease-springy); }
 .btn.is-new::after {
@@ -1054,7 +1124,7 @@ button { font: inherit; color: inherit; }
   @keyframes zz-blink { 50% { opacity: 0.4; } }
   :is(.sheet, .story, .screen):not([hidden]),
   .sheet__panel, .story__card, .screen__panel.is-entering, .story[data-kind='mage'] .story__card, .story__card.is-in { animation-name: fade-in; animation-duration: var(--motion-fast); }
-  .story__dot.is-active, .card.is-picked .portrait, .card.is-picked .card__medal, .card.is-waking, .end.is-turning .end__moon { animation: none; }
+  .recipe__arrow, .recipe__after > *, .story__dot.is-active, .card.is-picked .portrait, .card.is-picked .card__medal, .card.is-waking, .end.is-turning .end__moon { animation: none; }
   .card[aria-pressed='true'] .portrait { transform: none; }
   .card.is-joining, .card.is-arriving, .hud__season.is-new-season, .portrait.is-new-season img { animation-name: fade-in; animation-duration: var(--motion-fast); }
   .story__card.is-out, .sheet.is-leaving .sheet__panel, .story.is-leaving .story__card, .screen.is-leaving .screen__panel { animation-name: fade-out; }

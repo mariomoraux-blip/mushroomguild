@@ -150,6 +150,15 @@ export const es = {
       powers: 'Poderes',
     },
   },
+  /** Recetas visuales (026): lo que dice el lector de pantalla de cada tira «antes → después». */
+  recipe: {
+    lactarius: `Antes: la red y una tierra resaltada. Después: la red creció una casilla. Gasta ${plural(COST.weave, 'nutriente')}.`,
+    champi: `Antes: la red y un tronco resaltado. Después: el tronco usado y ${plural(GAIN.log, 'nutriente')} más.`,
+    amanita: `Antes: la red y un árbol gris resaltado. Después: el árbol vivo. Gasta ${COST.revive} nutrientes.`,
+    gliophorus: `Antes: un compañero cansado. Después: el compañero, listo para trabajar otra vez. Gasta ${plural(COST.call, 'espora')}.`,
+    sprout: 'Brote arcano. Antes: la red y una roca resaltada. Después: la roca es red.',
+    rain: 'Lluvia de esporas. Antes: un árbol vivo resaltado. Después: esporas y nutrientes extra por cada árbol vivo.',
+  },
   guide: {
     champi: {
       context: 'El más trabajador del gremio: convierte la madera muerta en alimento para el bosque.',
