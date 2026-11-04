@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
-import { act, advise, certify, endMonth, newGame, newRandomGame, noWorkThisMonth, recruit, validTargets, type GameState } from '../src/rules';
+import { act, advise, certify, endMonth, newGame, noWorkThisMonth, recruit, validTargets, type GameState } from '../src/rules';
 import { initialState, reduce } from '../src/store';
 import { INDI, BRUNO, RUBI } from './helpers';
 
 // Reporte de producción (024): Ancestral, semilla 745. El jugador hizo lo mismo que la línea ganadora del
 // certificador y en el mes 4 nadie del gremio tenía trabajo.
+// El claro queda fijo: desde el 027 (reclutar 3, 5, 7) la semilla 745 genera otro claro.
 // Sin `endMonth` del mes 3 si `closeLast` es falso (para cerrarlo desde el store).
+const REPORT_MAP = ['.T.ML', '.R..T', '....T', 'LT.R.', '.RLLR', 'RT.TT', 'R.RR.', 'RRLH.'];
 function report(closeLast = true): GameState {
-  let s = newRandomGame(745, 'ancestral');
+  let s = newGame(REPORT_MAP, 'seed-745', 'ancestral');
   const moves: [number, number, number][][] = [
     [[BRUNO, 2, 7], [INDI, 4, 7]],
     [[BRUNO, 2, 7], [INDI, 4, 6], [RUBI, 4, 5]],
@@ -32,7 +34,7 @@ describe('Requirement: Aviso de mes vacío', () => {
   });
 
   it('reclutar no lo apaga: el recluta llega cansado', () => {
-    expect(noWorkThisMonth(recruit(report(), 'lactarius').state)).toBe(true);
+    expect(noWorkThisMonth(recruit({ ...report(), spores: 3 }, 'lactarius').state)).toBe(true);
   });
 
   it('no es un mes vacío si alguien ya actuó este mes', () => {
@@ -68,13 +70,16 @@ describe('Requirement: Aviso de mes vacío', () => {
   });
 
   it('después de reclutar en un mes vacío, la bitácora lo sigue diciendo', () => {
-    const next = reduce(initialState(report()), { type: 'recruit', species: 'lactarius' });
+    const next = reduce(initialState({ ...report(), spores: 3 }), { type: 'recruit', species: 'lactarius' });
+    expect(next.game.members).toHaveLength(4);
     expect(next.ui.notice.text).toContain(es.log.emptyMonth(1));
   });
 
   it('con pistas, la pista de reclutar se queda; la de terminar el mes cede al aviso', () => {
     const bosque = { ...report(), level: 'bosque' as const };
-    expect(initialState(bosque).ui.notice.text).toMatch(/^Pista: tienes 2 esporas/);
+    expect(initialState({ ...bosque, spores: 3 }).ui.notice.text).toMatch(/^Pista: tienes 3 esporas/);
+    // Con 2 esporas ya no alcanza para el primer recluta (027): la pista de terminar el mes cede al aviso.
+    expect(initialState(bosque).ui.notice.text).toBe(es.log.emptyMonth(1));
     expect(initialState({ ...bosque, spores: 0 }).ui.notice.text).toBe(es.log.emptyMonth(1));
   });
 

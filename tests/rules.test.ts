@@ -3,14 +3,17 @@ import { es } from '../src/copy/es';
 import {
   act,
   check,
-  COST,
   endMonth,
   H,
   MAX_GUILD,
   newGame,
+  RECRUIT_COSTS,
   RECRUITABLE,
   type RecruitableSpecies,
   recruit,
+  recruitCost,
+  recruitedCount,
+  STARTING_GUILD,
   revivedCount,
   RuleError,
   season,
@@ -332,9 +335,9 @@ describe('Requirement: Cambio de mes', () => {
 });
 
 describe('Requirement: Reclutar', () => {
-  it('con 2 esporas recluta un miembro de cualquier especie, que trabaja desde el mes siguiente', () => {
+  it('con 3 esporas recluta un miembro de cualquier especie, que trabaja desde el mes siguiente', () => {
     for (const sp of RECRUITABLE) {
-      const s = setup({ spores: 2, net: [SOIL_NEAR_HOME] });
+      const s = setup({ spores: 3, net: [SOIL_NEAR_HOME] });
       const { state } = pure(s, (s) => recruit(s, sp));
       const m = state.members.at(-1)!;
       expect(m.species).toBe(sp);
@@ -344,21 +347,47 @@ describe('Requirement: Reclutar', () => {
     }
   });
 
+  it('Scenario: Cada recluta cuesta más — el primero 3, el segundo 5 y el tercero 7', () => {
+    expect(RECRUIT_COSTS).toEqual([3, 5, 7]);
+    expect(RECRUIT_COSTS).toHaveLength(MAX_GUILD - STARTING_GUILD.length);
+    let s = setup({ spores: 15 });
+    const paid: number[] = [];
+    for (const sp of ['lactarius', 'gliophorus', 'amanita'] as const) {
+      const before = s.spores;
+      expect(recruitCost(s)).toBe(RECRUIT_COSTS[recruitedCount(s)]);
+      s = recruit(s, sp).state;
+      paid.push(before - s.spores);
+    }
+    expect(paid).toEqual([3, 5, 7]);
+    expect(s.spores).toBe(0);
+    expect(recruitCost(s)).toBeNull();
+  });
+
+  it('Scenario: Los iniciales y Maestra Bruma no cuentan como reclutados', () => {
+    expect(recruitedCount(newGame())).toBe(0);
+    expect(recruitCost(newGame())).toBe(3);
+    const withMage = setup({ spores: 5, extraMembers: ['champi'], mage: true });
+    expect(recruitedCount(withMage)).toBe(1);
+    expect(recruitCost(withMage)).toBe(5);
+  });
+
   it('Scenario: Gremio completo — reclutar se rechaza con "El gremio está completo." (la maga no cuenta)', () => {
     const s = setup({ spores: 10, extraMembers: ['lactarius', 'champi', 'gliophorus'], mage: true });
     expect(s.members).toHaveLength(MAX_GUILD + 1);
     expect(() => recruit(s, 'lactarius')).toThrow(new RuleError('El gremio está completo.'));
-    // Sin la maga y con 5 reclutables todavía cabe uno más.
-    const five = setup({ spores: 2, extraMembers: ['lactarius', 'champi'], mage: true });
+    // Sin la maga y con 5 reclutables todavía cabe uno más (el tercero: 7 esporas).
+    const five = setup({ spores: 7, extraMembers: ['lactarius', 'champi'], mage: true });
     expect(recruit(five, 'gliophorus').state.members.filter((m) => m.species !== 'mago')).toHaveLength(MAX_GUILD);
   });
 
-  it('sin esporas suficientes se rechaza', () => {
-    expect(() => recruit(setup({ spores: 1 }), 'lactarius')).toThrow(new RuleError(es.reasons.recruitCost(COST.recruit), 'spores'));
+  it('sin esporas suficientes se rechaza con el costo del próximo recluta', () => {
+    expect(() => recruit(setup({ spores: 2 }), 'lactarius')).toThrow(new RuleError('Reclutar cuesta 3 esporas.', 'spores'));
+    expect(() => recruit(setup({ spores: 4, extraMembers: ['champi'] }), 'lactarius')).toThrow(new RuleError('Reclutar cuesta 5 esporas.', 'spores'));
+    expect(() => recruit(setup({ spores: 6, extraMembers: ['champi', 'lactarius'] }), 'amanita')).toThrow(new RuleError('Reclutar cuesta 7 esporas.', 'spores'));
   });
 
   it('los reclutas reciben los nombres en orden', () => {
-    let s = setup({ spores: 6 });
+    let s = setup({ spores: 15 });
     s = recruit(s, 'lactarius').state;
     s = recruit(s, 'gliophorus').state;
     s = recruit(s, 'champi').state;

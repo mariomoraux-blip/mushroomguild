@@ -716,7 +716,20 @@ test('Niveles: Elige tu dificultad con teclado, Ancestral sin ★, árbol marcad
 
 test('Mes vacío: el reporte de Ancestral (semilla 745) avisa que nadie tiene trabajo, sin «Pista:»', async ({ page }, info) => {
   // Las jugadas del jugador en los meses 1 a 3 (iguales a la línea ganadora del certificador, 024).
-  await page.goto('/?nivel=ancestral&seed=745');
+  // El claro queda fijo: desde el 027 (reclutar 3, 5, 7) la semilla 745 genera otro (igual que en empty-month.test.ts).
+  await page.goto('/?nivel=ancestral&map=clasico');
+  await page.evaluate(() => {
+    const map = ['.T.ML', '.R..T', '....T', 'LT.R.', '.RLLR', 'RT.TT', 'R.RR.', 'RRLH.'];
+    const kind: Record<string, string> = { H: 'home', M: 'mother', '.': 'soil', L: 'log', T: 'tree', R: 'rock' };
+    type S = { getState(): { game: { tiles: { x: number; y: number }[] } }; dispatch(a: object): void };
+    const store = (window as unknown as { store: S }).store;
+    const game = store.getState().game;
+    const tiles = game.tiles.map((t) => {
+      const k = kind[map[t.y]![t.x]!]!;
+      return { ...t, kind: k, net: k === 'home', uses: 0, alive: false, fading: false, faded: false };
+    });
+    store.dispatch({ type: 'start', game: { ...game, tiles, mapId: 'seed-745' }, intro: false });
+  });
   const months: [string, number, number][][] = [
     [['champi', 2, 7], ['lactarius', 4, 7]],
     [['champi', 2, 7], ['lactarius', 4, 6], ['amanita', 4, 5]],
@@ -846,7 +859,10 @@ test('Movimiento P1 (022): capas que entran y salen, intro, selección, gremio, 
   await expect(page.locator('#story')).toContainText('Llegó Maestra Bruma');
   await page.getByRole('button', { name: 'Seguir' }).click();
   await expect(page.locator('.card--mago')).toHaveClass(/is-arriving/);
+  // Un mes más para juntar las 3 esporas del primer recluta (027).
   await page.locator('.end').click();
+  await page.locator('.end').click();
+  await expect(page.locator('.chip__value').nth(1)).toHaveText('3');
   await page.locator('.card--recruit').click();
   await page.locator('#sheet [data-action="recruit"]').first().click();
   await expect(page.locator('.dock__item').nth(4).locator('.card')).toHaveClass(/is-joining/);
@@ -929,4 +945,43 @@ test('Recetas (026) con movimiento reducido: quietas desde el principio', async 
   const names = await page.locator('.recipe__arrow, .recipe__after > *').evaluateAll((ns) => [...new Set(ns.map((n) => getComputedStyle(n).animationName))]);
   expect(names).toEqual(['none']);
   await ctx.close();
+});
+
+test('Reclutar (027): cada recluta cuesta más (3, 5 y 7) y la hoja dice cuánto cuesta el próximo', async ({ page }, info) => {
+  await page.goto('/?map=clasico');
+  const recruitCard = page.locator('.card--recruit');
+  // Sin esporas: el medallón se atenúa y dice el costo del primero.
+  await expect(recruitCard).toHaveClass(/is-used/);
+  await expect(recruitCard).toHaveAttribute('aria-label', 'Reclutar: 3 esporas');
+  await expect(page.getByRole('button', { name: 'Esporas: 0. El próximo recluta cuesta 3. Abrir reclutar.' })).toHaveCount(1);
+  // Partida con 8 esporas (vía el store de desarrollo): el primero cuesta 3 y deja 5 para el segundo.
+  await page.evaluate(() => {
+    type S = { getState(): { game: object }; dispatch(a: object): void };
+    const store = (window as unknown as { store: S }).store;
+    store.dispatch({ type: 'start', game: { ...store.getState().game, spores: 8 }, intro: false });
+  });
+  await expect(recruitCard).not.toHaveClass(/is-used/);
+  await recruitCard.click();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet).toContainText('El próximo recluta cuesta 3 esporas; cada uno cuesta más (3, 5 y 7).');
+  await sheet.locator('[data-action="recruit"][data-species="gliophorus"]').click();
+  await expect(page.locator('.chip__value').nth(1)).toHaveText('5');
+  await expect(recruitCard).toHaveAttribute('aria-label', 'Reclutar: 5 esporas');
+  await expect(recruitCard).not.toHaveClass(/is-used/);
+  await recruitCard.click();
+  await expect(sheet).toContainText('El próximo recluta cuesta 5 esporas');
+  await sheet.locator('[data-action="recruit"][data-species="lactarius"]').click();
+  // Quedan 0 esporas y el tercero cuesta 7: la hoja lo dice y sus botones no se pueden pulsar.
+  await expect(page.locator('.chip__value').nth(1)).toHaveText('0');
+  await expect(recruitCard).toHaveClass(/is-used/);
+  await expect(recruitCard).toHaveAttribute('aria-label', 'Reclutar: 7 esporas');
+  await recruitCard.click();
+  await expect(sheet).toContainText('El próximo recluta cuesta 7 esporas');
+  await expect(sheet.locator('[data-action="recruit"]').first()).toBeDisabled();
+  const overflow = await sheet.evaluate((n) => n.scrollWidth - n.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/027-reclutar-390x844.png' });
+  // Esc cierra la hoja (teclado).
+  await page.keyboard.press('Escape');
+  await expect(sheet).toHaveCount(0);
 });

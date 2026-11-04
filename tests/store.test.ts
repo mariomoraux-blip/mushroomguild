@@ -101,7 +101,7 @@ describe('Requirement: Feedback de acción inválida', () => {
 
   it('Scenario: Sin trabajo disponible (Gliophorus psittacinus)', () => {
     // Chispa recién reclutada; al mes siguiente Bruno trabaja y no quedan esporas para pasarle la voz.
-    const withChispa = reduce(init(setup({ spores: 2 })), { type: 'recruit', species: 'gliophorus' }).game;
+    const withChispa = reduce(init(setup({ spores: 3 })), { type: 'recruit', species: 'gliophorus' }).game;
     const nextMonth = run(init(withChispa), { type: 'endMonth' }, { type: 'select', id: BRUNO }, { type: 'tapTile', x: 1, y: 7 }).game;
     const s = run(init(nextMonth), { type: 'select', id: idOf(nextMonth, 'gliophorus') });
     expect(s.ui.notice.text).toBe('Chispa: falta 1 espora: pasar la voz cuesta 1.');
@@ -138,10 +138,10 @@ describe('Requirement: Estado visible', () => {
 
 describe('store: reclutar, terminar el mes y fin de partida', () => {
   it('reclutar con esporas usa las reglas; sin esporas avisa el motivo', () => {
-    const ok = reduce(init(setup({ spores: 2 })), { type: 'recruit', species: 'gliophorus' });
+    const ok = reduce(init(setup({ spores: 3 })), { type: 'recruit', species: 'gliophorus' });
     expect(ok.game.members.at(-1)?.name).toBe('Chispa');
     const no = reduce(init(), { type: 'recruit', species: 'gliophorus' });
-    expect(no.ui.notice).toEqual({ text: es.reasons.recruitCost(2), tone: 'warn', short: 'spores' });
+    expect(no.ui.notice).toEqual({ text: es.reasons.recruitCost(3), tone: 'warn', short: 'spores' });
   });
 
   it('terminar el mes avanza el mes y muestra el cambio de mes', () => {

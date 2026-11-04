@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { COST, MAX_GUILD, RECRUITABLE, recruitableCount, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
+import { canRecruit, MAX_GUILD, RECRUITABLE, recruitCost, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
 import type { AppState, Sheet, Store } from '../store';
 import { el, portrait } from './dom';
 import { recipesFor, RECIPE_STAGGER } from './recipe';
@@ -50,7 +50,7 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
   function recruitSheet(state: AppState) {
     const season = currentSeason;
     const g = state.game;
-    const can = g.status === 'playing' && g.spores >= COST.recruit && recruitableCount(g) < MAX_GUILD;
+    const can = g.status === 'playing' && canRecruit(g);
     const rows = SPECIES.map((sp) => {
       const info = es.species[sp];
       const action =
@@ -68,7 +68,7 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
         action,
       );
     });
-    return panel(es.sheet.recruitTitle, el('p', { class: 'sheet__help' }, es.sheet.recruitHelp(COST.recruit, MAX_GUILD)), el('ul', { class: 'rows' }, ...rows));
+    return panel(es.sheet.recruitTitle, el('p', { class: 'sheet__help' }, es.sheet.recruitHelp(recruitCost(g), MAX_GUILD)), el('ul', { class: 'rows' }, ...rows));
   }
 
   /** Ficha de una especie (y de un miembro concreto, si se abrió al seleccionarlo). */

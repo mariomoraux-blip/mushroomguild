@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MONTHS, MONTHS_PER_SEASON, H, KIND, MAP, START_NUTRIENTS, START_SPORES, STARTING_GUILD, W } from './config';
+import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MAX_GUILD, MONTHS, MONTHS_PER_SEASON, H, KIND, MAP, RECRUIT_COSTS, START_NUTRIENTS, START_SPORES, STARTING_GUILD, W } from './config';
 import type { GameState, Level, Member, Mutable, RecruitableSpecies, Tile } from './types';
 
 export type MutableState = Mutable<GameState> & { tiles: Mutable<Tile>[]; members: Mutable<Member>[] };
@@ -86,6 +86,11 @@ export const workerAt = (s: GameState, x: number, y: number): Member | undefined
 export const mage = (s: GameState): Member | undefined => s.members.find((m) => m.species === 'mago');
 /** Miembros que cuentan en el límite del gremio (todos menos la maga). */
 export const recruitableCount = (s: GameState): number => s.members.filter((m) => m.species !== 'mago').length;
+/** Miembros reclutados en la partida: los reclutables menos el gremio inicial (la maga no cuenta). */
+export const recruitedCount = (s: GameState): number => Math.max(0, recruitableCount(s) - STARTING_GUILD.length);
+/** Esporas que cuesta el próximo recluta (027: 3, 5, 7), o `null` si el gremio está completo. */
+export const recruitCost = (s: GameState): number | null =>
+  recruitableCount(s) >= MAX_GUILD ? null : (RECRUIT_COSTS[recruitedCount(s)] ?? null);
 export const motherTile = (s: GameState): Tile => s.tiles.find((t) => t.kind === 'mother')!;
 
 /** Índice de estación (0 = Primavera … 3 = Invierno). */

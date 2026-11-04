@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
-import { act, advise, missingMessenger, newGame, recruitPick, weaveGoal } from '../src/rules';
+import { act, advise, canRecruit, missingMessenger, newGame, recruitPick, weaveGoal } from '../src/rules';
 import { highlighted, idleHint, initialState, reduce, suggestedMember, suggestedTile } from '../src/store';
 import { INDI, BRUNO, idOf, RUBI, setup } from './helpers';
 
@@ -69,22 +69,42 @@ describe('Requirement: Para qué sirve cada hongo', () => {
 });
 
 describe('Requirement: Cómo reclutar', () => {
+  it('Scenario: La hoja dice cuánto cuesta el próximo — los textos salen de RECRUIT_COSTS', () => {
+    expect(es.sheet.recruitHelp(3, 6)).toBe('El próximo recluta cuesta 3 esporas; cada uno cuesta más (3, 5 y 7). Hasta 6 miembros; trabaja desde el mes siguiente.');
+    expect(es.sheet.recruitHelp(null, 6)).toBe('El gremio está completo: 6 miembros.');
+    expect(es.hud.sporesButton(2, 3)).toBe('Esporas: 2. El próximo recluta cuesta 3. Abrir reclutar.');
+    expect(es.hud.sporesButton(4, null)).toBe('Esporas: 4. Gremio completo. Abrir reclutar.');
+    const curve = 'Con esporas reclutas otro hongo: cuesta 3, luego 5 y luego 7.';
+    expect(es.howto.steps[3]!.text).toContain(curve);
+    expect(es.help.how[3]).toContain(curve);
+    expect(JSON.stringify(es)).not.toContain('Con 2 esporas');
+  });
+
   it('Scenario: Nadie tiene una acción útil — la pista sugiere reclutar y qué especie conviene', () => {
-    const s = setup({ spores: 2, used: [INDI, BRUNO, RUBI] });
+    const s = setup({ spores: 3, used: [INDI, BRUNO, RUBI] });
     expect(advise(s)).toEqual({ kind: 'recruit', species: 'lactarius' });
-    expect(idleHint(s).text).toBe('Pista: tienes 2 esporas. Recluta un Lactarius en «+ Reclutar» o tocando las esporas.');
+    expect(idleHint(s).text).toBe('Pista: tienes 3 esporas. Recluta un Lactarius en «+ Reclutar» o tocando las esporas.');
+  });
+
+  it('Scenario: No alcanza para el próximo — con 2 esporas, o con 4 tras el primer recluta, la pista no sugiere reclutar', () => {
+    expect(advise(setup({ spores: 2, used: [INDI, BRUNO, RUBI] }))).toEqual({ kind: 'endMonth' });
+    const extra = setup({ spores: 4, used: [INDI, BRUNO, RUBI], extraMembers: ['lactarius'] });
+    const one = { ...extra, members: extra.members.map((m) => ({ ...m, used: true })) };
+    expect(canRecruit(one)).toBe(false);
+    expect(advise(one).kind).not.toBe('recruit');
+    expect(advise({ ...one, spores: 5 }).kind).toBe('recruit');
   });
 
   it('Scenario: Falta la Mensajera — Rubí revivió y podría revivir otro: la pista sugiere una Gliophorus', () => {
     // Red junto a dos árboles grises del mapa clásico: (4,1) y (2,5).
-    const s0 = setup({ spores: 2, nutrients: 10, net: [{ x: 3, y: 1 }, { x: 2, y: 4 }] });
+    const s0 = setup({ spores: 3, nutrients: 10, net: [{ x: 3, y: 1 }, { x: 2, y: 4 }] });
     const s = act(s0, RUBI, 4, 1).state;
     expect(missingMessenger(s)).toBe(true);
     expect(advise(s)).toEqual({ kind: 'recruit', species: 'gliophorus' });
   });
 
   it('Scenario: Hay trabajo útil — con esporas y cupo, la pista sugiere a Bruno y no reclutar', () => {
-    const s = setup({ spores: 2 });
+    const s = setup({ spores: 3 });
     expect(advise(s)).toMatchObject({ kind: 'decompose', memberId: BRUNO });
   });
 
