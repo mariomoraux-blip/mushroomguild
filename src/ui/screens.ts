@@ -3,6 +3,7 @@ import { LEVEL_IDS, LEVELS, RECRUITABLE, seasonIndex, type Level, type SpeciesId
 import { HOWTO_STEPS, type AppState, type Screen, type Store } from '../store';
 import { assetUrl, SCREEN_ART } from '../theme';
 import { el, portrait } from './dom';
+import { howtoArt } from './howto-art';
 import { hideLayer, showLayer } from './motion';
 
 const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
@@ -95,16 +96,16 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
               el('span', { class: 'level__mult' }, es.levels.multiplier(LEVELS[lv].multiplier)))))));
   }
 
-  function howto(screen: Extract<Screen, { kind: 'howto' }>) {
+  function howto(screen: Extract<Screen, { kind: 'howto' }>, state: AppState) {
     const page = es.howto.steps[screen.step]!;
     const last = screen.step === HOWTO_STEPS - 1;
-    const art = SCREEN_ART.howto[screen.step] ?? [];
     return el('div', { class: 'screen__panel' },
       header(es.howto.title),
       el('section', { class: 'howto', 'aria-roledescription': 'carrusel', 'aria-labelledby': 'screen-title' },
         el('div', { class: 'howto__card', 'aria-live': 'polite' },
           el('p', { class: 'howto__count' }, es.howto.step(screen.step + 1, HOWTO_STEPS)),
-          el('div', { class: `howto__art howto__art--${art.length}`, 'aria-hidden': 'true' }, ...art.map((k) => img(k, 'howto__img'))),
+          // Miniatura de la interfaz (029): decorativa, no se toca ni se enfoca.
+          el('div', { class: 'howto__art', 'aria-hidden': 'true', inert: '' }, ...howtoArt(screen.step, state.game, seasonIndex(state.game.month))),
           el('h2', { class: 'howto__title' }, page.title),
           el('p', { class: 'howto__text' }, page.text)),
         el('div', { class: 'howto__nav' },
@@ -148,7 +149,7 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
     root.dataset.kind = screen.kind;
     const focused = (document.activeElement as HTMLElement | null)?.dataset;
     const refocus = focused?.action === 'step' ? `[data-action="step"][data-step="${focused.step}"]` : null;
-    root.replaceChildren(screen.kind === 'title' ? title() : screen.kind === 'level' ? levelScreen() : screen.kind === 'howto' ? howto(screen) : guild(state));
+    root.replaceChildren(screen.kind === 'title' ? title() : screen.kind === 'level' ? levelScreen() : screen.kind === 'howto' ? howto(screen, state) : guild(state));
     // Entrada (022): el panel sube al cambiar de pantalla, no al pasar de paso en el carrusel.
     if (kindChanged) root.querySelector('.screen__panel')?.classList.add('is-entering');
     // Foco: el botón principal al entrar; en el carrusel, se mantiene en el control que se usó.

@@ -12,6 +12,7 @@
 // player-guidance › Meta visible: "Inicio" → "guía".
 // player-guidance › Recetas visuales: "Ficha de Bruno", "Libreta con las cinco recetas" y "Movimiento reducido" → "Recetas (026)".
 // story-presentation › Llega el frío y player-guidance › Avisos de la presión (hongo con hambre) → "Invierno duro (028)".
+// title-screens › Cómo jugar: "El paso se parece a la partida" → "Cómo jugar (029)".
 // title-screens › Elige tu dificultad y player-guidance › Ancestral sin pistas, board-interaction › Árbol marcado y apagado
 //   y Escarcha en el HUD (019) → "Niveles".
 import { expect, test, type Page } from '@playwright/test';
@@ -1018,4 +1019,31 @@ test('Invierno duro (028): carta «Llega el frío» al empezar el invierno en Bo
   await expect(page.locator('[data-id="1"]')).toHaveAttribute('aria-label', /Con hambre/);
   await expect(page.locator('[data-id="1"]')).toHaveClass(/is-used/);
   await expect(page.locator('[data-id="2"]')).not.toHaveClass(/is-used/);
+});
+
+test('Cómo jugar (029): cada paso muestra la interfaz de la partida, decorativa y sin desbordarse', async ({ page }, info) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Cómo jugar', exact: true }).click();
+  const art = page.locator('.howto__art');
+  const expected = ['.card[aria-pressed="true"] .card__badge[data-kind="star"]', '.recipe__tile.is-valid', '.card.is-used .card__badge[data-kind="rest"]', '.card--recruit', '.chip--trees'];
+  for (let i = 0; i < 5; i++) {
+    await page.getByRole('button', { name: `Ir al paso ${i + 1}` }).click();
+    await expect(art.locator(expected[i]!).first()).toBeVisible();
+    await expect(art).toHaveAttribute('aria-hidden', 'true');
+    expect(await art.evaluate((n) => n.hasAttribute('inert') && n.querySelectorAll('button, a, [tabindex]').length === 0)).toBe(true);
+    // Ninguna pieza se sale de la tarjeta del paso.
+    const outside = await art.evaluate((n) => {
+      const box = n.closest('.howto__card')!.getBoundingClientRect();
+      return [...n.querySelectorAll('*')].filter((e) => {
+        const r = e.getBoundingClientRect();
+        return r.width > 0 && (r.left < box.left || r.right > box.right || r.top < box.top || r.bottom > box.bottom);
+      }).length;
+    });
+    expect(outside).toBe(0);
+    if (i === 2) {
+      await expect(art.locator('.end')).toHaveText('Fin del mes');
+      if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/029-como-jugar-390x844.png' });
+    }
+  }
+  await noScrollNoZoom(page);
 });

@@ -6,11 +6,11 @@ import { assetUrl, BOARD_ART, SEASON_SLUGS, type SeasonSlug } from '../theme';
 import { el, portrait } from './dom';
 
 /** Una casilla (tierra o red, con un objeto encima) o el medallón de un compañero (Chispa). */
-type Piece =
+export type Piece =
   | { ground: 'grass' | 'net'; object?: 'log' | 'logUsed' | 'rock' | 'grey' | 'alive'; valid?: boolean }
   | { member: SpeciesId; tired: boolean };
 /** Lo que gana (+) o gasta (−): un recurso con su número («+» si depende de cuántos árboles vivos haya). */
-type Chip = { icon: 'nutrients' | 'spores'; n: number | '+' };
+export type Chip = { icon: 'nutrients' | 'spores'; n: number | '+' };
 
 export interface Recipe {
   readonly before: readonly Piece[];
@@ -50,7 +50,8 @@ function art(part: string, season: SeasonSlug): string {
   }
 }
 
-function piece(p: Piece, seasonIndex: number): HTMLElement {
+/** Casilla o medallón de una receta; también lo usan las miniaturas de «Cómo jugar» (029). */
+export function piece(p: Piece, seasonIndex: number): HTMLElement {
   const season = SEASON_SLUGS[seasonIndex] ?? 'spring';
   if ('member' in p) {
     return el('span', { class: `recipe__member${p.tired ? ' is-tired' : ''}` },
@@ -63,7 +64,8 @@ function piece(p: Piece, seasonIndex: number): HTMLElement {
   return tile;
 }
 
-function chip(c: Chip): HTMLElement {
+/** Pastilla «±n» de una receta (también en «Cómo jugar», 029). */
+export function chip(c: Chip): HTMLElement {
   const sign = c.n === '+' || c.n > 0 ? '+' : '-';
   const text = c.n === '+' ? '+' : `${c.n > 0 ? '+' : '−'}${Math.abs(c.n)}`;
   return el('span', { class: 'recipe__chip', 'data-sign': sign },
