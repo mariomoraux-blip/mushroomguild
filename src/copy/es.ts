@@ -7,7 +7,8 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 const listY = (items: readonly (string | number)[]) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} y ${items.at(-1)}`);
 /** Curva de reclutar (027): «cuesta 3, luego 5 y luego 7». */
 /** Nutrientes del Árbol Padre fuera de la partida (028): el de Brote y el de los niveles difíciles. */
-const motherNutrients = `${LEVELS.brote.mother} nutrientes (${LEVELS.bosque.mother} en Bosque y Ancestral)`;
+const motherNutrients =
+  LEVELS.bosque.mother === LEVELS.brote.mother ? `${LEVELS.brote.mother} nutrientes` : `${LEVELS.brote.mother} nutrientes (${LEVELS.bosque.mother} en Bosque y Ancestral)`;
 const recruitCurve = `cuesta ${listY(RECRUIT_COSTS.map((n, i) => (i === 0 ? n : `luego ${n}`)))}`;
 const times = (m: number) => `×${String(m).replace('.', ',')}`;
 
@@ -271,7 +272,7 @@ export const es = {
     tilesTitle: 'Las casillas',
     tip: 'Si no sabes qué hacer, sigue la ★: marca el hongo sugerido y la casilla que acerca la red a tu meta.',
     levelsTitle: 'Bosque y Ancestral',
-    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente) y los árboles no dan esporas. El Árbol Padre pide ${LEVELS.bosque.mother} nutrientes. Nunca se pierde la red ni los árboles vivos. En Ancestral no hay ★.`,
+    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En otoño e invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente). En invierno los árboles no dan esporas. Nunca se pierde la red ni los árboles vivos. En Ancestral no hay ★.`,
     start: '¡A jugar!',
   },
 
@@ -357,11 +358,11 @@ export const es = {
     mageSpells: 'Una vez por estación lanza uno de sus hechizos:',
     mageOk: 'Seguir',
     coldTitle: 'Llega el frío',
-    coldText: 'Llegó el invierno y el gremio tiene más hambre.',
+    coldText: 'Llegó el otoño y el gremio tiene más hambre.',
     coldRules: [
-      `Al terminar cada mes, el gremio come ${plural(UPKEEP, 'nutriente')}.`,
+      `Al terminar cada mes de otoño e invierno, el gremio come ${plural(UPKEEP, 'nutriente')}.`,
       'Si no hay, el primero en llegar al gremio se queda con hambre y descansa el mes siguiente.',
-      'Los árboles ya no dan esporas.',
+      'En invierno, los árboles no dan esporas.',
     ],
     coldOk: 'Seguir',
     wonTitle: '¡El bosque despertó!',

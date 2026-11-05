@@ -34,7 +34,7 @@ describe('Requirement: Niveles de dificultad', () => {
     expect(fadedCount(s)).toBe(0);
   });
 
-  it('Scenario: Nada se pierde — en 1000 partidas al azar por nivel, terminar el mes nunca quita red ni árboles vivos (las reservas solo bajan por lo que come el gremio en invierno)', () => {
+  it('Scenario: Nada se pierde — en 1000 partidas al azar por nivel, terminar el mes nunca quita red ni árboles vivos (las reservas solo bajan por lo que come el gremio en otoño e invierno)', () => {
     const rng = mulberry32(19);
     const starts = Object.fromEntries(LEVEL_IDS.map((l) => [l, Array.from({ length: 10 }, (_, i) => newRandomGame(i + 1, l))]));
     const count = (s: GameState) => ({ net: s.tiles.filter((t) => t.net).length, alive: s.tiles.filter((t) => t.alive).length });
@@ -48,7 +48,7 @@ describe('Requirement: Niveles de dificultad', () => {
           const before = count(s);
           const next = endMonth(s).state;
           const after = count(next);
-          // Lo único que puede bajar es lo que come el gremio en invierno (028): UPKEEP nutrientes, nunca esporas.
+          // Lo único que puede bajar es lo que come el gremio en otoño e invierno (028, 030): UPKEEP nutrientes, nunca esporas.
           const eaters = isCold(s) ? UPKEEP : 0;
           if (after.net < before.net || after.alive < before.alive || next.nutrients < s.nutrients - eaters || next.nutrients < 0 || next.spores < s.spores)
             throw new Error(`${level}: se perdió progreso en el mes ${s.month}`);

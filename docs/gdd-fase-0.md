@@ -83,7 +83,7 @@ La Mensajera, **Chispa**, convierte esporas en una segunda jugada: despierta a l
 ### Economía
 | Recurso | Se gana | Se gasta |
 | --- | --- | --- |
-| Nutrientes | Tronco: +2 por uso · árbol vivo: +1 al empezar el mes · Lluvia de esporas | Tejer 1 · revivir 3 · Árbol Padre 10 (12 en Bosque y Ancestral) · en Bosque y Ancestral, el gremio come 1 al terminar cada mes de invierno |
+| Nutrientes | Tronco: +2 por uso · árbol vivo: +1 al empezar el mes · Lluvia de esporas | Tejer 1 · revivir 3 · Árbol Padre 10 · en Bosque y Ancestral, el gremio come 1 al terminar cada mes de otoño e invierno |
 | Esporas | Árbol vivo: +1 al empezar el mes (en Bosque y Ancestral, nada en invierno) · Lluvia de esporas | Reclutar 3, 5 y 7 (sube con cada recluta) · Mensajera 1 |
 
 Inicio: 3 miembros (uno de cada especie), 2 nutrientes, 0 esporas. Los troncos son finitos; los árboles vivos son la fuente renovable. Esa tensión es el corazón del juego.
@@ -183,23 +183,23 @@ Con las reglas de la prueba de concepto, un jugador atento ganaba hacia el mes 5
 Palancas de ajuste: coste de tejer, ganancia por tronco, número de troncos, meses totales y nutriente mensual por árbol.
 
 ### Niveles (019)
-Una vez aprendido, Brote ya no era un reto. «Nueva partida» abre «Elige tu claro» con tres niveles; nada quita la red ni los árboles vivos (desde el 028, en Bosque y Ancestral el gremio come en invierno):
+Una vez aprendido, Brote ya no era un reto. «Nueva partida» abre «Elige tu claro» con tres niveles; nada quita la red ni los árboles vivos (desde el 030, en Bosque y Ancestral el gremio come en otoño e invierno):
 
 | | Brote | Bosque | Ancestral |
 | --- | --- | --- | --- |
 | Rocas | 6 | 8 | 10 |
 | Escarcha (tejer cuesta 2) | — | otoño | otoño e invierno |
 | Árbol que se apaga al final del mes | — | 6 | 3, 6 y 9 |
-| El gremio come 1 nutriente al terminar el mes | — | invierno | invierno |
+| El gremio come 1 nutriente al terminar el mes | — | otoño e invierno | otoño e invierno |
 | Los árboles no dan esporas | — | invierno | invierno |
-| Nutrientes del Árbol Padre | 10 | 12 | 12 |
+| Nutrientes del Árbol Padre | 10 | 10 | 10 |
 | Pistas (★) | sí | sí | no |
 | Puntaje | ×1 | ×1,5 | ×2 |
 
 - **Árbol que se apaga:** al empezar ese mes, el árbol gris más lejano de la red se cubre de escarcha; si nadie lo revive ese mes, se apaga y revivirlo cuesta 7 nutrientes en vez de 3.
-- **Invierno duro (028):** al empezar el invierno, una carta («Llega el frío») avisa que al terminar cada mes el gremio come 1 nutriente, después de lo que dan los árboles; si no hay, el primero en llegar al gremio descansa el mes siguiente con hambre. Los árboles solo dan nutrientes; la Lluvia de esporas sigue dando esporas. Una primera versión (cada hongo come en otoño e invierno) dejaba el juego casi imposible: 1 % de victorias con pistas en Bosque.
+- **Temporadas frías (028, 030):** al empezar el otoño, una carta («Llega el frío») avisa que al terminar cada mes el gremio come 1 nutriente, después de lo que dan los árboles; si no hay, el primero en llegar al gremio descansa el mes siguiente con hambre. En invierno, los árboles solo dan nutrientes; la Lluvia de esporas sigue dando esporas. Una primera versión (cada hongo come en otoño e invierno) dejaba el juego casi imposible: 1 % de victorias con pistas en Bosque. En el 028 el gremio comía solo en invierno y el Árbol Padre pedía 12; desde el 030 come desde el otoño y el Árbol Padre vuelve a 10.
 - **Claros justos:** Bosque y Ancestral son el claro de Brote de la misma semilla con rocas extra, y solo se juegan los que un bot experto con búsqueda puede ganar (tabla precalculada de 1000 semillas por nivel).
-- **Medido** (100 claros por nivel): hasta el 027 las pistas ganaban el 83 % en Bosque y el 50 % en Ancestral (la meta para Ancestral era «el jugador con experiencia pierde seguido, ~50 %»). Con el invierno duro (028) ganan el 65 % y el 32 %; los rangos de la prueba bajan a 55–70 % y 20–35 %.
+- **Medido** (100 claros por nivel): hasta el 027 las pistas ganaban el 83 % en Bosque y el 50 % en Ancestral (la meta para Ancestral era «el jugador con experiencia pierde seguido, ~50 %»). Con el invierno duro (028) ganan el 65 % y el 32 %; los rangos de la prueba bajan a 55–70 % y 20–35 %. Con el gremio comiendo desde el otoño y el Árbol Padre en 10 (030), el 63 % y el 28 %.
 - **Puntaje:** un récord por claro con el total ya multiplicado; las estrellas usan la referencia de Brote, así que en Bosque y Ancestral se consiguen más fácil (premio por el riesgo, a revisar en playtest).
 
 ### Puntaje y estrellas (015)

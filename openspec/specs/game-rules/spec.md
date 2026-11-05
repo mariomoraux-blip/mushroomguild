@@ -179,17 +179,6 @@ El juego SHALL tener 12 meses agrupados en 4 estaciones de 3 meses: Primavera, V
 - WHEN termina el mes 3
 - THEN el mes 4 pertenece a Verano
 
-### Requirement: Victoria
-La Amanita muscaria SHALL despertar al Árbol Padre si este toca la red, hay al menos 3 árboles revividos y los nutrientes del nivel (10 en Brote, 12 en Bosque y Ancestral, `LEVELS › mother`); eso SHALL terminar la partida con victoria.
-
-#### Scenario: Bosque que aún no habla
-- WHEN la Amanita muscaria intenta despertar al Árbol Padre con 2 árboles revividos
-- THEN la acción se rechaza pidiendo revivir al menos 3 árboles
-
-#### Scenario: Doce nutrientes en Bosque
-- WHEN en Bosque la Amanita muscaria intenta despertar al Árbol Padre con 3 árboles revividos y 11 nutrientes
-- THEN la acción se rechaza con "El Árbol Padre necesita 12 nutrientes."
-
 ### Requirement: Final suave
 Si termina el mes 12 sin victoria, la partida SHALL terminar en estado `lost` sin penalización, permitiendo reiniciar.
 
@@ -218,13 +207,13 @@ Cada partida SHALL jugarse en uno de tres niveles: Brote, Bosque o Ancestral. El
 | Rocas | 6 | 8 | 10 |
 | Escarcha | — | Otoño | Otoño e Invierno |
 | Se apaga un árbol al final del mes | — | 6 | 3, 6 y 9 |
-| El gremio come 1 nutriente al terminar el mes | — | Invierno | Invierno |
+| El gremio come 1 nutriente al terminar el mes | — | Otoño e Invierno | Otoño e Invierno |
 | Los árboles no dan esporas | — | Invierno | Invierno |
-| Nutrientes del Árbol Padre | 10 | 12 | 12 |
+| Nutrientes del Árbol Padre | 10 | 10 | 10 |
 | Pistas | sí | sí | no |
 | Multiplicador | ×1 | ×1,5 | ×2 |
 
-Ninguna regla de nivel SHALL quitar progreso del tablero: la red y los árboles vivos solo cambian por las acciones del jugador. Las esporas y los nutrientes solo cambian por las acciones del jugador, la producción de los árboles y lo que come el gremio en invierno.
+Ninguna regla de nivel SHALL quitar progreso del tablero: la red y los árboles vivos solo cambian por las acciones del jugador. Las esporas y los nutrientes solo cambian por las acciones del jugador, la producción de los árboles y lo que come el gremio en otoño e invierno.
 
 #### Scenario: Brote es el juego de siempre
 - WHEN se juega en Brote
@@ -269,23 +258,38 @@ Al empezar un mes en el que el nivel apaga un árbol, el juego SHALL marcar el �
 - WHEN se juega Ancestral sin revivir los árboles marcados
 - THEN al terminar los meses 3, 6 y 9 se apaga un árbol cada vez
 
-### Requirement: Invierno duro
-En Bosque y Ancestral, al terminar cada mes de Invierno el gremio SHALL comer 1 nutriente en total, después de sumar lo que dan los árboles. Si no hay, el primer miembro en llegar al gremio que no sea Maestra Bruma SHALL empezar el mes siguiente descansando, con hambre; los nutrientes nunca bajan de 0. Terminar el mes 12 no hace comer al gremio. En esas estaciones, lo que dan los árboles al empezar el mes SHALL ser solo nutrientes; la Lluvia de esporas sigue dando esporas.
+### Requirement: Despertar al Árbol Padre
+La Amanita muscaria SHALL despertar al Árbol Padre si este toca la red, hay al menos 3 árboles revividos y los nutrientes del nivel (10 en los tres niveles, `LEVELS › mother`); eso SHALL terminar la partida con victoria.
 
-#### Scenario: El gremio come en invierno
-- WHEN termina el mes 10 en Bosque con 1 árbol vivo y 3 nutrientes
+#### Scenario: Bosque que aún no habla
+- WHEN la Amanita muscaria intenta despertar al Árbol Padre con 2 árboles revividos
+- THEN la acción se rechaza pidiendo revivir al menos 3 árboles
+
+#### Scenario: Diez nutrientes en Ancestral
+- WHEN en Ancestral la Amanita muscaria intenta despertar al Árbol Padre con 3 árboles revividos y 9 nutrientes
+- THEN la acción se rechaza con "El Árbol Padre necesita 10 nutrientes."
+
+### Requirement: Temporadas frías
+En Bosque y Ancestral, al terminar cada mes de Otoño e Invierno el gremio SHALL comer 1 nutriente en total, después de sumar lo que dan los árboles. Si no hay, el primer miembro en llegar al gremio que no sea Maestra Bruma SHALL empezar el mes siguiente descansando, con hambre; los nutrientes nunca bajan de 0. Terminar el mes 12 no hace comer al gremio. En Invierno, lo que dan los árboles al empezar el mes SHALL ser solo nutrientes; la Lluvia de esporas sigue dando esporas.
+
+#### Scenario: El gremio come en otoño
+- WHEN termina el mes 7 en Bosque con 1 árbol vivo y 3 nutrientes
 - THEN el gremio suma 1 nutriente y come 1: quedan 3 y nadie tiene hambre
 
 #### Scenario: No hay nutrientes
-- WHEN termina el mes 11 en Ancestral sin árboles vivos y sin nutrientes
-- THEN quedan 0 nutrientes y el primero en llegar al gremio empieza el mes 12 descansando con hambre
+- WHEN termina el mes 8 en Ancestral sin árboles vivos y sin nutrientes
+- THEN quedan 0 nutrientes y el primero en llegar al gremio empieza el mes 9 descansando con hambre
 
 #### Scenario: Invierno sin esporas
 - WHEN termina el mes 9 en Bosque con 2 árboles vivos
 - THEN se suman 2 nutrientes y ninguna espora
 
-#### Scenario: El otoño no hace comer
-- WHEN termina el mes 8 en Ancestral
+#### Scenario: Otoño con esporas
+- WHEN termina el mes 6 en Bosque con 2 árboles vivos
+- THEN se suman 2 nutrientes y 2 esporas
+
+#### Scenario: El verano no hace comer
+- WHEN termina el mes 6 en Ancestral
 - THEN el gremio no come
 
 #### Scenario: Brote no come
