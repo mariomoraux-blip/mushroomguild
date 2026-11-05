@@ -10,8 +10,9 @@
 // board-interaction › Retratos del gremio: "La maga en el tablero" → "Maestra Bruma: retrato propio…".
 // player-guidance › Libreta de campo: "Consultar la ayuda" → "Libreta de campo".
 // player-guidance › Meta visible: "Inicio" → "guía".
+// game-rules › Victoria (031): "Árbol Padre de Ancestral (031)".
 // player-guidance › Recetas visuales: "Ficha de Bruno", "Libreta con las cinco recetas" y "Movimiento reducido" → "Recetas (026)".
-// story-presentation › Llega el frío y player-guidance › Avisos de la presión (hongo con hambre) → "Invierno duro (028)".
+// story-presentation › Llega el frío y player-guidance › Avisos de la presión (hongo con hambre) → "Temporadas frías (028, 030)".
 // title-screens › Cómo jugar: "El paso se parece a la partida" → "Cómo jugar (029)".
 // title-screens › Elige tu dificultad y player-guidance › Ancestral sin pistas, board-interaction › Árbol marcado y apagado
 //   y Escarcha en el HUD (019) → "Niveles".
@@ -1047,4 +1048,20 @@ test('Cómo jugar (029): cada paso muestra la interfaz de la partida, decorativa
     }
   }
   await noScrollNoZoom(page);
+});
+
+test('Árbol Padre de Ancestral (031): tocarlo y la Libreta dicen que pide 4 árboles y 12 nutrientes', async ({ page }, info) => {
+  await page.goto('/?map=clasico&nivel=ancestral');
+  await cell(page, 2, 0).click();
+  await expect(page.locator('#notice')).toContainText('(4 árboles vivos y 12 nutrientes)');
+  await page.getByRole('button', { name: 'Ayuda: Cómo jugar' }).click();
+  await page.getByRole('button', { name: 'Libreta de campo' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Necesitas que la red lo toque, 4 árboles revividos y 12 nutrientes.');
+  await expect(dialog).toContainText('el Árbol Padre pide 4 árboles revividos y 12 nutrientes');
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/031-libreta-ancestral-390x844.png' });
+  // En Bosque sigue pidiendo 3 y 10.
+  await page.goto('/?map=clasico&nivel=bosque');
+  await cell(page, 2, 0).click();
+  await expect(page.locator('#notice')).toContainText('(3 árboles vivos y 10 nutrientes)');
 });

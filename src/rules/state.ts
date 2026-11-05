@@ -106,6 +106,8 @@ export const hasFrost = (s: GameState): boolean => LEVELS[s.level].frost.include
 export const weaveCost = (s: GameState): number => (hasFrost(s) ? FROST_WEAVE : COST.weave);
 /** Nutrientes para despertar al Árbol Padre en el nivel (028). */
 export const motherCost = (s: GameState): number => LEVELS[s.level].mother;
+/** Árboles revividos que pide el Árbol Padre en el nivel de la partida (031). */
+export const motherTrees = (s: GameState): number => LEVELS[s.level].motherTrees;
 /** El mes es de una temporada fría del nivel: al terminarlo, el gremio come (028). */
 export const isCold = (s: GameState, month = s.month): boolean => LEVELS[s.level].upkeep.includes(seasonIndex(month));
 /** En este mes los árboles no dan esporas (028). */

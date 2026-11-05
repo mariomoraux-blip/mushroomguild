@@ -24,7 +24,7 @@ export const TREES_FOR_MAGE = 2;
  * Niveles de dificultad (019). `rocks`: rocas del claro; `frost`: estaciones (0 = Primavera … 3 = Invierno)
  * con escarcha; `fading`: meses que empiezan marcando un árbol gris que se apaga al terminarlos;
  * `upkeep`: temporadas frías, en que el gremio come `UPKEEP` al terminar cada mes (028); `sporeless`: estaciones en que
- * los árboles no dan esporas (028); `mother`: nutrientes para despertar al Árbol Padre (028);
+ * los árboles no dan esporas (028); `mother`: nutrientes para despertar al Árbol Padre (028); `motherTrees`: árboles revividos que pide (031);
  * `hints`: se muestran las pistas; `multiplier`: del puntaje. Ninguna regla de nivel quita progreso del tablero.
  */
 export interface LevelRules {
@@ -34,13 +34,14 @@ export interface LevelRules {
   readonly upkeep: readonly number[];
   readonly sporeless: readonly number[];
   readonly mother: number;
+  readonly motherTrees: number;
   readonly hints: boolean;
   readonly multiplier: number;
 }
 export const LEVELS: Readonly<Record<Level, LevelRules>> = {
-  brote: { rocks: 6, frost: [], fading: [], upkeep: [], sporeless: [], mother: 10, hints: true, multiplier: 1 },
-  bosque: { rocks: 8, frost: [2], fading: [6], upkeep: [2, 3], sporeless: [3], mother: 10, hints: true, multiplier: 1.5 },
-  ancestral: { rocks: 10, frost: [2, 3], fading: [3, 6, 9], upkeep: [2, 3], sporeless: [3], mother: 10, hints: false, multiplier: 2 },
+  brote: { rocks: 6, frost: [], fading: [], upkeep: [], sporeless: [], mother: 10, motherTrees: TREES_FOR_MOTHER, hints: true, multiplier: 1 },
+  bosque: { rocks: 8, frost: [2], fading: [6], upkeep: [2, 3], sporeless: [3], mother: 10, motherTrees: TREES_FOR_MOTHER, hints: true, multiplier: 1.5 },
+  ancestral: { rocks: 10, frost: [2, 3], fading: [3, 6, 9], upkeep: [2, 3], sporeless: [3], mother: 12, motherTrees: 4, hints: false, multiplier: 2 },
 };
 export const LEVEL_IDS: readonly Level[] = ['brote', 'bosque', 'ancestral'];
 /** Costo de tejer con escarcha. */
@@ -72,7 +73,7 @@ export const SCORE = {
   timeParS: 480, // 1 punto por segundo por debajo de 8:00
 } as const;
 /** Versión de la fórmula: cambia la clave del récord guardado y el `ScoreResult`. */
-export const SCORE_VERSION = 5;
+export const SCORE_VERSION = 6;
 /** Estrellas por claro: 2 desde el 90 % y 3 desde el 110 % del puntaje del bot con criterio en ese claro. */
 export const STARS = { two: 0.9, three: 1.1 } as const;
 /** Segundos de juego por mes que se suponen para la partida de referencia del bot. */
@@ -82,7 +83,7 @@ export const REFERENCE_SECONDS_PER_MONTH = 25;
  * Generador de mapas (cada partida nueva es un claro distinto). Un mapa solo se acepta si la
  * política de las pistas (`advise`) lo gana entre `minMonth` y `maxMonth`: ni regalado ni imposible.
  */
-export const MAP_GEN = { trees: 7, logs: 5, rocks: 6, minMonth: 8, maxMonth: 11, attempts: 400, levelAttempts: 20 } as const;
+export const MAP_GEN = { trees: 7, logs: 5, rocks: 6, minMonth: 8, maxMonth: 11, attempts: 400, levelAttempts: 20, levelAttemptsOutside: 10 } as const;
 
 // Capítulo 1 · El Claro Gris (mapa clásico, el del PoC rotado 90°: (x, y) del PoC → (y, 7 - x)).
 // Se usa en las pruebas y como respaldo si el generador no encuentra un mapa válido.

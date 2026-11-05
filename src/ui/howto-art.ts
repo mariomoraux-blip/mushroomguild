@@ -2,7 +2,7 @@
 // (tarjetas del dock, casillas, «Fin del mes», pastillas del HUD) para que el jugador la reconozca al jugar.
 // Son decorativas: el contenedor es `aria-hidden` e `inert`, y el texto del paso lo explica.
 import { es } from '../copy/es';
-import { GAIN, motherCost, type GameState, type RecruitableSpecies } from '../rules';
+import { GAIN, motherCost, motherTrees, type GameState, type RecruitableSpecies } from '../rules';
 import { assetUrl } from '../theme';
 import { el, portrait } from './dom';
 import { chip, piece } from './recipe';
@@ -45,6 +45,6 @@ export function howtoArt(step: number, game: GameState, season: number): HTMLEle
     default:
       return [el('span', { class: 'howto-ui howto-ui--goal' },
         el('img', { class: 'howto-ui__father', src: assetUrl('board/father-tree/asleep-painted'), alt: '', draggable: 'false', decoding: 'async' }),
-        el('span', { class: 'howto-ui__chips howto-ui__chips--hud' }, hudChip('trees', 3, es.hud.treesShort), hudChip('nutrients', motherCost(game), es.hud.nutrients)))];
+        el('span', { class: 'howto-ui__chips howto-ui__chips--hud' }, hudChip('trees', motherTrees(game), es.hud.treesShort), hudChip('nutrients', motherCost(game), es.hud.nutrients)))];
   }
 }

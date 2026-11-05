@@ -1,8 +1,8 @@
-// Temporadas frías (028, 030): game-rules › Temporadas frías, Despertar al Árbol Padre y Niveles de dificultad;
+// Temporadas frías (028, 030) y Árbol Padre de Ancestral (031): game-rules › Temporadas frías, Despertar al Árbol Padre y Niveles de dificultad;
 // story-presentation › Llega el frío; player-guidance › Avisos de la presión.
 import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
-import { act, endMonth, LEVELS, motherCost, type GameState, type Level } from '../src/rules';
+import { act, endMonth, LEVELS, motherCost, motherTrees, type GameState, type Level } from '../src/rules';
 import { initialState, reduce } from '../src/store';
 import { RUBI, setup, type Setup } from './helpers';
 
@@ -79,17 +79,34 @@ describe('Requirement: Temporadas frías', () => {
 });
 
 describe('Requirement: Despertar al Árbol Padre', () => {
-  it('el Árbol Padre pide 10 nutrientes en los tres niveles', () => {
-    expect([LEVELS.brote.mother, LEVELS.bosque.mother, LEVELS.ancestral.mother]).toEqual([10, 10, 10]);
-    expect(motherCost(at('ancestral'))).toBe(10);
+  it('el Árbol Padre pide 3 árboles y 10 nutrientes en Brote y Bosque, y 4 árboles y 12 nutrientes en Ancestral', () => {
+    expect([LEVELS.brote.mother, LEVELS.bosque.mother, LEVELS.ancestral.mother]).toEqual([10, 10, 12]);
+    expect([LEVELS.brote.motherTrees, LEVELS.bosque.motherTrees, LEVELS.ancestral.motherTrees]).toEqual([3, 3, 4]);
+    expect([motherCost(at('ancestral')), motherTrees(at('ancestral'))]).toEqual([12, 4]);
   });
 
-  it('Scenario: Diez nutrientes en Ancestral — con 9 se rechaza', () => {
-    // En el mapa clásico la red toca al Árbol Padre (2,0) desde (2,1) y hay 3 árboles vivos.
-    const s = at('ancestral', { nutrients: 9, net: [{ x: 2, y: 1 }], alive: [TREE, { x: 4, y: 6 }, { x: 0, y: 3 }] });
+  // En el mapa clásico la red toca al Árbol Padre (2,0) desde (2,1); los árboles son (1,0), (4,1), (0,3), (2,5) y (4,6).
+  const THREE = [TREE, { x: 4, y: 6 }, { x: 0, y: 3 }];
+  const FOUR = [...THREE, { x: 4, y: 1 }];
+  const awaken = (s: GameState) => {
     const mother = s.tiles.find((t) => t.kind === 'mother')!;
-    expect(() => act(s, RUBI, mother.x, mother.y)).toThrow(es.reasons.motherCost(10));
-    expect(act({ ...s, nutrients: 10 }, RUBI, mother.x, mother.y).state.status).toBe('won');
+    return act(s, RUBI, mother.x, mother.y);
+  };
+
+  it('Scenario: Diez nutrientes en Bosque — con 9 se rechaza y con 10 se gana', () => {
+    const s = at('bosque', { nutrients: 9, net: [{ x: 2, y: 1 }], alive: THREE });
+    expect(() => awaken(s)).toThrow(es.reasons.motherCost(10));
+    expect(awaken({ ...s, nutrients: 10 }).state.status).toBe('won');
+  });
+
+  it('Scenario: Ancestral pide cuatro árboles — con 3 se rechaza aunque haya 12 nutrientes', () => {
+    expect(() => awaken(at('ancestral', { nutrients: 12, net: [{ x: 2, y: 1 }], alive: THREE }))).toThrow(es.reasons.forestSilent(4));
+  });
+
+  it('Scenario: Doce nutrientes en Ancestral — con 4 árboles y 11 se rechaza; con 12 se gana', () => {
+    const s = at('ancestral', { nutrients: 11, net: [{ x: 2, y: 1 }], alive: FOUR });
+    expect(() => awaken(s)).toThrow(es.reasons.motherCost(12));
+    expect(awaken({ ...s, nutrients: 12 }).state.status).toBe('won');
   });
 });
 

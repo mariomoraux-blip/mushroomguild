@@ -6,7 +6,7 @@ Reglas del juego del Capítulo 1 (El Claro Gris): tablero, especies del gremio, 
 ## Requirements
 
 ### Requirement: Tablero inicial
-Cada partida nueva del juego SHALL generar un tablero vertical de 5 columnas por 8 filas con `newRandomGame(seed, level)`: el Hogar en la fila inferior y el Árbol Padre en la superior (columnas 2 a 4), un tronco junto al Hogar, 7 árboles grises a 2 o más casillas del Hogar, 5 troncos y las rocas del nivel (6 en Brote) en las filas intermedias. El Hogar es la única casilla con micelio. La semilla SHALL fijar el claro de Brote; Bosque y Ancestral le agregan rocas sobre casillas de tierra libres (nunca el Hogar, sus vecinas ni las vecinas del Árbol Padre), también según la semilla. En Brote, un mapa solo se acepta si la red puede llegar al Árbol Padre y a todos los árboles y si la política de las pistas lo gana entre el mes 8 y el 11; en Bosque y Ancestral, si la red puede llegar al Árbol Padre y a todos los árboles y si el bot experto (con su búsqueda) lo gana con las reglas del nivel; esa aceptación se precalcula para las semillas 0 a 1000 y las partidas nuevas de esos niveles eligen entre las aceptadas. Si no aparece ninguno, se usa el mapa clásico del Capítulo 1 (con las rocas del nivel). La misma semilla y el mismo nivel SHALL producir el mismo mapa.
+Cada partida nueva del juego SHALL generar un tablero vertical de 5 columnas por 8 filas con `newRandomGame(seed, level)`: el Hogar en la fila inferior y el Árbol Padre en la superior (columnas 2 a 4), un tronco junto al Hogar, 7 árboles grises a 2 o más casillas del Hogar, 5 troncos y las rocas del nivel (6 en Brote) en las filas intermedias. El Hogar es la única casilla con micelio. La semilla SHALL fijar el claro de Brote; Bosque y Ancestral le agregan rocas sobre casillas de tierra libres (nunca el Hogar, sus vecinas ni las vecinas del Árbol Padre), también según la semilla. En Brote, un mapa solo se acepta si la red puede llegar al Árbol Padre y a todos los árboles y si la política de las pistas lo gana entre el mes 8 y el 11; en Bosque y Ancestral, si la red puede llegar al Árbol Padre y a todos los árboles y si el bot experto (con su búsqueda) lo gana con las reglas del nivel; esa aceptación se precalcula para las semillas 0 a 1000 y las partidas nuevas de esos niveles eligen entre las aceptadas. Fuera de la tabla (`?seed=` mayor que 1000) se prueban hasta 10 intentos. Si no aparece ninguno, en Brote se usa el mapa clásico del Capítulo 1 y en Bosque y Ancestral el primer claro certificado del nivel (desde el 031 el clásico no se gana en Ancestral); la semilla 0 (`?map=clasico`) es el clásico, con las rocas certificadas del nivel si las hay. La misma semilla y el mismo nivel SHALL producir el mismo mapa.
 
 #### Scenario: Partida nueva
 - WHEN se inicia una partida
@@ -200,7 +200,7 @@ Generar un claro de Bosque o Ancestral de la tabla certificada SHALL tardar meno
 - AND en Bosque y Ancestral el bot experto gana todos, y la política de las pistas y el bot al azar quedan en sus rangos
 
 ### Requirement: Niveles de dificultad
-Cada partida SHALL jugarse en uno de tres niveles: Brote, Bosque o Ancestral. El nivel SHALL definir las rocas del claro, las estaciones con escarcha, los meses al final de los cuales se apaga un árbol, las estaciones en que come el gremio, las estaciones sin esporas, los nutrientes del Árbol Padre, si hay pistas y el multiplicador de puntaje, todo en `config.ts › LEVELS`:
+Cada partida SHALL jugarse en uno de tres niveles: Brote, Bosque o Ancestral. El nivel SHALL definir las rocas del claro, las estaciones con escarcha, los meses al final de los cuales se apaga un árbol, las estaciones en que come el gremio, las estaciones sin esporas, los árboles revividos y los nutrientes que pide el Árbol Padre, si hay pistas y el multiplicador de puntaje, todo en `config.ts › LEVELS`:
 
 | | Brote | Bosque | Ancestral |
 | --- | --- | --- | --- |
@@ -209,7 +209,8 @@ Cada partida SHALL jugarse en uno de tres niveles: Brote, Bosque o Ancestral. El
 | Se apaga un árbol al final del mes | — | 6 | 3, 6 y 9 |
 | El gremio come 1 nutriente al terminar el mes | — | Otoño e Invierno | Otoño e Invierno |
 | Los árboles no dan esporas | — | Invierno | Invierno |
-| Nutrientes del Árbol Padre | 10 | 10 | 10 |
+| Árboles revividos que pide el Árbol Padre | 3 | 3 | 4 |
+| Nutrientes del Árbol Padre | 10 | 10 | 12 |
 | Pistas | sí | sí | no |
 | Multiplicador | ×1 | ×1,5 | ×2 |
 
@@ -217,7 +218,7 @@ Ninguna regla de nivel SHALL quitar progreso del tablero: la red y los árboles 
 
 #### Scenario: Brote es el juego de siempre
 - WHEN se juega en Brote
-- THEN el claro tiene 6 rocas, tejer cuesta siempre 1 nutriente, ningún árbol se apaga, el gremio no come y el Árbol Padre pide 10 nutrientes
+- THEN el claro tiene 6 rocas, tejer cuesta siempre 1 nutriente, ningún árbol se apaga, el gremio no come y el Árbol Padre pide 3 árboles revividos y 10 nutrientes
 
 #### Scenario: Nada se pierde
 - WHEN termina cualquier mes en cualquier nivel
@@ -258,17 +259,6 @@ Al empezar un mes en el que el nivel apaga un árbol, el juego SHALL marcar el �
 - WHEN se juega Ancestral sin revivir los árboles marcados
 - THEN al terminar los meses 3, 6 y 9 se apaga un árbol cada vez
 
-### Requirement: Despertar al Árbol Padre
-La Amanita muscaria SHALL despertar al Árbol Padre si este toca la red, hay al menos 3 árboles revividos y los nutrientes del nivel (10 en los tres niveles, `LEVELS › mother`); eso SHALL terminar la partida con victoria.
-
-#### Scenario: Bosque que aún no habla
-- WHEN la Amanita muscaria intenta despertar al Árbol Padre con 2 árboles revividos
-- THEN la acción se rechaza pidiendo revivir al menos 3 árboles
-
-#### Scenario: Diez nutrientes en Ancestral
-- WHEN en Ancestral la Amanita muscaria intenta despertar al Árbol Padre con 3 árboles revividos y 9 nutrientes
-- THEN la acción se rechaza con "El Árbol Padre necesita 10 nutrientes."
-
 ### Requirement: Temporadas frías
 En Bosque y Ancestral, al terminar cada mes de Otoño e Invierno el gremio SHALL comer 1 nutriente en total, después de sumar lo que dan los árboles. Si no hay, el primer miembro en llegar al gremio que no sea Maestra Bruma SHALL empezar el mes siguiente descansando, con hambre; los nutrientes nunca bajan de 0. Terminar el mes 12 no hace comer al gremio. En Invierno, lo que dan los árboles al empezar el mes SHALL ser solo nutrientes; la Lluvia de esporas sigue dando esporas.
 
@@ -295,3 +285,23 @@ En Bosque y Ancestral, al terminar cada mes de Otoño e Invierno el gremio SHALL
 #### Scenario: Brote no come
 - WHEN termina el mes 11 en Brote
 - THEN el gremio no come y los árboles dan esporas y nutrientes como siempre
+
+### Requirement: Victoria
+La Amanita muscaria SHALL despertar al Árbol Padre si este toca la red y hay los árboles revividos y los nutrientes del nivel (`LEVELS › motherTrees` y `mother`): 3 árboles y 10 nutrientes en Brote y Bosque, 4 árboles y 12 nutrientes en Ancestral; eso SHALL terminar la partida con victoria.
+
+#### Scenario: Bosque que aún no habla
+- WHEN la Amanita muscaria intenta despertar al Árbol Padre con 2 árboles revividos
+- THEN la acción se rechaza pidiendo revivir al menos 3 árboles
+
+#### Scenario: Diez nutrientes en Bosque
+- WHEN en Bosque la Amanita muscaria intenta despertar al Árbol Padre con 3 árboles revividos y 9 nutrientes
+- THEN la acción se rechaza con "El Árbol Padre necesita 10 nutrientes."
+
+#### Scenario: Ancestral pide cuatro árboles
+- WHEN en Ancestral la Amanita muscaria intenta despertar al Árbol Padre con 3 árboles revividos y 12 nutrientes
+- THEN la acción se rechaza con "El bosque aún no habla: revive al menos 4 árboles primero."
+
+#### Scenario: Doce nutrientes en Ancestral
+- WHEN en Ancestral la Amanita muscaria intenta despertar al Árbol Padre con 4 árboles revividos y 11 nutrientes
+- THEN la acción se rechaza con "El Árbol Padre necesita 12 nutrientes."
+- AND con 12 nutrientes lo despierta y gana
