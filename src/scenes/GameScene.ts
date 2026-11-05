@@ -163,9 +163,12 @@ export class GameScene extends Phaser.Scene {
     this.glowTween = this.tweens.add({ targets: this.glowImage, alpha: target, duration: LIGHT_TRANSITION_MS, ease: MOTION.ease.soft.phaser });
   }
 
-  /** Velo del árbol marcado (019): se repinta si cambia el árbol o la casilla; su alfa late entre `FROST_PULSE`. */
+  /** Velo del árbol marcado (019) y de la casilla con plaga (032): se repinta si cambian o cambia la casilla; su alfa late entre `FROST_PULSE`. */
   private drawMarked(state: AppState, T: number): void {
-    const marked = state.game.tiles.filter((t) => t.fading && !t.alive).map((t) => `${t.x},${t.y}`).join(' ');
+    const marked = state.game.tiles
+      .filter((t) => (t.fading && !t.alive) || t.blighted)
+      .map((t) => `${t.blighted ? 'p' : ''}${t.x},${t.y}`)
+      .join(' ');
     const painted = `${T}|${marked}|${this.reduceMotion.matches}`;
     if (painted === this.frostPainted) return;
     this.frostPainted = painted;

@@ -25,6 +25,8 @@ export interface Tile extends Point {
   readonly fading: boolean;
   /** Árbol apagado: revivirlo cuesta `FADED_REVIVE` (019). */
   readonly faded: boolean;
+  /** Casilla tejida con plaga (032): sale de la red al terminar el mes si ningún hongo trabajó cerca. */
+  readonly blighted?: boolean;
 }
 
 export interface Member {

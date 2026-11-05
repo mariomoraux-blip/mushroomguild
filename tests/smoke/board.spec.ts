@@ -11,6 +11,7 @@
 // player-guidance › Libreta de campo: "Consultar la ayuda" → "Libreta de campo".
 // player-guidance › Meta visible: "Inicio" → "guía".
 // game-rules › Victoria (031): "Árbol Padre de Ancestral (031)".
+// game-rules › Plaga y player-guidance › Avisos de la presión (plaga): "Plaga de Ancestral (032)".
 // player-guidance › Recetas visuales: "Ficha de Bruno", "Libreta con las cinco recetas" y "Movimiento reducido" → "Recetas (026)".
 // story-presentation › Llega el frío y player-guidance › Avisos de la presión (hongo con hambre) → "Temporadas frías (028, 030)".
 // title-screens › Cómo jugar: "El paso se parece a la partida" → "Cómo jugar (029)".
@@ -1064,4 +1065,33 @@ test('Árbol Padre de Ancestral (031): tocarlo y la Libreta dicen que pide 4 ár
   await page.goto('/?map=clasico&nivel=bosque');
   await cell(page, 2, 0).click();
   await expect(page.locator('#notice')).toContainText('(3 árboles vivos y 10 nutrientes)');
+});
+
+test('Plaga de Ancestral (032): la carta del frío la explica y la casilla marcada se ve, se nombra y se explica', async ({ page }, info) => {
+  await page.goto('/?map=clasico&nivel=ancestral');
+  // Red tejida en (2,6), (2,4) y (2,3): la más cercana al Árbol Padre (2,0) es (2,3).
+  await page.evaluate(() => {
+    type T = { x: number; y: number; net: boolean };
+    type S = { getState(): { game: { tiles: T[] } }; dispatch(a: object): void };
+    const store = (window as unknown as { store: S }).store;
+    const g = store.getState().game;
+    const woven = ['2,6', '2,4', '2,3'];
+    const tiles = g.tiles.map((t) => (woven.includes(`${t.x},${t.y}`) ? { ...t, net: true } : t));
+    store.dispatch({ type: 'start', game: { ...g, month: 6, tiles }, intro: false });
+  });
+  await page.locator('.end').click();
+  const card = page.locator('#story [role="dialog"]');
+  await expect(card).toContainText('la plaga marca una casilla de la red');
+  await page.keyboard.press('Escape');
+  await expect(card).toHaveCount(0);
+  await expect(page.locator('#notice')).toContainText('La plaga llegó a la red');
+  await expect(cell(page, 2, 3)).toHaveAttribute('aria-label', /con plaga/);
+  await expect(cell(page, 2, 4)).not.toHaveAttribute('aria-label', /con plaga/);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/032-plaga-390x844.png' });
+  await cell(page, 2, 3).click();
+  await expect(page.locator('#notice')).toContainText('Red con plaga: se marchitará al terminar el mes');
+  // Nadie trabaja cerca: al terminar el mes se marchita y deja de estar en la red.
+  await page.locator('.end').click();
+  await expect(page.locator('#notice')).toContainText('La plaga marchitó una casilla de la red');
+  await expect(cell(page, 2, 3)).not.toHaveAttribute('aria-label', /en la red|con plaga/);
 });
