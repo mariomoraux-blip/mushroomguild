@@ -97,7 +97,12 @@ const broteMap = (seed: number): readonly string[] => (seed === 0 ? MAP : genera
  * tierra libres (nunca el Hogar, sus vecinas ni las vecinas del Árbol Padre) con `mulberry32(seed ^ LEVEL_SALT)`.
  * Devuelve el primer intento que `accept` acepta, con su número, o `null`.
  */
-export function levelAttempt(seed: number, level: Exclude<Level, 'brote'>, accept: (map: readonly string[], i: number) => boolean): { map: readonly string[]; index: number } | null {
+export function levelAttempt(
+  seed: number,
+  level: Exclude<Level, 'brote'>,
+  accept: (map: readonly string[], i: number) => boolean,
+  attempts: number = MAP_GEN.levelAttempts,
+): { map: readonly string[]; index: number } | null {
   const base = broteMap(seed);
   const find = (ch: string) => {
     const y = base.findIndex((row) => row.includes(ch));
@@ -109,7 +114,7 @@ export function levelAttempt(seed: number, level: Exclude<Level, 'brote'>, accep
   const free: { x: number; y: number }[] = [];
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (base[y]![x] === '.' && !near(home, x, y) && !near(mother, x, y)) free.push({ x, y });
   const rng = mulberry32((seed ^ LEVEL_SALT) >>> 0);
-  for (let i = 0; i < MAP_GEN.levelAttempts; i++) {
+  for (let i = 0; i < attempts; i++) {
     const pool = [...free];
     const g = base.map((row) => [...row]);
     for (let k = 0; k < LEVELS[level].rocks - MAP_GEN.rocks && pool.length; k++) {
@@ -125,18 +130,24 @@ export function levelAttempt(seed: number, level: Exclude<Level, 'brote'>, accep
 /**
  * Claro de una semilla en un nivel. En Brote, el de siempre. En Bosque y Ancestral, el de Brote con más rocas,
  * aceptado si la red llega a todo y el bot experto lo gana: para las semillas de `LEVEL_SEEDS` la aceptación ya
- * está calculada (con `certify`, que en el teléfono sería lenta); para las demás se juega `playExpert`. Si ningún
- * intento sirve, el clásico con las rocas del nivel (semilla 0).
+ * está calculada (con `certify`, que en el teléfono sería lenta); para las demás se juegan hasta
+ * `MAP_GEN.levelAttemptsOutside` intentos con `playExpert`. Si ningún intento sirve, el primer claro certificado del
+ * nivel (031: el clásico ya no se gana en Ancestral). La semilla 0 (`?map=clasico`) es el clásico con las rocas
+ * certificadas o, si no hay, tal cual.
  */
 export function levelMap(seed: number, level: Level): readonly string[] {
   if (level === 'brote') return broteMap(seed);
+  const fallback = () => (seed === 0 ? MAP : levelMap(firstCertified(level), level));
   const known = LEVEL_SEEDS[level].charAt(seed);
-  if (known === '-') return seed === 0 ? MAP : levelMap(0, level);
-  const accept = known
-    ? (_map: readonly string[], i: number) => i === parseInt(known, 36)
-    : (map: readonly string[]) => reachable(map) && playExpert(newGame(map, 'custom', level)).status === 'won';
-  return levelAttempt(seed, level, accept)?.map ?? (seed === 0 ? MAP : levelMap(0, level));
+  if (known === '-') return fallback();
+  const hit = known
+    ? levelAttempt(seed, level, (_map, i) => i === parseInt(known, 36))
+    : levelAttempt(seed, level, (map) => reachable(map) && playExpert(newGame(map, 'custom', level)).status === 'won', MAP_GEN.levelAttemptsOutside);
+  return hit?.map ?? fallback();
 }
+
+/** Primera semilla (desde la 1) con claro certificado en el nivel. */
+export const firstCertified = (level: Exclude<Level, 'brote'>): number => [...LEVEL_SEEDS[level]].findIndex((c, i) => i > 0 && c !== '-');
 
 /** Semilla para una partida nueva: en Brote cualquiera; en Bosque y Ancestral, una de la tabla certificada. */
 export function randomSeed(level: Level, now: number): number {

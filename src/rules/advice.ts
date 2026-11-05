@@ -1,6 +1,6 @@
 import { validTargets } from './actions';
-import { COST, STARTING_GUILD, TREES_FOR_MOTHER } from './config';
-import { magicSpent, motherTile, neighbors, recruitableCount, recruitCost, revivedCount, touchesNet, workerAt } from './state';
+import { COST, STARTING_GUILD } from './config';
+import { magicSpent, motherTile, motherTrees, neighbors, recruitableCount, recruitCost, revivedCount, touchesNet, workerAt } from './state';
 import type { GameState, Member, RecruitableSpecies, Spell, Tile } from './types';
 
 /** Siguiente paso sugerido al jugador (player-guidance). */
@@ -50,7 +50,7 @@ const closest = (tiles: readonly Tile[], to: Tile) => closestBy(tiles, (t) => di
 /** Meta del tejido: el árbol gris más cercano a la red mientras falten árboles; después, el Árbol Padre. */
 export function weaveGoal(s: GameState, o: PolicyOptions = {}): { goal: Tile; toward: 'tree' | 'mother' } {
   const mother = motherTile(s);
-  if (revivedCount(s) >= TREES_FOR_MOTHER) return { goal: mother, toward: 'mother' };
+  if (revivedCount(s) >= motherTrees(s)) return { goal: mother, toward: 'mother' };
   const net = s.tiles.filter((t) => t.net);
   // El experto prefiere el árbol marcado y evita los apagados (cuestan más).
   const grey = s.tiles.filter((t) => t.kind === 'tree' && !t.alive && !(o.saveMarked && t.faded));

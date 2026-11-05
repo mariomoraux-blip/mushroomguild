@@ -64,8 +64,9 @@ describe('estrellas por claro (015)', () => {
 
 // 019 · Dificultad por nivel, sobre las semillas 1 a 100 de la tabla certificada (`level-seeds.ts`).
 const TARGETS = {
-  bosque: { hints: [0.55, 0.7], random: 0.1 }, // 028: invierno duro
-  ancestral: { hints: [0.2, 0.35], random: 0.05 },
+  bosque: { hints: [0.55, 0.7], random: 0.1, certified: 90 }, // 028: invierno duro
+  // 031: con el Árbol Padre en 4 árboles y 12 nutrientes se certifican 85 de los 100 primeros (905 de 1000); solo se sirven esos.
+  ancestral: { hints: [0.2, 0.35], random: 0.05, certified: 80 },
 } as const;
 
 describe.each(['bosque', 'ancestral'] as const)('balance en %s', (level) => {
@@ -73,8 +74,8 @@ describe.each(['bosque', 'ancestral'] as const)('balance en %s', (level) => {
   const starts = seeds.map((seed) => newRandomGame(seed, level));
 
   it('el bot experto gana todos los claros aceptados', () => {
-    // 028: con el invierno duro, Ancestral certifica 94 de las 100 primeras (967 de 1001 en toda la tabla).
-    expect(seeds.length).toBeGreaterThanOrEqual(90);
+    console.info(`[balance] ${level} · certificados: ${seeds.length} de ${MAPS}`);
+    expect(seeds.length).toBeGreaterThanOrEqual(TARGETS[level].certified);
     for (const start of starts) expect(certify(start)?.status).toBe('won');
   }, 120_000);
 

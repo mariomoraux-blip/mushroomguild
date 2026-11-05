@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MONTHS, GAIN, UPKEEP, LOG_USES, MAX_GUILD, RECRUITABLE, TREES_FOR_MAGE, TREES_FOR_MOTHER } from './config';
+import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MONTHS, GAIN, UPKEEP, LOG_USES, MAX_GUILD, RECRUITABLE, TREES_FOR_MAGE } from './config';
 import {
   addMage,
   addMember,
@@ -9,6 +9,7 @@ import {
   isCold,
   isSporeless,
   motherCost,
+  motherTrees,
   magicSpent,
   member,
   recruitableCount,
@@ -67,7 +68,7 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
     case 'amanita':
       if (t.kind === 'mother') {
         if (!near) return no(R.motherFar);
-        if (revivedCount(s) < TREES_FOR_MOTHER) return no(R.forestSilent(TREES_FOR_MOTHER));
+        if (revivedCount(s) < motherTrees(s)) return no(R.forestSilent(motherTrees(s)));
         if (s.nutrients < motherCost(s)) return no(R.motherCost(motherCost(s)), 'nutrients');
         return yes;
       }

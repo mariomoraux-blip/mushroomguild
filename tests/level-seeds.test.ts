@@ -1,6 +1,6 @@
 import { writeFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { certify, levelAttempt, levelMap, newGame, reachable } from '../src/rules';
+import { certify, firstCertified, levelAttempt, levelMap, newGame, reachable } from '../src/rules';
 import { LEVEL_SEEDS } from '../src/rules/level-seeds';
 
 // Tabla de semillas certificadas de Bosque y Ancestral (019). `npm run certify` la regenera; aquí se comprueba.
@@ -20,10 +20,16 @@ describe('tabla de semillas por nivel', () => {
     );
   }, 3_600_000);
 
-  it.skipIf(Boolean(process.env.CERTIFY))(`cubre las semillas 0 a ${SEEDS} y el clásico (semilla 0) está certificado`, () => {
+  it.skipIf(Boolean(process.env.CERTIFY))(`cubre las semillas 0 a ${SEEDS}; si un intento no sirve, se juega el primer claro certificado`, () => {
     for (const level of LEVELS) {
       expect(LEVEL_SEEDS[level]).toHaveLength(SEEDS + 1);
-      expect(LEVEL_SEEDS[level][0]).not.toBe('-');
+      // 031: en Ancestral el clásico ya no se gana; la semilla 0 solo sirve para `?map=clasico`.
+      const first = firstCertified(level);
+      expect(first).toBeGreaterThan(0);
+      expect(certify(newGame(levelMap(first, level), 'custom', level))?.status).toBe('won');
+      // Una semilla sin intento certificado juega ese claro.
+      const none = [...LEVEL_SEEDS[level]].findIndex((c, i) => i > 0 && c === '-');
+      if (none > 0) expect(levelMap(none, level)).toEqual(levelMap(first, level));
     }
   });
 
