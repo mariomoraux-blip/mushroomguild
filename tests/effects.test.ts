@@ -69,3 +69,15 @@ describe('Requirement: Respuesta a cada acción', () => {
     expect(diffEffects(g, newRandomGame(7))).toEqual([]);
   });
 });
+
+describe('Plaga (033): efecto al marchitarse', () => {
+  it('la casilla con plaga que sale de la red produce «wither»; si los hongos la frenan, no', () => {
+    const base = { ...setup({ month: 6, net: [{ x: 2, y: 6 }, { x: 2, y: 4 }, { x: 2, y: 3 }] }), level: 'ancestral' as const };
+    const marked = endMonth(base).state;
+    const withered = endMonth(marked).state;
+    expect(diffEffects(marked, withered)).toContainEqual({ kind: 'wither', at: { x: 2, y: 3 } });
+    const nutrients = { ...marked, nutrients: 4 };
+    const saved = act(nutrients, INDI, 3, 4).state;
+    expect(kinds(saved, endMonth(saved).state)).not.toContain('wither');
+  });
+});

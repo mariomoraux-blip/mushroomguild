@@ -617,10 +617,11 @@ function blightSpots(ctx: Ctx, T: number, x: number, y: number) {
 
 /**
  * Capa de casillas marcadas: el árbol que se apagará (019; velo de escarcha y un copo chico) y la casilla tejida con
- * plaga (032; velo violeta y tres manchas), ambas con contorno punteado. La escena le pone el alfa que late
- * (`FROST_PULSE`). Devuelve las casillas pintadas.
+ * plaga (032), ambas con contorno punteado. La escena le pone el alfa que late (`FROST_PULSE`). La plaga tiene pieza
+ * pintada en el suelo (033); el velo violeta y las manchas solo se pintan si esa pieza no cargó (`plagueArt` falso).
+ * Devuelve las casillas pintadas.
  */
-export function paintMarked(ctx: Ctx, T: number, game: GameState): { x: number; y: number }[] {
+export function paintMarked(ctx: Ctx, T: number, game: GameState, plagueArt = false): { x: number; y: number }[] {
   ctx.clearRect(0, 0, W * T, H * T);
   const marked = game.tiles.filter((t) => t.kind === 'tree' && t.fading && !t.alive);
   for (const t of marked) {
@@ -630,9 +631,9 @@ export function paintMarked(ctx: Ctx, T: number, game: GameState): { x: number; 
   }
   const blighted = game.tiles.filter((t) => t.blighted);
   for (const t of blighted) {
-    blightVeil(ctx, T, t.x, t.y);
+    if (!plagueArt) blightVeil(ctx, T, t.x, t.y);
     dashedFrame(ctx, T, t.x, t.y);
-    blightSpots(ctx, T, t.x, t.y);
+    if (!plagueArt) blightSpots(ctx, T, t.x, t.y);
   }
   return [...marked, ...blighted].map(({ x, y }) => ({ x, y }));
 }
@@ -675,6 +676,8 @@ const size = (img: CanvasImageSource): [number, number] => {
 export function groundKey(t: Tile, season: SeasonSlug, occupied = false): string {
   // La casa-hongo es una casilla entera; con alguien encima queda solo la red.
   if (t.kind === 'home' && !occupied) return BOARD_ART.home;
+  // Casilla con plaga (033): su pieza pintada reemplaza la red mientras está marcada.
+  if (t.blighted) return season === 'winter' ? BOARD_ART.plague.winter : BOARD_ART.plague.blight;
   if (t.net) return BOARD_ART.net[Math.floor(hash(t.x, t.y, 90) * BOARD_ART.net.length)]!;
   const set = BOARD_ART.grass[season];
   return set[Math.floor(hash(t.x, t.y, 91) * set.length)]!;
@@ -730,7 +733,8 @@ export function paintMyceliumGlow(ctx: Ctx, T: number, game: GameState): { x: nu
   ctx.clip();
   const lit: { x: number; y: number }[] = [];
   for (const t of game.tiles) {
-    if (!t.net) continue;
+    // La casilla con plaga (033) pierde su luz: su pieza pintada ya trae los hilos, y el brillo la lavaría.
+    if (!t.net || t.blighted) continue;
     lit.push({ x: t.x, y: t.y });
     const cx = (t.x + 0.5) * T;
     const cy = (t.y + 0.5) * T;
@@ -755,9 +759,9 @@ export function paintMyceliumGlow(ctx: Ctx, T: number, game: GameState): { x: nu
   ctx.shadowColor = rgba('mycelium');
   ctx.shadowBlur = T * 0.3;
   for (const t of game.tiles) {
-    if (!t.net) continue;
+    if (!t.net || t.blighted) continue;
     for (const n of neighbors(game, t.x, t.y)) {
-      if (!n.net || n.y * W + n.x < t.y * W + t.x) continue;
+      if (!n.net || n.blighted || n.y * W + n.x < t.y * W + t.x) continue;
       const w = hash(t.x + n.x, t.y + n.y, 5) - 0.5; // la misma curva que paintNet
       const [x0, y0, x1, y1] = [(t.x + 0.5) * T, (t.y + 0.5) * T, (n.x + 0.5) * T, (n.y + 0.5) * T];
       ctx.beginPath();

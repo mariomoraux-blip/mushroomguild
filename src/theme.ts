@@ -119,6 +119,8 @@ export const BOARD_ART = {
   rock: { spring: 'board/rocks/rock', summer: 'board/rocks/rock', autumn: 'board/rocks/rock', winter: 'board/rocks/rock-winter' },
   tree: { grey: 'board/trees/grey', waking: 'board/trees/waking', spring: 'board/trees/alive', summer: 'board/trees/alive', autumn: 'board/trees/autumn', winter: 'board/trees/winter' },
   star: 'ui/icons/star',
+  // Plaga de Ancestral (033): la casilla tejida marcada (otoño / invierno) y el instante en que se marchita.
+  plague: { blight: 'board/plague/blight', winter: 'board/plague/blight-winter', withered: 'board/plague/withered' },
 } as const;
 
 /** Arte de las pantallas fuera de la partida (012). Se usa como <img>, así se descarga solo al mostrarse. */
@@ -157,6 +159,7 @@ const UI_ART: Record<string, string> = {
   spores: 'ui/icons/spores',
   trees: 'ui/icons/trees',
   book: 'ui/icons/book',
+  plague: 'ui/icons/plague',
   // Fondo de la partida (011): el del menú hasta que haya uno propio.
   'bg-game': 'backgrounds/menu',
   'bg-game-wide': 'backgrounds/menu-landscape',

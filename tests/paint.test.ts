@@ -134,3 +134,30 @@ describe('Requirement: Árbol marcado y apagado (019)', () => {
     expect(paintMarked(fakeCtx(), 64, newGame())).toEqual([]);
   });
 });
+
+describe('Requirement: Plaga pintada (033)', () => {
+  const blighted = () => {
+    const s = cloneState(newGame());
+    const t = s.tiles.find((tt) => tt.x === 2 && tt.y === 6)!;
+    t.net = true;
+    t.blighted = true;
+    return s;
+  };
+
+  it('la casilla con plaga usa su pieza pintada (con nieve en invierno) en vez de la red', () => {
+    const t = blighted().tiles.find((tt) => tt.x === 2 && tt.y === 6)!;
+    expect(groundKey(t, 'autumn')).toBe('board/plague/blight');
+    expect(groundKey(t, 'winter')).toBe('board/plague/blight-winter');
+  });
+
+  it('la casilla con plaga pierde la luz de la red', () => {
+    const s = blighted();
+    const home = s.tiles.find((t) => t.kind === 'home')!;
+    expect(paintMyceliumGlow(fakeCtx(), 64, s)).toEqual([{ x: home.x, y: home.y }]);
+  });
+
+  it('el contorno punteado se pinta siempre; con o sin la pieza pintada', () => {
+    expect(paintMarked(fakeCtx(), 64, blighted(), true)).toEqual([{ x: 2, y: 6 }]);
+    expect(paintMarked(fakeCtx(), 64, blighted(), false)).toEqual([{ x: 2, y: 6 }]);
+  });
+});
