@@ -74,6 +74,7 @@ Contraste mínimo de texto: Tinta sobre Pergamino, Crema o Sol (todos ≥ 7:1). 
 - **Árbol Padre:** se dibuja grande (`board/father-tree/asleep-painted` / `awake-painted`, desde el 010) y **sobresale por encima del tablero**, saliendo de su casilla en la fila superior. La regla no cambia: sigue siendo una casilla del tablero; solo su dibujo desborda. Las raíces bajan hacia la casilla.
 - **Casilla ocupada (se mantiene del 008):** si un hongo trabajó este mes en una casilla, su retrato la ocupa y el objeto de abajo no se pinta.
 - **Árbol marcado y apagado (019):** sin pieza nueva. Un velo de escarcha del token `frost` (`#CFE8F5`) sobre la casilla del árbol gris: el marcado lleva además un contorno punteado de tinta y un copo chico, y late suave (alfa 0,35–0,6 cada 1,6 s; fijo en 0,5 con movimiento reducido); el apagado lleva el velo fijo y un copo con contorno en la esquina superior. La pastilla del mes muestra un copo `frost` junto a la estación mientras hay escarcha.
+- **Casilla con plaga (032, 033, Ancestral):** la casilla tejida marcada se pinta con `board/plague/blight` (`blight-winter` en invierno) en vez de la red: bordes de podredumbre violeta con manchas y garras de hilo seco, y el centro crema con los hilos dorados todavía vivos. Pierde la luz de la red y lleva el contorno punteado que late, como el árbol marcado. Al marchitarse, `board/plague/withered` (la red muerta) se ve un momento y se funde hasta dejar el pasto. Mientras hay una casilla marcada, la pastilla del mes muestra `ui/icons/plague` (una hoja podrida) junto a la estación. Si una pieza no carga, se dibuja un velo del token `blight` (`#7E5A86`) con tres manchas de corteza ([piezas](#piezas-de-la-plaga-032)).
 - **Marco:** raíces trenzadas con hojas (`ui/frames/roots`, como `border-image` de 12 px por lado, en uso), y el marco de bosque alrededor de la pantalla (pendiente).
 
 ## Pantallas (390 × 844)
@@ -161,7 +162,7 @@ La saturación del progreso (003, hecho) va de apagado (40 % de color) a color p
 - **Piezas estirables:** marcos, pergamino, letrero, cinta y botones se entregan **en partes** (9 o 3 partes, con márgenes indicados) para que se estiren sin deformarse. Se usan con `border-image` o como capas.
 - **Estados por separado:** los brillos de casilla válida y seleccionada, y la ★, van como capas transparentes del mismo tamaño que la casilla.
 - **Sin texto horneado** (salvo el logo).
-- **Presupuesto:** `public/assets/` ≤ **4 MB** (decisión del 2 de noviembre; antes 2 MB). Hoy hay 2.82 MB. El JavaScript del juego no cuenta en este límite. Los fondos y piezas de portada, intro y victoria se cargan de forma diferida, cuando se muestra esa pantalla; la primera carga solo trae lo del tablero, los personajes y el HUD.
+- **Presupuesto:** `public/assets/` ≤ **4 MB** (decisión del 2 de noviembre; antes 2 MB). Hoy hay 2.95 MB (con las piezas de la plaga, 033). El JavaScript del juego no cuenta en este límite. Los fondos y piezas de portada, intro y victoria se cargan de forma diferida, cuando se muestra esa pantalla; la primera carga solo trae lo del tablero, los personajes y el HUD.
 - **Estaciones (010):** variantes pintadas por estación, sin gradación de color (descartada en el 003).
 - **Luz de la red (016):** capa aditiva del micelio que crece con la estación; en invierno es lo más brillante del tablero.
 
@@ -299,7 +300,19 @@ public/assets/
 | `ui/panels/ribbon.webp` | UI v2 | 178 × 73 | 6 KB | Baja resolución (objetivo 360 px de ancho) |
 | `ui/panels/sign.webp` | UI v2 | 180 × 83 | 8 KB | Baja resolución (objetivo 360 px de ancho) |
 
-**Faltan:** fondos verticales a 860 × 1860 (hoy 465 × 631), panorámicas más altas si se quieren a pantalla completa en horizontal, conector de micelio en T, retratos a 280 px para la ficha grande, Chispa `portrait` por estación sin marco y el fin del invierno si debe distinguirse de la intro.
+**Faltan:** fondos verticales a 860 × 1860 (hoy 465 × 631), panorámicas más altas si se quieren a pantalla completa en horizontal, conector de micelio en T, retratos a 280 px para la ficha grande, Chispa `portrait` por estación sin marco el fin del invierno si debe distinguirse de la intro.
+
+### Piezas de la plaga (032)
+Entregadas el 5 de noviembre en una hoja (`assets/ui/source/hoja-plaga.webp`) y cortadas en el 033. Tamaños a la escala del tablero HD (`board/mycelium/net` mide 226 × 234).
+
+| Archivo | Uso | Tamaño | Peso | Estado |
+| --- | --- | --- | --- | --- |
+| `board/plague/blight.webp` | Casilla tejida marcada (reemplaza la pieza de la red): podredumbre violeta desde los bordes, manchas y garras de hilo seco; centro crema con los hilos dorados | 232 × 225 | 22 KB | Listo |
+| `board/plague/withered.webp` | Instante en que se marchita: red muerta gris violácea; se funde y queda el pasto | 232 × 230 | 22 KB | Listo |
+| `ui/icons/plague.webp` | Hoja violeta podrida: en la pastilla del mes mientras hay casilla marcada (como el copo de la escarcha) | 96 × 114 (se ve a ~12 px) | 4 KB | Listo |
+| `board/plague/blight-winter.webp` | `blight` con nieve en los bordes, para el invierno | 232 × 226 | 22 KB | Listo |
+
+Reglas para todas: contorno café oscuro de grosor constante (nunca negro), luz arriba a la izquierda, sin texto, colores `blight` (`#7E5A86`) y `bark` (`#5E3B22`). Lo marcado no puede depender solo del color: manchas y garras que se leen en gris. Las cuatro suman 70 KB del presupuesto de 4 MB.
 
 ## Qué se conserva del 008
 - La regla de **casilla ocupada** y el pintor como respaldo si una imagen no carga.

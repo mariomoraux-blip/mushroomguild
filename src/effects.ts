@@ -17,7 +17,9 @@ export type Effect =
    */
   | { kind: 'spores'; from: Point[]; amount: number; leaves: number }
   /** Pasar la voz (022): Chispa, en `at`, liberó al miembro `memberId`, que vuelve a estar listo este mes. */
-  | { kind: 'call'; at: Point; memberId: number };
+  | { kind: 'call'; at: Point; memberId: number }
+  /** La plaga marchitó la casilla tejida marcada (033): sale de la red y vuelve a ser pasto. */
+  | { kind: 'wither'; at: Point };
 
 const key = (p: Point) => `${p.x},${p.y}`;
 
@@ -33,6 +35,7 @@ export function diffEffects(prev: GameState, next: GameState): Effect[] {
     if (b.kind === 'log' && (t.kind !== 'log' || t.uses > b.uses)) effects.push({ kind: 'decompose', at: t, before: b });
     if (t.kind === 'tree' && t.alive && !b.alive) effects.push({ kind: 'revive', at: t });
     if (t.kind === 'mother' && t.alive && !b.alive) effects.push({ kind: 'awaken', at: t });
+    if (b.blighted && b.net && !t.net) effects.push({ kind: 'wither', at: { x: t.x, y: t.y } });
     if (t.net && !b.net && t.kind !== 'home') {
       const from = neighbors(prev, t.x, t.y).find((n) => n.net) ?? null;
       effects.push({ kind: 'weave', at: t, from: from && { x: from.x, y: from.y }, before: b });

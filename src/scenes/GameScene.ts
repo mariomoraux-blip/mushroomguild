@@ -4,7 +4,7 @@ import { H, seasonIndex, W } from '../rules';
 import { BoardFx } from './fx';
 import { paintBoard, paintMarked, paintMyceliumGlow, progressSaturation } from './paint';
 import { highlighted, suggestedTile, type AppState, type Store } from '../store';
-import { BOARD_HEADROOM, boardArtKeys, boardArtUrl, FATHER_SCALE, fatherKey, FROST_PULSE, FROST_PULSE_MS, hex, LIGHT_TRANSITION_MS, MOTION, MYCELIUM_GLOW, portraitKey, renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteUrl, type ColorToken } from '../theme';
+import { BOARD_ART, BOARD_HEADROOM, boardArtKeys, boardArtUrl, FATHER_SCALE, fatherKey, FROST_PULSE, FROST_PULSE_MS, hex, LIGHT_TRANSITION_MS, MOTION, MYCELIUM_GLOW, portraitKey, renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteUrl, type ColorToken } from '../theme';
 
 /** Color de la silueta de respaldo si falta el retrato de una especie. */
 const SILHOUETTE: Readonly<Record<string, ColorToken>> = { champi: 'wood', lactarius: 'indigo', amanita: 'berry', gliophorus: 'leaf', mago: 'peach' };
@@ -141,7 +141,7 @@ export class GameScene extends Phaser.Scene {
     } else if (this.glowTex.width !== w || this.glowTex.height !== h) {
       this.glowTex.setSize(w, h);
     }
-    const net = state.game.tiles.filter((t) => t.net).map((t) => `${t.x},${t.y}`).join(' ');
+    const net = state.game.tiles.filter((t) => t.net && !t.blighted).map((t) => `${t.x},${t.y}`).join(' ');
     const painted = `${T}|${net}`;
     if (painted !== this.glowPainted) {
       this.glowPainted = painted;
@@ -169,7 +169,8 @@ export class GameScene extends Phaser.Scene {
       .filter((t) => (t.fading && !t.alive) || t.blighted)
       .map((t) => `${t.blighted ? 'p' : ''}${t.x},${t.y}`)
       .join(' ');
-    const painted = `${T}|${marked}|${this.reduceMotion.matches}`;
+    const plagueArt = this.textures.exists(BOARD_ART.plague.blight);
+    const painted = `${T}|${marked}|${this.reduceMotion.matches}|${plagueArt}`;
     if (painted === this.frostPainted) return;
     this.frostPainted = painted;
     if (!this.frostTex) {
@@ -180,7 +181,7 @@ export class GameScene extends Phaser.Scene {
     } else if (this.frostTex.width !== T * W || this.frostTex.height !== T * H) {
       this.frostTex.setSize(T * W, T * H);
     }
-    paintMarked(this.frostTex.getContext(), T, state.game);
+    paintMarked(this.frostTex.getContext(), T, state.game, plagueArt);
     this.frostTex.refresh();
     this.frostImage?.setTexture(FROST_KEY).setDisplaySize(T * W, T * H).setVisible(Boolean(marked));
     this.frostTween?.remove();

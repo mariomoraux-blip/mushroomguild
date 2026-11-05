@@ -310,7 +310,7 @@ export const es = {
     treesShort: 'árboles',
     time: (t: string) => `Tiempo de juego: ${t}`,
     /** Etiqueta del ícono de la estación: estación, escarcha y nivel (019). */
-    season: (season: string, frost: boolean, level: string) => `${season}${frost ? ', con escarcha' : ''} · ${level}`,
+    season: (season: string, frost: boolean, level: string, plague = false) => `${season}${frost ? ', con escarcha' : ''}${plague ? ', con plaga' : ''} · ${level}`,
   },
 
   scoring: {

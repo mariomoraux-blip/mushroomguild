@@ -109,6 +109,8 @@ button { font: inherit; color: inherit; }
 .hud__frost { flex: 0 0 auto; font-size: 12px; line-height: 1; color: var(--frost); text-shadow: 0 1px 0 var(--mossDark); }
 .hud__frost::before { content: '❄'; }
 .hud__frost[hidden] { display: none; }
+.hud__plague { flex: 0 0 auto; width: 12px; height: 14px; background: var(--art-plague) center / contain no-repeat; }
+.hud__plague[hidden] { display: none; }
 .chip {
   display: flex;
   flex-direction: column;

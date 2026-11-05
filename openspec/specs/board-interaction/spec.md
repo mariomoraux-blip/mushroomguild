@@ -69,7 +69,7 @@ Maestra Bruma no tiene otro motivo de inactividad: cuando llega siempre hay árb
 - THEN la bitácora dice "Maestra Bruma: su magia vuelve con la próxima estación."
 
 ### Requirement: Estado visible
-El HUD SHALL mostrar en todo momento mes (de 12), estación, nutrientes, esporas, árboles vivos (del total de árboles del claro) y el cronómetro de juego activo (`scoring` › Cronómetro). El cronómetro va en la segunda línea de la pastilla del mes, junto al ícono de la estación; el nombre de la estación y el nivel SHALL estar en la etiqueta accesible de la pastilla. Con escarcha activa, la pastilla SHALL mostrar un copo junto al ícono de la estación, y su etiqueta accesible lo SHALL decir.
+El HUD SHALL mostrar en todo momento mes (de 12), estación, nutrientes, esporas, árboles vivos (del total de árboles del claro) y el cronómetro de juego activo (`scoring` › Cronómetro). El cronómetro va en la segunda línea de la pastilla del mes, junto al ícono de la estación; el nombre de la estación y el nivel SHALL estar en la etiqueta accesible de la pastilla. Con escarcha activa, la pastilla SHALL mostrar un copo junto al ícono de la estación, y su etiqueta accesible lo SHALL decir. Mientras haya una casilla con plaga, la pastilla SHALL mostrar la hoja podrida (`ui/icons/plague`) junto a la estación, y su etiqueta accesible SHALL decir «con plaga».
 
 #### Scenario: Tras una acción
 - WHEN el Champiñón descompone un tronco
@@ -84,6 +84,11 @@ El HUD SHALL mostrar en todo momento mes (de 12), estación, nutrientes, esporas
 - WHEN empieza el mes 7 en Bosque
 - THEN la pastilla del mes muestra un copo junto al ícono del otoño
 - AND su etiqueta accesible dice "Otoño, con escarcha"
+
+#### Scenario: Pastilla con plaga
+- WHEN la plaga marca una casilla en Ancestral
+- THEN la pastilla del mes muestra la hoja podrida junto a la estación y su etiqueta dice «con plaga»
+- AND cuando la casilla se marchita o se salva, la hoja desaparece
 
 ### Requirement: Accesibilidad básica
 Todo lo que se hace con el puntero SHALL poder hacerse con teclado, y el foco SHALL ser visible.

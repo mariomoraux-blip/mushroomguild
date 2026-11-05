@@ -4,7 +4,7 @@
 import * as Phaser from 'phaser';
 import type { Effect } from '../effects';
 import { W, type GameState, type Point } from '../rules';
-import { hex, MOTION, type ColorToken } from '../theme';
+import { BOARD_ART, hex, MOTION, type ColorToken } from '../theme';
 import { groundKey, objectKey } from './paint';
 import type { SeasonSlug } from '../theme';
 
@@ -257,6 +257,7 @@ export class BoardFx {
       else if (e.kind === 'decompose') this.decompose(e, season);
       else if (e.kind === 'revive') this.burst(e.at, ['leaf', 'glow', 'sun'], 12, 0.7);
       else if (e.kind === 'awaken') this.awaken(e.at);
+      else if (e.kind === 'wither') this.wither(e.at);
     }
   }
 
@@ -311,6 +312,18 @@ export class BoardFx {
       });
     }
     this.burst(e.at, ['glow', 'sun'], 6, 0.45);
+  }
+
+  /** Marchitarse (033): la red muerta (`withered`) queda un momento sobre el pasto y se funde, con polvo violeta. */
+  private wither(at: Point): void {
+    const T = this.T;
+    const key = BOARD_ART.plague.withered;
+    if (this.scene.textures.exists(key)) {
+      const [cx, cy] = this.center(at);
+      const img = this.scene.add.image(cx, cy, key).setDisplaySize(T, T).setDepth(1);
+      this.scene.tweens.add({ targets: img, alpha: 0, delay: MOTION.ms.standard, duration: MOTION.ms.narrative, ease: E.leave.phaser, onComplete: () => img.destroy() });
+    }
+    this.burst(at, ['blight', 'stone'], 8, 0.5);
   }
 
   /** Descomponer: el tronco de antes se encoge y se hunde, con astillas que saltan. */

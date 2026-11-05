@@ -18,8 +18,10 @@ export function mountHud(root: HTMLElement, store: Store) {
   // Con escarcha (019), un copo junto a la estación; la etiqueta del ícono dice estación, escarcha y nivel.
   const seasonIcon = el('span', { class: 'hud__season', role: 'img' });
   const frost = el('span', { class: 'hud__frost', 'aria-hidden': 'true' });
+  // Plaga (033): una hoja podrida junto a la estación mientras hay una casilla marcada.
+  const plague = el('span', { class: 'hud__plague', 'aria-hidden': 'true' });
   const time = el('span', { class: 'hud__time' }, '00:00');
-  const month = el('div', { class: 'hud__month' }, monthValue, el('span', { class: 'hud__month-caption' }, seasonIcon, frost, time));
+  const month = el('div', { class: 'hud__month' }, monthValue, el('span', { class: 'hud__month-caption' }, seasonIcon, frost, plague, time));
 
   const chip = (iconName: string, label: string, tag: 'div' | 'button' = 'div') => {
     const value = el('strong', { class: 'chip__value' });
@@ -74,8 +76,10 @@ export function mountHud(root: HTMLElement, store: Store) {
     lastNotice = n;
     setText(monthValue, `${es.hud.month} ${g.month}${es.hud.of(MONTHS)}`);
     const frosty = hasFrost(g);
-    seasonIcon.setAttribute('aria-label', es.hud.season(season(g.month), frosty, es.levels.names[g.level]));
+    const blighted = g.tiles.some((t) => t.blighted);
+    seasonIcon.setAttribute('aria-label', es.hud.season(season(g.month), frosty, es.levels.names[g.level], blighted));
     frost.hidden = !frosty;
+    plague.hidden = !blighted;
     const slug = SEASON_SLUGS[seasonIndex(g.month)] ?? 'spring';
     // Estación nueva (022): el ícono cambia en un fundido, junto con el claro.
     if (seasonIcon.dataset.season && seasonIcon.dataset.season !== slug) replay(seasonIcon, 'is-new-season');
