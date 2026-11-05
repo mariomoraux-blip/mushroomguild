@@ -23,6 +23,7 @@ export const color = {
   glow: '#FFF4C2', // brillos, aura del Árbol Padre, luciérnagas
   stoneDark: '#6F675B', // sombra de rocas y copas dormidas
   frost: '#CFE8F5', // velo de escarcha: árbol marcado o apagado (019)
+  blight: '#7E5A86', // plaga de Ancestral: velo violeta apagado sobre la casilla tejida marcada (032)
   arcane: '#80E6E5', // magia de Maestra Bruma: el brillo de la punta de su bastón (022)
   neutral: '#808080', // gris sin tono: solo para desaturar el escenario (003, modo "saturation")
 } as const;

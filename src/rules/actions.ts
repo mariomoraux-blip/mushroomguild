@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MONTHS, GAIN, UPKEEP, LOG_USES, MAX_GUILD, RECRUITABLE, TREES_FOR_MAGE } from './config';
+import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MONTHS, GAIN, UPKEEP, LOG_USES, MAX_GUILD, PLAGUE_REACH, RECRUITABLE, TREES_FOR_MAGE } from './config';
 import {
   addMage,
   addMember,
@@ -10,6 +10,9 @@ import {
   isSporeless,
   motherCost,
   motherTrees,
+  guarded,
+  plagueStarts,
+  plagueTarget,
   magicSpent,
   member,
   recruitableCount,
@@ -195,6 +198,16 @@ export function endMonth(s: GameState): ActionResult {
       parts.push(es.log.treeFaded(FADED_REVIVE));
     }
   }
+  // Plaga (032): la casilla marcada sale de la red (vuelve a ser tierra) si ningún hongo trabajó cerca este mes.
+  const blighted = n.tiles.find((t) => t.blighted);
+  if (blighted) {
+    delete blighted.blighted;
+    if (guarded(n, blighted)) parts.push(es.log.plagueStopped);
+    else {
+      blighted.net = false;
+      parts.push(es.log.plagueWithered);
+    }
+  }
   const cold = isCold(s);
   n.month++;
   const trees = revivedCount(n);
@@ -237,6 +250,13 @@ export function endMonth(s: GameState): ActionResult {
     if (next) {
       n.tiles.find((t) => t === next)!.fading = true;
       parts.push(es.log.treeFading);
+    }
+  }
+  if (plagueStarts(n)) {
+    const target = plagueTarget(n);
+    if (target) {
+      n.tiles.find((t) => t === target)!.blighted = true;
+      parts.push(es.log.plagueMarked(PLAGUE_REACH));
     }
   }
   if (n.mageDue) {

@@ -1,4 +1,4 @@
-import { COST, FADED_REVIVE, FROST_WEAVE, GAIN, LEVELS, LOG_USES, RECRUIT_COSTS, UPKEEP } from '../rules/config';
+import { COST, FADED_REVIVE, FROST_WEAVE, GAIN, LEVELS, LOG_USES, PLAGUE_REACH, RECRUIT_COSTS, UPKEEP } from '../rules/config';
 import type { IdleReason } from '../rules/idle';
 import type { Level, RecruitableSpecies, SpeciesId } from '../rules/types';
 
@@ -143,6 +143,7 @@ export const es = {
     soilNet: 'Tierra tejida: ya es parte de la red. Se trabaja en las casillas vecinas.',
     log: `Tronco caído: el Champiñón lo descompone (+${GAIN.log} nutrientes, ${LOG_USES} veces).`,
     tree: `Árbol gris: la Amanita lo revive si toca la red (${plural(COST.revive, 'nutriente')}).`,
+    plague: `Red con plaga: se marchitará al terminar el mes si ningún hongo trabaja a ${PLAGUE_REACH} casillas o menos. Si se marchita, vuelve a ser tierra y se puede tejer otra vez.`,
     treeFading: `Árbol gris con escarcha: se apagará al terminar el mes si la Amanita no lo revive (${plural(COST.revive, 'nutriente')}).`,
     treeFaded: `Árbol apagado: la Amanita aún puede revivirlo, pero cuesta ${plural(FADED_REVIVE, 'nutriente')}.`,
     treeAlive: `Árbol vivo: al empezar cada mes da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}.`,
@@ -224,7 +225,7 @@ export const es = {
     lines: {
       brote: 'El claro de siempre, con la ★ para guiarte.',
       bosque: 'Más rocas, escarcha en otoño y un árbol que se apaga.',
-      ancestral: 'Más rocas aún, escarcha hasta el final, tres árboles que se apagan, un Árbol Padre más exigente y sin ★.',
+      ancestral: 'Más rocas aún, escarcha hasta el final, tres árboles que se apagan, plaga, un Árbol Padre más exigente y sin ★.',
     },
     multiplier: (m: number) => `Puntaje ${times(m)}`,
     back: 'Volver a la portada',
@@ -280,7 +281,7 @@ export const es = {
     tilesTitle: 'Las casillas',
     tip: 'Si no sabes qué hacer, sigue la ★: marca el hongo sugerido y la casilla que acerca la red a tu meta.',
     levelsTitle: 'Bosque y Ancestral',
-    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En otoño e invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente). En invierno los árboles no dan esporas. Nunca se pierde la red ni los árboles vivos. En Ancestral no hay ★ y el Árbol Padre pide ${A.motherTrees} árboles revividos y ${plural(A.mother, 'nutriente')}.`,
+    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En otoño e invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente). En invierno los árboles no dan esporas. Nunca se pierden los árboles vivos. En Ancestral, al empezar el otoño y el invierno la plaga marca una casilla tejida cerca del Árbol Padre: al terminar el mes se marchita y vuelve a ser tierra si ningún hongo trabajó a ${PLAGUE_REACH} casillas o menos. En Ancestral no hay ★ y el Árbol Padre pide ${A.motherTrees} árboles revividos y ${plural(A.mother, 'nutriente')}.`,
     start: '¡A jugar!',
   },
 
@@ -372,6 +373,8 @@ export const es = {
       'Si no hay, el primero en llegar al gremio se queda con hambre y descansa el mes siguiente.',
       'En invierno, los árboles no dan esporas.',
     ],
+    /** Regla extra de la carta en Ancestral (032). */
+    coldPlague: `Cada estación, la plaga marca una casilla de la red cerca del Árbol Padre: se marchita al terminar el mes si ningún hongo trabaja a ${PLAGUE_REACH} casillas o menos.`,
     coldOk: 'Seguir',
     wonTitle: '¡El bosque despertó!',
     wonText: (month: number) => `El Árbol Padre despertó en el mes ${month}.`,
@@ -411,6 +414,7 @@ export const es = {
     goal: 'la meta',
     fading: `con escarcha: se apagará al terminar el mes, revivirlo cuesta ${plural(COST.revive, 'nutriente')}`,
     faded: `apagado: revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}`,
+    plague: `con plaga: se marchitará al terminar el mes si ningún hongo trabaja a ${PLAGUE_REACH} casillas o menos`,
     position: (x: number, y: number) => `columna ${x + 1}, fila ${y + 1}`,
     boardLabel: 'Tablero del claro',
   },
@@ -439,6 +443,9 @@ export const es = {
     hungry: (names: readonly string[]) => `${listY(names)} ${names.length > 1 ? 'se quedaron' : 'se quedó'} sin comer: ${names.length > 1 ? 'descansan' : 'descansa'} este mes.`,
     sporelessStart: 'Llegó el invierno: los árboles ya no dan esporas.',
     treeFading: 'Este árbol se apagará al terminar el mes si nadie lo revive.',
+    plagueMarked: (reach: number) => `La plaga llegó a la red: esa casilla se marchitará al terminar el mes si ningún hongo trabaja a ${reach} casillas o menos.`,
+    plagueWithered: 'La plaga marchitó una casilla de la red: volvió a ser tierra.',
+    plagueStopped: 'Los hongos frenaron la plaga.',
     treeFaded: (n: number) => `Un árbol se apagó: revivirlo ahora cuesta ${plural(n, 'nutriente')}.`,
     /** Mes vacío (024): no es una pista, sale también en Ancestral. */
     emptyMonth: (nutrients: number) =>

@@ -34,7 +34,7 @@ describe('Requirement: Niveles de dificultad', () => {
     expect(fadedCount(s)).toBe(0);
   });
 
-  it('Scenario: Nada se pierde — en 1000 partidas al azar por nivel, terminar el mes nunca quita red ni árboles vivos (las reservas solo bajan por lo que come el gremio en otoño e invierno)', () => {
+  it('Scenario: Nada se pierde — en 1000 partidas al azar por nivel, terminar el mes nunca quita árboles vivos y solo la plaga de Ancestral quita una casilla de red (las reservas solo bajan por lo que come el gremio en otoño e invierno)', () => {
     const rng = mulberry32(19);
     const starts = Object.fromEntries(LEVEL_IDS.map((l) => [l, Array.from({ length: 10 }, (_, i) => newRandomGame(i + 1, l))]));
     const count = (s: GameState) => ({ net: s.tiles.filter((t) => t.net).length, alive: s.tiles.filter((t) => t.alive).length });
@@ -50,7 +50,9 @@ describe('Requirement: Niveles de dificultad', () => {
           const after = count(next);
           // Lo único que puede bajar es lo que come el gremio en otoño e invierno (028, 030): UPKEEP nutrientes, nunca esporas.
           const eaters = isCold(s) ? UPKEEP : 0;
-          if (after.net < before.net || after.alive < before.alive || next.nutrients < s.nutrients - eaters || next.nutrients < 0 || next.spores < s.spores)
+          // La plaga (032) puede quitar la casilla tejida marcada: a lo más una por mes.
+          const plague = s.tiles.some((t) => t.blighted) ? 1 : 0;
+          if (after.net < before.net - plague || after.alive < before.alive || next.nutrients < s.nutrients - eaters || next.nutrients < 0 || next.spores < s.spores)
             throw new Error(`${level}: se perdió progreso en el mes ${s.month}`);
           s = next;
         }

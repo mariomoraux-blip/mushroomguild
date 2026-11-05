@@ -1,6 +1,7 @@
 import { es } from '../copy/es';
-import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MAX_GUILD, MONTHS, MONTHS_PER_SEASON, H, KIND, MAP, RECRUIT_COSTS, START_NUTRIENTS, START_SPORES, STARTING_GUILD, W } from './config';
-import type { GameState, Level, Member, Mutable, RecruitableSpecies, Tile } from './types';
+import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MAX_GUILD, MONTHS, MONTHS_PER_SEASON, H, KIND, MAP, PLAGUE_REACH, RECRUIT_COSTS, START_NUTRIENTS, START_SPORES, STARTING_GUILD, W } from './config';
+import { hashString, mulberry32 } from './rng';
+import type { GameState, Level, Member, Mutable, Point, RecruitableSpecies, Tile } from './types';
 
 export type MutableState = Mutable<GameState> & { tiles: Mutable<Tile>[]; members: Mutable<Member>[] };
 
@@ -119,6 +120,28 @@ export const reviveCost = (t: Tile): number => (t.faded ? FADED_REVIVE : COST.re
  * Árbol gris (ni vivo ni apagado) más lejano de la red: mayor distancia en pasos ortogonales desde la red sin
  * atravesar rocas; si hay empate, el de la fila más alta (y menor) y después el de la columna menor (019).
  */
+/** Empieza una estación con plaga (032): primer mes de una estación de `LEVELS › plague`. */
+export const plagueStarts = (s: GameState, month = s.month): boolean =>
+  LEVELS[s.level].plague.includes(seasonIndex(month)) && (month - 1) % MONTHS_PER_SEASON === 0;
+
+const steps = (a: Point, b: Point) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+
+/**
+ * Casilla que marca la plaga (032): una casilla tejida (tierra de la red; nunca el Hogar, un árbol ni el Árbol Padre)
+ * entre las más cercanas al Árbol Padre, al azar con el claro y el mes (`hashString(mapId) ^ month`).
+ */
+export function plagueTarget(s: GameState): Tile | null {
+  const mother = s.tiles.find((t) => t.kind === 'mother');
+  const woven = s.tiles.filter((t) => t.net && t.kind === 'soil');
+  if (!mother || !woven.length) return null;
+  const near = Math.min(...woven.map((t) => steps(t, mother)));
+  const ties = woven.filter((t) => steps(t, mother) === near);
+  return ties[Math.floor(mulberry32((hashString(s.mapId) ^ s.month) >>> 0)() * ties.length)]!;
+}
+
+/** Algún hongo trabajó este mes a `PLAGUE_REACH` casillas o menos de `t` (032). */
+export const guarded = (s: GameState, t: Point): boolean => s.members.some((m) => m.at && steps(m.at, t) <= PLAGUE_REACH);
+
 export function farthestGreyTree(s: GameState): Tile | null {
   const dist = new Map<Tile, number>();
   const queue: Tile[] = s.tiles.filter((t) => t.net);

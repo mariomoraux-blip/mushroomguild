@@ -570,26 +570,71 @@ function paintFaded(ctx: Ctx, T: number, x: number, y: number) {
   snowflake(ctx, (x + 0.8) * T, (y + 0.2) * T, T * 0.13);
 }
 
+/** Contorno punteado de tinta de una casilla marcada (019, 032). */
+function dashedFrame(ctx: Ctx, T: number, x: number, y: number) {
+  const inset = T * 0.08;
+  ctx.save();
+  roundRect(ctx, x * T + inset, y * T + inset, T - 2 * inset, T - 2 * inset, T * 0.18);
+  ctx.strokeStyle = rgba('ink');
+  ctx.lineWidth = T * 0.04;
+  ctx.setLineDash([T * 0.1, T * 0.08]);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/** Velo de plaga (032): violeta apagado, más denso en los bordes, como la escarcha. */
+function blightVeil(ctx: Ctx, T: number, x: number, y: number) {
+  const inset = T * 0.05;
+  ctx.save();
+  roundRect(ctx, x * T + inset, y * T + inset, T - 2 * inset, T - 2 * inset, T * 0.2);
+  ctx.fillStyle = radial(ctx, (x + 0.5) * T, (y + 0.5) * T, T * 0.6, [
+    [0, 'blight', 0.55],
+    [1, 'blight', 1],
+  ]);
+  ctx.fill();
+  ctx.restore();
+}
+
+/** Tres manchas con contorno de tinta en la esquina: que la plaga no dependa solo del color (032). */
+function blightSpots(ctx: Ctx, T: number, x: number, y: number) {
+  const spots: [number, number, number][] = [
+    [0.78, 0.22, 0.075],
+    [0.66, 0.16, 0.05],
+    [0.86, 0.34, 0.045],
+  ];
+  ctx.save();
+  for (const [dx, dy, r] of spots) {
+    ctx.beginPath();
+    ctx.arc((x + dx) * T, (y + dy) * T, r * T, 0, Math.PI * 2);
+    ctx.fillStyle = rgba('bark');
+    ctx.fill();
+    ctx.strokeStyle = rgba('ink');
+    ctx.lineWidth = T * 0.02;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 /**
- * Capa del árbol marcado (019): velo pleno, contorno punteado y un copo chico; la escena le pone el alfa
- * que late (`FROST_PULSE`). Devuelve las casillas pintadas.
+ * Capa de casillas marcadas: el árbol que se apagará (019; velo de escarcha y un copo chico) y la casilla tejida con
+ * plaga (032; velo violeta y tres manchas), ambas con contorno punteado. La escena le pone el alfa que late
+ * (`FROST_PULSE`). Devuelve las casillas pintadas.
  */
 export function paintMarked(ctx: Ctx, T: number, game: GameState): { x: number; y: number }[] {
   ctx.clearRect(0, 0, W * T, H * T);
   const marked = game.tiles.filter((t) => t.kind === 'tree' && t.fading && !t.alive);
   for (const t of marked) {
     frostVeil(ctx, T, t.x, t.y, 1);
-    const inset = T * 0.08;
-    ctx.save();
-    roundRect(ctx, t.x * T + inset, t.y * T + inset, T - 2 * inset, T - 2 * inset, T * 0.18);
-    ctx.strokeStyle = rgba('ink');
-    ctx.lineWidth = T * 0.04;
-    ctx.setLineDash([T * 0.1, T * 0.08]);
-    ctx.stroke();
-    ctx.restore();
+    dashedFrame(ctx, T, t.x, t.y);
     snowflake(ctx, (t.x + 0.8) * T, (t.y + 0.2) * T, T * 0.09);
   }
-  return marked.map(({ x, y }) => ({ x, y }));
+  const blighted = game.tiles.filter((t) => t.blighted);
+  for (const t of blighted) {
+    blightVeil(ctx, T, t.x, t.y);
+    dashedFrame(ctx, T, t.x, t.y);
+    blightSpots(ctx, T, t.x, t.y);
+  }
+  return [...marked, ...blighted].map(({ x, y }) => ({ x, y }));
 }
 
 function paintStar(ctx: Ctx, T: number, x: number, y: number) {

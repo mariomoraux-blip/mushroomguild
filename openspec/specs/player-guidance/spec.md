@@ -118,7 +118,7 @@ El Árbol Padre SHALL marcarse como meta en el tablero en todo momento, y las ca
 - THEN el Árbol Padre tiene el aro de meta y su etiqueta accesible dice que es la meta
 
 ### Requirement: Avisos de la presión
-En los niveles con escarcha, árboles que se apagan o temporadas frías, la bitácora SHALL avisar, en todos esos niveles (también en Ancestral, porque no son pistas): al empezar una estación con escarcha, que tejer cuesta 2 nutrientes; al marcar un árbol, que se apagará al terminar el mes si nadie lo revive; al apagarse, que revivirlo cuesta 7; al terminar un mes de otoño o invierno, lo que comió el gremio o quién se quedó con hambre; y al empezar una estación sin esporas, que los árboles ya no dan esporas. Tocar un árbol marcado o apagado sin miembro seleccionado SHALL explicar su estado y su costo. Un hongo con hambre SHALL decir «Con hambre» en el dock en vez de «Descansa». La meta y la etiqueta del Árbol Padre SHALL decir los árboles revividos y los nutrientes que pide en el nivel de la partida; la Libreta, la ficha de la Amanita y «Cómo jugar» SHALL decir los de Brote y Bosque y, entre paréntesis, los de Ancestral.
+En los niveles con escarcha, árboles que se apagan, temporadas frías o plaga, la bitácora SHALL avisar, en todos esos niveles (también en Ancestral, porque no son pistas): al empezar una estación con escarcha, que tejer cuesta 2 nutrientes; al marcar un árbol, que se apagará al terminar el mes si nadie lo revive; al apagarse, que revivirlo cuesta 7; al terminar un mes de otoño o invierno, lo que comió el gremio o quién se quedó con hambre; al empezar una estación sin esporas, que los árboles ya no dan esporas; al marcar la plaga una casilla, que se marchitará al terminar el mes si ningún hongo trabaja a 2 casillas o menos; y al terminar ese mes, que se marchitó o que los hongos la frenaron. Tocar un árbol marcado o apagado, o una casilla con plaga, sin miembro seleccionado SHALL explicar su estado y su costo. La casilla con plaga SHALL verse con un velo violeta, contorno punteado y tres manchas (no solo color), y su etiqueta accesible SHALL decir «con plaga». Un hongo con hambre SHALL decir «Con hambre» en el dock en vez de «Descansa». La meta y la etiqueta del Árbol Padre SHALL decir los árboles revividos y los nutrientes que pide en el nivel de la partida; la Libreta, la ficha de la Amanita y «Cómo jugar» SHALL decir los de Brote y Bosque y, entre paréntesis, los de Ancestral.
 
 #### Scenario: Aviso del árbol marcado
 - WHEN empieza el mes 6 en Bosque
@@ -131,6 +131,10 @@ En los niveles con escarcha, árboles que se apagan o temporadas frías, la bit�
 #### Scenario: Hongo con hambre
 - WHEN un hongo se queda sin comer al terminar un mes de otoño
 - THEN la bitácora lo nombra y su tarjeta del dock dice "Con hambre"
+
+#### Scenario: Aviso de plaga
+- WHEN empieza el mes 7 en Ancestral con casillas tejidas
+- THEN la bitácora dice que la plaga llegó a la red y tocar la casilla marcada explica que se marchitará si ningún hongo trabaja a 2 casillas o menos
 
 ### Requirement: Aviso de mes vacío
 Cuando hay miembros listos, ninguno tiene una casilla válida y en el mes todavía nadie actuó (reclutar no cuenta), la bitácora SHALL decir que nadie tiene trabajo este mes y cuántos nutrientes traerá la hojarasca al terminarlo: «Nadie tiene trabajo este mes. Termina el mes: la hojarasca traerá N nutrientes.», o «Nadie tiene trabajo este mes. Termina el mes.» si no hay árboles vivos. El aviso SHALL mostrarse en todos los niveles, también en Ancestral, porque describe el estado y no sugiere ningún miembro ni casilla. Tocar un miembro SHALL seguir mostrando su motivo de inactividad.
