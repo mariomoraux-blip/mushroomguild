@@ -225,7 +225,7 @@ export const es = {
     lines: {
       brote: 'El claro de siempre, con la ★ para guiarte.',
       bosque: 'Más rocas, escarcha en otoño y un árbol que se apaga.',
-      ancestral: 'Más rocas aún, escarcha hasta el final, tres árboles que se apagan, plaga, un Árbol Padre más exigente y sin ★.',
+      ancestral: 'Más rocas aún, escarcha hasta el final, cinco árboles que se apagan, plaga, un Árbol Padre más exigente y sin ★.',
     },
     multiplier: (m: number) => `Puntaje ${times(m)}`,
     back: 'Volver a la portada',

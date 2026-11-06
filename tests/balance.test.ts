@@ -66,7 +66,8 @@ describe('estrellas por claro (015)', () => {
 const TARGETS = {
   bosque: { hints: [0.55, 0.7], random: 0.1, certified: 90 }, // 028: invierno duro
   // 031: con el Árbol Padre en 4 árboles y 12 nutrientes se certifican 85 de los 100 primeros (905 de 1000); solo se sirven esos.
-  ancestral: { hints: [0.2, 0.35], random: 0.05, certified: 80 },
+  // 034: un árbol se apaga cada dos meses; se certifican 86 de los 100 primeros (861 de 1000) y las pistas bajan a 10–25 %.
+  ancestral: { hints: [0.1, 0.25], random: 0.05, certified: 80 },
 } as const;
 
 describe.each(['bosque', 'ancestral'] as const)('balance en %s', (level) => {
