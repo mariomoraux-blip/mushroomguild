@@ -190,7 +190,7 @@ Si termina el mes 12 sin victoria, la partida SHALL terminar en estado `lost` si
 El balance SHALL verificarse por simulación en 100 mapas generados por nivel, con semillas fijas (en Bosque y Ancestral, las certificadas de la tabla precalculada):
 - **Brote:** la política de las pistas gana el 100 % de los mapas aceptados con un mes medio entre 8 y 10, y un bot que juega al azar gana entre el 5 % y el 30 %.
 - **Bosque:** el bot experto gana el 100 % de los mapas aceptados, la política de las pistas gana entre el 55 % y el 70 %, y el bot al azar gana como máximo el 10 %.
-- **Ancestral:** el bot experto gana el 100 % de los mapas aceptados, la política de las pistas gana entre el 20 % y el 35 %, y el bot al azar gana como máximo el 5 %.
+- **Ancestral:** el bot experto gana el 100 % de los mapas aceptados, la política de las pistas gana entre el 10 % y el 25 %, y el bot al azar gana como máximo el 5 %.
 
 Generar un claro de Bosque o Ancestral de la tabla certificada SHALL tardar menos de 300 ms en un teléfono de gama media; uno fuera de la tabla (solo con `?seed=` mayor que 1000) SHALL tardar menos de 800 ms.
 
@@ -206,7 +206,7 @@ Cada partida SHALL jugarse en uno de tres niveles: Brote, Bosque o Ancestral. El
 | --- | --- | --- | --- |
 | Rocas | 6 | 8 | 10 |
 | Escarcha | — | Otoño | Otoño e Invierno |
-| Se apaga un árbol al final del mes | — | 6 | 3, 6 y 9 |
+| Se apaga un árbol al final del mes | — | 6 | 3, 5, 7, 9 y 11 |
 | El gremio come 1 nutriente al terminar el mes | — | Otoño e Invierno | Otoño e Invierno |
 | Los árboles no dan esporas | — | Invierno | Invierno |
 | Plaga (una casilla tejida por estación) | — | — | Otoño e Invierno |
@@ -240,25 +240,6 @@ En las estaciones con escarcha del nivel, tejer SHALL costar 2 nutrientes en vez
 #### Scenario: Invierno en Bosque
 - WHEN empieza el mes 10 (Invierno) en Bosque
 - THEN tejer vuelve a costar 1 nutriente
-
-### Requirement: Árboles que se apagan
-Al empezar un mes en el que el nivel apaga un árbol, el juego SHALL marcar el árbol gris (ni vivo ni apagado) más lejano de la red: el de mayor distancia en pasos ortogonales desde la red sin atravesar rocas; si hay empate, el de la fila más alta y después el de la columna menor. Si al terminar ese mes el árbol marcado sigue gris, SHALL apagarse. Revivirlo durante ese mes lo salva. Revivir un árbol apagado SHALL costar 7 nutrientes. Si no queda ningún árbol gris sin apagar, no se marca ninguno.
-
-#### Scenario: Se marca el más lejano
-- WHEN empieza el mes 6 en Bosque
-- THEN el árbol gris más lejano de la red queda marcado
-
-#### Scenario: Se apaga
-- WHEN termina el mes 6 en Bosque y el árbol marcado sigue gris
-- THEN el árbol queda apagado y revivirlo cuesta 7 nutrientes
-
-#### Scenario: Se salva
-- WHEN la Amanita revive el árbol marcado durante el mes 6
-- THEN el árbol queda vivo y no se apaga ningún otro al terminar el mes
-
-#### Scenario: Ancestral, tres veces
-- WHEN se juega Ancestral sin revivir los árboles marcados
-- THEN al terminar los meses 3, 6 y 9 se apaga un árbol cada vez
 
 ### Requirement: Temporadas frías
 En Bosque y Ancestral, al terminar cada mes de Otoño e Invierno el gremio SHALL comer 1 nutriente en total, después de sumar lo que dan los árboles. Si no hay, el primer miembro en llegar al gremio que no sea Maestra Bruma SHALL empezar el mes siguiente descansando, con hambre; los nutrientes nunca bajan de 0. Terminar el mes 12 no hace comer al gremio. En Invierno, lo que dan los árboles al empezar el mes SHALL ser solo nutrientes; la Lluvia de esporas sigue dando esporas.
@@ -326,3 +307,22 @@ En Ancestral, al empezar el otoño y el invierno (meses 7 y 10) la plaga SHALL m
 #### Scenario: Bosque sin plaga
 - WHEN empieza el mes 7 o el 10 en Bosque
 - THEN no se marca ninguna casilla
+
+### Requirement: Árboles marcados
+Al empezar un mes en el que el nivel apaga un árbol, el juego SHALL marcar el árbol gris (ni vivo ni apagado) más lejano de la red: el de mayor distancia en pasos ortogonales desde la red sin atravesar rocas; si hay empate, el de la fila más alta y después el de la columna menor. Si al terminar ese mes el árbol marcado sigue gris, SHALL apagarse. Revivirlo durante ese mes lo salva. Revivir un árbol apagado SHALL costar 7 nutrientes. Si no queda ningún árbol gris sin apagar, no se marca ninguno.
+
+#### Scenario: Se marca el más lejano
+- WHEN empieza el mes 6 en Bosque
+- THEN el árbol gris más lejano de la red queda marcado
+
+#### Scenario: Se apaga
+- WHEN termina el mes 6 en Bosque y el árbol marcado sigue gris
+- THEN el árbol queda apagado y revivirlo cuesta 7 nutrientes
+
+#### Scenario: Se salva
+- WHEN la Amanita revive el árbol marcado durante el mes 6
+- THEN el árbol queda vivo y no se apaga ningún otro al terminar el mes
+
+#### Scenario: Ancestral, cinco veces
+- WHEN se juega Ancestral sin revivir los árboles marcados
+- THEN al terminar los meses 3, 5, 7, 9 y 11 se apaga un árbol cada vez

@@ -12,6 +12,7 @@
 // player-guidance › Meta visible: "Inicio" → "guía".
 // game-rules › Victoria (031): "Árbol Padre de Ancestral (031)".
 // game-rules › Plaga y player-guidance › Avisos de la presión (plaga): "Plaga de Ancestral (032)".
+// game-rules › Árboles marcados (Ancestral, cinco veces): "Ancestral cada dos meses (034)".
 // player-guidance › Recetas visuales: "Ficha de Bruno", "Libreta con las cinco recetas" y "Movimiento reducido" → "Recetas (026)".
 // story-presentation › Llega el frío y player-guidance › Avisos de la presión (hongo con hambre) → "Temporadas frías (028, 030)".
 // title-screens › Cómo jugar: "El paso se parece a la partida" → "Cómo jugar (029)".
@@ -1109,4 +1110,17 @@ test('Plaga de Ancestral (032, 033): la carta del frío la explica y la casilla 
     await page.waitForTimeout(1500);
     await page.screenshot({ path: 'docs/screenshots/033-plaga-invierno-390x844.png' });
   }
+});
+
+test('Ancestral cada dos meses (034): Elige tu dificultad lo dice y al empezar el mes 5 ya hay un árbol apagado y otro marcado', async ({ page }, info) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Nueva partida' }).click();
+  await expect(page.locator('#screen')).toContainText('cinco árboles que se apagan');
+  await page.goto('/?nivel=ancestral&seed=1');
+  for (let m = 1; m < 5; m++) await page.locator('.end').click();
+  await expect(page.locator('.hud__month-value')).toHaveText('Mes 5/12');
+  await expect(page.locator('#notice')).toContainText('Este árbol se apagará al terminar el mes si nadie lo revive.');
+  await expect(page.locator('.cell[aria-label*="se apagará al terminar el mes"]')).toHaveCount(1);
+  await expect(page.locator('.cell[aria-label*="apagado: revivirlo cuesta 7 nutrientes"]')).toHaveCount(1);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/034-ancestral-mes-5-390x844.png' });
 });

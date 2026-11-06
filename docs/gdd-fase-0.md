@@ -189,7 +189,7 @@ Una vez aprendido, Brote ya no era un reto. «Nueva partida» abre «Elige tu cl
 | --- | --- | --- | --- |
 | Rocas | 6 | 8 | 10 |
 | Escarcha (tejer cuesta 2) | — | otoño | otoño e invierno |
-| Árbol que se apaga al final del mes | — | 6 | 3, 6 y 9 |
+| Árbol que se apaga al final del mes | — | 6 | 3, 5, 7, 9 y 11 |
 | El gremio come 1 nutriente al terminar el mes | — | otoño e invierno | otoño e invierno |
 | Los árboles no dan esporas | — | invierno | invierno |
 | Plaga (una casilla tejida por estación) | — | — | otoño e invierno |
@@ -202,7 +202,7 @@ Una vez aprendido, Brote ya no era un reto. «Nueva partida» abre «Elige tu cl
 - **Temporadas frías (028, 030):** al empezar el otoño, una carta («Llega el frío») avisa que al terminar cada mes el gremio come 1 nutriente, después de lo que dan los árboles; si no hay, el primero en llegar al gremio descansa el mes siguiente con hambre. En invierno, los árboles solo dan nutrientes; la Lluvia de esporas sigue dando esporas. Una primera versión (cada hongo come en otoño e invierno) dejaba el juego casi imposible: 1 % de victorias con pistas en Bosque. En el 028 el gremio comía solo en invierno y el Árbol Padre pedía 12; desde el 030 come desde el otoño y el Árbol Padre vuelve a 10.
 - **Plaga (032):** en Ancestral, al empezar el otoño y el invierno se marca una casilla tejida, al azar entre las más cercanas al Árbol Padre. Al terminar ese mes se marchita y vuelve a ser tierra si ningún hongo trabajó a 2 casillas o menos; se puede tejer otra vez. Da tensión más que dificultad: las pistas pasaron del 21 % al 22 % sobre los claros del 031.
 - **Claros justos:** Bosque y Ancestral son el claro de Brote de la misma semilla con rocas extra, y solo se juegan los que un bot experto con búsqueda puede ganar (tabla precalculada de 1000 semillas por nivel).
-- **Medido** (100 claros por nivel): hasta el 027 las pistas ganaban el 83 % en Bosque y el 50 % en Ancestral (la meta para Ancestral era «el jugador con experiencia pierde seguido, ~50 %»). Con el invierno duro (028) ganan el 65 % y el 32 %; los rangos de la prueba bajan a 55–70 % y 20–35 %. Con el gremio comiendo desde el otoño y el Árbol Padre en 10 (030), el 63 % y el 28 %. Con el Árbol Padre de Ancestral en 4 árboles y 12 nutrientes (031), Ancestral baja al 21 % y certifica 905 de 1000 claros (el clásico ya no se gana ahí).
+- **Medido** (100 claros por nivel): hasta el 027 las pistas ganaban el 83 % en Bosque y el 50 % en Ancestral (la meta para Ancestral era «el jugador con experiencia pierde seguido, ~50 %»). Con el invierno duro (028) ganan el 65 % y el 32 %; los rangos de la prueba bajan a 55–70 % y 20–35 %. Con el gremio comiendo desde el otoño y el Árbol Padre en 10 (030), el 63 % y el 28 %. Con el Árbol Padre de Ancestral en 4 árboles y 12 nutrientes (031), Ancestral baja al 21 % y certifica 905 de 1000 claros (el clásico ya no se gana ahí). Con un árbol que se apaga cada dos meses en Ancestral (034: meses 3, 5, 7, 9 y 11), las pistas ganan el 17 % y se certifican 861 de 1000 claros; el rango de la prueba baja a 10–25 %.
 - **Puntaje:** un récord por claro con el total ya multiplicado; las estrellas usan la referencia de Brote, así que en Bosque y Ancestral se consiguen más fácil (premio por el riesgo, a revisar en playtest).
 
 ### Puntaje y estrellas (015)

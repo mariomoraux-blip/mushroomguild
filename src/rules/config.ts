@@ -45,7 +45,7 @@ export interface LevelRules {
 export const LEVELS: Readonly<Record<Level, LevelRules>> = {
   brote: { rocks: 6, frost: [], fading: [], upkeep: [], sporeless: [], mother: 10, motherTrees: TREES_FOR_MOTHER, plague: [], hints: true, multiplier: 1 },
   bosque: { rocks: 8, frost: [2], fading: [6], upkeep: [2, 3], sporeless: [3], mother: 10, motherTrees: TREES_FOR_MOTHER, plague: [], hints: true, multiplier: 1.5 },
-  ancestral: { rocks: 10, frost: [2, 3], fading: [3, 6, 9], upkeep: [2, 3], sporeless: [3], mother: 12, motherTrees: 4, plague: [2, 3], hints: false, multiplier: 2 },
+  ancestral: { rocks: 10, frost: [2, 3], fading: [3, 5, 7, 9, 11], upkeep: [2, 3], sporeless: [3], mother: 12, motherTrees: 4, plague: [2, 3], hints: false, multiplier: 2 },
 };
 export const LEVEL_IDS: readonly Level[] = ['brote', 'bosque', 'ancestral'];
 /** Costo de tejer con escarcha. */
@@ -77,7 +77,7 @@ export const SCORE = {
   timeParS: 480, // 1 punto por segundo por debajo de 8:00
 } as const;
 /** Versión de la fórmula: cambia la clave del récord guardado y el `ScoreResult`. */
-export const SCORE_VERSION = 7;
+export const SCORE_VERSION = 8;
 /** Estrellas por claro: 2 desde el 90 % y 3 desde el 110 % del puntaje del bot con criterio en ese claro. */
 export const STARS = { two: 0.9, three: 1.1 } as const;
 /** Segundos de juego por mes que se suponen para la partida de referencia del bot. */

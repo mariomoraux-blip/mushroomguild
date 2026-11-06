@@ -125,15 +125,15 @@ describe('Requirement: Árboles que se apagan', () => {
     expect(message).not.toContain(es.log.treeFaded(FADED_REVIVE));
   });
 
-  it('Scenario: Ancestral, tres veces', () => {
+  it('Scenario: Ancestral, cinco veces', () => {
     let s = at('ancestral');
     const faded: number[] = [];
-    while (s.month < 11) {
+    while (s.month < 12) {
       s = endMonth(s).state;
       faded.push(fadedCount(s));
     }
-    // Índice = mes que empieza − 2: se apaga al terminar los meses 3, 6 y 9.
-    expect(faded).toEqual([0, 0, 1, 1, 1, 2, 2, 2, 3, 3]);
+    // Índice = mes que empieza − 2: se apaga al terminar los meses 3, 5, 7, 9 y 11 (034).
+    expect(faded).toEqual([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5]);
   });
 
   it('sin árboles grises sin apagar, no se marca ninguno', () => {
