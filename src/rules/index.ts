@@ -8,3 +8,5 @@ export * from './advice';
 export * from './autoplay';
 export * from './mapgen';
 export * from './scoring';
+export * from './alias';
+export * from './verify';

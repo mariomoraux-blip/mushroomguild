@@ -238,6 +238,9 @@ export const es = {
     play: 'Nueva partida',
     howto: 'Cómo jugar',
     guild: 'El gremio',
+    ranking: 'Ranking',
+    /** Jugador que vuelve (036). */
+    hello: (alias: string) => `Hola de nuevo, ${alias}`,
     /** Firma del autor (020): va tal cual, en inglés. */
     credit: 'By Mario Mora for BerryLab',
   },
@@ -313,6 +316,48 @@ export const es = {
     time: (t: string) => `Tiempo de juego: ${t}`,
     /** Etiqueta del ícono de la estación: estación, escarcha y nivel (019). */
     season: (season: string, frost: boolean, level: string, plague = false) => `${season}${frost ? ', con escarcha' : ''}${plague ? ', con plaga' : ''} · ${level}`,
+  },
+
+  /** Ranking global (036). */
+  leaderboard: {
+    title: 'Ranking',
+    season: (n: number) => `Temporada ${n}`,
+    players: (n: number) => (n === 1 ? '1 jugador' : `${n} jugadores`),
+    you: '(tú)',
+    rename: 'Cambiar nombre',
+    open: 'Ver ranking',
+    register: 'Registra tu puntaje',
+    sending: 'Enviando tu puntaje…',
+    rank: (rank: number, players: number) => `Puesto ${rank} de ${players}`,
+    best: (total: number) => `Tu mejor: ${total}`,
+    offline: 'No pudimos llegar al bosque. Tu puntaje quedó guardado y lo enviaremos después.',
+    offlineBoard: 'No pudimos llegar al bosque. Prueba de nuevo en un rato.',
+    retry: 'Reintentar',
+    rejected: 'Este puntaje no se pudo verificar.',
+    loading: 'Buscando el ranking…',
+    empty: 'Aún no hay puntajes. ¡Sé el primero!',
+    privacy: 'Guardamos tu nombre del gremio y tus puntajes. Nada más.',
+    list: 'Mejores puntajes',
+    row: (rank: number, alias: string, total: number, level: string, stars: string, me: boolean) =>
+      `Puesto ${rank}, ${alias}${me ? ' (tú)' : ''}, ${total} puntos, ${level}, ${stars}`,
+    sheet: {
+      title: 'Tu nombre en el gremio',
+      help: 'Así te verán en el ranking. Puedes cambiarlo cuando quieras.',
+      roll: 'Otro nombre',
+      confirm: 'Registrar',
+      save: 'Guardar',
+      later: 'Ahora no',
+    },
+    /** Alias generados (036): «<nombre> del/de la <lugar>». Sin texto libre, sin moderación. */
+    alias: {
+      names: ['Bruno', 'Lía', 'Tomillo', 'Anís', 'Brezo', 'Canela', 'Olmo', 'Malva', 'Junco', 'Salvia', 'Trébol', 'Nube', 'Piñón', 'Romero', 'Vera', 'Lino', 'Mora', 'Ciro', 'Hiedra', 'Nilo', 'Perla', 'Tilo', 'Ámbar', 'Coral'],
+      places: [
+        ['del', 'Musgo'], ['del', 'Rocío'], ['de la', 'Hojarasca'], ['del', 'Arroyo'], ['de la', 'Loma'], ['del', 'Helecho'],
+        ['de la', 'Niebla'], ['del', 'Claro'], ['de la', 'Raíz'], ['del', 'Sendero'], ['de la', 'Bellota'], ['del', 'Roble'],
+        ['de la', 'Corteza'], ['del', 'Manantial'], ['de la', 'Colina'], ['del', 'Valle'], ['de la', 'Espora'], ['del', 'Tronco'],
+        ['de la', 'Luna'], ['del', 'Alba'], ['de la', 'Lluvia'], ['del', 'Otoño'], ['de la', 'Brisa'], ['del', 'Liquen'],
+      ],
+    } satisfies { names: readonly string[]; places: readonly (readonly [string, string])[] },
   },
 
   scoring: {

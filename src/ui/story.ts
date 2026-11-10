@@ -1,6 +1,7 @@
 import { es } from '../copy/es';
 import { LEVELS, revivedCount, SCORE_KEYS, seasonIndex, treeTotal, type SpeciesId } from '../rules';
 import { formatClock } from '../clock';
+import type { Submission } from '../leaderboard';
 import { INTRO_STEPS, type AppState, type Story, type Store } from '../store';
 import { reducedMotion } from '../scenes/fx';
 import { MOTION } from '../theme';
@@ -15,7 +16,13 @@ const GUILD: SpeciesId[] = ['lactarius', 'champi', 'amanita'];
  * Cartas de historia (003): intro de 3 cartas con "Saltar", llegada de Maestra Bruma, el frío (028) y los dos finales.
  * Modal accesible: el foco va al botón principal y vuelve al juego al cerrar; Esc cierra (main.ts › cancel).
  */
-export function mountStory(root: HTMLElement, store: Store, onRestart: () => void) {
+/** Lo que las cartas de final piden para el ranking (036): registrar el puntaje y abrir la pantalla. */
+export interface RankingActions {
+  register(): void;
+  open(): void;
+}
+
+export function mountStory(root: HTMLElement, store: Store, onRestart: () => void, ranking: RankingActions) {
   let shown = '';
   let opener: HTMLElement | null = null;
 
@@ -26,10 +33,36 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
     if (action === 'next') store.dispatch({ type: 'storyNext' });
     if (action === 'close') store.dispatch({ type: 'closeStory' });
     if (action === 'again') onRestart();
+    if (action === 'register') ranking.register();
+    if (action === 'ranking') ranking.open();
   });
 
   const button = (action: string, label: string, primary = false) =>
     el('button', { class: `btn story__btn${primary ? ' story__btn--primary' : ''}`, type: 'button', 'data-action': action }, label);
+
+  /** Ranking en la carta de final (036): el estado del envío y «Ver ranking». */
+  function rankingBlock(submission: Submission | null): HTMLElement {
+    const L = es.leaderboard;
+    const line = (() => {
+      switch (submission?.kind) {
+        case 'unregistered':
+          return el('button', { class: 'btn btn--primary story__register', type: 'button', 'data-action': 'register' }, L.register);
+        case 'sending':
+          return el('p', { class: 'story__rank' }, L.sending);
+        case 'ok':
+          return el('p', { class: 'story__rank' }, el('strong', {}, L.rank(submission.rank, submission.players)), ...(submission.improved ? [] : [` · ${L.best(submission.best)}`]));
+        case 'offline':
+          return el('p', { class: 'story__note' }, L.offline);
+        case 'rejected':
+          return el('p', { class: 'story__note' }, L.rejected);
+        default:
+          return null;
+      }
+    })();
+    return el('div', { class: 'story__ranking', 'aria-live': 'polite' },
+      ...(line ? [line] : []),
+      el('button', { class: 'btn story__link', type: 'button', 'data-action': 'ranking' }, L.open));
+  }
 
   function card(state: AppState, story: Story): HTMLElement {
     const g = state.game;
@@ -112,6 +145,7 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
               stat(String(g.spores), es.story.stats.spores)),
           );
         }
+        body.push(rankingBlock(won ? state.ui.submission : null));
         actions.push(button('close', es.story.viewBoard), button('again', es.story.again, true));
         break;
       }
@@ -176,7 +210,7 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
   function show(state: AppState) {
     const story = state.ui.story;
     // El puntaje llega justo después de la carta de victoria: también redibuja.
-    const key = story ? JSON.stringify(story) + (state.ui.result ? `|${state.ui.result.score.total}|${state.ui.result.newRecord}` : '') : '';
+    const key = story ? JSON.stringify(story) + (state.ui.result ? `|${state.ui.result.score.total}|${state.ui.result.newRecord}` : '') + `|${JSON.stringify(state.ui.submission)}` : '';
     if (key === shown) return;
     if (!shown && story) opener = document.activeElement as HTMLElement | null;
     const before = shown;

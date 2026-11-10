@@ -29,13 +29,16 @@ import {
   type Resource,
   type Tile,
 } from './rules';
+import type { BoardView, Submission } from './leaderboard';
 
 export type Sheet =
   | { kind: 'recruit' }
   | { kind: 'creature'; species: SpeciesId }
   | { kind: 'member'; id: number }
   | { kind: 'spell' }
-  | { kind: 'help' };
+  | { kind: 'help' }
+  /** «Tu nombre en el gremio» (036): alias propuesto, su número de sorteo y para qué se abrió. */
+  | { kind: 'alias'; alias: string; n: number; purpose: 'register' | 'rename' };
 
 /** Carta de historia (003): intro de 3 pasos, llegada de Maestra Bruma o final. */
 /** Carta de historia. `then`: la que sigue al cerrarla (028: la del frío después de la de la maga). */
@@ -53,7 +56,13 @@ export const INTRO_STEPS = 3;
  * Pantallas fuera de la partida (012): portada, "Elige tu dificultad" (019), "Cómo jugar" (carrusel) y "El gremio".
  * `back` dice a dónde vuelven; "Elige tu dificultad" siempre vuelve a la portada.
  */
-export type Screen = { kind: 'title' } | { kind: 'level' } | { kind: 'howto'; step: number; back: 'title' | 'game' } | { kind: 'guild'; back: 'title' | 'game' };
+export type Screen =
+  | { kind: 'title' }
+  | { kind: 'level' }
+  | { kind: 'howto'; step: number; back: 'title' | 'game' }
+  | { kind: 'guild'; back: 'title' | 'game' }
+  /** Ranking (036): desde la portada o desde una carta de final (que sigue abierta debajo). */
+  | { kind: 'ranking'; back: 'title' | 'game' };
 export const HOWTO_STEPS = 5;
 
 export interface Notice {
@@ -78,6 +87,12 @@ export interface UiState {
   readonly notice: Notice;
   /** Especies cuya ficha ya se abrió alguna vez (se recuerdan entre visitas; las nuevas llevan un punto en "Ficha"). */
   readonly seen: readonly SpeciesId[];
+  /** Alias del jugador registrado en este dispositivo (036), o `null`. */
+  readonly player: string | null;
+  /** Envío de la victoria actual al ranking; `null` si la partida no cuenta. */
+  readonly submission: Submission | null;
+  /** Lo que muestra la pantalla «Ranking». */
+  readonly board: BoardView | null;
 }
 
 export interface AppState {
@@ -109,7 +124,11 @@ export type Action =
   /** Partida nueva (la crea quien llama: el store no usa azar). */
   | { type: 'restart'; game: GameState }
   /** Puntaje de la victoria (lo calcula quien tiene el reloj: el store no lee la hora). */
-  | { type: 'scored'; score: ScoreResult; newRecord: boolean };
+  | { type: 'scored'; score: ScoreResult; newRecord: boolean }
+  /** Ranking (036): alias registrado (cierra «Tu nombre en el gremio»), estado del envío y datos del ranking. */
+  | { type: 'player'; alias: string | null }
+  | { type: 'submission'; submission: Submission | null }
+  | { type: 'board'; board: BoardView };
 
 const info = (text: string): Notice => ({ text, tone: 'info' });
 const warn = (text: string, short?: Resource | null): Notice => (short ? { text, tone: 'warn', short } : { text, tone: 'warn' });
@@ -191,7 +210,7 @@ function tileHelp(g: GameState, t: Tile): string {
  * Estado inicial. `title`: empieza en la portada (y "Nueva partida" abre la intro);
  * `intro`: empieza directo en la intro.
  */
-export function initialState(game: GameState = newGame(), seen: readonly SpeciesId[] = [], opts: { title?: boolean; intro?: boolean } | boolean = {}): AppState {
+export function initialState(game: GameState = newGame(), seen: readonly SpeciesId[] = [], opts: { title?: boolean; intro?: boolean; player?: string | null } | boolean = {}): AppState {
   const o = typeof opts === 'boolean' ? { intro: opts } : opts;
   return {
     game,
@@ -204,6 +223,9 @@ export function initialState(game: GameState = newGame(), seen: readonly Species
       result: null,
       notice: idleHint(game),
       seen,
+      player: o.player ?? null,
+      submission: null,
+      board: null,
     },
   };
 }
@@ -281,7 +303,10 @@ export function highlighted(state: AppState): Tile[] {
 
 const cleared = (ui: UiState, notice: Notice): UiState => ({ ...ui, selected: null, spell: null, sheet: null, notice });
 /** Interfaz de una partida nueva: sin selección, hojas, cartas ni pantallas (se conservan las fichas vistas). */
-const fresh = (ui: UiState, game: GameState): UiState => ({ selected: null, spell: null, sheet: null, story: null, screen: null, result: null, notice: idleHint(game), seen: ui.seen });
+const fresh = (ui: UiState, game: GameState): UiState => ({
+  selected: null, spell: null, sheet: null, story: null, screen: null, result: null, notice: idleHint(game), seen: ui.seen,
+  player: ui.player, submission: null, board: ui.board,
+});
 
 export function reduce(state: AppState, action: Action): AppState {
   const { game, ui } = state;
@@ -340,6 +365,8 @@ export function reduce(state: AppState, action: Action): AppState {
       // Esc o «atrás» sobre la ficha de Maestra Bruma la cierran del todo (022): solo "Entendido" pide el hechizo.
       if (mageCardOpen(state)) return { game, ui: cleared(ui, idleHint(game)) };
       if (ui.sheet) return afterSheet(state);
+      // El ranking abierto desde una carta de final está encima de ella: se cierra primero (036).
+      if (ui.screen?.kind === 'ranking') return { game, ui: { ...ui, screen: backFrom(ui.screen) } };
       if (ui.story) return { game, ui: { ...ui, story: nextStory(ui.story) } };
       if (ui.screen && ui.screen.kind !== 'title') return { game, ui: { ...ui, screen: backFrom(ui.screen) } };
       if (ui.screen) return state;
@@ -379,6 +406,12 @@ export function reduce(state: AppState, action: Action): AppState {
       return { game: action.game, ui: fresh(ui, action.game) };
     case 'scored':
       return game.status === 'won' ? { game, ui: { ...ui, result: { score: action.score, newRecord: action.newRecord } } } : state;
+    case 'player':
+      return { game, ui: { ...ui, player: action.alias, sheet: ui.sheet?.kind === 'alias' ? null : ui.sheet } };
+    case 'submission':
+      return { game, ui: { ...ui, submission: action.submission } };
+    case 'board':
+      return { game, ui: { ...ui, board: action.board } };
   }
 }
 

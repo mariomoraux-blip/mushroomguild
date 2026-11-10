@@ -211,7 +211,14 @@ Solo la victoria da puntaje; la derrota sigue siendo suave, sin puntaje ni estre
 - **Estrellas por claro:** el bot con criterio juega cada claro al generarlo (25 s por mes); 2 estrellas desde el 90 % de su puntaje y 3 desde el 110 %.
 - **Cronómetro:** cuenta solo el juego activo (se pausa con cualquier hoja o carta) desde la primera acción.
 - **Récord local** por claro y `ScoreResult` con el registro de acciones, para rejugar y verificar.
-- **Hacia un leaderboard:** el "claro del día", una semilla por fecha del calendario igual para todos; un servidor rejugaría el registro antes de aceptar el puntaje. Pesos y 25 s por mes se recalibran con datos de playtest.
+- **Pesos y 25 s por mes** se recalibran con datos de playtest.
+
+### Ranking del gremio (036)
+- **Una tabla general** con el mejor total de cada jugador (ya multiplicado por el nivel). Cada `SCORE_VERSION` abre una temporada nueva.
+- **Sin cuentas:** el dispositivo guarda una clave anónima y un alias generado («Bruno del Musgo»), que se puede volver a sortear. Sin texto libre.
+- **Verificado:** el servidor (funciones de Vercel + Upstash Redis) rejuega el registro de acciones con las mismas reglas antes de aceptar un puntaje; el tiempo solo se acota.
+- **Solo cuentan** las partidas que empiezan desde «Nueva partida». Tras registrarse, las victorias se envían solas; sin conexión, quedan pendientes.
+- **Idea para después:** el "claro del día", una semilla por fecha igual para todos, con su propia tabla.
 
 ### Ideas del referente visual (sin decidir)
 El referente "Bosque pintado" muestra sistemas que el vertical slice no tiene: misiones con recompensas, estrellas como moneda, enciclopedia del bosque (hongos, plantas, aliados, lugares), logros y potenciadores con cargas (martillo, cambio, bolsa). El cambio 011 solo tomó su lenguaje visual. Si alguno entra al juego, necesita su propio cambio de OpenSpec con reglas y balance.

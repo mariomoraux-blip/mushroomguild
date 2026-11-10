@@ -2,7 +2,8 @@ import * as Phaser from 'phaser';
 import { es } from './copy/es';
 import { tileSize } from './layout';
 import { GameScene } from './scenes/GameScene';
-import { LEVEL_IDS, newRandomGame, randomSeed, scoreResult, thresholds, type Level, type SpeciesId } from './rules';
+import { aliasFor, LEVEL_IDS, newRandomGame, randomSeed, scoreResult, thresholds, type Level, type ScoreResult, type SpeciesId } from './rules';
+import { createLeaderboardClient } from './leaderboard';
 import { formatClock, newClock, read, sync } from './clock';
 import { saveIfBest } from './records';
 import { clockShouldRun, createStore, initialState, type AppState } from './store';
@@ -49,7 +50,11 @@ const firstGame = debug ?? gameFor(level, Number.isFinite(seedParam) && seedPara
 // La portada ("Nueva partida" → "Elige tu dificultad" → intro) abre el juego normal; con `?map`, `?seed`, `?nivel`
 // o `?debugState` se entra directo al tablero (pruebas y playtests).
 const title = !debug && !params.has('map') && !params.has('seed') && !params.has('nivel');
-const store = createStore(initialState(firstGame, seen, { title }));
+// Ranking (036): el jugador de este dispositivo. Solo cuentan las partidas que empiezan desde la portada
+// («Nueva partida» y «Jugar de nuevo» después); `?seed`, `?nivel`, `?map` y `?debugState` no envían nada.
+const leaderboard = createLeaderboardClient();
+const ranked = title;
+const store = createStore(initialState(firstGame, seen, { title, player: leaderboard.readPlayer()?.alias ?? null }));
 /** "Jugar de nuevo": mismo nivel, con el mapa clásico o un claro aleatorio nuevo. */
 const restart = () => store.dispatch({ type: 'restart', game: gameFor(store.getState().game.level) });
 /** Nivel elegido en "Elige tu dificultad": se recuerda, y la intro sale solo la primera vez en ese nivel. */
@@ -78,18 +83,74 @@ store.subscribe((state, prev) => {
   if (prev.game.status === 'playing' && state.game.status === 'won') {
     const score = scoreResult(state.game, read(clock, now()), thresholdsNow);
     const { newRecord } = saveIfBest(score);
-    queueMicrotask(() => store.dispatch({ type: 'scored', score, newRecord }));
+    queueMicrotask(() => {
+      store.dispatch({ type: 'scored', score, newRecord });
+      if (ranked) void sendScore(score);
+    });
   }
 });
+
+// ─── Ranking (036) ────────────────────────────────────────────────────────────
+/** Envía la victoria si hay jugador; si no, la carta ofrece registrarse (si el dispositivo puede guardar la clave). */
+async function sendScore(score: ScoreResult) {
+  if (!store.getState().ui.player) {
+    if (leaderboard.ensureToken()) store.dispatch({ type: 'submission', submission: { kind: 'unregistered' } });
+    return;
+  }
+  store.dispatch({ type: 'submission', submission: { kind: 'sending' } });
+  await leaderboard.flush();
+  const submission = await leaderboard.submit(score);
+  if (store.getState().ui.result?.score === score) store.dispatch({ type: 'submission', submission });
+}
+/** Abre «Tu nombre en el gremio» con el siguiente alias de este dispositivo. */
+function openAlias(purpose: 'register' | 'rename') {
+  const token = leaderboard.ensureToken();
+  if (!token) return;
+  const current = store.getState().ui.player;
+  let n = 0;
+  while (aliasFor(token, n) === current) n++;
+  store.dispatch({ type: 'openSheet', sheet: { kind: 'alias', alias: aliasFor(token, n), n, purpose } });
+}
+const aliasActions = {
+  roll() {
+    const sheet = store.getState().ui.sheet;
+    const token = leaderboard.readPlayer()?.token;
+    if (sheet?.kind !== 'alias' || !token) return;
+    let n = sheet.n + 1;
+    while (aliasFor(token, n) === sheet.alias) n++;
+    store.dispatch({ type: 'openSheet', sheet: { ...sheet, alias: aliasFor(token, n), n } });
+  },
+  async confirm() {
+    const sheet = store.getState().ui.sheet;
+    if (sheet?.kind !== 'alias' || !(await leaderboard.saveAlias(sheet.alias))) return;
+    store.dispatch({ type: 'player', alias: sheet.alias });
+    const result = store.getState().ui.result;
+    if (sheet.purpose === 'register' && result && store.getState().ui.submission?.kind === 'unregistered') void sendScore(result.score);
+    if (store.getState().ui.screen?.kind === 'ranking') void loadBoard();
+  },
+};
+async function loadBoard() {
+  store.dispatch({ type: 'board', board: { kind: 'loading' } });
+  await leaderboard.flush();
+  store.dispatch({ type: 'board', board: await leaderboard.board() });
+}
+const rankingScreen = {
+  open(back: 'title' | 'game') {
+    store.dispatch({ type: 'openScreen', screen: { kind: 'ranking', back } });
+    void loadBoard();
+  },
+  retry: () => void loadBoard(),
+  rename: () => openAlias('rename'),
+};
 document.addEventListener('visibilitychange', syncClock);
 setInterval(() => hud.setTime(formatClock(read(clock, now()))), 250);
 
 const hud = mountHud($('hud'), store);
 const renderDock = mountDock($('dock'), store);
 const overlay = mountBoardOverlay($('overlay'), store);
-const renderSheet = mountSheet($('sheet'), store, (x, y) => overlay.tap(x, y));
-const renderStory = mountStory($('story'), store, restart);
-const renderScreens = mountScreens($('screen'), store, { pickLevel: startLevel, lastLevel });
+const renderSheet = mountSheet($('sheet'), store, (x, y) => overlay.tap(x, y), aliasActions);
+const renderStory = mountStory($('story'), store, restart, { register: () => openAlias('register'), open: () => rankingScreen.open('game') });
+const renderScreens = mountScreens($('screen'), store, { pickLevel: startLevel, lastLevel }, rankingScreen);
 const notice = $('notice');
 mountAmbient($<HTMLCanvasElement>('ambient'));
 const noticeBar = $('notice-bar');
