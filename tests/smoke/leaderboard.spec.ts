@@ -98,13 +98,16 @@ test('registrar y volver: primer registro desde la carta, ranking encima de la c
   const calls = await mockApi(page);
   await page.goto('/');
   await winFromTitle(page);
-  // story-presentation › Finales: "Una acción principal" (037).
-  await expect(page.locator('#story .story__btn--primary')).toHaveCount(1);
-  await expect(page.locator('#story .story__btn--primary')).toHaveText('Jugar de nuevo');
-  await expect(page.locator('#story .story__btn--primary')).toBeFocused();
-  await expect(page.locator('#story .story__ranking').getByRole('button', { name: 'Registra tu puntaje' })).toBeVisible();
-  await expect(page.locator('#story .story__ranking').getByRole('button', { name: 'Ver ranking' })).toBeVisible();
-  await expect(page.locator('#story .story__actions button')).toHaveCount(2);
+  // story-presentation › Finales: "Acciones del final" (037).
+  const box = page.locator('#story .story__ranking');
+  await expect(box.getByRole('button', { name: 'Registra tu puntaje' })).toHaveClass(/is-primary/);
+  await expect(box.getByRole('button', { name: 'Registra tu puntaje' })).toBeFocused();
+  await expect(box.getByRole('button', { name: 'Ver ranking' })).not.toHaveClass(/is-primary/);
+  await expect(page.locator('#story .story__card').getByRole('button', { name: 'Jugar de nuevo' })).toHaveCount(0);
+  await expect(page.locator('#story .story__again')).toHaveText('Jugar de nuevo');
+  await expect(page.locator('#story .story__card .story__board')).toHaveText('Ver tablero');
+  await expect(page.locator('#story [role="dialog"]')).toHaveCount(1);
+  for (const b of await page.locator('#story button').evaluateAll((bs) => bs.map((x) => x.getBoundingClientRect().height))) expect(b).toBeGreaterThanOrEqual(44);
   const unregistered = shotFor('victoria-sin-registro', info.project.name, '037');
   if (unregistered) await page.screenshot({ path: unregistered });
   await page.getByRole('button', { name: 'Registra tu puntaje' }).click();

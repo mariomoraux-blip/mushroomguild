@@ -119,7 +119,7 @@ export type Action =
   | { type: 'start'; game: GameState; intro: boolean }
   | { type: 'storyNext' }
   | { type: 'closeStory' }
-  /** "Ver final" tras "Ver el claro": la partida terminada vuelve a su carta de final (017). */
+  /** "Ver final" tras "Ver tablero": la partida terminada vuelve a su carta de final (017). */
   | { type: 'showEnd' }
   /** Partida nueva (la crea quien llama: el store no usa azar). */
   | { type: 'restart'; game: GameState }

@@ -1054,15 +1054,15 @@ button { font: inherit; color: inherit; }
 @keyframes new-pulse { 50% { transform: scale(1.08); } }
 /* Capas (022): hojas, cartas y pantallas suben 24 px y se funden con el fondo; al cerrar, bajan y salen sin atrapar toques. */
 :is(.sheet, .story, .screen):not([hidden]) { animation: fade-in var(--motion-standard) var(--ease-settle); }
-.sheet__panel, .story__card, .screen__panel.is-entering { animation: layer-in var(--motion-standard) var(--ease-settle); }
+.sheet__panel, .story__card, .story__again, .screen__panel.is-entering { animation: layer-in var(--motion-standard) var(--ease-settle); }
 .story[data-kind='mage'] .story__card { animation: layer-in var(--motion-narrative) var(--ease-soft); }
-.story__card.is-still { animation: none; }
+.story__card.is-still, .story__stack.is-still :is(.story__card, .story__again) { animation: none; }
 /* Intro: la carta nueva entra desde la derecha mientras la anterior sale a la izquierda; el punto activo crece. */
 .story__card.is-in { animation: card-in var(--motion-standard) var(--ease-settle); }
 .story__card.is-out { pointer-events: none; animation: card-out var(--motion-fast) var(--ease-leave) forwards; }
 .story__dot.is-active { animation: dot-in var(--motion-fast) var(--ease-springy); }
 :is(.sheet, .story, .screen).is-leaving { pointer-events: none; animation: fade-out var(--motion-fast) var(--ease-leave) forwards; }
-.sheet.is-leaving .sheet__panel, .story.is-leaving .story__card, .screen.is-leaving .screen__panel { animation: layer-out var(--motion-fast) var(--ease-leave) forwards; }
+.sheet.is-leaving .sheet__panel, .story.is-leaving .story__card, .story.is-leaving .story__again, .screen.is-leaving .screen__panel { animation: layer-out var(--motion-fast) var(--ease-leave) forwards; }
 @keyframes fade-in { from { opacity: 0; } }
 @keyframes fade-out { to { opacity: 0; } }
 @keyframes layer-in { from { opacity: 0; transform: translateY(24px); } }
@@ -1113,7 +1113,7 @@ button { font: inherit; color: inherit; }
   .story[data-bg='victory'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 35%, transparent)), var(--art-bg-victory-wide); }
   /* El Árbol Padre queda al centro del fondo apaisado: la carta de final va a un costado. */
   .story[data-kind='won'], .story[data-kind='lost'] { align-items: center; justify-content: flex-end; padding-right: max(24px, 5vw); }
-  .story[data-kind='won'] .story__card, .story[data-kind='lost'] .story__card { width: min(360px, 46%); }
+  .story[data-kind='won'] .story__stack, .story[data-kind='lost'] .story__stack { width: min(360px, 46%); }
   body {
     background:
       linear-gradient(color-mix(in srgb, var(--ink) 30%, transparent), transparent 25%, transparent 70%, color-mix(in srgb, var(--ink) 40%, transparent)),
@@ -1132,11 +1132,11 @@ button { font: inherit; color: inherit; }
   .card.is-tired .card__badge { animation-name: zz-blink; }
   @keyframes zz-blink { 50% { opacity: 0.4; } }
   :is(.sheet, .story, .screen):not([hidden]),
-  .sheet__panel, .story__card, .screen__panel.is-entering, .story[data-kind='mage'] .story__card, .story__card.is-in { animation-name: fade-in; animation-duration: var(--motion-fast); }
+  .sheet__panel, .story__card, .story__again, .screen__panel.is-entering, .story[data-kind='mage'] .story__card, .story__card.is-in { animation-name: fade-in; animation-duration: var(--motion-fast); }
   .recipe__arrow, .recipe__after > *, .story__dot.is-active, .card.is-picked .portrait, .card.is-picked .card__medal, .card.is-waking, .end.is-turning .end__moon { animation: none; }
   .card[aria-pressed='true'] .portrait { transform: none; }
   .card.is-joining, .card.is-arriving, .hud__season.is-new-season, .portrait.is-new-season img { animation-name: fade-in; animation-duration: var(--motion-fast); }
-  .story__card.is-out, .sheet.is-leaving .sheet__panel, .story.is-leaving .story__card, .screen.is-leaving .screen__panel { animation-name: fade-out; }
+  .story__card.is-out, .sheet.is-leaving .sheet__panel, .story.is-leaving .story__card, .story.is-leaving .story__again, .screen.is-leaving .screen__panel { animation-name: fade-out; }
 }
 
 /* ─── Ranking (036) ─────────────────────────────────────────────────────────── */
@@ -1188,36 +1188,23 @@ button { font: inherit; color: inherit; }
 .alias__actions .btn, .alias__later { min-height: 48px; }
 .alias__later { width: 100%; }
 /* Cartas de final */
-/* Franja del ranking (037): estado a la izquierda, enlace a la derecha; aparte de las acciones de la carta. */
-.story__ranking {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px 8px;
-  padding: 6px 4px 6px 12px;
-  text-align: left;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--paper) 70%, var(--peach));
-}
-.story__ranking > p { flex: 1 1 150px; }
+/* Finales (037): la carta y, debajo y fuera de ella, «Jugar de nuevo» grande con icono. */
+.story__stack { display: flex; flex-direction: column; align-items: center; gap: 18px; width: min(400px, 100%); }
+.story__stack > .story__card { width: 100%; }
+.story__again { width: min(300px, 100%); }
+/* Caja del ranking: estado arriba y sus dos botones, «Registra tu puntaje» (principal) y «Ver ranking». */
+.story__ranking { display: grid; gap: 6px; padding: 8px; border-radius: 14px; background: color-mix(in srgb, var(--paper) 70%, var(--peach)); }
+.story__ranking .story__actions { margin-top: 0; flex-wrap: nowrap; gap: 8px; }
+.story__ranking .story__btn { flex: 1 1 auto; max-width: none; padding: 0 14px; font-size: 15px; white-space: nowrap; }
+.story__ranking .story__btn.is-primary { flex-grow: 1.4; }
 .story__ranking .story__note { font-size: 13px; line-height: 1.3; }
 .story__rank { margin: 0; font-size: 15px; font-weight: 700; }
-.story__register {
-  flex: 0 1 auto;
-  min-height: 44px;
-  padding: 0 16px;
-  color: var(--ink);
-  text-shadow: none;
-  background: color-mix(in srgb, var(--sun) 28%, var(--paper));
-  border-radius: 22px;
-  box-shadow: 0 2px 0 var(--ink);
-}
-.story__register:active { box-shadow: 0 0 0 var(--ink); }
+/* «Ver tablero»: enlace de texto bajo el puntaje (≥ 44 px de alto). */
 .story__link {
-  flex: 0 0 auto;
+  justify-self: center;
   min-height: 44px;
-  padding: 0 10px;
+  margin: -6px 0;
+  padding: 0 12px;
   font-family: var(--font-display);
   font-size: 15px;
   font-weight: 700;
@@ -1230,7 +1217,6 @@ button { font: inherit; color: inherit; }
   text-underline-offset: 4px;
   cursor: pointer;
 }
-.story__link::after { content: ' ›' / ''; }
 
 @media (orientation: landscape) and (max-height: 540px) {
   .ranking { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); column-gap: 16px; }
@@ -1239,9 +1225,15 @@ button { font: inherit; color: inherit; }
   .ranking > .ranking__retry { grid-row: 3; }
   .ranking > .ranking__list { grid-column: 1; grid-row: 2 / span 2; }
   .ranking > .ranking__foot { grid-column: 2; grid-row: 3; align-self: end; }
-  /* Carta de final apaisada (037): más compacta para que el letrero no se corte arriba. */
-  .story[data-kind='won'] .story__card { gap: 6px; padding-bottom: 14px; }
-  .story[data-kind='won'] .story__body { gap: 6px; }
-  .story[data-kind='won'] .score__star { width: 36px; height: 36px; }
-  .story__ranking { padding-block: 0; }
+  /* Carta de final apaisada (037): compacta, con estrellas y puntaje en una fila, y «Jugar de nuevo» a la izquierda. */
+  .story[data-kind='won'], .story[data-kind='lost'] { padding-block: 8px; align-items: flex-end; }
+  .story[data-kind='won'] .story__stack, .story[data-kind='lost'] .story__stack { width: auto; flex-direction: row-reverse; align-items: flex-end; }
+  .story__stack > .story__card { width: min(360px, 46vw); margin-top: 22px; padding: 30px 14px 12px; gap: 6px; }
+  .story__again { flex: 0 0 auto; width: auto; margin-bottom: 6px; white-space: nowrap; }
+  .story[data-kind='won'] .story__body { grid-template-columns: 1fr 1fr; align-items: center; gap: 4px 10px; }
+  .story[data-kind='won'] .story__body > * { grid-column: 1 / -1; }
+  .story[data-kind='won'] .story__body > .score__stars { grid-column: 1; justify-self: end; margin: 0; }
+  .story[data-kind='won'] .story__body > .score__total { grid-column: 2; justify-self: start; text-align: left; }
+  .story[data-kind='won'] .score__star { width: 32px; height: 32px; }
+  .story__ranking { padding: 4px; }
 }

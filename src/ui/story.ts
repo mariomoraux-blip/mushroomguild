@@ -41,15 +41,13 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
     el('button', { class: `btn story__btn${primary ? ' story__btn--primary' : ''}`, type: 'button', 'data-action': action }, label);
 
   /**
-   * Franja del ranking en la carta de final (036, 037): el estado del envío a un lado y «Ver ranking» como enlace al
-   * otro, aparte de las acciones de la carta, para que «Jugar de nuevo» sea la única principal.
+   * Caja del ranking en la carta de final (036, 037): el estado del envío y sus dos botones, «Registra tu puntaje»
+   * (principal) y «Ver ranking» (secundario). «Jugar de nuevo» va fuera de la carta.
    */
   function rankingBlock(submission: Submission | null): HTMLElement {
     const L = es.leaderboard;
     const line = (() => {
       switch (submission?.kind) {
-        case 'unregistered':
-          return el('button', { class: 'btn story__register', type: 'button', 'data-action': 'register' }, L.register);
         case 'sending':
           return el('p', { class: 'story__rank' }, L.sending);
         case 'ok':
@@ -59,12 +57,15 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
         case 'rejected':
           return el('p', { class: 'story__note' }, L.rejected);
         default:
-          return el('p', { class: 'story__rank' }, L.title);
+          return null;
       }
     })();
+    const register = submission?.kind === 'unregistered'
+      ? [el('button', { class: 'btn story__btn is-primary', type: 'button', 'data-action': 'register', 'data-autofocus': '' }, L.register)]
+      : [];
     return el('div', { class: 'story__ranking', 'aria-live': 'polite' },
-      line,
-      el('button', { class: 'story__link', type: 'button', 'data-action': 'ranking' }, L.open));
+      ...(line ? [line] : []),
+      el('div', { class: 'story__actions' }, ...register, button('ranking', L.open)));
   }
 
   function card(state: AppState, story: Story): HTMLElement {
@@ -127,6 +128,7 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
               el('strong', {}, String(score.total)), ` ${es.scoring.total}`,
               el('span', { class: 'score__time' }, ` · ${es.scoring.time} ${formatClock(score.timeMs)}`)),
             ...(newRecord ? [el('p', { class: 'score__record' }, es.scoring.newRecord)] : []),
+            boardLink(),
             el('ul', { class: 'score__list', 'aria-label': es.scoring.title },
               ...SCORE_KEYS.map((k) =>
                 el('li', { class: `score__row${score.breakdown[k] ? '' : ' is-zero'}` },
@@ -146,22 +148,33 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
               stat(`${revivedCount(g)}/${treeTotal(g)}`, es.story.stats.trees),
               stat(String(g.nutrients), es.story.stats.nutrients),
               stat(String(g.spores), es.story.stats.spores)),
+            boardLink(),
           );
         }
         body.push(rankingBlock(won ? state.ui.submission : null));
-        actions.push(button('close', es.story.viewBoard), button('again', es.story.again, true));
         break;
       }
     }
-    return el(
+    const ending = story.kind === 'won' || story.kind === 'lost';
+    const dialog = { role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': id };
+    const panel = el(
       'div',
-      { class: 'story__card', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': id },
+      { class: 'story__card', ...(ending ? {} : dialog) },
       ...(art ? [art] : []),
       el('h2', { id, class: 'story__title' }, title),
       el('div', { class: 'story__body' }, ...body),
-      el('div', { class: 'story__actions' }, ...actions),
+      ...(actions.length ? [el('div', { class: 'story__actions' }, ...actions)] : []),
     );
+    if (!ending) return panel;
+    // Finales (037): «Jugar de nuevo» va fuera de la carta, grande y con icono, como «Nueva partida» en la portada.
+    return el('div', { class: 'story__stack', ...dialog },
+      panel,
+      el('button', { class: 'menu-btn menu-btn--primary story__again', type: 'button', 'data-action': 'again', 'data-autofocus': '' },
+        el('span', { class: 'menu-btn__icon menu-btn__icon--play', 'aria-hidden': 'true' }), es.story.again));
   }
+
+  /** «Ver tablero» (037): enlace bajo el puntaje que cierra la carta y deja ver el claro terminado. */
+  const boardLink = () => el('button', { class: 'story__link story__board', type: 'button', 'data-action': 'close' }, es.story.viewBoard);
 
   /**
    * Al terminar la partida (022), la carta espera: al ganar, `narrative` para que se vean el anillo, el halo y la ola
@@ -235,6 +248,7 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
     root.dataset.kind = story.kind;
     root.dataset.bg = BACKGROUND[story.kind];
     showLayer(root);
-    next.querySelector<HTMLButtonElement>('.story__btn--primary')?.focus();
+    // Foco: el botón principal; en los finales, «Registra tu puntaje» si está y si no «Jugar de nuevo» (037).
+    next.querySelector<HTMLButtonElement>('[data-autofocus], .story__btn--primary')?.focus();
   }
 }

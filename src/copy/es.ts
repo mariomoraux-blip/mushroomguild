@@ -430,7 +430,7 @@ export const es = {
     lostTip: 'Consejo: revive árboles temprano. Cada árbol vivo da esporas cada mes.',
     summary: 'Resumen',
     stats: { month: 'mes', trees: 'árboles', nutrients: 'nutrientes', spores: 'esporas' },
-    viewBoard: 'Ver el claro',
+    viewBoard: 'Ver tablero',
     again: 'Jugar de nuevo',
   },
 

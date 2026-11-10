@@ -444,7 +444,7 @@ test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page 
   await page.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
   await expect(card).toContainText('¡El bosque despertó!');
   await shot('victoria');
-  await page.getByRole('button', { name: 'Ver el claro' }).click();
+  await page.getByRole('button', { name: 'Ver tablero' }).click();
   await expect(card).toHaveCount(0);
   // Partida terminada (017): el botón de fin de mes vuelve a la carta; también con teclado.
   const end = page.getByRole('button', { name: 'Ver el final de la partida' });
