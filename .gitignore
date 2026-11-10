@@ -15,3 +15,6 @@ docs/references/*
 
 # Blender: copias de respaldo automáticas
 *.blend1
+
+# Vercel (Build Output API, la genera npm run build)
+.vercel/

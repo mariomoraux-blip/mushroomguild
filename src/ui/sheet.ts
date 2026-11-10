@@ -7,11 +7,17 @@ import { hideLayer, showLayer } from './motion';
 
 const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
 
+/** Lo que la hoja «Tu nombre en el gremio» (036) pide a quien la monta: sortear otro alias y registrarlo. */
+export interface AliasActions {
+  roll(): void;
+  confirm(): void;
+}
+
 /**
- * Hoja inferior: reclutar (con fichas), ficha de criatura o elegir hechizo.
+ * Hoja inferior: reclutar (con fichas), ficha de criatura, elegir hechizo o «Tu nombre en el gremio» (036).
  * `tapBoard`: un toque en el fondo, sobre una casilla visible, con la ficha de un miembro abierta (022).
  */
-export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number, y: number) => void) {
+export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number, y: number) => void, alias: AliasActions) {
   let shown: Sheet | null = null;
   let currentSeason = 0;
   let opener: HTMLElement | null = null;
@@ -31,6 +37,8 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
     if (action === 'recruit') store.dispatch({ type: 'recruit', species: species as (typeof RECRUITABLE)[number] });
     if (action === 'info') store.dispatch({ type: 'openSheet', sheet: { kind: 'creature', species: species as SpeciesId } });
     if (action === 'spell') store.dispatch({ type: 'chooseSpell', spell: spell as Spell });
+    if (action === 'aliasRoll') alias.roll();
+    if (action === 'aliasConfirm') alias.confirm();
     const id = store.getState().ui.selected;
     if (action === 'member' && id !== null) store.dispatch({ type: 'openSheet', sheet: { kind: 'member', id } });
   });
@@ -145,11 +153,27 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
     );
   }
 
+  /** «Tu nombre en el gremio» (036): el alias propuesto, «Otro nombre», «Registrar» (o «Guardar») y «Ahora no». */
+  function aliasSheet(sheet: Extract<Sheet, { kind: 'alias' }>) {
+    const t = es.leaderboard.sheet;
+    return panel(
+      t.title,
+      el('div', { class: 'alias' },
+        el('p', { class: 'sheet__help' }, t.help),
+        el('p', { class: 'alias__name', 'aria-live': 'polite' }, sheet.alias),
+        el('div', { class: 'alias__actions' },
+          el('button', { class: 'btn', type: 'button', 'data-action': 'aliasRoll' }, t.roll),
+          el('button', { class: 'btn btn--primary', type: 'button', 'data-action': 'aliasConfirm' }, sheet.purpose === 'register' ? t.confirm : t.save)),
+        el('button', { class: 'btn alias__later', type: 'button', 'data-action': 'close' }, t.later)),
+    );
+  }
+
   return (state: AppState) => {
     currentSeason = seasonIndex(state.game.month);
     const sheet = state.ui.sheet;
     if (JSON.stringify(sheet) === JSON.stringify(shown)) return;
     const wasOpen = shown !== null;
+    const prevKind = shown?.kind;
     shown = sheet;
     if (!sheet) {
       hideLayer(root);
@@ -166,9 +190,13 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
       },
       spell: () => spellSheet(state),
       help: () => helpSheet(),
+      alias: () => aliasSheet(sheet as Extract<Sheet, { kind: 'alias' }>),
     };
+    // «Otro nombre» (036): cambia solo el alias, sin volver a abrir la hoja ni mover el foco.
+    const name = root.querySelector('.alias__name');
+    if (prevKind === 'alias' && sheet.kind === 'alias' && name) return void (name.textContent = sheet.alias);
     root.replaceChildren(views[sheet.kind]());
     showLayer(root);
-    root.querySelector<HTMLElement>('.sheet__panel button:not([disabled])')?.focus();
+    root.querySelector<HTMLElement>(sheet.kind === 'alias' ? '[data-action="aliasConfirm"]' : '.sheet__panel button:not([disabled])')?.focus();
   };
 }

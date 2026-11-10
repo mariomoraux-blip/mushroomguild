@@ -18,6 +18,7 @@ Vertical slice jugable (Capítulo 1: El Claro Gris) para la sección Lab del por
 | `title-screens` | Portada, "Elige tu dificultad", "Cómo jugar" y "El gremio" |
 | `visual-feedback` | Animaciones, partículas, luz de la red por estación, movimiento reducido, peso de la página |
 | `scoring` | Cronómetro, puntaje con multiplicador del nivel, estrellas por claro, resultado verificable y récord local |
+| `leaderboard` | Ranking global: jugador del dispositivo, alias generado, verificación en el servidor, pantalla «Ranking», sin conexión y temporadas |
 
 ## Convenciones
 - Requisitos con SHALL; escenarios con WHEN / THEN.

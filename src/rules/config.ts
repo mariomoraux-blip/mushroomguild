@@ -111,3 +111,18 @@ export const KIND: Readonly<Record<string, TileKind>> = {
   T: 'tree',
   R: 'rock',
 };
+
+/**
+ * Ranking global (036 · leaderboard). Cotas del servidor al verificar un resultado: acciones registradas como
+ * máximo (12 meses × 7 miembros + 12 fines de mes + 3 reclutas ≈ 100; se deja holgura), tiempo mínimo por acción
+ * registrada (cada una pide al menos un toque, actuar pide dos) y tiempo máximo de una partida. `rate`: envíos por
+ * hora por dispositivo y por IP.
+ */
+export const LEADERBOARD = {
+  topSize: 10,
+  maxLog: 200,
+  minMsPerAction: 500,
+  maxTimeMs: 4 * 60 * 60 * 1000,
+  maxBodyBytes: 64 * 1024,
+  rate: { device: 10, ip: 30, windowS: 3600 },
+} as const;
