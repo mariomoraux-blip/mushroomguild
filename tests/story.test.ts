@@ -69,7 +69,7 @@ describe('Requirement: Finales', () => {
     expect(next.ui.story).toEqual({ kind: 'lost' });
   });
 
-  it('"Ver el claro" cierra la carta y "Jugar de nuevo" empieza otra partida conservando las fichas vistas', () => {
+  it('"Ver tablero" cierra la carta y "Jugar de nuevo" empieza otra partida conservando las fichas vistas', () => {
     const lost = run(initialState({ ...newGame(), month: 12 }, ['champi']), { type: 'endMonth' });
     expect(run(lost, { type: 'closeStory' }).ui.story).toBeNull();
     const again = run(lost, { type: 'restart', game: newGame() });
@@ -79,7 +79,7 @@ describe('Requirement: Finales', () => {
     expect(again.ui.seen).toEqual(['champi']);
   });
 
-  it('Scenario: Volver al final — tras "Ver el claro", "Ver final" reabre la carta', () => {
+  it('Scenario: Volver al final — tras "Ver tablero", "Ver final" reabre la carta', () => {
     const lost = run(initialState({ ...newGame(), month: 12 }), { type: 'endMonth' }, { type: 'closeStory' });
     expect(run(lost, { type: 'showEnd' }).ui.story).toEqual({ kind: 'lost' });
     const g = nearWin();
