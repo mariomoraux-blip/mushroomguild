@@ -10,4 +10,4 @@
 - [x] 2.2 `npm run test`, `npm run build` y humo; capturas `docs/screenshots/037-*` a 390 × 844 y 844 × 390.
 
 ## 3. Cierre
-- [ ] 3.1 Fusionar el delta y archivar.
+- [x] 3.1 Fusionar el delta y archivar.
