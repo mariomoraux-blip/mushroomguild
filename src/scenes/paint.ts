@@ -676,7 +676,8 @@ const size = (img: CanvasImageSource): [number, number] => {
 export function groundKey(t: Tile, season: SeasonSlug, occupied = false): string {
   // La casa-hongo es una casilla entera; con alguien encima queda solo la red.
   if (t.kind === 'home' && !occupied) return BOARD_ART.home;
-  // Casilla con plaga (033): su pieza pintada reemplaza la red mientras está marcada.
+  // Casilla con plaga (033): su pieza pintada reemplaza la red mientras está marcada; marchita, la red muerta (035).
+  if (t.blighted && !t.net) return BOARD_ART.plague.withered;
   if (t.blighted) return season === 'winter' ? BOARD_ART.plague.winter : BOARD_ART.plague.blight;
   if (t.net) return BOARD_ART.net[Math.floor(hash(t.x, t.y, 90) * BOARD_ART.net.length)]!;
   const set = BOARD_ART.grass[season];

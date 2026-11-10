@@ -61,6 +61,7 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
     case 'lactarius':
       if (t.kind !== 'soil') return no(R.lactariusNeedsSoil);
       if (t.net) return no(R.alreadyNet);
+      if (t.blighted) return no(R.plagueBlocks(PLAGUE_REACH));
       if (!near) return no(R.farSoil);
       if (s.nutrients < weaveCost(s)) return no(hasFrost(s) ? R.noNutrientWeaveFrost(weaveCost(s)) : R.noNutrientWeave(weaveCost(s)), 'nutrients');
       return yes;
@@ -198,14 +199,15 @@ export function endMonth(s: GameState): ActionResult {
       parts.push(es.log.treeFaded(FADED_REVIVE));
     }
   }
-  // Plaga (032): la casilla marcada sale de la red (vuelve a ser tierra) si ningún hongo trabajó cerca este mes.
-  const blighted = n.tiles.find((t) => t.blighted);
-  if (blighted) {
-    delete blighted.blighted;
-    if (guarded(n, blighted)) parts.push(es.log.plagueStopped);
-    else {
+  // Plaga (032, 035): la casilla con plaga sigue así hasta que un hongo trabaje cerca. Si no, se marchita: sale de la red
+  // y no se puede tejer. Al frenarla, una casilla aún tejida sigue en la red y una marchita vuelve a ser tierra.
+  for (const blighted of n.tiles.filter((t) => t.blighted)) {
+    if (guarded(n, blighted)) {
+      delete blighted.blighted;
+      parts.push(blighted.net ? es.log.plagueStopped : es.log.plagueCleared);
+    } else if (blighted.net) {
       blighted.net = false;
-      parts.push(es.log.plagueWithered);
+      parts.push(es.log.plagueWithered(PLAGUE_REACH));
     }
   }
   const cold = isCold(s);

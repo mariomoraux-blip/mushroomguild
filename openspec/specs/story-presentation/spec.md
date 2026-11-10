@@ -60,7 +60,7 @@ La saturación del claro SHALL aumentar con cada árbol revivido y alcanzar el m
 - AND WHEN se despierta al Árbol Padre THEN se ve con más color
 
 ### Requirement: Llega el frío
-En Bosque y Ancestral, al empezar el otoño el juego SHALL mostrar una carta breve, como la de la maga, que diga que al terminar cada mes de otoño e invierno el gremio come 1 nutriente, que si no hay el primero en llegar al gremio descansa el mes siguiente y que en invierno los árboles no dan esporas; en Ancestral, también que cada estación la plaga marca una casilla de la red cerca del Árbol Padre, que se marchita al terminar el mes si ningún hongo trabaja a 2 casillas o menos. Si Maestra Bruma llega ese mismo mes, su carta SHALL mostrarse primero y esta después. La carta SHALL mostrarse también en Ancestral, una sola vez por partida.
+En Bosque y Ancestral, al empezar el otoño el juego SHALL mostrar una carta breve, como la de la maga, que diga que al terminar cada mes de otoño e invierno el gremio come 1 nutriente, que si no hay el primero en llegar al gremio descansa el mes siguiente y que en invierno los árboles no dan esporas; en Ancestral, también que cada estación la plaga marca una casilla de la red cerca del Árbol Padre, que se marchita al terminar el mes si ningún hongo trabaja a 2 casillas o menos, y que se queda hasta que uno lo haga. Si Maestra Bruma llega ese mismo mes, su carta SHALL mostrarse primero y esta después. La carta SHALL mostrarse también en Ancestral, una sola vez por partida.
 
 #### Scenario: Empieza el otoño en Bosque
 - WHEN empieza el mes 7 en Bosque

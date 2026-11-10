@@ -148,6 +148,9 @@ describe('Requirement: Plaga pintada (033)', () => {
     const t = blighted().tiles.find((tt) => tt.x === 2 && tt.y === 6)!;
     expect(groundKey(t, 'autumn')).toBe('board/plague/blight');
     expect(groundKey(t, 'winter')).toBe('board/plague/blight-winter');
+    // Marchita (035): la red muerta, en cualquier estación.
+    expect(groundKey({ ...t, net: false }, 'autumn')).toBe('board/plague/withered');
+    expect(groundKey({ ...t, net: false }, 'winter')).toBe('board/plague/withered');
   });
 
   it('la casilla con plaga pierde la luz de la red', () => {
