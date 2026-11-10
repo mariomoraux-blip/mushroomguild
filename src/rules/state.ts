@@ -132,7 +132,7 @@ const steps = (a: Point, b: Point) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
  */
 export function plagueTarget(s: GameState): Tile | null {
   const mother = s.tiles.find((t) => t.kind === 'mother');
-  const woven = s.tiles.filter((t) => t.net && t.kind === 'soil');
+  const woven = s.tiles.filter((t) => t.net && t.kind === 'soil' && !t.blighted);
   if (!mother || !woven.length) return null;
   const near = Math.min(...woven.map((t) => steps(t, mother)));
   const ties = woven.filter((t) => steps(t, mother) === near);

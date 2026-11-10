@@ -1,4 +1,4 @@
-// Plaga de Ancestral (032): game-rules › Plaga; player-guidance › Avisos de la presión; story-presentation › Llega el frío.
+// Plaga de Ancestral (032, 035): game-rules › Plaga; player-guidance › Avisos de la presión; story-presentation › Llega el frío.
 import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
 import { act, endMonth, guarded, LEVELS, plagueStarts, plagueTarget, PLAGUE_REACH, tile, type GameState, type Level, type Point } from '../src/rules';
@@ -44,15 +44,45 @@ describe('Requirement: Plaga', () => {
     expect(marked(state)).toEqual([]);
   });
 
-  it('Scenario: Se marchita — sin hongos cerca, la casilla vuelve a ser tierra fuera de la red', () => {
+  it('Scenario: Se marchita — sin hongos cerca, la casilla sale de la red y sigue con plaga', () => {
     const s = endMonth(at('ancestral', { month: 6, net: NET })).state;
     const { state, message } = endMonth(s);
+    expect(tile(state, 2, 3)).toMatchObject({ kind: 'soil', net: false, blighted: true });
+    expect(message).toContain(es.log.plagueWithered(PLAGUE_REACH));
+  });
+
+  it('Scenario: No se puede tejer — la casilla marchita rechaza al Lactarius', () => {
+    const s = endMonth(endMonth(at('ancestral', { month: 6, net: NET })).state).state;
+    expect(() => act({ ...s, nutrients: 4 }, INDI, 2, 3)).toThrow(es.reasons.plagueBlocks(PLAGUE_REACH));
+  });
+
+  it('Scenario: Se queda — otro mes sin hongos cerca, sigue con plaga y la bitácora no repite el aviso', () => {
+    const s = endMonth(endMonth(at('ancestral', { month: 6, net: NET })).state).state;
+    const { state, message } = endMonth(s);
+    expect(tile(state, 2, 3)).toMatchObject({ net: false, blighted: true });
+    expect(message).not.toContain(es.log.plagueWithered(PLAGUE_REACH));
+  });
+
+  it('Scenario: Los hongos la limpian — un hongo a 2 casillas la deja como tierra que se puede tejer', () => {
+    const s = endMonth(endMonth(at('ancestral', { month: 6, net: NET })).state).state;
+    // Mes 8: Indi teje (3,4), vecina de (2,4) y a 2 pasos de (2,3).
+    const worked = act({ ...s, nutrients: 4 }, INDI, 3, 4).state;
+    const { state, message } = endMonth(worked);
     expect(tile(state, 2, 3)).toMatchObject({ kind: 'soil', net: false });
     expect(tile(state, 2, 3)!.blighted).toBeUndefined();
-    expect(message).toContain(es.log.plagueWithered);
-    // Se puede tejer otra vez (con escarcha, 2 nutrientes).
+    expect(message).toContain(es.log.plagueCleared);
     const again = act({ ...state, nutrients: 2 }, INDI, 2, 3).state;
     expect(tile(again, 2, 3)!.net).toBe(true);
+  });
+
+  it('Scenario: Dos plagas — la del otoño sigue cuando el invierno marca otra casilla', () => {
+    let s = at('ancestral', { month: 6, net: NET });
+    for (let m = 6; m < 10; m++) s = endMonth(s).state;
+    expect(s.month).toBe(10);
+    expect(marked(s).map(({ x, y, net }) => ({ x, y, net }))).toEqual([
+      { x: 2, y: 3, net: false },
+      { x: 2, y: 4, net: true },
+    ]);
   });
 
   it('Scenario: Los hongos la frenan — un hongo que trabajó a 2 casillas salva la casilla', () => {
@@ -99,5 +129,8 @@ describe('Requirement: Avisos de la presión (plaga)', () => {
     const g = endMonth(at('ancestral', { month: 6, net: NET })).state;
     const s = reduce(initialState(g), { type: 'tapTile', x: 2, y: 3 });
     expect(s.ui.notice.text).toBe(es.tileHelp.plague);
+    // Marchita, explica que no se puede tejer hasta limpiarla (035).
+    const w = reduce(initialState(endMonth(g).state), { type: 'tapTile', x: 2, y: 3 });
+    expect(w.ui.notice.text).toBe(es.tileHelp.plagueWithered);
   });
 });

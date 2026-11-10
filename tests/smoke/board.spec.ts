@@ -11,7 +11,7 @@
 // player-guidance › Libreta de campo: "Consultar la ayuda" → "Libreta de campo".
 // player-guidance › Meta visible: "Inicio" → "guía".
 // game-rules › Victoria (031): "Árbol Padre de Ancestral (031)".
-// game-rules › Plaga y player-guidance › Avisos de la presión (plaga): "Plaga de Ancestral (032)".
+// game-rules › Plaga y player-guidance › Avisos de la presión (plaga): "Plaga de Ancestral (032, 035)".
 // game-rules › Árboles marcados (Ancestral, cinco veces): "Ancestral cada dos meses (034)".
 // player-guidance › Recetas visuales: "Ficha de Bruno", "Libreta con las cinco recetas" y "Movimiento reducido" → "Recetas (026)".
 // story-presentation › Llega el frío y player-guidance › Avisos de la presión (hongo con hambre) → "Temporadas frías (028, 030)".
@@ -1068,7 +1068,7 @@ test('Árbol Padre de Ancestral (031): tocarlo y la Libreta dicen que pide 4 ár
   await expect(page.locator('#notice')).toContainText('(3 árboles vivos y 10 nutrientes)');
 });
 
-test('Plaga de Ancestral (032, 033): la carta del frío la explica y la casilla marcada se ve pintada, se nombra y se explica', async ({ page }, info) => {
+test('Plaga de Ancestral (032, 033, 035): la carta del frío la explica y la casilla marcada se ve pintada, se nombra y se explica', async ({ page }, info) => {
   await page.goto('/?map=clasico&nivel=ancestral');
   // Red tejida en (2,6), (2,4) y (2,3): la más cercana al Árbol Padre (2,0) es (2,3).
   const weave = (month: number) =>
@@ -1078,7 +1078,8 @@ test('Plaga de Ancestral (032, 033): la carta del frío la explica y la casilla 
       const store = (window as unknown as { store: S }).store;
       const g = store.getState().game;
       const woven = ['2,6', '2,4', '2,3'];
-      const tiles = g.tiles.map((t) => (woven.includes(`${t.x},${t.y}`) ? { ...t, net: true } : t));
+      // Sin plaga previa (035: la marchita se queda), para empezar cada estación desde cero.
+      const tiles = g.tiles.map((t) => ({ ...t, blighted: false, net: t.net || woven.includes(`${t.x},${t.y}`) }));
       store.dispatch({ type: 'start', game: { ...g, month: m, tiles }, intro: false });
     }, month);
   await weave(6);
@@ -1096,11 +1097,18 @@ test('Plaga de Ancestral (032, 033): la carta del frío la explica y la casilla 
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/033-plaga-390x844.png' });
   await cell(page, 2, 3).click();
   await expect(page.locator('#notice')).toContainText('Red con plaga: se marchitará al terminar el mes');
-  // Nadie trabaja cerca: al terminar el mes se marchita y deja de estar en la red.
+  // Nadie trabaja cerca: al terminar el mes se marchita, deja de estar en la red y la plaga se queda (035).
   await page.locator('.end').click();
-  await expect(page.locator('#notice')).toContainText('La plaga marchitó una casilla de la red');
-  await expect(cell(page, 2, 3)).not.toHaveAttribute('aria-label', /en la red|con plaga/);
-  await expect(page.locator('.hud__plague')).toBeHidden();
+  await expect(page.locator('#notice')).toContainText('La plaga marchitó una casilla de la red: no se puede tejer');
+  await expect(cell(page, 2, 3)).toHaveAttribute('aria-label', /con plaga marchita/);
+  await expect(cell(page, 2, 3)).not.toHaveAttribute('aria-label', /en la red/);
+  await expect(page.locator('.hud__plague')).toBeVisible();
+  await cell(page, 2, 3).click();
+  await expect(page.locator('#notice')).toContainText('Plaga marchita: no se puede tejer.');
+  if (info.project.name === 'vertical-390x844') {
+    await page.waitForTimeout(1500); // que termine el fundido de la plaga viva sobre la red muerta
+    await page.screenshot({ path: 'docs/screenshots/035-plaga-marchita-390x844.png' });
+  }
   // En invierno (mes 10) la casilla usa su variante con nieve.
   await weave(9);
   await page.locator('.end').click();

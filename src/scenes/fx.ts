@@ -257,7 +257,7 @@ export class BoardFx {
       else if (e.kind === 'decompose') this.decompose(e, season);
       else if (e.kind === 'revive') this.burst(e.at, ['leaf', 'glow', 'sun'], 12, 0.7);
       else if (e.kind === 'awaken') this.awaken(e.at);
-      else if (e.kind === 'wither') this.wither(e.at);
+      else if (e.kind === 'wither') this.wither(e.at, season);
     }
   }
 
@@ -315,9 +315,10 @@ export class BoardFx {
   }
 
   /** Marchitarse (033): la red muerta (`withered`) queda un momento sobre el pasto y se funde, con polvo violeta. */
-  private wither(at: Point): void {
+  /** La plaga viva (`blight`) se funde y deja ver la red muerta que ya pinta el suelo (035). */
+  private wither(at: Point, season: SeasonSlug): void {
     const T = this.T;
-    const key = BOARD_ART.plague.withered;
+    const key = season === 'winter' ? BOARD_ART.plague.winter : BOARD_ART.plague.blight;
     if (this.scene.textures.exists(key)) {
       const [cx, cy] = this.center(at);
       const img = this.scene.add.image(cx, cy, key).setDisplaySize(T, T).setDepth(1);

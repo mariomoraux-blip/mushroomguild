@@ -88,7 +88,7 @@ El HUD SHALL mostrar en todo momento mes (de 12), estación, nutrientes, esporas
 #### Scenario: Pastilla con plaga
 - WHEN la plaga marca una casilla en Ancestral
 - THEN la pastilla del mes muestra la hoja podrida junto a la estación y su etiqueta dice «con plaga»
-- AND cuando la casilla se marchita o se salva, la hoja desaparece
+- AND la hoja sigue mientras alguna casilla tenga plaga, también marchita, y desaparece cuando los hongos la frenan o la limpian
 
 ### Requirement: Accesibilidad básica
 Todo lo que se hace con el puntero SHALL poder hacerse con teclado, y el foco SHALL ser visible.

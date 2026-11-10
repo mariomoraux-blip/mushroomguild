@@ -63,7 +63,7 @@ export function mountBoardOverlay(root: HTMLElement, store: Store) {
       if (t.kind === 'tree' && !t.alive && t.faded) parts.push(es.tiles.faded);
       else if (t.kind === 'tree' && !t.alive && t.fading) parts.push(es.tiles.fading);
       if (t.net && t.kind !== 'home') parts.push(es.tiles.inNet);
-      if (t.blighted) parts.push(es.tiles.plague);
+      if (t.blighted) parts.push(t.net ? es.tiles.plague : es.tiles.plagueWithered);
       if (ok) parts.push(es.tiles.valid);
       if (ok && star && star.x === t.x && star.y === t.y) parts.push(`★ ${es.advice.star}`);
       b.setAttribute('aria-label', parts.join(', '));
