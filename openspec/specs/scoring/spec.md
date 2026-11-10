@@ -1,7 +1,7 @@
 # scoring
 
 ## Purpose
-Puntaje de la victoria: cronómetro de juego activo, desglose, estrellas por claro, resultado verificable (`ScoreResult` con su registro de acciones) y mejor resultado local. Origen: cambio 015 (archivado). Implementado en `src/rules/scoring.ts`, `src/clock.ts`, `src/records.ts`, `src/store.ts` y `src/ui/story.ts`.
+Puntaje de la victoria: cronómetro de juego activo, desglose, estrellas por claro, resultado verificable (`ScoreResult` con su registro de acciones) y mejor resultado local. Origen: cambio 015 (archivado); el ranking global vive en `leaderboard` (036). Implementado en `src/rules/scoring.ts`, `src/clock.ts`, `src/records.ts`, `src/store.ts` y `src/ui/story.ts`.
 
 ## Requirements
 
@@ -75,7 +75,7 @@ Al ganar, el juego SHALL armar un `ScoreResult` con `{ scoringVersion, mapId, le
 - THEN el estado final y `score(final, timeMs).total` coinciden con el `ScoreResult`
 
 ### Requirement: Mejor resultado local
-El juego SHALL guardar solo el mejor `ScoreResult` de cada claro en `localStorage`, con una clave versionada por `mapId` y `scoringVersion`: un solo récord por claro para los tres niveles, comparando totales ya multiplicados. Si leer o escribir falla, el juego SHALL seguir sin récord. No hay nombres de jugador, cuentas ni llamadas de red.
+El juego SHALL guardar solo el mejor `ScoreResult` de cada claro en `localStorage`, con una clave versionada por `mapId` y `scoringVersion`: un solo récord por claro para los tres niveles, comparando totales ya multiplicados. Si leer o escribir falla, el juego SHALL seguir sin récord. El récord local no depende de la red ni del alias; el ranking global vive en `leaderboard`.
 
 #### Scenario: Nuevo récord
 - WHEN una victoria supera el mejor resultado guardado de su mismo `mapId`
