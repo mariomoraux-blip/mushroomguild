@@ -4,7 +4,7 @@ Antes de empezar, se responden las preguntas abiertas de `proposal.md`.
 
 ## 0. Preparación
 - [x] 0.1 Respuestas de Mario a las preguntas 1–3 anotadas en `proposal.md`
-- [ ] 0.2 Mario crea la base Upstash Redis desde Vercel (Storage → Marketplace) y la enlaza al proyecto (producción y preview)
+- [x] 0.2 Mario crea la base Upstash Redis desde Vercel (Storage → Marketplace) y la enlaza al proyecto (producción y preview)
 
 ## 1. Reglas (puro)
 - [x] 1.1 `config.ts › LEADERBOARD` con valores calibrados (anotados en `design.md`)
@@ -27,6 +27,6 @@ Antes de empezar, se responden las preguntas abiertas de `proposal.md`.
 ## 4. Cierre
 - [x] 4.1 Humo con `page.route`: registrar, jugador que vuelve, sin conexión, ranking desde la portada y victoria que no cuenta; Esc y foco de vuelta. Sin animaciones nuevas: las capas usan las de 022, que ya respetan el movimiento reducido
 - [x] 4.2 Capturas a 390 × 844 y 844 × 390
-- [ ] 4.3 Deploy de preview contra Redis real: que Vercel use `.vercel/output`, un envío verificado y uno alterado rechazado (necesita 0.2)
+- [x] 4.3 Verificado en producción (10 de noviembre, tras el merge del PR 34): `GET /api/leaderboard` 200 con la temporada 8; un resultado real con 100 puntos de más → 422 `score`; alias inventado → 400. No se envió una victoria válida para no ensuciar el ranking público (la aceptación está cubierta por las pruebas)
 - [x] 4.4 `CLAUDE.md` (stack y «sin backend»), `openspec/project.md` (capacidad `leaderboard`) y GDD
-- [ ] 4.5 Specs fusionadas y cambio archivado
+- [x] 4.5 Specs fusionadas y cambio archivado

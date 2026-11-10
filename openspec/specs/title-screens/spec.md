@@ -1,18 +1,26 @@
 # title-screens
 
 ## Purpose
-Pantallas fuera de la partida: portada, "Cómo jugar" (carrusel de 5 pasos) y "El gremio". Origen: cambio 012 (archivado); el 018 limpió la portada (sin personajes) y rehízo el recorte del logo. Implementadas en `src/store.ts` (`ui.screen`) y `src/ui/screens.ts`.
+Pantallas fuera de la partida: portada, "Cómo jugar" (carrusel de 5 pasos), "El gremio" y el acceso al ranking (`leaderboard`, 036). Origen: cambio 012 (archivado); el 018 limpió la portada (sin personajes) y rehízo el recorte del logo. Implementadas en `src/store.ts` (`ui.screen`) y `src/ui/screens.ts`.
 
 ## Requirements
 
 ### Requirement: Portada
-Al abrir el juego sin `?map`, `?seed`, `?nivel` ni `?debugState`, el juego SHALL mostrar la portada: el logo completo (sin recortes) y un menú con "Nueva partida" (principal), "Cómo jugar" y "El gremio". "Nueva partida" SHALL abrir "Elige tu dificultad" y, tras elegir el nivel, la intro o el tablero.
+Al abrir el juego sin `?map`, `?seed`, `?nivel` ni `?debugState`, el juego SHALL mostrar la portada: el logo completo (sin recortes) y un menú con "Nueva partida" (principal), "Cómo jugar", "El gremio" y "Ranking". "Nueva partida" SHALL abrir "Elige tu dificultad" y, tras elegir el nivel, la intro o el tablero. "Ranking" SHALL abrir la pantalla del ranking (`leaderboard`). Si el dispositivo tiene un jugador registrado, la portada SHALL saludarlo por su alias en una línea que no es un control.
 
 #### Scenario: Abrir el juego
 - WHEN el jugador abre el sitio
 - THEN ve la portada con el foco en "Nueva partida"
 - AND la portada no muestra a los personajes
 - AND al pulsarla ve "Elige tu dificultad"; al elegir Brote por primera vez ve la intro y después el tablero en el mes 1
+
+#### Scenario: Abrir el ranking
+- WHEN el jugador pulsa "Ranking" en la portada
+- THEN ve el ranking y con Esc vuelve a la portada con el foco en "Ranking"
+
+#### Scenario: Portada en horizontal con saludo
+- WHEN un jugador registrado abre la portada a 844 × 390
+- THEN el menú de cuatro opciones, el saludo y el crédito se ven completos y la página no hace scroll
 
 ### Requirement: Cómo jugar
 "Cómo jugar" SHALL mostrar 5 pasos (elige un hongo, trabaja junto a la red, una vez por mes, al empezar el mes, despierta al Árbol Padre) en un carrusel con anterior y siguiente, puntos que llevan a cada paso, flechas del teclado y deslizar con el dedo. El último paso no tiene "siguiente". Desde cualquier paso se puede abrir la Libreta de campo; "¡A jugar!" empieza la partida (desde la portada) o vuelve al tablero (desde el "?"). Cada paso SHALL ilustrarse con una miniatura de la interfaz del juego hecha con sus mismos componentes, decorativa (no se toca ni se enfoca): tarjetas del dock con la ★ (paso 1), casillas de red y casillas resaltadas (paso 2), una tarjeta que descansa y el botón «Fin del mes» (paso 3), un árbol vivo con lo que da y el medallón «Reclutar» (paso 4), y el Árbol Padre con las pastillas de árboles y nutrientes del HUD (paso 5).
