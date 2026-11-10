@@ -69,8 +69,8 @@ async function winFromTitle(page: Page) {
   await expect(page.locator('#story .score__stars')).toBeVisible({ timeout: 10_000 });
 }
 
-const shotFor = (name: string, project: string) =>
-  project === 'vertical-390x844' || project === 'horizontal-844x390' ? `docs/screenshots/036-${name}-${project}.png` : null;
+const shotFor = (name: string, project: string, change = '036') =>
+  project === 'vertical-390x844' || project === 'horizontal-844x390' ? `docs/screenshots/${change}-${name}-${project}.png` : null;
 
 test('pantalla: ranking desde la portada, fila propia fijada, sin scroll de página y Esc', async ({ page }, info) => {
   const calls = await mockApi(page);
@@ -98,6 +98,15 @@ test('registrar y volver: primer registro desde la carta, ranking encima de la c
   const calls = await mockApi(page);
   await page.goto('/');
   await winFromTitle(page);
+  // story-presentation › Finales: "Una acción principal" (037).
+  await expect(page.locator('#story .story__btn--primary')).toHaveCount(1);
+  await expect(page.locator('#story .story__btn--primary')).toHaveText('Jugar de nuevo');
+  await expect(page.locator('#story .story__btn--primary')).toBeFocused();
+  await expect(page.locator('#story .story__ranking').getByRole('button', { name: 'Registra tu puntaje' })).toBeVisible();
+  await expect(page.locator('#story .story__ranking').getByRole('button', { name: 'Ver ranking' })).toBeVisible();
+  await expect(page.locator('#story .story__actions button')).toHaveCount(2);
+  const unregistered = shotFor('victoria-sin-registro', info.project.name, '037');
+  if (unregistered) await page.screenshot({ path: unregistered });
   await page.getByRole('button', { name: 'Registra tu puntaje' }).click();
   const name = page.locator('.alias__name');
   const first = await name.textContent();
@@ -111,7 +120,7 @@ test('registrar y volver: primer registro desde la carta, ranking encima de la c
   expect(body.alias).toBe(alias);
   expect(body.result.actionLog.length).toBeGreaterThan(0);
   expect(calls.every((c) => !c.url.includes(body.token))).toBe(true);
-  const shot = shotFor('victoria', info.project.name);
+  const shot = shotFor('victoria', info.project.name, '037');
   if (shot) await page.screenshot({ path: shot });
   // «Ver ranking» abre el ranking encima de la carta; Esc vuelve a la carta.
   await page.getByRole('button', { name: 'Ver ranking' }).click();

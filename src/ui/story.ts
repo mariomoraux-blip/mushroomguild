@@ -40,13 +40,16 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
   const button = (action: string, label: string, primary = false) =>
     el('button', { class: `btn story__btn${primary ? ' story__btn--primary' : ''}`, type: 'button', 'data-action': action }, label);
 
-  /** Ranking en la carta de final (036): el estado del envío y «Ver ranking». */
+  /**
+   * Franja del ranking en la carta de final (036, 037): el estado del envío a un lado y «Ver ranking» como enlace al
+   * otro, aparte de las acciones de la carta, para que «Jugar de nuevo» sea la única principal.
+   */
   function rankingBlock(submission: Submission | null): HTMLElement {
     const L = es.leaderboard;
     const line = (() => {
       switch (submission?.kind) {
         case 'unregistered':
-          return el('button', { class: 'btn btn--primary story__register', type: 'button', 'data-action': 'register' }, L.register);
+          return el('button', { class: 'btn story__register', type: 'button', 'data-action': 'register' }, L.register);
         case 'sending':
           return el('p', { class: 'story__rank' }, L.sending);
         case 'ok':
@@ -56,12 +59,12 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
         case 'rejected':
           return el('p', { class: 'story__note' }, L.rejected);
         default:
-          return null;
+          return el('p', { class: 'story__rank' }, L.title);
       }
     })();
     return el('div', { class: 'story__ranking', 'aria-live': 'polite' },
-      ...(line ? [line] : []),
-      el('button', { class: 'btn story__link', type: 'button', 'data-action': 'ranking' }, L.open));
+      line,
+      el('button', { class: 'story__link', type: 'button', 'data-action': 'ranking' }, L.open));
   }
 
   function card(state: AppState, story: Story): HTMLElement {
