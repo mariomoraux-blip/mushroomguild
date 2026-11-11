@@ -347,18 +347,18 @@ describe('Requirement: Reclutar', () => {
     }
   });
 
-  it('Scenario: Cada recluta cuesta más — el primero 3, el segundo 5 y el tercero 7', () => {
-    expect(RECRUIT_COSTS).toEqual([3, 5, 7]);
+  it('Scenario: Cada recluta cuesta más — 3, 4, 6 y 7 (041: cuatro cupos)', () => {
+    expect(RECRUIT_COSTS).toEqual([3, 4, 6, 7]);
     expect(RECRUIT_COSTS).toHaveLength(MAX_GUILD - STARTING_GUILD.length);
-    let s = setup({ spores: 15 });
+    let s = setup({ spores: 20 });
     const paid: number[] = [];
-    for (const sp of ['morchella', 'gliophorus', 'ganoderma'] as const) {
+    for (const sp of ['morchella', 'gliophorus', 'ganoderma', 'lycoperdon'] as const) {
       const before = s.spores;
       expect(recruitCost(s)).toBe(RECRUIT_COSTS[recruitedCount(s)]);
       s = recruit(s, sp).state;
       paid.push(before - s.spores);
     }
-    expect(paid).toEqual([3, 5, 7]);
+    expect(paid).toEqual([3, 4, 6, 7]);
     expect(s.spores).toBe(0);
     expect(recruitCost(s)).toBeNull();
   });
@@ -368,22 +368,25 @@ describe('Requirement: Reclutar', () => {
     expect(recruitCost(newGame())).toBe(3);
     const withMage = setup({ spores: 5, extraMembers: ['lycoperdon'], mage: true });
     expect(recruitedCount(withMage)).toBe(1);
-    expect(recruitCost(withMage)).toBe(5);
+    expect(recruitCost(withMage)).toBe(4);
   });
 
   it('Scenario: Gremio completo — reclutar se rechaza con "El gremio está completo." (la maga no cuenta)', () => {
-    const s = setup({ spores: 10, extraMembers: ['morchella', 'ganoderma', 'gliophorus'], mage: true });
+    const s = setup({ spores: 10, extraMembers: ['morchella', 'ganoderma', 'gliophorus', 'lycoperdon'], mage: true });
     expect(s.members).toHaveLength(MAX_GUILD + 1);
-    expect(() => recruit(s, 'lycoperdon')).toThrow(new RuleError('El gremio está completo.'));
-    // Sin la maga y con 5 reclutables todavía cabe uno más (el tercero: 7 esporas).
-    const five = setup({ spores: 7, extraMembers: ['morchella', 'ganoderma'], mage: true });
-    expect(recruit(five, 'gliophorus').state.members.filter((m) => m.species !== 'mago')).toHaveLength(MAX_GUILD);
+    expect(recruitCost(s)).toBeNull();
+    // Con las cuatro especies el gremio está completo: no queda especie ni cupo (la maga no cuenta).
+    expect(() => recruit(s, 'lycoperdon')).toThrow(RuleError);
+    // Con 6 reclutables todavía cabe uno más (el cuarto: 7 esporas): las cuatro especies (041).
+    const six = setup({ spores: 7, extraMembers: ['morchella', 'ganoderma', 'gliophorus'], mage: true });
+    expect(recruit(six, 'lycoperdon').state.members.filter((m) => m.species !== 'mago')).toHaveLength(MAX_GUILD);
   });
 
   it('sin esporas suficientes se rechaza con el costo del próximo recluta', () => {
     expect(() => recruit(setup({ spores: 2 }), 'gliophorus')).toThrow(new RuleError('Reclutar cuesta 3 esporas.', 'spores'));
-    expect(() => recruit(setup({ spores: 4, extraMembers: ['morchella'] }), 'gliophorus')).toThrow(new RuleError('Reclutar cuesta 5 esporas.', 'spores'));
-    expect(() => recruit(setup({ spores: 6, extraMembers: ['morchella', 'gliophorus'] }), 'ganoderma')).toThrow(new RuleError('Reclutar cuesta 7 esporas.', 'spores'));
+    expect(() => recruit(setup({ spores: 3, extraMembers: ['morchella'] }), 'gliophorus')).toThrow(new RuleError('Reclutar cuesta 4 esporas.', 'spores'));
+    expect(() => recruit(setup({ spores: 5, extraMembers: ['morchella', 'gliophorus'] }), 'ganoderma')).toThrow(new RuleError('Reclutar cuesta 6 esporas.', 'spores'));
+    expect(() => recruit(setup({ spores: 6, extraMembers: ['morchella', 'gliophorus', 'ganoderma'] }), 'lycoperdon')).toThrow(new RuleError('Reclutar cuesta 7 esporas.', 'spores'));
   });
 
   it('los reclutas reciben los nombres en orden', () => {

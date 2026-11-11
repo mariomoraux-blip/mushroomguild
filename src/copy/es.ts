@@ -10,12 +10,15 @@ const listY = (items: readonly (string | number)[]) => (items.length < 2 ? items
  * si es distinto. Dentro de la partida, la meta y la etiqueta usan lo del nivel (`motherCost`, `motherTrees`).
  */
 const B = LEVELS.brote;
+const W = LEVELS.bosque;
 const A = LEVELS.ancestral;
-const motherNutrients = A.mother === B.mother ? `${B.mother} nutrientes` : `${B.mother} nutrientes (${A.mother} en Ancestral)`;
-const motherNeeds =
-  A.mother === B.mother && A.motherTrees === B.motherTrees
-    ? `${B.motherTrees} árboles revividos y ${B.mother} nutrientes`
-    : `${B.motherTrees} árboles revividos y ${B.mother} nutrientes (${A.motherTrees} y ${A.mother} en Ancestral)`;
+// 041: cada nivel pide sus nutrientes (10, 11 y 13); se nombran solo los que cambian.
+const otherNutrients = [W.mother !== B.mother && `${W.mother} en Bosque`, A.mother !== B.mother && `${A.mother} en Ancestral`].filter((t): t is string => Boolean(t));
+const motherNutrients = otherNutrients.length ? `${B.mother} nutrientes (${listY(otherNutrients)})` : `${B.mother} nutrientes`;
+const motherNeeds = [
+  `${B.motherTrees} árboles revividos y ${B.mother} nutrientes`,
+  [W.mother !== B.mother && `${W.mother} nutrientes en Bosque`, (A.mother !== B.mother || A.motherTrees !== B.motherTrees) && `${A.motherTrees} árboles y ${A.mother} nutrientes en Ancestral`].filter(Boolean).join('; '),
+].filter(Boolean).join(' (') + (W.mother !== B.mother || A.mother !== B.mother || A.motherTrees !== B.motherTrees ? ')' : '');
 /** Curva de reclutar (027): «cuesta 3, luego 5 y luego 7». */
 const recruitCurve = `cuesta ${listY(RECRUIT_COSTS.map((n, i) => (i === 0 ? n : `luego ${n}`)))}`;
 const times = (m: number) => `×${String(m).replace('.', ',')}`;
@@ -298,8 +301,8 @@ export const es = {
     names: { brote: 'Brote', bosque: 'Bosque', ancestral: 'Ancestral' },
     lines: {
       brote: 'El claro de siempre, con la ★ para guiarte.',
-      bosque: 'Más rocas, escarcha en otoño y un árbol que se apaga.',
-      ancestral: 'Más rocas aún, escarcha hasta el final, cinco árboles que se apagan, plaga, un Árbol Padre más exigente y sin ★.',
+      bosque: 'Más rocas, escarcha en otoño, un árbol que se apaga y un Árbol Padre más exigente.',
+      ancestral: 'Más rocas aún, escarcha hasta el final, cinco árboles que se apagan, plaga, un Árbol Padre aún más exigente y sin ★.',
     },
     multiplier: (m: number) => `Puntaje ${times(m)}`,
     back: 'Volver a la portada',
@@ -458,9 +461,11 @@ export const es = {
       reserves: 'Reservas',
       guild: 'Gremio eficiente',
       activity: 'Actividad',
-      variety: 'Las 5 especies',
+      variety: 'Todo el gremio actuó',
       time: 'Rapidez',
     },
+    /** Fila de variedad según las especies reclutables del gremio (041). */
+    variety: (n: number) => (n >= 4 ? 'Las 4 especies reclutadas' : n >= 2 ? `${n} especies reclutadas` : 'Todo el gremio actuó'),
     level: (name: string) => `Nivel ${name}`,
     multiplier: times,
   },

@@ -2,12 +2,12 @@
 import { endMonth, newGame, recruit, type GameState, type RecruitableSpecies } from './rules';
 
 const presets: Record<string, () => GameState> = {
-  /** Gremio completo: 6 reclutables y Maestra Bruma (escenario "Gremio completo en el dock"). */
+  /** Gremio completo: 7 reclutables (las cuatro especies, 041) y Maestra Bruma (escenario "Gremio completo en el dock"). */
   fullGuild: () => {
-    let s: GameState = { ...newGame(), spores: 20, nutrients: 10 };
+    let s: GameState = { ...newGame(), spores: 25, nutrients: 10 };
     const tiles = s.tiles.map((t) => (t.kind === 'tree' && (t.x + t.y) % 2 === 0 ? { ...t, alive: true, net: true } : t));
     s = { ...s, tiles, mageDue: true };
-    (['gliophorus', 'morchella', 'ganoderma'] as RecruitableSpecies[]).forEach((sp) => (s = recruit(s, sp).state));
+    (['gliophorus', 'morchella', 'ganoderma', 'lycoperdon'] as RecruitableSpecies[]).forEach((sp) => (s = recruit(s, sp).state));
     return endMonth(s).state;
   },
   /** Pompón listo, con árboles vivos, 1 nutriente y 2 esporas: puede soplar o abonar (040). */

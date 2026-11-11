@@ -19,7 +19,7 @@ const fadedCount = (s: GameState) => s.tiles.filter((t) => t.faded).length;
 
 describe('Requirement: Niveles de dificultad', () => {
   it('los niveles van de menos a más rocas y de ×1 a ×2', () => {
-    expect(LEVEL_IDS.map((l) => LEVELS[l].rocks)).toEqual([6, 8, 10]);
+    expect(LEVEL_IDS.map((l) => LEVELS[l].rocks)).toEqual([6, 9, 11]);
     expect(LEVEL_IDS.map((l) => LEVELS[l].multiplier)).toEqual([1, 1.5, 2]);
     expect(LEVELS.ancestral.hints).toBe(false);
   });

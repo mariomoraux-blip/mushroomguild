@@ -5,7 +5,7 @@ export const W = 5;
 export const H = 8;
 export const MONTHS = 12;
 export const MONTHS_PER_SEASON = 3;
-export const MAX_GUILD = 6;
+export const MAX_GUILD = 7;
 export const START_NUTRIENTS = 2;
 export const START_SPORES = 0;
 /**
@@ -15,10 +15,10 @@ export const START_SPORES = 0;
  */
 export const COST = { weave: 1, revive: 3, call: 1, breakRock: 2, heal: 1, puff: 1, compost: 2 } as const;
 /**
- * Costo en esporas de cada recluta (027): el primero 3, el segundo 5, el tercero 7. Hay un valor por cupo
+ * Costo en esporas de cada recluta (027; 041: cuatro cupos): 3, 4, 6 y 7. Hay un valor por cupo
  * (`MAX_GUILD − STARTING_GUILD`); los miembros iniciales y Maestra Bruma no cuentan como reclutados.
  */
-export const RECRUIT_COSTS = [3, 5, 7] as const;
+export const RECRUIT_COSTS = [3, 4, 6, 7] as const;
 export const GAIN = { log: 2, treeSpores: 1, treeNutrients: 1, puff: 2, compost: 1 } as const;
 export const LOG_USES = 2;
 export const TREES_FOR_MOTHER = 3;
@@ -51,8 +51,8 @@ export interface LevelRules {
 }
 export const LEVELS: Readonly<Record<Level, LevelRules>> = {
   brote: { rocks: 6, frost: [], fading: [], upkeep: [], sporeless: [], mother: 10, motherTrees: TREES_FOR_MOTHER, plague: [], hints: true, multiplier: 1 },
-  bosque: { rocks: 8, frost: [2], fading: [6], upkeep: [2, 3], sporeless: [3], mother: 10, motherTrees: TREES_FOR_MOTHER, plague: [], hints: true, multiplier: 1.5 },
-  ancestral: { rocks: 10, frost: [2, 3], fading: [3, 5, 7, 9, 11], upkeep: [2, 3], sporeless: [3], mother: 12, motherTrees: 4, plague: [2, 3], hints: false, multiplier: 2 },
+  bosque: { rocks: 9, frost: [2], fading: [6], upkeep: [2, 3], sporeless: [3], mother: 11, motherTrees: TREES_FOR_MOTHER, plague: [], hints: true, multiplier: 1.5 },
+  ancestral: { rocks: 11, frost: [2, 3], fading: [3, 5, 7, 9, 11], upkeep: [2, 3], sporeless: [3], mother: 13, motherTrees: 4, plague: [2, 3], hints: false, multiplier: 2 },
 };
 export const LEVEL_IDS: readonly Level[] = ['brote', 'bosque', 'ancestral'];
 /** Costo de tejer con escarcha. */
@@ -80,11 +80,12 @@ export const SCORE = {
   perFreeSlot: 60, // × (MAX_GUILD − miembros reclutables)
   perAction: 5,
   actionCap: 40,
-  variety: 150, // las 5 especies actuaron al menos una vez
+  /** 041: si todas las especies del gremio actuaron; según cuántas especies reclutables hay en el gremio (0 a 4). */
+  variety: [150, 150, 250, 350, 450],
   timeParS: 480, // 1 punto por segundo por debajo de 8:00
 } as const;
 /** Versión de la fórmula: cambia la clave del récord guardado y el `ScoreResult`. */
-export const SCORE_VERSION = 10;
+export const SCORE_VERSION = 11;
 /** Estrellas por claro: 2 desde el 90 % y 3 desde el 110 % del puntaje del bot con criterio en ese claro. */
 export const STARS = { two: 0.9, three: 1.1 } as const;
 /** Segundos de juego por mes que se suponen para la partida de referencia del bot. */

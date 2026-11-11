@@ -70,11 +70,11 @@ describe('Requirement: Para qué sirve cada hongo', () => {
 
 describe('Requirement: Cómo reclutar', () => {
   it('Scenario: La hoja dice cuánto cuesta el próximo — los textos salen de RECRUIT_COSTS', () => {
-    expect(es.sheet.recruitHelp(3, 6)).toBe('El próximo recluta cuesta 3 esporas; cada uno cuesta más (3, 5 y 7). Hasta 6 miembros; trabaja desde el mes siguiente.');
-    expect(es.sheet.recruitHelp(null, 6)).toBe('El gremio está completo: 6 miembros.');
+    expect(es.sheet.recruitHelp(3, 7)).toBe('El próximo recluta cuesta 3 esporas; cada uno cuesta más (3, 4, 6 y 7). Hasta 7 miembros; trabaja desde el mes siguiente.');
+    expect(es.sheet.recruitHelp(null, 7)).toBe('El gremio está completo: 7 miembros.');
     expect(es.hud.sporesButton(2, 3)).toBe('Esporas: 2. El próximo recluta cuesta 3. Abrir reclutar.');
     expect(es.hud.sporesButton(4, null)).toBe('Esporas: 4. Gremio completo. Abrir reclutar.');
-    const curve = 'Con esporas reclutas otro hongo: cuesta 3, luego 5 y luego 7.';
+    const curve = 'Con esporas reclutas otro hongo: cuesta 3, luego 4, luego 6 y luego 7.';
     expect(es.howto.steps[3]!.text).toContain(curve);
     expect(es.help.how[3]).toContain(curve);
     expect(JSON.stringify(es)).not.toContain('Con 2 esporas');
@@ -86,13 +86,13 @@ describe('Requirement: Cómo reclutar', () => {
     expect(idleHint(s).text).toBe('Pista: tienes 3 esporas. Recluta una Gliophorus en «+ Reclutar» o tocando las esporas.');
   });
 
-  it('Scenario: No alcanza para el próximo — con 2 esporas, o con 4 tras el primer recluta, la pista no sugiere reclutar', () => {
+  it('Scenario: No alcanza para el próximo — con 2 esporas, o con 3 tras el primer recluta, la pista no sugiere reclutar', () => {
     expect(advise(setup({ spores: 2, used: [INDI, BRUNO, RUBI] }))).toEqual({ kind: 'endMonth' });
-    const extra = setup({ spores: 4, used: [INDI, BRUNO, RUBI], extraMembers: ['morchella'] });
+    const extra = setup({ spores: 3, used: [INDI, BRUNO, RUBI], extraMembers: ['morchella'] });
     const one = { ...extra, members: extra.members.map((m) => ({ ...m, used: true })) };
     expect(canRecruit(one)).toBe(false);
     expect(advise(one).kind).not.toBe('recruit');
-    expect(advise({ ...one, spores: 5 }).kind).toBe('recruit');
+    expect(advise({ ...one, spores: 4 }).kind).toBe('recruit');
   });
 
   it('Scenario: Falta la Mensajera — Rubí revivió y podría revivir otro: la pista sugiere una Gliophorus', () => {

@@ -189,7 +189,7 @@ test('gremio completo: el dock se desplaza por dentro, solo con tarjetas enteras
   test.skip(info.project.name !== 'vertical-390x844', 'solo a 390 px de ancho');
   await page.goto('/?debugState=fullGuild');
   const cards = page.locator('.dock__cards');
-  await expect(page.locator('.dock__item')).toHaveCount(7);
+  await expect(page.locator('.dock__item')).toHaveCount(8);
   const ids = () => page.locator('.dock__item .card').evaluateAll((bs) => bs.map((b) => b.getAttribute('data-id')));
   const order = await ids();
   expect(await cards.evaluate((c) => c.scrollWidth > c.clientWidth)).toBe(true);
@@ -208,10 +208,11 @@ test('gremio completo: el dock se desplaza por dentro, solo con tarjetas enteras
   await cards.evaluate((c) => c.scrollBy(70, 0));
   await expect(rail).toHaveAttribute('data-more', 'start end');
   await expect.poll(cut).toBe(0);
-  await cards.evaluate((c) => c.scrollBy(400, 0));
+  await cards.evaluate((c) => c.scrollBy(800, 0));
   await expect(rail).toHaveAttribute('data-more', 'start');
   await expect.poll(cut).toBe(0);
   await page.screenshot({ path: 'docs/screenshots/018-dock-390x844.png' });
+  await page.screenshot({ path: 'docs/screenshots/041-gremio-completo-390x844.png' });
   await expect(page.locator('.end')).toBeInViewport();
   await noScrollNoZoom(page);
   await page.locator('.end').click();
@@ -957,42 +958,42 @@ test('Recetas (026) con movimiento reducido: quietas desde el principio', async 
   await ctx.close();
 });
 
-test('Reclutar (027): cada recluta cuesta más (3, 5 y 7) y la hoja dice cuánto cuesta el próximo', async ({ page }, info) => {
+test('Reclutar (027, 041): cada recluta cuesta más (3, 4, 6 y 7) y la hoja dice cuánto cuesta el próximo', async ({ page }, info) => {
   await page.goto('/?map=clasico');
   const recruitCard = page.locator('.card--recruit');
   // Sin esporas: el medallón se atenúa y dice el costo del primero.
   await expect(recruitCard).toHaveClass(/is-used/);
   await expect(recruitCard).toHaveAttribute('aria-label', 'Reclutar: 3 esporas');
   await expect(page.getByRole('button', { name: 'Esporas: 0. El próximo recluta cuesta 3. Abrir reclutar.' })).toHaveCount(1);
-  // Partida con 8 esporas (vía el store de desarrollo): el primero cuesta 3 y deja 5 para el segundo.
+  // Partida con 7 esporas (vía el store de desarrollo): el primero cuesta 3 y deja 4 para el segundo.
   await page.evaluate(() => {
     type S = { getState(): { game: object }; dispatch(a: object): void };
     const store = (window as unknown as { store: S }).store;
-    store.dispatch({ type: 'start', game: { ...store.getState().game, spores: 8 }, intro: false });
+    store.dispatch({ type: 'start', game: { ...store.getState().game, spores: 7 }, intro: false });
   });
   await expect(recruitCard).not.toHaveClass(/is-used/);
   await recruitCard.click();
   const sheet = page.getByRole('dialog');
-  await expect(sheet).toContainText('El próximo recluta cuesta 3 esporas; cada uno cuesta más (3, 5 y 7).');
+  await expect(sheet).toContainText('El próximo recluta cuesta 3 esporas; cada uno cuesta más (3, 4, 6 y 7).');
   await sheet.locator('[data-action="recruit"][data-species="gliophorus"]').click();
-  await expect(page.locator('.chip__value').nth(1)).toHaveText('5');
+  await expect(page.locator('.chip__value').nth(1)).toHaveText('4');
   // 039: una de cada especie; la Gliophorus ya no se puede reclutar otra vez.
   await recruitCard.click();
   await expect(sheet.locator('.row.is-taken')).toContainText('Ya está en el gremio.');
   await expect(sheet.locator('[data-action="recruit"][data-species="gliophorus"]')).toHaveCount(0);
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/039-reclutar-390x844.png' });
   await page.keyboard.press('Escape');
-  await expect(recruitCard).toHaveAttribute('aria-label', 'Reclutar: 5 esporas');
+  await expect(recruitCard).toHaveAttribute('aria-label', 'Reclutar: 4 esporas');
   await expect(recruitCard).not.toHaveClass(/is-used/);
   await recruitCard.click();
-  await expect(sheet).toContainText('El próximo recluta cuesta 5 esporas');
+  await expect(sheet).toContainText('El próximo recluta cuesta 4 esporas');
   await sheet.locator('[data-action="recruit"][data-species="morchella"]').click();
-  // Quedan 0 esporas y el tercero cuesta 7: la hoja lo dice y sus botones no se pueden pulsar.
+  // Quedan 0 esporas y el tercero cuesta 6: la hoja lo dice y sus botones no se pueden pulsar.
   await expect(page.locator('.chip__value').nth(1)).toHaveText('0');
   await expect(recruitCard).toHaveClass(/is-used/);
-  await expect(recruitCard).toHaveAttribute('aria-label', 'Reclutar: 7 esporas');
+  await expect(recruitCard).toHaveAttribute('aria-label', 'Reclutar: 6 esporas');
   await recruitCard.click();
-  await expect(sheet).toContainText('El próximo recluta cuesta 7 esporas');
+  await expect(sheet).toContainText('El próximo recluta cuesta 6 esporas');
   await expect(sheet.locator('[data-action="recruit"]').first()).toBeDisabled();
   const overflow = await sheet.evaluate((n) => n.scrollWidth - n.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
@@ -1059,20 +1060,20 @@ test('Cómo jugar (029): cada paso muestra la interfaz de la partida, decorativa
   await noScrollNoZoom(page);
 });
 
-test('Árbol Padre de Ancestral (031): tocarlo y la Libreta dicen que pide 4 árboles y 12 nutrientes', async ({ page }, info) => {
+test('Árbol Padre de Ancestral (031, 041): tocarlo y la Libreta dicen que pide 4 árboles y 13 nutrientes', async ({ page }, info) => {
   await page.goto('/?map=clasico&nivel=ancestral');
   await cell(page, 2, 0).click();
-  await expect(page.locator('#notice')).toContainText('(4 árboles vivos y 12 nutrientes)');
+  await expect(page.locator('#notice')).toContainText('(4 árboles vivos y 13 nutrientes)');
   await page.getByRole('button', { name: 'Ayuda: Cómo jugar' }).click();
   await page.getByRole('button', { name: 'Libreta de campo' }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog).toContainText('Necesitas que la red lo toque, 4 árboles revividos y 12 nutrientes.');
-  await expect(dialog).toContainText('el Árbol Padre pide 4 árboles revividos y 12 nutrientes');
+  await expect(dialog).toContainText('Necesitas que la red lo toque, 4 árboles revividos y 13 nutrientes.');
+  await expect(dialog).toContainText('el Árbol Padre pide 4 árboles revividos y 13 nutrientes');
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/031-libreta-ancestral-390x844.png' });
-  // En Bosque sigue pidiendo 3 y 10.
+  // En Bosque pide 3 y 11 (041).
   await page.goto('/?map=clasico&nivel=bosque');
   await cell(page, 2, 0).click();
-  await expect(page.locator('#notice')).toContainText('(3 árboles vivos y 10 nutrientes)');
+  await expect(page.locator('#notice')).toContainText('(3 árboles vivos y 11 nutrientes)');
 });
 
 test('Plaga de Ancestral (032, 033, 035): la carta del frío la explica y la casilla marcada se ve pintada, se nombra y se explica', async ({ page }, info) => {
@@ -1181,4 +1182,19 @@ test('Pompón cambia en los dos sentidos (040): elige soplar o abonar y después
   await valid(page).first().click();
   await expect(page.locator('#notice')).toContainText('abonó el árbol');
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/040-abonar-390x844.png' });
+});
+
+test('Partida nueva (041): el dock no guarda las tarjetas de los reclutas de la partida anterior', async ({ page }) => {
+  await page.goto('/?map=clasico&debugState=fullGuild');
+  while (await page.locator('#story:not([hidden]):not(.is-leaving)').count()) await page.locator('.story__btn--primary').click();
+  await expect(page.locator('.dock__item')).toHaveCount(8);
+  // Lo mismo que hace «Jugar de nuevo»: una partida nueva con solo los tres iniciales.
+  await page.evaluate(() => {
+    type S = { getState(): { game: { members: { used: boolean; at: unknown }[] } }; dispatch(a: object): void };
+    const store = (window as unknown as { store: S }).store;
+    const g = store.getState().game;
+    store.dispatch({ type: 'restart', game: { ...g, month: 1, members: g.members.slice(0, 3).map((m) => ({ ...m, used: false, at: null })) } });
+  });
+  await expect(page.locator('.dock__item')).toHaveCount(3);
+  for (const sp of ['ganoderma', 'morchella', 'gliophorus', 'lycoperdon', 'mago']) await expect(page.locator(`.card--${sp}`)).toHaveCount(0);
 });
