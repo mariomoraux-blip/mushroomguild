@@ -11,14 +11,15 @@ export const START_SPORES = 0;
 /**
  * `breakRock`: nutrientes de la Morchella; `heal`: esporas que suma el Ganoderma a lo que cuesta revivir (y lo que cuesta
  * limpiar una plaga); `puff`: nutriente que el Lycoperdon cambia por `GAIN.puff` esporas (039).
+ * `compost`: esporas que el Lycoperdon cambia por `GAIN.compost` nutriente al abonar el árbol (040).
  */
-export const COST = { weave: 1, revive: 3, call: 1, breakRock: 2, heal: 1, puff: 1 } as const;
+export const COST = { weave: 1, revive: 3, call: 1, breakRock: 2, heal: 1, puff: 1, compost: 2 } as const;
 /**
  * Costo en esporas de cada recluta (027): el primero 3, el segundo 5, el tercero 7. Hay un valor por cupo
  * (`MAX_GUILD − STARTING_GUILD`); los miembros iniciales y Maestra Bruma no cuentan como reclutados.
  */
 export const RECRUIT_COSTS = [3, 5, 7] as const;
-export const GAIN = { log: 2, treeSpores: 1, treeNutrients: 1, puff: 2 } as const;
+export const GAIN = { log: 2, treeSpores: 1, treeNutrients: 1, puff: 2, compost: 1 } as const;
 export const LOG_USES = 2;
 export const TREES_FOR_MOTHER = 3;
 /** Plaga (032): la casilla marcada se salva si algún hongo trabajó ese mes a esta distancia o menos (pasos en cruz). */
@@ -83,7 +84,7 @@ export const SCORE = {
   timeParS: 480, // 1 punto por segundo por debajo de 8:00
 } as const;
 /** Versión de la fórmula: cambia la clave del récord guardado y el `ScoreResult`. */
-export const SCORE_VERSION = 9;
+export const SCORE_VERSION = 10;
 /** Estrellas por claro: 2 desde el 90 % y 3 desde el 110 % del puntaje del bot con criterio en ese claro. */
 export const STARS = { two: 0.9, three: 1.1 } as const;
 /** Segundos de juego por mes que se suponen para la partida de referencia del bot. */

@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { canRecruit, hasSpecies, LEADERBOARD, MAX_GUILD, motherCost, motherTrees, RECRUITABLE, STARTING_GUILD, recruitCost, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
+import { canRecruit, hasSpecies, LEADERBOARD, MAX_GUILD, motherCost, motherTrees, RECRUITABLE, STARTING_GUILD, recruitCost, seasonIndex, member, validTargets, type Choice, type SpeciesId } from '../rules';
 import type { AppState, Sheet, Store } from '../store';
 import { el, portrait } from './dom';
 import { recipesFor, RECIPE_STAGGER } from './recipe';
@@ -57,7 +57,7 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
     if (action === 'close') store.dispatch({ type: 'closeSheet' });
     if (action === 'recruit') store.dispatch({ type: 'recruit', species: species as (typeof RECRUITABLE)[number] });
     if (action === 'info') store.dispatch({ type: 'openSheet', sheet: { kind: 'creature', species: species as SpeciesId } });
-    if (action === 'spell') store.dispatch({ type: 'chooseSpell', spell: spell as Spell });
+    if (action === 'spell') store.dispatch({ type: 'chooseSpell', spell: spell as Choice });
     if (action === 'aliasRoll') alias.roll();
     if (action === 'aliasWrite') alias.write(true);
     if (action === 'aliasPick') alias.write(false);
@@ -164,19 +164,24 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
     );
   }
 
+  /** Hoja de elección: los hechizos de Maestra Bruma o los dos cambios de Pompón (040), cada uno deshabilitado si no se puede. */
   function spellSheet(state: AppState) {
     const id = state.ui.selected!;
-    const spells: Spell[] = ['sprout', 'rain'];
-    // La ficha de Maestra Bruma (022) se abre desde aquí: la hoja tapa el botón "Ficha" de la bitácora.
-    const isNew = !state.ui.seen.includes('mago');
+    const m = member(state.game, id);
+    const puff = m?.species === 'lycoperdon';
+    const options: { choice: Choice; name: string; help: string }[] = puff
+      ? (['spores', 'nutrients'] as const).map((p) => ({ choice: p, name: es.puffs[p], help: es.puffHelp[p] }))
+      : (['sprout', 'rain'] as const).map((sp) => ({ choice: sp, name: es.spells[sp], help: es.spellHelp[sp] }));
+    // La ficha (022) se abre desde aquí: la hoja tapa el botón "Ficha" de la bitácora.
+    const isNew = !state.ui.seen.includes(puff ? 'lycoperdon' : 'mago');
     return panel(
-      es.sheet.spellTitle,
+      puff ? es.sheet.puffTitle(m!.name) : es.sheet.spellTitle,
       el('div', { class: 'spells' },
-        ...spells.map((sp) =>
-          el('button', { class: 'btn btn--spell', type: 'button', 'data-action': 'spell', 'data-spell': sp, disabled: !validTargets(state.game, id, sp).length },
-            el('strong', {}, es.spells[sp]),
-            el('span', {}, es.spellHelp[sp])))),
-      el('button', { class: `btn btn--card${isNew ? ' is-new' : ''}`, type: 'button', 'data-action': 'member' }, es.card.openLabel(es.mageName)),
+        ...options.map((o) =>
+          el('button', { class: 'btn btn--spell', type: 'button', 'data-action': 'spell', 'data-spell': o.choice, disabled: !validTargets(state.game, id, o.choice).length },
+            el('strong', {}, o.name),
+            el('span', {}, o.help)))),
+      el('button', { class: `btn btn--card${isNew ? ' is-new' : ''}`, type: 'button', 'data-action': 'member' }, es.card.openLabel(puff ? m!.name : es.mageName)),
     );
   }
 

@@ -1,5 +1,5 @@
 import { act, endMonth, recruit } from './actions';
-import { advise, type PolicyOptions } from './advice';
+import { advise, adviceChoice, type PolicyOptions } from './advice';
 import { MONTHS } from './config';
 import { motherTile, revivedCount } from './state';
 import type { GameState } from './types';
@@ -12,7 +12,7 @@ export function playAdvised(start: GameState, o: PolicyOptions = {}): GameState 
     if (a.kind === 'over') break;
     if (a.kind === 'endMonth') s = endMonth(s).state;
     else if (a.kind === 'recruit') s = recruit(s, a.species).state;
-    else s = act(s, a.memberId, a.target.x, a.target.y).state;
+    else s = act(s, a.memberId, a.target.x, a.target.y, adviceChoice(a)).state;
   }
   return s;
 }
@@ -56,7 +56,7 @@ function playMonth(start: GameState, o: PolicyOptions, noRecruit: boolean): Game
     if (a.kind === 'over') break;
     if (a.kind === 'endMonth' || (a.kind === 'recruit' && noRecruit)) return endMonth(s).state;
     if (a.kind === 'recruit') s = recruit(s, a.species).state;
-    else s = act(s, a.memberId, a.target.x, a.target.y).state;
+    else s = act(s, a.memberId, a.target.x, a.target.y, adviceChoice(a)).state;
   }
   return s;
 }

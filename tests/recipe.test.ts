@@ -6,9 +6,11 @@ import { RECIPES } from '../src/ui/recipe';
 describe('Requirement: Recetas visuales', () => {
   const numbers = (sp: keyof typeof RECIPES) => RECIPES[sp].flatMap((r) => r.chips.map((c) => c.n));
 
-  it('cada especie tiene receta; Maestra Bruma, una por hechizo', () => {
-    for (const sp of RECRUITABLE) expect(RECIPES[sp]).toHaveLength(1);
+  it('cada especie tiene receta; Maestra Bruma, una por hechizo; Pompón, una por cambio (040)', () => {
+    for (const sp of RECRUITABLE) expect(RECIPES[sp]).toHaveLength(sp === 'lycoperdon' ? 2 : 1);
     expect(RECIPES.mago).toHaveLength(2);
+    expect(RECIPES.lycoperdon.map((r) => r.title)).toEqual(['Soplar esporas', 'Abonar el árbol']);
+    expect(numbers('lycoperdon')).toEqual([-COST.puff, GAIN.puff, -COST.compost, GAIN.compost]);
   });
 
   it('los números salen de las reglas: tejer, descomponer, revivir y pasar la voz', () => {

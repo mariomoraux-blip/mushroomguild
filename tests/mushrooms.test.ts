@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
 import { diffEffects } from '../src/effects';
-import { act, idleReason, RECRUITABLE, recruit, RuleError, STARTING_GUILD, tile, validTargets, type GameState } from '../src/rules';
+import { act, COST, GAIN, idleReason, RECRUITABLE, recruit, RuleError, STARTING_GUILD, tile, validTargets, type GameState } from '../src/rules';
 import { idOf, setup, type Setup } from './helpers';
 
 // Mapa clásico: Hogar (2,7); árboles (1,0) (4,1) (0,3) (2,5) (4,6); rocas (2,2) (4,2) (0,4) (1,4) (3,5).
@@ -119,5 +119,45 @@ describe('Requirement: Soplar esporas (Lycoperdon perlatum)', () => {
   it('Scenario: Sin nutriente — se rechaza', () => {
     const [s, pompon] = withSpecies('lycoperdon', { nutrients: 0, alive: [{ x: 2, y: 5 }] });
     expect(() => act(s, pompon, 2, 5)).toThrow(new RuleError('Falta 1 nutriente para soplar esporas.', 'nutrients'));
+  });
+
+  // 040: el cambio de vuelta.
+  it('Scenario: Abona — bajan 2 esporas y sube 1 nutriente; vuelan hojas desde el árbol', () => {
+    const [s, pompon] = withSpecies('lycoperdon', { nutrients: 0, spores: 2, alive: [{ x: 2, y: 5 }] });
+    const { state, message } = act(s, pompon, 2, 5, 'nutrients');
+    expect([state.nutrients, state.spores]).toEqual([1, 0]);
+    expect(message).toBe(es.log.composted(s.members.at(-1)!.name, 1));
+    expect(diffEffects(s, state)).toContainEqual({ kind: 'spores', from: [{ x: 2, y: 5 }], amount: 0, leaves: 1 });
+  });
+
+  it('Scenario: Sin esporas para abonar — se rechaza y el árbol no se resalta', () => {
+    const [s, pompon] = withSpecies('lycoperdon', { nutrients: 0, spores: 1, alive: [{ x: 2, y: 5 }] });
+    expect(() => act(s, pompon, 2, 5, 'nutrients')).toThrow(new RuleError('Faltan 2 esporas para abonar.', 'spores'));
+    expect(validTargets(s, pompon, 'nutrients')).toEqual([]);
+    expect(idleReason(s, pompon)).toBe('noTrade');
+  });
+
+  it('cada cambio resalta solo lo que alcanza: con 1 nutriente y 2 esporas, los dos', () => {
+    const [s, pompon] = withSpecies('lycoperdon', { nutrients: 1, spores: 2, alive: [{ x: 2, y: 5 }] });
+    expect(validTargets(s, pompon, 'spores').map(({ x, y }) => [x, y])).toEqual([[2, 5]]);
+    expect(validTargets(s, pompon, 'nutrients').map(({ x, y }) => [x, y])).toEqual([[2, 5]]);
+    expect(idleReason(s, pompon)).toBeNull();
+  });
+
+  it('el cambio elegido queda en el registro (para rejugar la partida)', () => {
+    const [s, pompon] = withSpecies('lycoperdon', { nutrients: 1, spores: 2, alive: [{ x: 2, y: 5 }] });
+    expect(act(s, pompon, 2, 5, 'nutrients').state.log.at(-1)).toMatchObject({ type: 'act', memberId: pompon, spell: 'nutrients' });
+    expect(act(s, pompon, 2, 5).state.log.at(-1)).toMatchObject({ type: 'act', memberId: pompon, spell: 'spores' });
+  });
+
+  it('Scenario: Ida y vuelta no gana nada — los nutrientes quedan igual y las esporas pagan la voz', () => {
+    const s0 = setup({ nutrients: 1, spores: 1, alive: [{ x: 2, y: 5 }], extraMembers: ['gliophorus', 'lycoperdon'] });
+    const pompon = idOf(s0, 'lycoperdon');
+    const blown = act(s0, pompon, 2, 5, 'spores').state;
+    const called = act(blown, idOf(s0, 'gliophorus'), 2, 5).state;
+    const back = act(called, pompon, 2, 5, 'nutrients').state;
+    expect(back.nutrients).toBe(s0.nutrients);
+    expect(back.spores).toBe(s0.spores + GAIN.puff - COST.call - COST.compost);
+    expect(back.spores).toBeLessThan(s0.spores);
   });
 });

@@ -35,6 +35,8 @@ import {
   type GameState,
   type RecruitableSpecies,
   type Resource,
+  type Choice,
+  type Puff,
   type Spell,
   type Tile,
 } from './types';
@@ -50,9 +52,10 @@ export const spellFor = (t: Tile): Spell => (t.kind === 'rock' ? 'sprout' : 'rai
 
 /**
  * ¿Puede el miembro `id` actuar sobre (x, y)? No cambia el estado.
- * `spell` solo aplica a Maestra Bruma: restringe el hechizo (si se omite, se deduce de la casilla).
+ * `choice` aplica a Maestra Bruma (restringe el hechizo; si se omite, se deduce de la casilla) y a Pompón (soplar o
+ * abonar; si se omite, soplar).
  */
-export function check(s: GameState, id: number, x: number, y: number, spell?: Spell): CheckResult {
+export function check(s: GameState, id: number, x: number, y: number, choice?: Choice): CheckResult {
   const m = member(s, id);
   const t = tile(s, x, y);
   if (s.status !== 'playing') return no(R.gameOver);
@@ -107,32 +110,37 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
       return yes;
     case 'lycoperdon':
       if (t.kind !== 'tree' || !t.alive) return no(R.lycoperdonNeedsTree);
+      if (puffOf(choice) === 'nutrients') return s.spores < COST.compost ? no(R.compostCost(COST.compost), 'spores') : yes;
       if (s.nutrients < COST.puff) return no(R.puffCost(COST.puff), 'nutrients');
       return yes;
     case 'mago': {
       if (magicSpent(s)) return no(R.magicSpent);
-      const sp = spell ?? spellFor(t);
+      const sp = choice === 'sprout' || choice === 'rain' ? choice : spellFor(t);
       if (sp === 'sprout') return t.kind === 'rock' && near ? yes : no(R.sproutNeedsRock);
       return isLiveTree(t) ? yes : no(R.rainNeedsTree);
     }
   }
 }
 
-/** Casillas donde el miembro `id` puede actuar ahora (para la maga, opcionalmente con un hechizo). */
-export function validTargets(s: GameState, id: number, spell?: Spell): Tile[] {
-  return s.tiles.filter((t) => check(s, id, t.x, t.y, spell).ok);
+/** Casillas donde el miembro `id` puede actuar ahora (la maga y Pompón, opcionalmente con su elección). */
+export function validTargets(s: GameState, id: number, choice?: Choice): Tile[] {
+  return s.tiles.filter((t) => check(s, id, t.x, t.y, choice).ok);
 }
 
-/** Ejecuta la acción sobre una copia. Lanza `RuleError` si no es válida. */
-export function act(s: GameState, id: number, x: number, y: number): ActionResult {
-  const c = check(s, id, x, y);
+/** Cambio de Pompón (040): abonar solo si se eligió; si no, soplar esporas. */
+export const puffOf = (choice?: Choice): Puff => (choice === 'nutrients' ? 'nutrients' : 'spores');
+
+/** Ejecuta la acción sobre una copia (`choice`: hechizo o cambio de Pompón). Lanza `RuleError` si no es válida. */
+export function act(s: GameState, id: number, x: number, y: number, choice?: Choice): ActionResult {
+  const c = check(s, id, x, y, choice);
   if (!c.ok) throw new RuleError(c.reason, c.short);
   const n = cloneState(s);
   const m = n.members.find((mm) => mm.id === id)!;
   const t = n.tiles.find((tt) => tt.x === x && tt.y === y)!;
   m.used = true;
   m.at = { x, y };
-  n.log.push(m.species === 'mago' ? { type: 'act', memberId: id, x, y, spell: spellFor(t) } : { type: 'act', memberId: id, x, y });
+  const logged = m.species === 'mago' ? spellFor(t) : m.species === 'lycoperdon' ? puffOf(choice) : undefined;
+  n.log.push(logged ? { type: 'act', memberId: id, x, y, spell: logged } : { type: 'act', memberId: id, x, y });
 
   switch (m.species) {
     case 'lactarius':
@@ -193,6 +201,11 @@ export function act(s: GameState, id: number, x: number, y: number): ActionResul
       revive(n, t);
       return { state: n, message: es.log.healed(m.name) };
     case 'lycoperdon':
+      if (puffOf(choice) === 'nutrients') {
+        n.spores -= COST.compost;
+        n.nutrients += GAIN.compost;
+        return { state: n, message: es.log.composted(m.name, GAIN.compost) };
+      }
       n.nutrients -= COST.puff;
       n.spores += GAIN.puff;
       return { state: n, message: es.log.puffed(m.name, GAIN.puff) };

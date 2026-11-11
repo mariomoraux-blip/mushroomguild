@@ -18,7 +18,7 @@ function isAction(a: unknown): a is LoggedAction {
   if (a.type === 'endMonth') return true;
   if (a.type === 'recruit') return RECRUITABLE.includes(a.species as never);
   if (a.type !== 'act') return false;
-  return isInt(a.memberId, 0, 1000) && isInt(a.x, 0, W - 1) && isInt(a.y, 0, H - 1) && (a.spell === undefined || a.spell === 'sprout' || a.spell === 'rain');
+  return isInt(a.memberId, 0, 1000) && isInt(a.x, 0, W - 1) && isInt(a.y, 0, H - 1) && (a.spell === undefined || ['sprout', 'rain', 'spores', 'nutrients'].includes(a.spell as string));
 }
 
 /** Semilla de un `mapId` que cuenta para el ranking: un claro generado; en Bosque y Ancestral, uno certificado. */
@@ -37,7 +37,7 @@ function replayStrict(start: GameState, log: readonly LoggedAction[]): GameState
   try {
     for (const a of log) {
       if (s.status !== 'playing') return null;
-      if (a.type === 'act') s = act(s, a.memberId, a.x, a.y).state;
+      if (a.type === 'act') s = act(s, a.memberId, a.x, a.y, a.spell).state;
       else if (a.type === 'recruit') s = recruit(s, a.species).state;
       else s = endMonth(s).state;
     }

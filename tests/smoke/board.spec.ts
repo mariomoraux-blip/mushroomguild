@@ -936,8 +936,8 @@ test('Recetas (026): «Cómo usarlo» de la ficha y la Libreta muestran qué hac
   await page.getByRole('button', { name: 'Ayuda: Cómo jugar' }).click();
   await page.getByRole('button', { name: 'Libreta de campo' }).click();
   const recipes = page.getByRole('dialog').locator('.recipe');
-  await expect(recipes).toHaveCount(9);
-  for (const name of [/la red creció/, /el tronco usado/, /un árbol gris resaltado\. Después: el árbol vivo/, /la roca es tierra libre/, /a dos casillas/, /2 esporas más/, /compañero cansado/, /^Brote arcano/, /^Lluvia de esporas/])
+  await expect(recipes).toHaveCount(10);
+  for (const name of [/la red creció/, /el tronco usado/, /un árbol gris resaltado\. Después: el árbol vivo/, /la roca es tierra libre/, /a dos casillas/, /^Soplar esporas/, /^Abonar el árbol/, /compañero cansado/, /^Brote arcano/, /^Lluvia de esporas/])
     await expect(page.getByRole('dialog').getByRole('img', { name })).toHaveCount(1);
   // Ninguna receta se sale de su caja (las piezas no se recortan a 360 px ni en horizontal).
   const overflow = await recipes.evaluateAll((ns) => ns.map((n) => n.scrollWidth - n.clientWidth));
@@ -1161,4 +1161,24 @@ test('Hongos para reclutar (039): Ámbar cura a distancia con su ficha completa'
   await expect(page.locator('#notice')).toContainText('curó un árbol a distancia');
   await expect(cell(page, 2, 5)).toHaveAttribute('aria-label', /Árbol vivo/);
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/039-curar-390x844.png' });
+});
+
+test('Pompón cambia en los dos sentidos (040): elige soplar o abonar y después el árbol', async ({ page }, info) => {
+  await page.goto('/?map=clasico&debugState=pompon');
+  while (await page.locator('#story:not([hidden]):not(.is-leaving)').count()) await page.locator('.story__btn--primary').click();
+  const pompon = page.locator('.card--lycoperdon');
+  await pompon.scrollIntoViewIfNeeded();
+  await pompon.click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('¿Qué cambia Pompón?');
+  await expect(valid(page)).toHaveCount(0);
+  await expect(dialog.getByRole('button', { name: /Soplar esporas/ })).toBeEnabled();
+  await expect(dialog.getByRole('button', { name: /Abonar el árbol/ })).toBeEnabled();
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/040-pompon-390x844.png' });
+  await dialog.getByRole('button', { name: /Abonar el árbol/ }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(valid(page).first()).toHaveAttribute('aria-label', /Árbol vivo/);
+  await valid(page).first().click();
+  await expect(page.locator('#notice')).toContainText('abonó el árbol');
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/040-abonar-390x844.png' });
 });

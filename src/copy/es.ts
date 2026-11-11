@@ -63,9 +63,9 @@ export const es = {
     },
     lycoperdon: {
       name: 'Lycoperdon perlatum', short: 'Lycoperdon', article: 'un', scientific: 'Lycoperdon perlatum', role: 'Soplador',
-      verb: `Desde un árbol vivo, cambia ${plural(COST.puff, 'nutriente')} por ${plural(GAIN.puff, 'espora')}.`,
+      verb: `Desde un árbol vivo, cambia ${plural(COST.puff, 'nutriente')} por ${plural(GAIN.puff, 'espora')}, o ${plural(COST.compost, 'espora')} por ${plural(GAIN.compost, 'nutriente')}.`,
       quip: 'Tiene cosquillas: lo tocas y sopla una nube de esporas.',
-      action: `Sopla · −${COST.puff} nutriente, +${plural(GAIN.puff, 'espora')}`,
+      action: 'Sopla o abona · cambia nutrientes y esporas',
     },
     mago: {
       name: 'Conocybe arcana', short: 'Conocybe', article: 'una', scientific: 'Conocybe arcana', role: 'Maga',
@@ -90,6 +90,12 @@ export const es = {
   spells: {
     sprout: 'Brote arcano',
     rain: 'Lluvia de esporas',
+  },
+  /** Cambios de Pompón (040), en su hoja de elección. */
+  puffs: { spores: 'Soplar esporas', nutrients: 'Abonar el árbol' },
+  puffHelp: {
+    spores: `${plural(COST.puff, 'nutriente')} → ${plural(GAIN.puff, 'espora')}.`,
+    nutrients: `${plural(COST.compost, 'espora')} → ${plural(GAIN.compost, 'nutriente')}.`,
   },
   spellHelp: {
     sprout: 'Convierte una roca vecina a la red en tierra con micelio.',
@@ -130,6 +136,7 @@ export const es = {
     farHeal: (n: number) => `Muy lejos: el Ganoderma cura árboles a ${n} casillas o menos de la red.`,
     healSpores: (n: number) => `Falta${n === 1 ? '' : 'n'} ${plural(n, 'espora')}: curar a distancia cuesta ${n}.`,
     lycoperdonNeedsTree: 'El Lycoperdon sopla esporas desde un árbol vivo.',
+    compostCost: (n: number) => `Faltan ${plural(n, 'espora')} para abonar.`,
     puffCost: (n: number) => `Falta${n === 1 ? '' : 'n'} ${plural(n, 'nutriente')} para soplar esporas.`,
     speciesTaken: (article: string, species: string) => `Ya hay ${article} ${species} en el gremio.`,
     guildFull: 'El gremio está completo.',
@@ -149,6 +156,7 @@ export const es = {
     noHealSpores: `falta${COST.heal === 1 ? '' : 'n'} ${plural(COST.heal, 'espora')}: curar a distancia cuesta ${COST.heal}.`,
     noTreesInReach: `no hay árboles grises a ${HEAL_REACH} casillas o menos de la red.`,
     noLiveTrees: 'todavía no hay árboles vivos para soplar desde ellos.',
+    noTrade: `no alcanza para ningún cambio: soplar pide ${plural(COST.puff, 'nutriente')} y abonar, ${plural(COST.compost, 'espora')}.`,
   } satisfies Record<IdleReason, string>,
   idleLine: (name: string, reason: string) => `${name}: ${reason}`,
   /** Acción del Tejedor con el costo de este mes (con escarcha, 2). */
@@ -164,6 +172,7 @@ export const es = {
     cleanse: (n: string) => `Pista: ${n} puede limpiar la plaga por ${plural(COST.heal, 'espora')}.`,
     breakRock: (n: string) => `Pista: ${n} puede romper una roca que acorta el camino (★).`,
     puff: (n: string) => `Pista: ${n} puede soplar esporas desde un árbol vivo (+${GAIN.puff}).`,
+    compost: (n: string) => `Pista: ${n} puede abonar un árbol: ${plural(COST.compost, 'espora')} se vuelven ${plural(GAIN.compost, 'nutriente')}.`,
     weaveTree: (n: string) => `Pista: ${n} puede tejer la red hacia un árbol gris (★).`,
     weaveMother: (n: string) => `Pista: ${n} puede tejer la red hacia el Árbol Padre (★).`,
     call: (n: string, other: string) => `Pista: ${n} puede pasar la voz a ${other} para que trabaje otra vez (★).`,
@@ -213,7 +222,8 @@ export const es = {
     amanita: `Antes: la red y un árbol gris resaltado. Después: el árbol vivo. Gasta ${COST.revive} nutrientes.`,
     morchella: `Antes: la red y una roca resaltada. Después: la roca es tierra libre. Gasta ${plural(COST.breakRock, 'nutriente')}.`,
     ganoderma: `Antes: la red y un árbol gris a dos casillas, resaltado. Después: el árbol vivo y en la red. Gasta ${COST.revive} nutrientes y ${plural(COST.heal, 'espora')}.`,
-    lycoperdon: `Antes: un árbol vivo resaltado. Después: el mismo árbol y ${plural(GAIN.puff, 'espora')} más. Gasta ${plural(COST.puff, 'nutriente')}.`,
+    lycoperdon: `Soplar esporas. Antes: un árbol vivo resaltado. Después: el mismo árbol y ${plural(GAIN.puff, 'espora')} más. Gasta ${plural(COST.puff, 'nutriente')}.`,
+    compost: `Abonar el árbol. Antes: un árbol vivo resaltado. Después: el mismo árbol y ${plural(GAIN.compost, 'nutriente')} más. Gasta ${plural(COST.compost, 'espora')}.`,
     gliophorus: `Antes: un compañero cansado. Después: el compañero, listo para trabajar otra vez. Gasta ${plural(COST.call, 'espora')}.`,
     sprout: 'Brote arcano. Antes: la red y una roca resaltada. Después: la roca es red.',
     rain: 'Lluvia de esporas. Antes: un árbol vivo resaltado. Después: esporas y nutrientes extra por cada árbol vivo.',
@@ -265,10 +275,10 @@ export const es = {
     },
     lycoperdon: {
       context: 'Redondo, juguetón y con cosquillas: cualquier toque le hace soplar una nube de esporas.',
-      ability: `Desde un árbol vivo, cambia ${plural(COST.puff, 'nutriente')} por ${plural(GAIN.puff, 'espora')}.`,
-      howTo: 'Tócalo y después toca un árbol vivo resaltado.',
-      movement: 'No camina: sopla desde cualquier árbol vivo del claro, esté donde esté. El Árbol Padre no cuenta.',
-      nutrients: `Nunca consigue nutrientes: gasta ${plural(COST.puff, 'nutriente')} para dar ${plural(GAIN.puff, 'espora')}. Sirve para reclutar, pasar la voz o curar antes.`,
+      ability: `Desde un árbol vivo hace un cambio: sopla esporas (${plural(COST.puff, 'nutriente')} por ${plural(GAIN.puff, 'espora')}) o abona el árbol (${plural(COST.compost, 'espora')} por ${plural(GAIN.compost, 'nutriente')}).`,
+      howTo: 'Tócalo, elige «Soplar esporas» o «Abonar el árbol» y después toca un árbol vivo resaltado.',
+      movement: 'No camina: trabaja desde cualquier árbol vivo del claro, esté donde esté. El Árbol Padre no cuenta.',
+      nutrients: 'Soplar sirve para reclutar, pasar la voz o curar antes; abonar, para llegar a los nutrientes del Árbol Padre cuando ya sobran esporas. Ida y vuelta no gana nada.',
     },
     mago: {
       context: 'Nadie la recluta: llega sola al empezar el mes siguiente a revivir el segundo árbol, cuando el bosque vuelve a hablar.',
@@ -360,6 +370,7 @@ export const es = {
     allWorked: 'Todos trabajaron. Termina el mes.',
     pickTile: (name: string) => `${name}: toca una casilla resaltada.`,
     pickSpell: (name: string) => `${name}: elige un hechizo.`,
+    pickPuff: (name: string) => `${name}: elige qué cambiar.`,
     /** Primera vez con una especie (022): la ficha no se abre sola. */
     meetCard: (name: string) => `Toca Ficha para conocer a ${name}.`,
     won: 'El bosque respira de nuevo.',
@@ -521,6 +532,8 @@ export const es = {
     info: (name: string) => `Ficha de ${name}`,
     mageArrives: 'Llega sola, al empezar el mes siguiente al segundo árbol revivido.',
     spellTitle: 'Elige un hechizo',
+    /** 040: la hoja de Pompón. */
+    puffTitle: (name: string) => `¿Qué cambia ${name}?`,
   },
 
   tiles: {
@@ -554,6 +567,7 @@ export const es = {
     brokeRock: (name: string) => `${name} rompió la roca. Ahora es tierra lista para tejer.`,
     healed: (name: string) => `${name} curó un árbol a distancia: entró a la red. Al empezar cada mes dará una espora y un nutriente.`,
     plagueHealed: (name: string) => `${name} limpió la plaga.`,
+    composted: (name: string, n: number) => `${name} abonó el árbol: +${plural(n, 'nutriente')}.`,
     puffed: (name: string, n: number) => `${name} sopló una nube: +${plural(n, 'espora')}.`,
     sprouted: (name: string) => `${name} lanzó el Brote arcano. La roca ahora es tierra con micelio.`,
     rained: (name: string, spores: number, nutrients: number) =>

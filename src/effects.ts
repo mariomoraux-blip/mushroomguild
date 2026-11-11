@@ -73,6 +73,9 @@ export function diffEffects(prev: GameState, next: GameState): Effect[] {
     const spot = actor?.species === 'lycoperdon' ? actor.at : mage?.at;
     const from = next.month > prev.month ? alive(prev) : spot ? [spot] : alive(next);
     if (from.length) effects.push({ kind: 'spores', from: from.map(({ x, y }) => ({ x, y })), amount: gained, leaves: Math.max(0, next.nutrients - prev.nutrients) });
+  } else if (actor?.species === 'lycoperdon' && actor.at && next.nutrients > prev.nutrients) {
+    // 040: al abonar, solo vuelan hojas desde el árbol hasta los nutrientes.
+    effects.push({ kind: 'spores', from: [{ x: actor.at.x, y: actor.at.y }], amount: 0, leaves: next.nutrients - prev.nutrients });
   }
   return effects;
 }

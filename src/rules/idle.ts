@@ -15,7 +15,8 @@ export type IdleReason =
   | 'noRocks'
   | 'noHealSpores'
   | 'noTreesInReach'
-  | 'noLiveTrees';
+  | 'noLiveTrees'
+  | 'noTrade';
 
 /** Recurso que falta detrás de un motivo de inactividad, si es eso (022). */
 export const idleShort = (r: IdleReason): Resource | null =>
@@ -57,7 +58,8 @@ export function idleReason(s: GameState, id: number): IdleReason | null {
       if (s.spores < COST.heal) return 'noHealSpores';
       return s.tiles.some((t) => t.kind === 'tree' && !t.alive && inHealReach(s, t)) ? 'noNutrients' : 'noTreesInReach';
     case 'lycoperdon':
-      return s.tiles.some((t) => t.kind === 'tree' && t.alive) ? 'noNutrients' : 'noLiveTrees';
+      // 040: con árbol vivo, solo descansa si no alcanza ni para soplar (1 nutriente) ni para abonar (2 esporas).
+      return s.tiles.some((t) => t.kind === 'tree' && t.alive) ? 'noTrade' : 'noLiveTrees';
     case 'mago':
       return magicSpent(s) ? 'magicSpent' : null;
   }

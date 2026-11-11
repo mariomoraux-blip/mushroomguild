@@ -8,6 +8,10 @@ export type StartingSpecies = 'champi' | 'lactarius' | 'amanita';
 export type RecruitableSpecies = Exclude<GuildSpecies, StartingSpecies>;
 /** Hechizos de Maestra Bruma: Brote arcano y Lluvia de esporas. */
 export type Spell = 'sprout' | 'rain';
+/** Cambio del Lycoperdon (040): soplar esporas (nutriente → esporas) o abonar el árbol (esporas → nutriente). */
+export type Puff = 'spores' | 'nutrients';
+/** Lo que se elige antes de tocar la casilla: un hechizo de Maestra Bruma o un cambio de Pompón. */
+export type Choice = Spell | Puff;
 export type GameStatus = 'playing' | 'won' | 'lost';
 /** Nivel de dificultad (019): Brote es el juego de siempre; Bosque y Ancestral suman presión. */
 export type Level = 'brote' | 'bosque' | 'ancestral';
@@ -47,7 +51,7 @@ export interface Member {
 
 /** Acción registrada (015): permite rejugar una partida y verificar su puntaje. */
 export type LoggedAction =
-  | { readonly type: 'act'; readonly memberId: number; readonly x: number; readonly y: number; readonly spell?: Spell }
+  | { readonly type: 'act'; readonly memberId: number; readonly x: number; readonly y: number; readonly spell?: Choice }
   | { readonly type: 'recruit'; readonly species: RecruitableSpecies }
   | { readonly type: 'endMonth' };
 

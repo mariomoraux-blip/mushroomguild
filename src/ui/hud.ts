@@ -60,7 +60,7 @@ export function mountHud(root: HTMLElement, store: Store) {
     if (g.log.length !== prev.log.length + 1) return;
     const flying = reducedMotion() ? undefined : diffEffects(prev, g).find((e) => e.kind === 'spores');
     if (g.nutrients !== prev.nutrients && !flying?.leaves) countChange(nutrients.node, g.nutrients - prev.nutrients);
-    if (g.spores !== prev.spores && !flying) countChange(spores.node, g.spores - prev.spores);
+    if (g.spores !== prev.spores && !flying?.amount) countChange(spores.node, g.spores - prev.spores);
     const trees = revivedCount(g) - revivedCount(prev);
     if (trees) countChange(treesChip.node, trees);
     if (g.month !== prev.month) replay(month, 'is-bump');

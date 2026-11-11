@@ -72,7 +72,7 @@ Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol P
 | *Gliophorus psittacinus* | Mensajera | Reclutable | "Pasa la voz" a un compañero que ya trabajó este mes | −1 espora; ese compañero trabaja otra vez |
 | *Morchella esculenta* "Panal" | Rompe-rocas | Reclutable | Rompe una roca vecina a la red | −2 nutrientes; queda tierra sin tejer |
 | *Ganoderma lucidum* "Ámbar" | Boticaria | Reclutable | Revive un árbol gris a 2 casillas o menos de la red; en Ancestral, también limpia la plaga | −3 nutrientes y −1 espora (apagado, −7 y −1); el árbol entra a la red · limpiar, −1 espora |
-| *Lycoperdon perlatum* "Pompón" | Soplador | Reclutable | Sopla desde un árbol vivo | −1 nutriente, +2 esporas |
+| *Lycoperdon perlatum* "Pompón" | Soplador | Reclutable | Desde un árbol vivo, elige: soplar esporas o abonar el árbol | Soplar: −1 nutriente, +2 esporas · Abonar: −2 esporas, +1 nutriente |
 | *Conocybe arcana* (ficticio) | Maga | Única; llega sola | Un hechizo por estación | Ver hechizos |
 
 Cada miembro actúa una vez por mes. El gremio llega a 6 reclutables como máximo, y un recluta trabaja desde el mes siguiente. Desde el 039 se recluta **una de cada especie** y solo las que no están al empezar: hay 4 para 3 cupos.
@@ -86,8 +86,8 @@ La Mensajera, **Chispa**, convierte esporas en una segunda jugada: despierta a l
 ### Economía
 | Recurso | Se gana | Se gasta |
 | --- | --- | --- |
-| Nutrientes | Tronco: +2 por uso · árbol vivo: +1 al empezar el mes · Lluvia de esporas | Tejer 1 · revivir 3 · romper una roca 2 · soplar esporas 1 · Árbol Padre 10 (12 en Ancestral) · en Bosque y Ancestral, el gremio come 1 al terminar cada mes de otoño e invierno |
-| Esporas | Árbol vivo: +1 al empezar el mes (en Bosque y Ancestral, nada en invierno) · Lluvia de esporas · Lycoperdon +2 | Reclutar 3, 5 y 7 (sube con cada recluta) · Mensajera 1 · Ganoderma 1 |
+| Nutrientes | Tronco: +2 por uso · árbol vivo: +1 al empezar el mes · Lluvia de esporas · Lycoperdon abona +1 | Tejer 1 · revivir 3 · romper una roca 2 · soplar esporas 1 · Árbol Padre 10 (12 en Ancestral) · en Bosque y Ancestral, el gremio come 1 al terminar cada mes de otoño e invierno |
+| Esporas | Árbol vivo: +1 al empezar el mes (en Bosque y Ancestral, nada en invierno) · Lluvia de esporas · Lycoperdon +2 | Reclutar 3, 5 y 7 (sube con cada recluta) · Mensajera 1 · Ganoderma 1 · abonar 2 |
 
 Inicio: 3 miembros (uno de cada especie), 2 nutrientes, 0 esporas. Los troncos son finitos; los árboles vivos son la fuente renovable. Esa tensión es el corazón del juego.
 
