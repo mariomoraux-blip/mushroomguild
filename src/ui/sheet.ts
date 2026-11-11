@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { canRecruit, MAX_GUILD, motherCost, motherTrees, RECRUITABLE, recruitCost, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
+import { canRecruit, LEADERBOARD, MAX_GUILD, motherCost, motherTrees, RECRUITABLE, recruitCost, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
 import type { AppState, Sheet, Store } from '../store';
 import { el, portrait } from './dom';
 import { recipesFor, RECIPE_STAGGER } from './recipe';
@@ -7,10 +7,14 @@ import { hideLayer, showLayer } from './motion';
 
 const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
 
-/** Lo que la hoja «Tu nombre en el gremio» (036) pide a quien la monta: sortear otro alias y registrarlo. */
+/**
+ * Lo que la hoja «Tu nombre en el gremio» (036, 038) pide a quien la monta: sortear otro alias, pasar a escribir el
+ * nombre (o volver a los alias) y registrarlo. `typed`: lo escrito en el campo, si la hoja está en modo escribir.
+ */
 export interface AliasActions {
   roll(): void;
-  confirm(): void;
+  write(on: boolean): void;
+  confirm(typed: string | null): void;
 }
 
 /**
@@ -21,6 +25,22 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
   let shown: Sheet | null = null;
   let currentSeason = 0;
   let opener: HTMLElement | null = null;
+  /** Lo escrito en el campo del nombre (038): se conserva al volver a los alias y al reabrir el campo. */
+  let draft = '';
+  const typed = () => root.querySelector<HTMLInputElement>('.alias__input')?.value ?? null;
+
+  // Enter en el campo del nombre registra (038).
+  root.addEventListener('submit', (e) => {
+    e.preventDefault();
+    alias.confirm(typed());
+  });
+  root.addEventListener('input', (e) => {
+    const t = e.target as HTMLElement;
+    if (!(t instanceof HTMLInputElement) || !t.classList.contains('alias__input')) return;
+    draft = t.value;
+    const sheet = store.getState().ui.sheet;
+    if (sheet?.kind === 'alias' && sheet.problem) store.dispatch({ type: 'openSheet', sheet: { ...sheet, problem: null } });
+  });
 
   root.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
@@ -38,7 +58,9 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
     if (action === 'info') store.dispatch({ type: 'openSheet', sheet: { kind: 'creature', species: species as SpeciesId } });
     if (action === 'spell') store.dispatch({ type: 'chooseSpell', spell: spell as Spell });
     if (action === 'aliasRoll') alias.roll();
-    if (action === 'aliasConfirm') alias.confirm();
+    if (action === 'aliasWrite') alias.write(true);
+    if (action === 'aliasPick') alias.write(false);
+    if (action === 'aliasConfirm' && b.type !== 'submit') alias.confirm(typed());
     const id = store.getState().ui.selected;
     if (action === 'member' && id !== null) store.dispatch({ type: 'openSheet', sheet: { kind: 'member', id } });
   });
@@ -153,18 +175,51 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
     );
   }
 
-  /** «Tu nombre en el gremio» (036): el alias propuesto, «Otro nombre», «Registrar» (o «Guardar») y «Ahora no». */
+  /**
+   * «Tu nombre en el gremio» (036, 038). Con alias: el propuesto, «Otro nombre», «Escribir el mío», «Registrar» (o
+   * «Guardar») y «Ahora no». Escribiendo: el campo con su ayuda o el problema, «Elegir uno del gremio» y «Registrar».
+   */
   function aliasSheet(sheet: Extract<Sheet, { kind: 'alias' }>) {
     const t = es.leaderboard.sheet;
+    const confirm = sheet.purpose === 'register' ? t.confirm : t.save;
+    const later = el('button', { class: 'btn alias__later', type: 'button', 'data-action': 'close' }, t.later);
+    if (!sheet.writing)
+      return panel(
+        t.title,
+        el('div', { class: 'alias' },
+          el('p', { class: 'sheet__help' }, t.help),
+          el('p', { class: 'alias__name', 'aria-live': 'polite' }, sheet.alias),
+          el('div', { class: 'alias__actions' },
+            el('button', { class: 'btn', type: 'button', 'data-action': 'aliasRoll' }, t.roll),
+            el('button', { class: 'btn', type: 'button', 'data-action': 'aliasWrite' }, t.write)),
+          el('button', { class: 'btn btn--primary alias__confirm', type: 'button', 'data-action': 'aliasConfirm' }, confirm),
+          later),
+      );
+    const input = el('input', {
+      id: 'alias-input',
+      class: 'alias__input',
+      type: 'text',
+      name: 'alias',
+      maxlength: String(LEADERBOARD.name.max + 4),
+      autocomplete: 'off',
+      autocapitalize: 'words',
+      spellcheck: 'false',
+      enterkeyhint: 'done',
+      placeholder: sheet.alias,
+      'aria-describedby': 'alias-hint',
+      ...(sheet.problem ? { 'aria-invalid': 'true' } : {}),
+    });
+    input.value = draft;
     return panel(
       t.title,
-      el('div', { class: 'alias' },
+      el('form', { class: 'alias', novalidate: '' },
         el('p', { class: 'sheet__help' }, t.help),
-        el('p', { class: 'alias__name', 'aria-live': 'polite' }, sheet.alias),
-        el('div', { class: 'alias__actions' },
-          el('button', { class: 'btn', type: 'button', 'data-action': 'aliasRoll' }, t.roll),
-          el('button', { class: 'btn btn--primary', type: 'button', 'data-action': 'aliasConfirm' }, sheet.purpose === 'register' ? t.confirm : t.save)),
-        el('button', { class: 'btn alias__later', type: 'button', 'data-action': 'close' }, t.later)),
+        el('label', { class: 'alias__label', for: 'alias-input' }, t.label),
+        input,
+        el('p', { id: 'alias-hint', class: `alias__hint${sheet.problem ? ' is-error' : ''}`, 'aria-live': 'polite' }, sheet.problem ? t.problems[sheet.problem] : t.hint),
+        el('button', { class: 'btn alias__pick', type: 'button', 'data-action': 'aliasPick' }, t.pick),
+        el('button', { class: 'btn btn--primary alias__confirm', type: 'submit', 'data-action': 'aliasConfirm' }, confirm),
+        later),
     );
   }
 
@@ -174,6 +229,7 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
     if (JSON.stringify(sheet) === JSON.stringify(shown)) return;
     const wasOpen = shown !== null;
     const prevKind = shown?.kind;
+    const prevWriting = shown?.kind === 'alias' ? shown.writing : undefined;
     shown = sheet;
     if (!sheet) {
       hideLayer(root);
@@ -192,11 +248,28 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
       help: () => helpSheet(),
       alias: () => aliasSheet(sheet as Extract<Sheet, { kind: 'alias' }>),
     };
-    // «Otro nombre» (036): cambia solo el alias, sin volver a abrir la hoja ni mover el foco.
-    const name = root.querySelector('.alias__name');
-    if (prevKind === 'alias' && sheet.kind === 'alias' && name) return void (name.textContent = sheet.alias);
+    // «Otro nombre» (036) y el problema de lo escrito (038): cambian en el lugar, sin volver a abrir la hoja, sin
+    // mover el foco ni borrar lo escrito.
+    if (prevKind === 'alias' && sheet.kind === 'alias' && Boolean(prevWriting) === Boolean(sheet.writing)) {
+      const name = root.querySelector('.alias__name');
+      if (name) name.textContent = sheet.alias;
+      const hint = root.querySelector('.alias__hint');
+      const input = root.querySelector('.alias__input');
+      if (hint && input) {
+        const t = es.leaderboard.sheet;
+        hint.textContent = sheet.problem ? t.problems[sheet.problem] : t.hint;
+        hint.classList.toggle('is-error', Boolean(sheet.problem));
+        // Con un problema, el foco vuelve al campo para corregirlo.
+        if (sheet.problem) input.setAttribute('aria-invalid', 'true');
+        else input.removeAttribute('aria-invalid');
+        if (sheet.problem && input instanceof HTMLElement) input.focus();
+      }
+      return;
+    }
+    if (sheet.kind === 'alias' && prevKind !== 'alias') draft = '';
     root.replaceChildren(views[sheet.kind]());
     showLayer(root);
-    root.querySelector<HTMLElement>(sheet.kind === 'alias' ? '[data-action="aliasConfirm"]' : '.sheet__panel button:not([disabled])')?.focus();
+    const focus = sheet.kind === 'alias' ? (sheet.writing ? '.alias__input' : '[data-action="aliasConfirm"]') : '.sheet__panel button:not([disabled])';
+    root.querySelector<HTMLElement>(focus)?.focus();
   };
 }

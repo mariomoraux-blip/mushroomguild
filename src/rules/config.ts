@@ -125,4 +125,6 @@ export const LEADERBOARD = {
   maxTimeMs: 4 * 60 * 60 * 1000,
   maxBodyBytes: 64 * 1024,
   rate: { device: 10, ip: 30, windowS: 3600 },
+  /** Nombre escrito (038): de 3 a 16 caracteres. */
+  name: { min: 3, max: 16 },
 } as const;

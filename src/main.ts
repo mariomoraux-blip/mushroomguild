@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { es } from './copy/es';
 import { tileSize } from './layout';
 import { GameScene } from './scenes/GameScene';
-import { aliasFor, LEVEL_IDS, newRandomGame, randomSeed, scoreResult, thresholds, type Level, type ScoreResult, type SpeciesId } from './rules';
+import { aliasFor, checkName, LEVEL_IDS, newRandomGame, randomSeed, scoreResult, thresholds, type Level, type ScoreResult, type SpeciesId } from './rules';
 import { createLeaderboardClient } from './leaderboard';
 import { formatClock, newClock, read, sync } from './clock';
 import { saveIfBest } from './records';
@@ -120,10 +120,22 @@ const aliasActions = {
     while (aliasFor(token, n) === sheet.alias) n++;
     store.dispatch({ type: 'openSheet', sheet: { ...sheet, alias: aliasFor(token, n), n } });
   },
-  async confirm() {
+  /** «Escribir el mío» / «Elegir uno del gremio» (038). */
+  write(on: boolean) {
     const sheet = store.getState().ui.sheet;
-    if (sheet?.kind !== 'alias' || !(await leaderboard.saveAlias(sheet.alias))) return;
-    store.dispatch({ type: 'player', alias: sheet.alias });
+    if (sheet?.kind === 'alias') store.dispatch({ type: 'openSheet', sheet: { ...sheet, writing: on, problem: null } });
+  },
+  async confirm(typed: string | null) {
+    const sheet = store.getState().ui.sheet;
+    if (sheet?.kind !== 'alias') return;
+    // Nombre escrito (038): se valida aquí con las mismas reglas que el servidor; el problema queda junto al campo.
+    const check = sheet.writing ? checkName(typed ?? '') : null;
+    if (check && !check.ok) return store.dispatch({ type: 'openSheet', sheet: { ...sheet, problem: check.problem } });
+    const name = check?.ok ? check.name : sheet.alias;
+    const saved = await leaderboard.saveAlias(name);
+    if (saved === 'rejected') return store.dispatch({ type: 'openSheet', sheet: { ...sheet, problem: 'blocked' } });
+    if (saved !== 'saved') return;
+    store.dispatch({ type: 'player', alias: name });
     const result = store.getState().ui.result;
     if (sheet.purpose === 'register' && result && store.getState().ui.submission?.kind === 'unregistered') void sendScore(result.score);
     if (store.getState().ui.screen?.kind === 'ranking') void loadBoard();
