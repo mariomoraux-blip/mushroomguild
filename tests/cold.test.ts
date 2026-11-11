@@ -79,10 +79,10 @@ describe('Requirement: Temporadas frías', () => {
 });
 
 describe('Requirement: Despertar al Árbol Padre', () => {
-  it('el Árbol Padre pide 3 árboles y 10 nutrientes en Brote y Bosque, y 4 árboles y 12 nutrientes en Ancestral', () => {
-    expect([LEVELS.brote.mother, LEVELS.bosque.mother, LEVELS.ancestral.mother]).toEqual([10, 10, 12]);
+  it('el Árbol Padre pide 3 árboles y 10 nutrientes en Brote, 11 en Bosque, y 4 árboles y 13 nutrientes en Ancestral (041)', () => {
+    expect([LEVELS.brote.mother, LEVELS.bosque.mother, LEVELS.ancestral.mother]).toEqual([10, 11, 13]);
     expect([LEVELS.brote.motherTrees, LEVELS.bosque.motherTrees, LEVELS.ancestral.motherTrees]).toEqual([3, 3, 4]);
-    expect([motherCost(at('ancestral')), motherTrees(at('ancestral'))]).toEqual([12, 4]);
+    expect([motherCost(at('ancestral')), motherTrees(at('ancestral'))]).toEqual([13, 4]);
   });
 
   // En el mapa clásico la red toca al Árbol Padre (2,0) desde (2,1); los árboles son (1,0), (4,1), (0,3), (2,5) y (4,6).
@@ -93,20 +93,20 @@ describe('Requirement: Despertar al Árbol Padre', () => {
     return act(s, RUBI, mother.x, mother.y);
   };
 
-  it('Scenario: Diez nutrientes en Bosque — con 9 se rechaza y con 10 se gana', () => {
-    const s = at('bosque', { nutrients: 9, net: [{ x: 2, y: 1 }], alive: THREE });
-    expect(() => awaken(s)).toThrow(es.reasons.motherCost(10));
-    expect(awaken({ ...s, nutrients: 10 }).state.status).toBe('won');
+  it('Scenario: Once nutrientes en Bosque — con 10 se rechaza y con 11 se gana', () => {
+    const s = at('bosque', { nutrients: 10, net: [{ x: 2, y: 1 }], alive: THREE });
+    expect(() => awaken(s)).toThrow(es.reasons.motherCost(11));
+    expect(awaken({ ...s, nutrients: 11 }).state.status).toBe('won');
   });
 
-  it('Scenario: Ancestral pide cuatro árboles — con 3 se rechaza aunque haya 12 nutrientes', () => {
-    expect(() => awaken(at('ancestral', { nutrients: 12, net: [{ x: 2, y: 1 }], alive: THREE }))).toThrow(es.reasons.forestSilent(4));
+  it('Scenario: Ancestral pide cuatro árboles — con 3 se rechaza aunque haya 13 nutrientes', () => {
+    expect(() => awaken(at('ancestral', { nutrients: 13, net: [{ x: 2, y: 1 }], alive: THREE }))).toThrow(es.reasons.forestSilent(4));
   });
 
-  it('Scenario: Doce nutrientes en Ancestral — con 4 árboles y 11 se rechaza; con 12 se gana', () => {
-    const s = at('ancestral', { nutrients: 11, net: [{ x: 2, y: 1 }], alive: FOUR });
-    expect(() => awaken(s)).toThrow(es.reasons.motherCost(12));
-    expect(awaken({ ...s, nutrients: 12 }).state.status).toBe('won');
+  it('Scenario: Trece nutrientes en Ancestral — con 4 árboles y 12 se rechaza; con 13 se gana', () => {
+    const s = at('ancestral', { nutrients: 12, net: [{ x: 2, y: 1 }], alive: FOUR });
+    expect(() => awaken(s)).toThrow(es.reasons.motherCost(13));
+    expect(awaken({ ...s, nutrients: 13 }).state.status).toBe('won');
   });
 });
 

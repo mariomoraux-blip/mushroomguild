@@ -73,7 +73,7 @@ export function mountDock(root: HTMLElement, store: Store) {
   let lastSeason: number | null = null;
   /** Animaciones del dock (022) que esperan a que se cierre la carta de historia que las taparía. */
   let queued: { id: number; cls: string; delay: number }[] = [];
-  const byId = new Map<number, { item: HTMLElement; button: HTMLButtonElement; badge: HTMLElement; face: HTMLElement }>();
+  const byId = new Map<number, { item: HTMLElement; button: HTMLButtonElement; badge: HTMLElement; face: HTMLElement; species: string }>();
 
   cards.addEventListener('click', (e) => {
     const target = (e.target as HTMLElement).closest('button');
@@ -118,6 +118,12 @@ export function mountDock(root: HTMLElement, store: Store) {
     const g = state.game;
     const playing = g.status === 'playing';
     const suggested = suggestedMember(state);
+    // «Jugar de nuevo» (041): fuera las tarjetas de quien ya no está en el gremio, o de otra especie con el mismo id.
+    for (const [id, card] of byId)
+      if (g.members.find((m) => m.id === id)?.species !== card.species) {
+        card.item.remove();
+        byId.delete(id);
+      }
     // Orden estable: orden de llegada al gremio. Las tarjetas existentes se reutilizan (no se pierde el foco).
     g.members.forEach((m, i) => {
       let card = byId.get(m.id);
@@ -133,7 +139,7 @@ export function mountDock(root: HTMLElement, store: Store) {
           el('span', { class: 'card__name' }, m.name),
         );
         const item = el('div', { role: 'listitem', class: 'dock__item' }, button);
-        card = { item, button, badge, face };
+        card = { item, button, badge, face, species: m.species };
         byId.set(m.id, card);
       }
       if (cards.children[i] !== card.item) cards.insertBefore(card.item, cards.children[i] ?? null);

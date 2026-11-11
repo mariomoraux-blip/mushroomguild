@@ -1,7 +1,7 @@
 // Puntaje, estrellas y resultado verificable (015 · scoring). Lógica pura: sin DOM ni reloj.
 import { act, endMonth, recruit } from './actions';
 import { playAdvised } from './autoplay';
-import { LEVELS, MAX_GUILD, MONTHS, REFERENCE_SECONDS_PER_MONTH, SCORE, SCORE_VERSION, STARS } from './config';
+import { LEVELS, MAX_GUILD, MONTHS, RECRUITABLE, REFERENCE_SECONDS_PER_MONTH, SCORE, SCORE_VERSION, STARS } from './config';
 import { newRandomGame } from './mapgen';
 import { recruitableCount } from './state';
 import type { GameState, Level, LoggedAction, SpeciesId } from './types';
@@ -55,6 +55,9 @@ export interface ScoreResult {
 /** Acciones de miembros (actuar, pasar la voz y hechizos): reclutar y terminar el mes no cuentan. */
 export const actionsOf = (s: GameState): number => s.log.filter((a) => a.type === 'act').length;
 
+/** Especies reclutables en el gremio (041): el escalón de la variedad, de 0 a 4. */
+export const varietyStep = (s: GameState): number => s.members.filter((m) => (RECRUITABLE as readonly string[]).includes(m.species)).length;
+
 /** Especies que actuaron al menos una vez (Maestra Bruma cuenta con un hechizo). */
 export function speciesActed(s: GameState): ReadonlySet<SpeciesId> {
   const byId = new Map(s.members.map((m) => [m.id, m.species]));
@@ -78,7 +81,7 @@ export function score(final: GameState, timeMs: number): Score {
     reserves: SCORE.perNutrient * final.nutrients + SCORE.perSpore * final.spores,
     guild: SCORE.perFreeSlot * Math.max(0, MAX_GUILD - recruitableCount(final)),
     activity: SCORE.perAction * Math.min(actionsOf(final), SCORE.actionCap),
-    variety: final.members.every((m) => acted.has(m.species)) ? SCORE.variety : 0,
+    variety: final.members.every((m) => acted.has(m.species)) ? SCORE.variety[varietyStep(final)]! : 0,
     time: Math.min(SCORE.timeParS, Math.max(0, SCORE.timeParS - seconds)),
   };
   const multiplier = LEVELS[final.level].multiplier;

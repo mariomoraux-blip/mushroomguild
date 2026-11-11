@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { addMage, cloneState, newGame, newRandomGame, playAdvised, replay, SCORE_VERSION, score, scoreResult, stars, thresholds, type GameState, type LoggedAction, type SpeciesId } from '../src/rules';
+import { es } from '../src/copy/es';
+import { addMage, cloneState, newGame, newRandomGame, playAdvised, replay, SCORE, SCORE_VERSION, score, scoreResult, stars, thresholds, varietyStep, type GameState, type LoggedAction, type SpeciesId } from '../src/rules';
 import { addMember } from '../src/rules/state';
 
 /** Victoria armada a mano: mes, árboles vivos, reservas, gremio y acciones por especie. */
@@ -24,18 +25,29 @@ describe('Requirement: Puntaje', () => {
   it('Scenario: Victoria conocida — mes 8, 5 árboles, 4 nutrientes, 3 esporas, 5 reclutables, 30 acciones, 5 especies, 3:20', () => {
     const s = victory({ month: 8, trees: 5, nutrients: 4, spores: 3, extra: ['gliophorus', 'morchella'], actions: 30, species: [...FIVE, 'morchella'] });
     const sc = score(s, 200_000);
-    expect(sc.breakdown).toEqual({ victory: 500, months: 320, trees: 600, reserves: 100, guild: 60, activity: 150, variety: 150, time: 280 });
-    expect(sc.total).toBe(2160);
+    // 041: gremio eficiente 60 × (7 − 5) y variedad del escalón de 2 especies reclutadas.
+    expect(sc.breakdown).toEqual({ victory: 500, months: 320, trees: 600, reserves: 100, guild: 120, activity: 150, variety: 250, time: 280 });
+    expect(sc.total).toBe(2320);
     expect(sc.multiplier).toBe(1);
   });
 
-  it('Scenario: Multiplicador del nivel — la misma partida en Bosque vale 3240 y en Ancestral 4320', () => {
+  it('Scenario: Multiplicador del nivel — la misma partida en Bosque vale 3480 y en Ancestral 4640', () => {
     const s = victory({ month: 8, trees: 5, nutrients: 4, spores: 3, extra: ['gliophorus', 'morchella'], actions: 30, species: [...FIVE, 'morchella'] });
     const bosque = score({ ...s, level: 'bosque' }, 200_000);
-    expect(Object.values(bosque.breakdown).reduce((a, b) => a + b, 0)).toBe(2160);
+    expect(Object.values(bosque.breakdown).reduce((a, b) => a + b, 0)).toBe(2320);
     expect(bosque.multiplier).toBe(1.5);
-    expect(bosque.total).toBe(3240);
-    expect(score({ ...s, level: 'ancestral' }, 200_000).total).toBe(4320);
+    expect(bosque.total).toBe(3480);
+    expect(score({ ...s, level: 'ancestral' }, 200_000).total).toBe(4640);
+  });
+
+  it('Scenario: Variedad con las cuatro reclutadas — 450 y su fila dice «Las 4 especies reclutadas» (041)', () => {
+    const extra = ['gliophorus', 'morchella', 'ganoderma', 'lycoperdon'] as const;
+    const s = victory({ month: 8, trees: 5, nutrients: 4, spores: 3, extra: [...extra], actions: 30, species: [...FIVE, ...extra.slice(1)] });
+    expect(varietyStep(s)).toBe(4);
+    expect(score(s, 200_000).breakdown.variety).toBe(450);
+    expect(es.scoring.variety(4)).toBe('Las 4 especies reclutadas');
+    expect([0, 1, 2, 3].map(es.scoring.variety)).toEqual(['Todo el gremio actuó', 'Todo el gremio actuó', '2 especies reclutadas', '3 especies reclutadas']);
+    expect(SCORE.variety).toEqual([150, 150, 250, 350, 450]);
   });
 
   it('Scenario: Tope de actividad — 47 acciones valen lo mismo que 40', () => {
@@ -122,10 +134,10 @@ describe('Requirement: Resultado verificable', () => {
   });
 
   it('Scenario: Rejugar con nivel — una victoria de Bosque se rejuega en Bosque', () => {
-    const final = playAdvised(newRandomGame(3, 'bosque'));
+    const final = playAdvised(newRandomGame(2, 'bosque')); // 041: la semilla 3 ya no se gana con las pistas
     expect(final.status).toBe('won');
-    const r = scoreResult(final, 300_000, thresholds(newRandomGame(3, 'bosque')));
-    expect(r).toMatchObject({ mapId: 'seed-3', level: 'bosque' });
+    const r = scoreResult(final, 300_000, thresholds(newRandomGame(2, 'bosque')));
+    expect(r).toMatchObject({ mapId: 'seed-2', level: 'bosque' });
     const again = replay(r.mapId, r.level, r.actionLog);
     expect(again).toEqual(final);
     expect(score(again, r.timeMs).total).toBe(r.total);
