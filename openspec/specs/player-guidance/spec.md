@@ -90,7 +90,7 @@ Cada tarjeta del dock SHALL mostrar el rol y la acción con su costo actual (con
 - THEN la bitácora dice "Tronco caído: el Champiñón lo descompone (+2 nutrientes, 2 veces)."
 
 ### Requirement: Cómo reclutar
-El chip de esporas del HUD SHALL abrir la hoja de reclutar. Cada fila de la hoja SHALL decir para qué sirve la especie. La hoja SHALL decir cuánto cuesta el próximo recluta y que cada uno cuesta más (3, 5 y 7), o que el gremio está completo; los botones de reclutar SHALL habilitarse solo si alcanza para el próximo. El medallón «Reclutar» del dock SHALL atenuarse si no alcanza o no hay cupo, y su etiqueta accesible SHALL decir el costo del próximo (o «gremio completo»); la del chip de esporas también. «Cómo jugar» y la Libreta de campo SHALL decir la curva: «Con esporas reclutas otro hongo: cuesta 3, luego 5 y luego 7.» Con esporas suficientes para el próximo recluta y cupo, la pista SHALL sugerir reclutar solo en dos casos: (1) ningún miembro listo tiene una acción útil; entonces sugiere un segundo Lactarius mientras la red no toque al Árbol Padre, después una Gliophorus y después otra Amanita; (2) falta el rol que pide el siguiente paso sugerido: un compañero que ya trabajó este mes (Amanita o Champiñón) tendría trabajo útil si le pasaran la voz y el gremio no tiene Gliophorus; entonces sugiere una Gliophorus. Mientras haya miembros listos con acciones útiles y no falte un rol, la pista no SHALL sugerir reclutar.
+El chip de esporas del HUD SHALL abrir la hoja de reclutar. Cada fila de la hoja SHALL decir para qué sirve la especie. La hoja SHALL decir cuánto cuesta el próximo recluta y que cada uno cuesta más (3, 5 y 7), o que el gremio está completo; los botones de reclutar SHALL habilitarse solo si alcanza para el próximo. El medallón «Reclutar» del dock SHALL atenuarse si no alcanza o no hay cupo, y su etiqueta accesible SHALL decir el costo del próximo (o «gremio completo»); la del chip de esporas también. «Cómo jugar» y la Libreta de campo SHALL decir la curva: «Con esporas reclutas otro hongo: cuesta 3, luego 5 y luego 7.» Con esporas suficientes para el próximo recluta y cupo, la pista SHALL sugerir reclutar solo en dos casos: (1) ningún miembro listo tiene una acción útil; entonces sugiere la primera especie que falte en el gremio, en este orden: Gliophorus, Morchella, Ganoderma y Lycoperdon; (2) falta el rol que pide el siguiente paso sugerido: un compañero que ya trabajó este mes (Amanita o Champiñón) tendría trabajo útil si le pasaran la voz y el gremio no tiene Gliophorus; entonces sugiere una Gliophorus. Mientras haya miembros listos con acciones útiles y no falte un rol, la pista no SHALL sugerir reclutar.
 
 #### Scenario: Nadie tiene una acción útil
 - WHEN el jugador tiene 3 esporas, cupo en el gremio y ningún miembro listo tiene una casilla válida
@@ -109,6 +109,10 @@ El chip de esporas del HUD SHALL abrir la hoja de reclutar. Cada fila de la hoja
 #### Scenario: Hay trabajo útil
 - WHEN el jugador tiene 3 esporas y cupo, y Bruno puede descomponer un tronco
 - THEN la pista sugiere a Bruno y no sugiere reclutar
+
+#### Scenario: Una sola de cada especie en la hoja
+- WHEN el gremio ya tiene a Chispa y el jugador abre la hoja de reclutar
+- THEN la fila de la Gliophorus está deshabilitada y dice que ya está en el gremio
 
 ### Requirement: Meta visible
 El Árbol Padre SHALL marcarse como meta en el tablero en todo momento, y las casillas de la red SHALL dibujarse con un contorno de micelio visible.
@@ -161,6 +165,9 @@ Cada especie SHALL tener una receta visual: una tira «antes → después» hech
 | Champiñón | red y tronco resaltado | red y tronco usado | +2 nutrientes |
 | Amanita muscaria | red y árbol gris resaltado | red y árbol vivo | −3 nutrientes |
 | Gliophorus psittacinus | compañero cansado (Zz) | compañero listo | −1 espora |
+| Morchella esculenta | red y roca resaltada | red y tierra | −2 nutrientes |
+| Ganoderma lucidum | red, una tierra y árbol gris resaltado | red, la tierra y árbol vivo | −3 nutrientes, −1 espora |
+| Lycoperdon perlatum | árbol vivo resaltado | árbol vivo y esporas | −1 nutriente, +2 esporas |
 | Maestra Bruma | red y roca resaltada (Brote arcano); árbol vivo resaltado (Lluvia de esporas) | red y red; árbol vivo | —; +esporas y +nutrientes |
 
 #### Scenario: Ficha de Bruno
@@ -170,7 +177,7 @@ Cada especie SHALL tener una receta visual: una tira «antes → después» hech
 
 #### Scenario: Libreta con las cinco recetas
 - WHEN el jugador abre la Libreta de campo
-- THEN ve las cinco especies, cada una con su receta
+- THEN ve las ocho especies, cada una con su receta
 
 #### Scenario: Movimiento reducido
 - WHEN el sistema pide movimiento reducido y el jugador abre la ficha de Rubí

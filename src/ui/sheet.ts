@@ -1,11 +1,12 @@
 import { es } from '../copy/es';
-import { canRecruit, LEADERBOARD, MAX_GUILD, motherCost, motherTrees, RECRUITABLE, recruitCost, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
+import { canRecruit, hasSpecies, LEADERBOARD, MAX_GUILD, motherCost, motherTrees, RECRUITABLE, STARTING_GUILD, recruitCost, seasonIndex, validTargets, type SpeciesId, type Spell } from '../rules';
 import type { AppState, Sheet, Store } from '../store';
 import { el, portrait } from './dom';
 import { recipesFor, RECIPE_STAGGER } from './recipe';
 import { hideLayer, showLayer } from './motion';
 
-const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
+/** Las ocho especies (039): las del inicio, las que solo llegan reclutando y Maestra Bruma. */
+const SPECIES: readonly SpeciesId[] = [...STARTING_GUILD, ...RECRUITABLE, 'mago'];
 
 /**
  * Lo que la hoja «Tu nombre en el gremio» (036, 038) pide a quien la monta: sortear otro alias, pasar a escribir el
@@ -81,15 +82,19 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
     const season = currentSeason;
     const g = state.game;
     const can = g.status === 'playing' && canRecruit(g);
-    const rows = SPECIES.map((sp) => {
+    const rows = [...RECRUITABLE, 'mago' as const].map((sp) => {
       const info = es.species[sp];
+      // 039: una de cada especie; la que ya está en el gremio queda deshabilitada.
+      const taken = sp !== 'mago' && hasSpecies(g, sp);
       const action =
         sp === 'mago'
           ? el('span', { class: 'row__note' }, es.sheet.mageArrives)
-          : el('button', { class: 'btn btn--primary', type: 'button', 'data-action': 'recruit', 'data-species': sp, disabled: !can }, es.sheet.recruitAction);
+          : taken
+            ? el('span', { class: 'row__note' }, es.sheet.inGuild)
+            : el('button', { class: 'btn btn--primary', type: 'button', 'data-action': 'recruit', 'data-species': sp, disabled: !can }, es.sheet.recruitAction);
       return el(
         'li',
-        { class: 'row' },
+        { class: `row${taken ? ' is-taken' : ''}`, 'aria-disabled': taken ? 'true' : undefined },
         el('span', { class: 'medal' }, portrait(sp, 'reposo', season)),
         el('span', { class: 'row__text' },
           el('strong', {}, info.name), el('span', { class: 'row__role' }, ` · ${info.role}`),

@@ -231,6 +231,15 @@ export class BoardFx {
         tw.add({ targets: s, t: 1, duration: MOTION.ms.fast * 2, ease: E.soft.phaser, onUpdate: () => img.setAngle(4 * Math.sin(s.t * Math.PI * 4)), onComplete: () => img.setAngle(0) });
         break;
       }
+      case 'morchella': // Panal: golpe seco, aplasta y rebota.
+        tw.add({ targets: img, scaleX: scaleX * 1.06, scaleY: scaleY * 0.9, duration: MOTION.ms.instant, yoyo: true, ease: E.springy.phaser });
+        break;
+      case 'ganoderma': // Ámbar: se funde despacio, sin rebote.
+        tw.add({ targets: img, alpha: { from: 0, to: 1 }, duration: MOTION.ms.standard, ease: E.soft.phaser });
+        break;
+      case 'lycoperdon': // Pompón: se infla un poco y se desinfla.
+        tw.add({ targets: img, scaleX: scaleX * 1.08, scaleY: scaleY * 1.08, duration: MOTION.ms.fast, yoyo: true, ease: E.springy.phaser });
+        break;
       case 'mago': { // Maestra Bruma: fundido solemne con un halo arcano, sin rebote.
         tw.add({ targets: img, alpha: { from: 0, to: 1 }, duration: MOTION.ms.narrative, ease: E.soft.phaser });
         const halo = this.scene.add.image(img.x, y - img.displayHeight * 0.45, DOT).setDepth(4.9).setTint(hex('arcane')).setBlendMode(Phaser.BlendModes.ADD);
@@ -258,6 +267,9 @@ export class BoardFx {
       else if (e.kind === 'revive') this.burst(e.at, ['leaf', 'glow', 'sun'], 12, 0.7);
       else if (e.kind === 'awaken') this.awaken(e.at);
       else if (e.kind === 'wither') this.wither(e.at, season);
+      else if (e.kind === 'crumble') this.crumble(e, season);
+      else if (e.kind === 'thread') this.thread(e.from, e.to);
+      else if (e.kind === 'cleanse') this.burst(e.at, ['amber', 'glow'], 8, 0.5);
     }
   }
 
@@ -325,6 +337,49 @@ export class BoardFx {
       this.scene.tweens.add({ targets: img, alpha: 0, delay: MOTION.ms.standard, duration: MOTION.ms.narrative, ease: E.leave.phaser, onComplete: () => img.destroy() });
     }
     this.burst(at, ['blight', 'stone'], 8, 0.5);
+  }
+
+  /** Romper una roca (039): la roca tiembla, se parte en polvo color miel y se funde. */
+  private crumble(e: Extract<Effect, { kind: 'crumble' }>, season: SeasonSlug): void {
+    const T = this.T;
+    const key = objectKey(e.before, season);
+    if (key && this.scene.textures.exists(key)) {
+      const frame = this.scene.textures.getFrame(key);
+      const w = T * 0.92;
+      const x = (e.at.x + 0.5) * T;
+      const img = this.scene.add.image(x, (e.at.y + 0.9) * T, key).setOrigin(0.5, 1).setDepth(3);
+      img.setDisplaySize(w, (w * frame.height) / frame.width);
+      this.scene.tweens.add({ targets: img, x: { from: x - T * 0.03, to: x + T * 0.03 }, duration: MOTION.ms.instant / 2, yoyo: true, repeat: 1, ease: E.soft.phaser });
+      this.scene.tweens.add({ targets: img, scaleY: img.scaleY * 0.2, alpha: 0, delay: MOTION.ms.instant, duration: MOTION.ms.standard, ease: E.leave.phaser, onComplete: () => img.destroy() });
+    }
+    this.burst(e.at, ['honey', 'stone', 'stoneDark'], 10, 0.6);
+  }
+
+  /** Curar a distancia (039): un hilo dorado punteado va de la red al árbol, por encima de lo que haya en medio. */
+  private thread(from: Point, to: Point): void {
+    const T = this.T;
+    const [fx, fy] = this.center(from);
+    const [tx, ty] = this.center(to);
+    const line = this.scene.add.graphics().setDepth(6).setBlendMode(Phaser.BlendModes.ADD);
+    const state = { t: 0 };
+    const dots = 10;
+    this.scene.tweens.add({
+      targets: state,
+      t: 1,
+      duration: ACTION_MS,
+      ease: E.settle.phaser,
+      onUpdate: () => {
+        line.clear();
+        for (let i = 0; i <= dots * state.t; i++) {
+          const k = i / dots;
+          // Arco suave hacia arriba: el hilo pasa por encima de las rocas.
+          const lift = Math.sin(k * Math.PI) * T * 0.35;
+          line.fillStyle(hex(i % 2 ? 'amber' : 'glow'), 0.95);
+          line.fillCircle(fx + (tx - fx) * k, fy + (ty - fy) * k - lift, T * 0.05);
+        }
+      },
+      onComplete: () => this.scene.tweens.add({ targets: line, alpha: 0, duration: MOTION.ms.standard, onComplete: () => line.destroy() }),
+    });
   }
 
   /** Descomponer: el tronco de antes se encoge y se hunde, con astillas que saltan. */

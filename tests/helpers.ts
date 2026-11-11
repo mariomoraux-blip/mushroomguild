@@ -1,4 +1,4 @@
-import { addMage, cloneState, newGame, type GameState, type Point, type RecruitableSpecies } from '../src/rules';
+import { addMage, cloneState, newGame, type GameState, type GuildSpecies, type Point } from '../src/rules';
 
 export interface Setup {
   month?: number;
@@ -13,7 +13,7 @@ export interface Setup {
   /** Ids de miembros que ya actuaron este mes. */
   used?: number[];
   /** Miembros reclutables extra que se agregan al gremio (disponibles). */
-  extraMembers?: RecruitableSpecies[];
+  extraMembers?: GuildSpecies[];
   /** Maestra Bruma ya está en el gremio (se agrega después de los extra). */
   mage?: boolean;
   /** Estación (0–3) del último hechizo de Maestra Bruma. */

@@ -122,9 +122,12 @@ FICHA                          EL GREMIO                      INTRO / VICTORIA
 | *Lactarius indigo* ("Indi") | Tejedor | Embudo poco profundo con anillos concéntricos | Índigo, láminas azules | Carrete de hilo índigo | Gotitas de látex azul; el micelio que teje tiene destellos índigo |
 | *Amanita muscaria* ("Rubí") | Sanadora | Domo alto con verrugas y falda en el tallo | Rojo y crema | Bolso con hojas que curan | — |
 | *Gliophorus psittacinus* ("Chispa") | Mensajera | Campana pequeña, viscosa y brillante | Verde loro | Saquito de cartas | Cambia de color con la estación: verde, amarillo, naranja, rosa |
+| *Morchella esculenta* ("Panal") | Rompe-rocas | Huevo alto, sin ala, con alvéolos que rompen el contorno en bultitos | Crestas miel, alvéolos café | Pico de ramita y guijarro | Solo llega reclutando (039) |
+| *Ganoderma lucidum* ("Ámbar") | Boticaria | Repisa ancha y baja en forma de riñón, de lado, con pie lateral: el único sombrero asimétrico | Laca roja a ámbar, borde crema, muy brillante | Gotero de vidrio ámbar | Cura de lejos con un hilo dorado (en el juego, un efecto) · solo reclutando (039) |
+| *Lycoperdon perlatum* ("Pompón") | Soplador | Bola en forma de pera sin sombrero, cubierta de perlitas | Crema que se entibia a beige | Hoja como abanico | Suelta una nube de esporas por el poro de arriba · solo reclutando (039) |
 | *Conocybe arcana* ("Maestra Bruma") | Maga | Cono alto con la punta doblada en rizo, como sombrero de hechicera; túnica larga; la más alta | Sombrero rojo amanita que degrada a blanco, punta naranja; túnica color tallo; motas doradas que brillan como estrellas | Bastón de ramita con una espora luminosa | Cabello rubio de hilos de micelio; brilla siempre un poco |
 
-Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña y cono alto deben distinguirse en negro sobre blanco a 56 px.
+Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña, huevo alveolado, repisa de lado, bola de perlitas y cono alto deben distinguirse en negro sobre blanco a 56 px.
 *Conocybe* es un género real de sombrero cónico; *arcana* es inventado: la maga es el único personaje fantástico.
 
 - Antes de Blender: una hoja de personaje por especie (frente, perfil, ¾ espalda, paleta, escala), formato de `references/mushie-character-sheet.jpg`.
@@ -184,6 +187,7 @@ public/assets/
 │   └── father-tree/    asleep-, awake-painted (en uso) · green-, spring-, summer-, autumn-, winter-painted
 ├── characters/
 │   ├── indi/ bruno/ rubi/ maestra-bruma/   portrait (pintado, sin placa)
+│   ├── panal/ ambar/ pompon/   portrait (039; reclutas nuevos)
 │   └── chispa/         portrait ·
 │                       frame-{spring,summer,autumn,winter} (retrato con marco de estación)
 ├── ui/
@@ -194,7 +198,7 @@ public/assets/
 │   └── frames/         forest, roots, roots-pieces
 └── atlas/              atlas generados (PNG/WebP + JSON de Phaser); no se editan a mano
 ```
-- **Personajes:** la carpeta lleva el nombre del primer miembro de la especie (Indi = *Lactarius indigo*, Bruno = Champiñón, Rubí = *Amanita*, Chispa = *Gliophorus*, Maestra Bruma = *Conocybe arcana*); los reclutas de la misma especie usan el mismo arte. `portrait` es el retrato pintado para tablero, dock, fichas y "El gremio"; los sprites de Blender son fuente (`assets/sprites/webp/`).
+- **Personajes:** la carpeta lleva el nombre del primer miembro de la especie (Indi = *Lactarius indigo*, Bruno = Champiñón, Rubí = *Amanita*, Chispa = *Gliophorus*, Panal = *Morchella*, Ámbar = *Ganoderma*, Pompón = *Lycoperdon*, Maestra Bruma = *Conocybe arcana*); los reclutas de la misma especie usan el mismo arte. `portrait` es el retrato pintado para tablero, dock, fichas y "El gremio"; los sprites de Blender son fuente (`assets/sprites/webp/`).
 - **Micelio:** se dibuja con el tile completo `net`/`net-b` (decisión del 010). Los conectores (`straight-h`, `straight-v`, `corner`, `cross`…) sobre `dirt` quedan publicados para un efecto futuro (p. ej. el hilo que se teje); falta la pieza en T.
 - **Estaciones:** pasto (`grass-autumn`, `grass-winter`), rocas (`rock-winter`) y árboles (`autumn`, `winter`) cambian por estación (010). El Árbol Padre por estación (`spring-`…`winter-painted`) muestra un árbol vivo y verde, que se confunde con "despierto": por ahora el Padre usa solo `asleep-painted` y `awake-painted`.
 - **Fondos por orientación:** vertical en el teléfono (`menu`, `intro`, `victory`); en horizontal y escritorio, los 16:9 a pantalla completa (`menu-landscape` en la portada y la partida, `intro-landscape` en la intro, `victory-landscape` en la victoria). La panorámica `menu-wide` solo tiene 310 px de alto: estirada a pantalla completa se ve borrosa, así que solo sirve como franja.
@@ -264,6 +268,9 @@ public/assets/
 | `characters/chispa/frame-summer.webp` | UI v2 | 103 × 112 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
 | `characters/chispa/frame-winter.webp` | UI v2 | 102 × 111 | 7 KB | Baja resolución (objetivo 140 px de ancho) |
 | `characters/chispa/portrait.webp` | UI v2 | 116 × 128 | 6 KB | Baja resolución (objetivo 140 px de ancho) |
+| `characters/ambar/portrait.webp` | Mario (039) | 280 × 293 | 18 KB | Listo; recortado a mano de la hoja (sin pasto, piedras ni hilo dorado) |
+| `characters/panal/portrait.webp` | Mario (039) | 280 × 308 | 16 KB | Listo; recortado a mano de la hoja |
+| `characters/pompon/portrait.webp` | Mario (039) | 280 × 308 | 20 KB | Listo; recortado a mano de la hoja |
 | `characters/maestra-bruma/portrait.webp` | UI v2 | 119 × 141 | 8 KB | Baja resolución (objetivo 140 px de ancho) |
 | `characters/rubi/portrait.webp` | UI v2 | 136 × 133 | 8 KB | Listo |
 | `ui/buttons/close.webp` | UI v2 | 57 × 52 | 2 KB | Baja resolución (objetivo 88 px de ancho) |

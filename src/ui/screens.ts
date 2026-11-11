@@ -1,13 +1,14 @@
 import { es } from '../copy/es';
 import type { Row } from '../api-types';
-import { LEVEL_IDS, LEVELS, RECRUITABLE, seasonIndex, type Level, type SpeciesId } from '../rules';
+import { LEVEL_IDS, LEVELS, RECRUITABLE, STARTING_GUILD, seasonIndex, type Level, type SpeciesId } from '../rules';
 import { HOWTO_STEPS, type AppState, type Screen, type Store } from '../store';
 import { assetUrl, SCREEN_ART } from '../theme';
 import { el, portrait } from './dom';
 import { howtoArt } from './howto-art';
 import { hideLayer, showLayer } from './motion';
 
-const SPECIES: readonly SpeciesId[] = [...RECRUITABLE, 'mago'];
+/** Las ocho especies (039): las del inicio, las que solo llegan reclutando y Maestra Bruma. */
+const SPECIES: readonly SpeciesId[] = [...STARTING_GUILD, ...RECRUITABLE, 'mago'];
 const img = (key: string, cls: string) => el('img', { class: cls, src: assetUrl(key), alt: '', draggable: 'false', decoding: 'async' });
 const nameOf = (sp: SpeciesId) => (sp === 'mago' ? es.mageName : es.species[sp].short);
 /** Control que recibe el foco al entrar a cada pantalla (en niveles, el último elegido). */
@@ -149,7 +150,8 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
               el('span', { class: 'guild__medal' }, portrait(sp, 'reposo', season)),
               el('span', { class: 'guild__text' },
                 el('strong', {}, nameOf(sp), el('span', { class: 'guild__role' }, ` · ${es.species[sp].role}`)),
-                el('span', { class: 'guild__verb' }, es.species[sp].verb)),
+                el('span', { class: 'guild__verb' }, es.species[sp].verb),
+                ...((RECRUITABLE as readonly SpeciesId[]).includes(sp) ? [el('span', { class: 'guild__tag' }, es.guild.recruitOnly)] : [])),
               el('span', { class: 'guild__chev', 'aria-hidden': 'true' }, '›'))))));
   }
 

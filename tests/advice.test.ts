@@ -82,13 +82,13 @@ describe('Requirement: Cómo reclutar', () => {
 
   it('Scenario: Nadie tiene una acción útil — la pista sugiere reclutar y qué especie conviene', () => {
     const s = setup({ spores: 3, used: [INDI, BRUNO, RUBI] });
-    expect(advise(s)).toEqual({ kind: 'recruit', species: 'lactarius' });
-    expect(idleHint(s).text).toBe('Pista: tienes 3 esporas. Recluta un Lactarius en «+ Reclutar» o tocando las esporas.');
+    expect(advise(s)).toEqual({ kind: 'recruit', species: 'gliophorus' });
+    expect(idleHint(s).text).toBe('Pista: tienes 3 esporas. Recluta una Gliophorus en «+ Reclutar» o tocando las esporas.');
   });
 
   it('Scenario: No alcanza para el próximo — con 2 esporas, o con 4 tras el primer recluta, la pista no sugiere reclutar', () => {
     expect(advise(setup({ spores: 2, used: [INDI, BRUNO, RUBI] }))).toEqual({ kind: 'endMonth' });
-    const extra = setup({ spores: 4, used: [INDI, BRUNO, RUBI], extraMembers: ['lactarius'] });
+    const extra = setup({ spores: 4, used: [INDI, BRUNO, RUBI], extraMembers: ['morchella'] });
     const one = { ...extra, members: extra.members.map((m) => ({ ...m, used: true })) };
     expect(canRecruit(one)).toBe(false);
     expect(advise(one).kind).not.toBe('recruit');
@@ -108,11 +108,13 @@ describe('Requirement: Cómo reclutar', () => {
     expect(advise(s)).toMatchObject({ kind: 'decompose', memberId: BRUNO });
   });
 
-  it('con dos Lactarius (o la red junto al Árbol Padre) conviene una Gliophorus, y después otra Amanita', () => {
-    const two = setup({ spores: 2, used: [BRUNO], extraMembers: ['lactarius'] });
-    expect(recruitPick(two)).toBe('gliophorus');
-    const both = setup({ spores: 2, extraMembers: ['lactarius', 'gliophorus'] });
-    expect(recruitPick(both)).toBe('amanita');
+  it('conviene la primera especie que falta: Gliophorus, Morchella, Ganoderma, Lycoperdon (039)', () => {
+    expect(recruitPick(setup({ spores: 2 }))).toBe('gliophorus');
+    expect(recruitPick(setup({ spores: 2, extraMembers: ['gliophorus'] }))).toBe('morchella');
+    expect(recruitPick(setup({ spores: 2, extraMembers: ['gliophorus', 'morchella'] }))).toBe('ganoderma');
+    expect(recruitPick(setup({ spores: 2, extraMembers: ['morchella', 'gliophorus', 'ganoderma'] }))).toBe('lycoperdon');
+    // El orden del experto salta la especie que ya está.
+    expect(recruitPick(setup({ spores: 2, extraMembers: ['ganoderma'] }), { recruitOrder: ['ganoderma', 'lycoperdon'] })).toBe('lycoperdon');
   });
 });
 

@@ -1,6 +1,6 @@
 // Efectos visuales de una jugada (004): qué cambió entre el juego antes y después de una acción.
 // Es presentación pura (sin Phaser ni DOM): la escena y la interfaz deciden cómo animarlo.
-import { neighbors, type GameState, type Point, type Tile } from './rules';
+import { neighbors, steps, type GameState, type Point, type Tile } from './rules';
 
 export type Effect =
   /** Micelio nuevo en (x, y), que crece desde una casilla vecina que ya era red. */
@@ -19,7 +19,13 @@ export type Effect =
   /** Pasar la voz (022): Chispa, en `at`, liberó al miembro `memberId`, que vuelve a estar listo este mes. */
   | { kind: 'call'; at: Point; memberId: number }
   /** La plaga marchitó la casilla tejida marcada (033): sale de la red y vuelve a ser pasto. */
-  | { kind: 'wither'; at: Point };
+  | { kind: 'wither'; at: Point }
+  /** La Morchella rompió una roca (039): queda tierra fuera de la red. */
+  | { kind: 'crumble'; at: Point; before: Tile }
+  /** El Ganoderma curó a distancia (039): un hilo dorado va de la casilla tejida más cercana al árbol. */
+  | { kind: 'thread'; from: Point; to: Point }
+  /** El Ganoderma limpió la plaga de una casilla (039). */
+  | { kind: 'cleanse'; at: Point };
 
 const key = (p: Point) => `${p.x},${p.y}`;
 
@@ -36,13 +42,24 @@ export function diffEffects(prev: GameState, next: GameState): Effect[] {
     if (t.kind === 'tree' && t.alive && !b.alive) effects.push({ kind: 'revive', at: t });
     if (t.kind === 'mother' && t.alive && !b.alive) effects.push({ kind: 'awaken', at: t });
     if (b.blighted && b.net && !t.net) effects.push({ kind: 'wither', at: { x: t.x, y: t.y } });
+    if (b.kind === 'rock' && t.kind === 'soil' && !t.net) effects.push({ kind: 'crumble', at: { x: t.x, y: t.y }, before: b });
+    if (b.blighted && !t.blighted && next.month === prev.month) effects.push({ kind: 'cleanse', at: { x: t.x, y: t.y } });
     if (t.net && !b.net && t.kind !== 'home') {
       const from = neighbors(prev, t.x, t.y).find((n) => n.net) ?? null;
       effects.push({ kind: 'weave', at: t, from: from && { x: from.x, y: from.y }, before: b });
     }
   }
+  const was = new Map(prev.members.map((m) => [m.id, m]));
+  /** Quien actuó en esta jugada (mismo mes, recién cansado). */
+  const actor = next.month === prev.month ? next.members.find((m) => m.used && m.at && !was.get(m.id)?.used) : undefined;
+  if (actor?.species === 'ganoderma' && actor.at) {
+    const to = actor.at;
+    const healed = next.tiles.find((t) => t.x === to.x && t.y === to.y && t.kind === 'tree' && t.alive);
+    const net = prev.tiles.filter((t) => t.net);
+    const from = healed && net.reduce<Tile | undefined>((best, t) => (!best || steps(t, to) < steps(best, to) ? t : best), undefined);
+    if (from) effects.push({ kind: 'thread', from: { x: from.x, y: from.y }, to: { x: to.x, y: to.y } });
+  }
   if (next.month === prev.month) {
-    const was = new Map(prev.members.map((m) => [m.id, m]));
     const caller = next.members.find((m) => m.species === 'gliophorus' && m.used && m.at && !was.get(m.id)?.used);
     const called = next.members.find((m) => !m.used && was.get(m.id)?.used);
     if (caller?.at && called) effects.push({ kind: 'call', at: { x: caller.at.x, y: caller.at.y }, memberId: called.id });
@@ -51,8 +68,10 @@ export function diffEffects(prev: GameState, next: GameState): Effect[] {
   if (gained > 0) {
     const alive = (g: GameState) => g.tiles.filter((t) => (t.kind === 'tree' || t.kind === 'mother') && t.alive);
     // Al empezar el mes salen de cada árbol vivo; de mes (Lluvia de esporas), del árbol donde la maga lanzó el hechizo.
+    // 039: el Lycoperdon sopla desde su árbol.
     const mage = next.members.find((m) => m.species === 'mago' && m.at);
-    const from = next.month > prev.month ? alive(prev) : mage?.at ? [mage.at] : alive(next);
+    const spot = actor?.species === 'lycoperdon' ? actor.at : mage?.at;
+    const from = next.month > prev.month ? alive(prev) : spot ? [spot] : alive(next);
     if (from.length) effects.push({ kind: 'spores', from: from.map(({ x, y }) => ({ x, y })), amount: gained, leaves: Math.max(0, next.nutrients - prev.nutrients) });
   }
   return effects;

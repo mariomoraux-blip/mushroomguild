@@ -2,13 +2,13 @@
 // (tarjetas del dock, casillas, «Fin del mes», pastillas del HUD) para que el jugador la reconozca al jugar.
 // Son decorativas: el contenedor es `aria-hidden` e `inert`, y el texto del paso lo explica.
 import { es } from '../copy/es';
-import { GAIN, motherCost, motherTrees, type GameState, type RecruitableSpecies } from '../rules';
+import { GAIN, motherCost, motherTrees, type GameState, type GuildSpecies } from '../rules';
 import { assetUrl } from '../theme';
 import { el, portrait } from './dom';
 import { chip, piece } from './recipe';
 
 /** Tarjeta del dock: medallón con retrato, cinta con el nombre e insignia (★ sugerido, Zz descansa, + reclutar). */
-function card(species: RecruitableSpecies | 'recruit', o: { badge?: 'star' | 'rest' | 'plus'; picked?: boolean; used?: boolean } = {}, season = 0): HTMLElement {
+function card(species: GuildSpecies | 'recruit', o: { badge?: 'star' | 'rest' | 'plus'; picked?: boolean; used?: boolean } = {}, season = 0): HTMLElement {
   const recruit = species === 'recruit';
   const name = recruit ? es.dock.recruit : es.memberNames[species][0]!;
   const badge = o.badge === 'star' ? '★' : o.badge === 'rest' ? 'Zz' : o.badge === 'plus' ? '+' : '';

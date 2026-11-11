@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MONTHS, GAIN, UPKEEP, LOG_USES, MAX_GUILD, PLAGUE_REACH, RECRUITABLE, TREES_FOR_MAGE } from './config';
+import { COST, FADED_REVIVE, FROST_WEAVE, HEAL_REACH, LEVELS, MONTHS, GAIN, UPKEEP, LOG_USES, MAX_GUILD, PLAGUE_REACH, RECRUITABLE, TREES_FOR_MAGE } from './config';
 import {
   addMage,
   addMember,
@@ -11,6 +11,8 @@ import {
   motherCost,
   motherTrees,
   guarded,
+  hasSpecies,
+  inHealReach,
   plagueStarts,
   plagueTarget,
   magicSpent,
@@ -85,6 +87,28 @@ export function check(s: GameState, id: number, x: number, y: number, spell?: Sp
       if (!workerAt(s, x, y)) return no(R.gliophorusNeedsWorker);
       if (s.spores < COST.call) return no(R.callCost(COST.call), 'spores');
       return yes;
+    case 'morchella':
+      if (t.kind !== 'rock') return no(R.morchellaNeedsRock);
+      if (!near) return no(R.farRock);
+      if (s.nutrients < COST.breakRock) return no(R.breakCost(COST.breakRock), 'nutrients');
+      return yes;
+    case 'ganoderma':
+      // Plaga (039): la limpia a distancia por una espora.
+      if (t.blighted) {
+        if (!inHealReach(s, t)) return no(R.farHeal(HEAL_REACH));
+        if (s.spores < COST.heal) return no(R.healSpores(COST.heal), 'spores');
+        return yes;
+      }
+      if (t.kind !== 'tree') return no(R.ganodermaNeedsTree);
+      if (t.alive) return no(R.treeAlive);
+      if (!inHealReach(s, t)) return no(R.farHeal(HEAL_REACH));
+      if (s.nutrients < reviveCost(t)) return no(R.reviveCost(reviveCost(t)), 'nutrients');
+      if (s.spores < COST.heal) return no(R.healSpores(COST.heal), 'spores');
+      return yes;
+    case 'lycoperdon':
+      if (t.kind !== 'tree' || !t.alive) return no(R.lycoperdonNeedsTree);
+      if (s.nutrients < COST.puff) return no(R.puffCost(COST.puff), 'nutrients');
+      return yes;
     case 'mago': {
       if (magicSpent(s)) return no(R.magicSpent);
       const sp = spell ?? spellFor(t);
@@ -153,15 +177,37 @@ export function act(s: GameState, id: number, x: number, y: number): ActionResul
         n.wonMonth = n.month;
         return { state: n, message: es.log.motherAwake(m.name) };
       }
-      n.nutrients -= reviveCost(t);
-      t.alive = true;
-      t.net = true;
-      t.fading = false; // revivirlo el mes en que está marcado lo salva (019)
-      t.faded = false;
-      // Maestra Bruma llega al empezar el mes siguiente al segundo árbol (no hay cambio de mes después del mes 12).
-      if (!n.mageArrived && !n.mageDue && revivedCount(n) >= TREES_FOR_MAGE && n.month < MONTHS) n.mageDue = true;
+      revive(n, t);
       return { state: n, message: es.log.revived(m.name) };
+    case 'morchella':
+      n.nutrients -= COST.breakRock;
+      t.kind = 'soil';
+      return { state: n, message: es.log.brokeRock(m.name) };
+    case 'ganoderma':
+      n.spores -= COST.heal;
+      if (t.blighted) {
+        // Tejida sigue en la red; marchita vuelve a ser tierra (no estaba en la red).
+        delete t.blighted;
+        return { state: n, message: es.log.plagueHealed(m.name) };
+      }
+      revive(n, t);
+      return { state: n, message: es.log.healed(m.name) };
+    case 'lycoperdon':
+      n.nutrients -= COST.puff;
+      n.spores += GAIN.puff;
+      return { state: n, message: es.log.puffed(m.name, GAIN.puff) };
   }
+}
+
+/** Revive un árbol gris (Amanita o Ganoderma) sobre una copia: entra a la red y cuenta para la llegada de la maga. */
+function revive(n: ReturnType<typeof cloneState>, t: ReturnType<typeof cloneState>['tiles'][number]): void {
+  n.nutrients -= reviveCost(t);
+  t.alive = true;
+  t.net = true;
+  t.fading = false; // revivirlo el mes en que está marcado lo salva (019)
+  t.faded = false;
+  // Maestra Bruma llega al empezar el mes siguiente al segundo árbol (no hay cambio de mes después del mes 12).
+  if (!n.mageArrived && !n.mageDue && revivedCount(n) >= TREES_FOR_MAGE && n.month < MONTHS) n.mageDue = true;
 }
 
 /** Recluta un miembro de una especie reclutable. Llega cansado: trabaja desde el mes siguiente. Lanza `RuleError` si no se puede. */
@@ -169,6 +215,7 @@ export function recruit(s: GameState, species: RecruitableSpecies): ActionResult
   if (!RECRUITABLE.includes(species)) throw new RuleError(R.unknown);
   if (s.status !== 'playing') throw new RuleError(R.gameOver);
   if (recruitableCount(s) >= MAX_GUILD) throw new RuleError(R.guildFull);
+  if (hasSpecies(s, species)) throw new RuleError(R.speciesTaken(es.species[species].article, es.species[species].short));
   const cost = recruitCost(s)!;
   if (s.spores < cost) throw new RuleError(R.recruitCost(cost), 'spores');
   const n = cloneState(s);

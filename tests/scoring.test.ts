@@ -3,7 +3,7 @@ import { addMage, cloneState, newGame, newRandomGame, playAdvised, replay, SCORE
 import { addMember } from '../src/rules/state';
 
 /** Victoria armada a mano: mes, árboles vivos, reservas, gremio y acciones por especie. */
-function victory(o: { month: number; trees: number; nutrients: number; spores: number; extra: ('gliophorus' | 'champi' | 'lactarius' | 'amanita')[]; actions: number; species: SpeciesId[] }): GameState {
+function victory(o: { month: number; trees: number; nutrients: number; spores: number; extra: ('gliophorus' | 'morchella' | 'ganoderma' | 'lycoperdon')[]; actions: number; species: SpeciesId[] }): GameState {
   const s = cloneState(newGame());
   o.extra.forEach((sp) => addMember(s, sp));
   if (o.species.includes('mago')) addMage(s);
@@ -22,7 +22,7 @@ const FIVE: SpeciesId[] = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago
 
 describe('Requirement: Puntaje', () => {
   it('Scenario: Victoria conocida — mes 8, 5 árboles, 4 nutrientes, 3 esporas, 5 reclutables, 30 acciones, 5 especies, 3:20', () => {
-    const s = victory({ month: 8, trees: 5, nutrients: 4, spores: 3, extra: ['gliophorus', 'champi'], actions: 30, species: FIVE });
+    const s = victory({ month: 8, trees: 5, nutrients: 4, spores: 3, extra: ['gliophorus', 'morchella'], actions: 30, species: [...FIVE, 'morchella'] });
     const sc = score(s, 200_000);
     expect(sc.breakdown).toEqual({ victory: 500, months: 320, trees: 600, reserves: 100, guild: 60, activity: 150, variety: 150, time: 280 });
     expect(sc.total).toBe(2160);
@@ -30,7 +30,7 @@ describe('Requirement: Puntaje', () => {
   });
 
   it('Scenario: Multiplicador del nivel — la misma partida en Bosque vale 3240 y en Ancestral 4320', () => {
-    const s = victory({ month: 8, trees: 5, nutrients: 4, spores: 3, extra: ['gliophorus', 'champi'], actions: 30, species: FIVE });
+    const s = victory({ month: 8, trees: 5, nutrients: 4, spores: 3, extra: ['gliophorus', 'morchella'], actions: 30, species: [...FIVE, 'morchella'] });
     const bosque = score({ ...s, level: 'bosque' }, 200_000);
     expect(Object.values(bosque.breakdown).reduce((a, b) => a + b, 0)).toBe(2160);
     expect(bosque.multiplier).toBe(1.5);
@@ -44,9 +44,14 @@ describe('Requirement: Puntaje', () => {
     expect(score(victory({ ...base, actions: 40 }), 0).breakdown.activity).toBe(200);
   });
 
-  it('Scenario: Variedad sin Gliophorus — vale 0', () => {
-    const s = victory({ month: 9, trees: 3, nutrients: 0, spores: 0, extra: [], actions: 20, species: ['champi', 'lactarius', 'amanita', 'mago'] });
+  it('Scenario: Variedad sin Gliophorus — con Chispa en el gremio sin actuar, vale 0', () => {
+    const s = victory({ month: 9, trees: 3, nutrients: 0, spores: 0, extra: ['gliophorus'], actions: 20, species: ['champi', 'lactarius', 'amanita', 'mago'] });
     expect(score(s, 0).breakdown.variety).toBe(0);
+  });
+
+  it('Scenario: Variedad con el gremio inicial — sin reclutas ni maga, si Bruno, Indi y Rubí actuaron vale 150 (039)', () => {
+    const s = victory({ month: 9, trees: 3, nutrients: 0, spores: 0, extra: [], actions: 20, species: ['champi', 'lactarius', 'amanita'] });
+    expect(score(s, 0).breakdown.variety).toBe(150);
   });
 
   it('Scenario: Derrota — no hay puntaje', () => {
@@ -62,7 +67,7 @@ describe('Requirement: Puntaje', () => {
 
   it('reclutar y terminar el mes no cuentan como acciones', () => {
     const s = victory({ month: 9, trees: 3, nutrients: 0, spores: 0, extra: ['gliophorus'], actions: 0, species: FIVE });
-    const withOthers = { ...s, log: [...s.log, { type: 'recruit', species: 'champi' } as const, { type: 'endMonth' } as const] };
+    const withOthers = { ...s, log: [...s.log, { type: 'recruit', species: 'gliophorus' } as const, { type: 'endMonth' } as const] };
     expect(score(withOthers, 0).breakdown.activity).toBe(0);
   });
 });

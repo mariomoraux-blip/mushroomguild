@@ -32,7 +32,7 @@ test.beforeEach(async ({ page }, info) => {
   // Las especies nuevas llevan un punto en "Ficha" (022); salvo en su propia prueba, se dan por vistas.
   if (!info.title.startsWith('Ficha')) {
     await page.addInitScript(() =>
-      localStorage.setItem('gremio.seenSpecies', JSON.stringify(['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'])),
+      localStorage.setItem('gremio.seenSpecies', JSON.stringify(['champi', 'lactarius', 'amanita', 'gliophorus', 'morchella', 'ganoderma', 'lycoperdon', 'mago'])),
     );
   }
   const list: string[] = [];
@@ -221,11 +221,11 @@ test('gremio completo: el dock se desplaza por dentro, solo con tarjetas enteras
 test('fichas de criatura: nombre científico, rol, acción y línea con humor', async ({ page }) => {
   await page.goto('/?map=clasico');
   await page.locator('.card--recruit').click();
-  await page.getByRole('button', { name: 'Ficha de Champiñón' }).click();
+  await page.getByRole('button', { name: 'Ficha de Morchella esculenta' }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog).toContainText('Agaricus bisporus');
-  await expect(dialog).toContainText('Descompositor');
-  await expect(dialog).toContainText('Comestible: sí, y lo sabe. Por eso trabaja rápido.');
+  await expect(dialog).toContainText('Morchella esculenta');
+  await expect(dialog).toContainText('Rompe-rocas');
+  await expect(dialog).toContainText('Para ella, cada roca es una puerta que nadie ha abierto todavía.');
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
 });
@@ -509,7 +509,8 @@ test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la f
   await expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeVisible();
   // El gremio: cinco especies; tocar una abre su ficha encima.
   await page.getByRole('button', { name: 'El gremio', exact: true }).click();
-  await expect(screen.locator('.guild__row')).toHaveCount(5);
+  await expect(screen.locator('.guild__row')).toHaveCount(8);
+  await expect(screen.locator('.guild__tag')).toHaveCount(4);
   await shot('gremio');
   await page.getByRole('button', { name: 'Ver la ficha de Maestra Bruma' }).click();
   await expect(page.getByRole('dialog')).toContainText('Conocybe arcana');
@@ -922,21 +923,21 @@ test('Movimiento P1 (022) con movimiento reducido: fundidos cortos y la victoria
 });
 
 test('Recetas (026): «Cómo usarlo» de la ficha y la Libreta muestran qué hace cada hongo, sin desbordarse', async ({ page }, info) => {
-  await page.goto('/?map=clasico');
-  await page.locator('.card--recruit').click();
-  await page.getByRole('button', { name: 'Ficha de Champiñón' }).click();
+  await page.goto('/');
+  await page.getByRole('button', { name: 'El gremio', exact: true }).click();
+  await page.getByRole('button', { name: 'Ver la ficha de Champiñón' }).click();
   const dialog = page.getByRole('dialog');
   const bruno = dialog.getByRole('img', { name: /^Antes: la red y un tronco resaltado/ });
   await expect(bruno).toHaveCount(1);
   await expect(bruno.locator('.recipe__chip')).toHaveText('+2');
   await expect(bruno.locator('.recipe__after > *').first()).toHaveCSS('animation-name', 'recipe-pop');
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/026-ficha-390x844.png' });
-  await page.keyboard.press('Escape');
+  await page.goto('/?map=clasico');
   await page.getByRole('button', { name: 'Ayuda: Cómo jugar' }).click();
   await page.getByRole('button', { name: 'Libreta de campo' }).click();
   const recipes = page.getByRole('dialog').locator('.recipe');
-  await expect(recipes).toHaveCount(6);
-  for (const name of [/la red creció/, /el tronco usado/, /el árbol vivo/, /compañero cansado/, /^Brote arcano/, /^Lluvia de esporas/])
+  await expect(recipes).toHaveCount(9);
+  for (const name of [/la red creció/, /el tronco usado/, /un árbol gris resaltado\. Después: el árbol vivo/, /la roca es tierra libre/, /a dos casillas/, /2 esporas más/, /compañero cansado/, /^Brote arcano/, /^Lluvia de esporas/])
     await expect(page.getByRole('dialog').getByRole('img', { name })).toHaveCount(1);
   // Ninguna receta se sale de su caja (las piezas no se recortan a 360 px ni en horizontal).
   const overflow = await recipes.evaluateAll((ns) => ns.map((n) => n.scrollWidth - n.clientWidth));
@@ -975,11 +976,17 @@ test('Reclutar (027): cada recluta cuesta más (3, 5 y 7) y la hoja dice cuánto
   await expect(sheet).toContainText('El próximo recluta cuesta 3 esporas; cada uno cuesta más (3, 5 y 7).');
   await sheet.locator('[data-action="recruit"][data-species="gliophorus"]').click();
   await expect(page.locator('.chip__value').nth(1)).toHaveText('5');
+  // 039: una de cada especie; la Gliophorus ya no se puede reclutar otra vez.
+  await recruitCard.click();
+  await expect(sheet.locator('.row.is-taken')).toContainText('Ya está en el gremio.');
+  await expect(sheet.locator('[data-action="recruit"][data-species="gliophorus"]')).toHaveCount(0);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/039-reclutar-390x844.png' });
+  await page.keyboard.press('Escape');
   await expect(recruitCard).toHaveAttribute('aria-label', 'Reclutar: 5 esporas');
   await expect(recruitCard).not.toHaveClass(/is-used/);
   await recruitCard.click();
   await expect(sheet).toContainText('El próximo recluta cuesta 5 esporas');
-  await sheet.locator('[data-action="recruit"][data-species="lactarius"]').click();
+  await sheet.locator('[data-action="recruit"][data-species="morchella"]').click();
   // Quedan 0 esporas y el tercero cuesta 7: la hoja lo dice y sus botones no se pueden pulsar.
   await expect(page.locator('.chip__value').nth(1)).toHaveText('0');
   await expect(recruitCard).toHaveClass(/is-used/);
@@ -1131,4 +1138,27 @@ test('Ancestral cada dos meses (034): Elige tu dificultad lo dice y al empezar e
   await expect(page.locator('.cell[aria-label*="se apagará al terminar el mes"]')).toHaveCount(1);
   await expect(page.locator('.cell[aria-label*="apagado: revivirlo cuesta 7 nutrientes"]')).toHaveCount(1);
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/034-ancestral-mes-5-390x844.png' });
+});
+
+test('Hongos para reclutar (039): Ámbar cura a distancia con su ficha completa', async ({ page }, info) => {
+  await page.goto('/?map=clasico&debugState=fullGuild');
+  while (await page.locator('#story:not([hidden]):not(.is-leaving)').count()) await page.locator('.story__btn--primary').click();
+  const ambar = page.locator('.card--ganoderma');
+  await ambar.scrollIntoViewIfNeeded();
+  await expect(ambar.locator('.portrait img')).toHaveAttribute('src', /characters\/ambar\/portrait\.webp$/);
+  await ambar.click();
+  // Solo el árbol gris a 2 pasos del Hogar, aunque la red no lo toque.
+  await expect(valid(page)).toHaveCount(1);
+  await expect(cell(page, 2, 5)).toHaveAttribute('data-valid', 'true');
+  await page.getByRole('button', { name: 'Ver la ficha de Ámbar' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Ganoderma lucidum');
+  await expect(dialog.getByRole('img', { name: /a dos casillas/ })).toHaveCount(1);
+  expect(await dialog.evaluate((n) => n.scrollWidth - n.clientWidth)).toBeLessThanOrEqual(0);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/039-ambar-390x844.png' });
+  await page.keyboard.press('Escape');
+  await cell(page, 2, 5).click();
+  await expect(page.locator('#notice')).toContainText('curó un árbol a distancia');
+  await expect(cell(page, 2, 5)).toHaveAttribute('aria-label', /Árbol vivo/);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/039-curar-390x844.png' });
 });

@@ -20,6 +20,18 @@ Cada acción válida SHALL tener una animación de 400 ms o menos que muestre su
 - WHEN la Amanita despierta al Árbol Padre
 - THEN un anillo de luz se abre desde el árbol y queda un halo cálido detrás de él
 
+#### Scenario: Romper una roca
+- WHEN la Morchella rompe una roca
+- THEN la roca se parte en piedras que caen y queda la tierra, en menos de 400 ms
+
+#### Scenario: Curar a distancia
+- WHEN el Ganoderma revive un árbol que la red no tocaba
+- THEN un hilo dorado va de la red al árbol y el árbol revive como con la Amanita
+
+#### Scenario: Soplar esporas
+- WHEN el Lycoperdon sopla esporas
+- THEN una nube de esporas sale del árbol y vuela al contador de esporas
+
 ### Requirement: Esporas al contador
 Al empezar el mes, por cada árbol vivo (hasta 12) SHALL volar una espora al contador de esporas del HUD, que da un saltito al recibirlas. Con la Lluvia de esporas, las esporas salen del árbol del hechizo.
 

@@ -1,13 +1,25 @@
 import { validTargets } from './actions';
 import { COST } from './config';
-import { magicSpent, member, touchesNet, weaveCost, workerAt } from './state';
+import { inHealReach, magicSpent, member, touchesNet, weaveCost, workerAt } from './state';
 import type { GameState, Resource } from './types';
 
 /** Motivo por el que un miembro no tiene ninguna casilla válida (clave; el texto vive en es.ts). */
-export type IdleReason = 'noLogs' | 'noNutrients' | 'noSoil' | 'noGreyTrees' | 'noSpores' | 'noWorkers' | 'magicSpent';
+export type IdleReason =
+  | 'noLogs'
+  | 'noNutrients'
+  | 'noSoil'
+  | 'noGreyTrees'
+  | 'noSpores'
+  | 'noWorkers'
+  | 'magicSpent'
+  | 'noRocks'
+  | 'noHealSpores'
+  | 'noTreesInReach'
+  | 'noLiveTrees';
 
 /** Recurso que falta detrás de un motivo de inactividad, si es eso (022). */
-export const idleShort = (r: IdleReason): Resource | null => (r === 'noNutrients' ? 'nutrients' : r === 'noSpores' ? 'spores' : null);
+export const idleShort = (r: IdleReason): Resource | null =>
+  r === 'noNutrients' ? 'nutrients' : r === 'noSpores' || r === 'noHealSpores' ? 'spores' : null;
 
 /**
  * Mes vacío (024): hay miembros listos, ninguno tiene una casilla válida y en este mes nadie actuó (reclutar no
@@ -39,6 +51,13 @@ export function idleReason(s: GameState, id: number): IdleReason | null {
       return s.nutrients < COST.revive || s.tiles.some((t) => t.kind === 'tree' && !t.alive && touchesNet(s, t.x, t.y)) ? 'noNutrients' : 'noGreyTrees';
     case 'gliophorus':
       return s.members.some((w) => workerAt(s, w.at?.x ?? -1, w.at?.y ?? -1)) ? 'noSpores' : 'noWorkers';
+    case 'morchella':
+      return s.nutrients < COST.breakRock ? 'noNutrients' : 'noRocks';
+    case 'ganoderma':
+      if (s.spores < COST.heal) return 'noHealSpores';
+      return s.tiles.some((t) => t.kind === 'tree' && !t.alive && inHealReach(s, t)) ? 'noNutrients' : 'noTreesInReach';
+    case 'lycoperdon':
+      return s.tiles.some((t) => t.kind === 'tree' && t.alive) ? 'noNutrients' : 'noLiveTrees';
     case 'mago':
       return magicSpent(s) ? 'magicSpent' : null;
   }

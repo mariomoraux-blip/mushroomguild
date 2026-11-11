@@ -25,6 +25,10 @@ export const color = {
   frost: '#CFE8F5', // velo de escarcha: árbol marcado o apagado (019)
   blight: '#7E5A86', // plaga de Ancestral: velo violeta apagado sobre la casilla tejida marcada (032)
   arcane: '#80E6E5', // magia de Maestra Bruma: el brillo de la punta de su bastón (022)
+  honey: '#D2A86A', // crestas de la Morchella (Panal) y polvo de roca rota (039)
+  lacquer: '#9B2F1C', // laca del Ganoderma (Ámbar) (039)
+  amber: '#FFD21A', // hilo dorado del Ganoderma al curar a distancia (039)
+  puff: '#E6D5B2', // Lycoperdon (Pompón) y su nube de esporas (039)
   neutral: '#808080', // gris sin tono: solo para desaturar el escenario (003, modo "saturation")
 } as const;
 
@@ -79,12 +83,15 @@ export const FROST_FADED = 0.5;
 /** Duración del cambio de luz al pasar de estación (ms). Con movimiento reducido es inmediato. */
 export const LIGHT_TRANSITION_MS = MOTION.ms.narrative;
 export type SeasonSlug = (typeof SEASON_SLUGS)[number];
-export const SPRITE_SPECIES = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'] as const;
+export const SPRITE_SPECIES = ['champi', 'lactarius', 'amanita', 'gliophorus', 'morchella', 'ganoderma', 'lycoperdon', 'mago'] as const;
 export const CHARACTER_DIR: Readonly<Record<string, string>> = {
   champi: 'bruno',
   lactarius: 'indi',
   amanita: 'rubi',
   gliophorus: 'chispa',
+  morchella: 'panal',
+  ganoderma: 'ambar',
+  lycoperdon: 'pompon',
   mago: 'maestra-bruma',
 };
 /** Retrato pintado sin marco (tablero), o null si la especie no tiene arte. */
