@@ -5,7 +5,7 @@
 // leaderboard › Sin conexión: "Ganar sin red" → "sin conexión".
 import { expect, test, type Page, type Route } from '@playwright/test';
 
-const SEEN = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'];
+const SEEN = ['champi', 'lactarius', 'amanita', 'gliophorus', 'morchella', 'ganoderma', 'lycoperdon', 'mago'];
 const row = (rank: number, alias: string, total: number, me = false) => ({ rank, alias, total, level: rank % 3 ? 'brote' : 'bosque', stars: rank < 4 ? 3 : 2, wonMonth: 9, at: 1, me });
 const TOP = [
   'Coral del Alba', 'Lía del Rocío', 'Mora de la Corteza', 'Tomillo de la Brisa', 'Olmo del Otoño',

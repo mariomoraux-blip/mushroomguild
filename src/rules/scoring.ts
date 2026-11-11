@@ -51,7 +51,6 @@ export interface ScoreResult {
   readonly actionLog: readonly LoggedAction[];
 }
 
-const ALL_SPECIES: readonly SpeciesId[] = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'];
 
 /** Acciones de miembros (actuar, pasar la voz y hechizos): reclutar y terminar el mes no cuentan. */
 export const actionsOf = (s: GameState): number => s.log.filter((a) => a.type === 'act').length;
@@ -79,7 +78,7 @@ export function score(final: GameState, timeMs: number): Score {
     reserves: SCORE.perNutrient * final.nutrients + SCORE.perSpore * final.spores,
     guild: SCORE.perFreeSlot * Math.max(0, MAX_GUILD - recruitableCount(final)),
     activity: SCORE.perAction * Math.min(actionsOf(final), SCORE.actionCap),
-    variety: ALL_SPECIES.every((sp) => acted.has(sp)) ? SCORE.variety : 0,
+    variety: final.members.every((m) => acted.has(m.species)) ? SCORE.variety : 0,
     time: Math.min(SCORE.timeParS, Math.max(0, SCORE.timeParS - seconds)),
   };
   const multiplier = LEVELS[final.level].multiplier;

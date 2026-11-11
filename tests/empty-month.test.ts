@@ -35,7 +35,7 @@ describe('Requirement: Aviso de mes vacío', () => {
   });
 
   it('reclutar no lo apaga: el recluta llega cansado', () => {
-    expect(noWorkThisMonth(recruit({ ...report(), spores: 3 }, 'lactarius').state)).toBe(true);
+    expect(noWorkThisMonth(recruit({ ...report(), spores: 3 }, 'gliophorus').state)).toBe(true);
   });
 
   it('no es un mes vacío si alguien ya actuó este mes', () => {
@@ -71,7 +71,7 @@ describe('Requirement: Aviso de mes vacío', () => {
   });
 
   it('después de reclutar en un mes vacío, la bitácora lo sigue diciendo', () => {
-    const next = reduce(initialState({ ...report(), spores: 3 }), { type: 'recruit', species: 'lactarius' });
+    const next = reduce(initialState({ ...report(), spores: 3 }), { type: 'recruit', species: 'gliophorus' });
     expect(next.game.members).toHaveLength(4);
     expect(next.ui.notice.text).toContain(es.log.emptyMonth(1));
   });

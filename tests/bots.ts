@@ -38,7 +38,7 @@ export function playGame(start: GameState, month: (s: GameState) => GameState): 
 export function randomMonth(rng: Rng) {
   return (start: GameState): GameState => {
     let s = start;
-    if (canRecruit(s)) s = recruit(s, pick(rng, RECRUITABLE)).state;
+    if (canRecruit(s)) s = recruit(s, pick(rng, RECRUITABLE.filter((sp) => !s.members.some((m) => m.species === sp)))).state;
     for (const m of shuffle(rng, s.members)) {
       if (s.status !== 'playing') break;
       const targets = validTargets(s, m.id);

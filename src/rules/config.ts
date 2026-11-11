@@ -1,4 +1,4 @@
-import type { Level, RecruitableSpecies, TileKind } from './types';
+import type { Level, RecruitableSpecies, StartingSpecies, TileKind } from './types';
 
 // Palancas de balance del GDD. Ninguna otra parte del código repite estos números.
 export const W = 5;
@@ -8,17 +8,23 @@ export const MONTHS_PER_SEASON = 3;
 export const MAX_GUILD = 6;
 export const START_NUTRIENTS = 2;
 export const START_SPORES = 0;
-export const COST = { weave: 1, revive: 3, call: 1 } as const;
+/**
+ * `breakRock`: nutrientes de la Morchella; `heal`: esporas que suma el Ganoderma a lo que cuesta revivir (y lo que cuesta
+ * limpiar una plaga); `puff`: nutriente que el Lycoperdon cambia por `GAIN.puff` esporas (039).
+ */
+export const COST = { weave: 1, revive: 3, call: 1, breakRock: 2, heal: 1, puff: 1 } as const;
 /**
  * Costo en esporas de cada recluta (027): el primero 3, el segundo 5, el tercero 7. Hay un valor por cupo
  * (`MAX_GUILD − STARTING_GUILD`); los miembros iniciales y Maestra Bruma no cuentan como reclutados.
  */
 export const RECRUIT_COSTS = [3, 5, 7] as const;
-export const GAIN = { log: 2, treeSpores: 1, treeNutrients: 1 } as const;
+export const GAIN = { log: 2, treeSpores: 1, treeNutrients: 1, puff: 2 } as const;
 export const LOG_USES = 2;
 export const TREES_FOR_MOTHER = 3;
 /** Plaga (032): la casilla marcada se salva si algún hongo trabajó ese mes a esta distancia o menos (pasos en cruz). */
 export const PLAGUE_REACH = 2;
+/** Ganoderma (039): cura árboles y limpia plagas a esta distancia de la red o menos (pasos en cruz, sin importar las rocas). */
+export const HEAL_REACH = 2;
 /** Árboles revividos que hacen llegar a Maestra Bruma al empezar el mes siguiente. */
 export const TREES_FOR_MAGE = 2;
 
@@ -57,9 +63,9 @@ export const FADED_REVIVE = 7;
 /** Sal del rng que agrega las rocas de Bosque y Ancestral sobre el claro de Brote de la misma semilla. */
 export const LEVEL_SALT = 0x5eed019;
 
-/** Especies reclutables; la maga no está aquí y no cuenta en `MAX_GUILD`. */
-export const RECRUITABLE: readonly RecruitableSpecies[] = ['champi', 'lactarius', 'amanita', 'gliophorus'];
-export const STARTING_GUILD: readonly RecruitableSpecies[] = ['lactarius', 'champi', 'amanita'];
+/** Especies reclutables, una vez cada una (039); la maga no está aquí y no cuenta en `MAX_GUILD`. */
+export const RECRUITABLE: readonly RecruitableSpecies[] = ['gliophorus', 'morchella', 'ganoderma', 'lycoperdon'];
+export const STARTING_GUILD: readonly StartingSpecies[] = ['lactarius', 'champi', 'amanita'];
 
 /**
  * Puntaje (015 · scoring). Solo con victoria. Pesos y topes del desglose; se recalibran con datos de playtest.
@@ -77,7 +83,7 @@ export const SCORE = {
   timeParS: 480, // 1 punto por segundo por debajo de 8:00
 } as const;
 /** Versión de la fórmula: cambia la clave del récord guardado y el `ScoreResult`. */
-export const SCORE_VERSION = 8;
+export const SCORE_VERSION = 9;
 /** Estrellas por claro: 2 desde el 90 % y 3 desde el 110 % del puntaje del bot con criterio en ese claro. */
 export const STARS = { two: 0.9, three: 1.1 } as const;
 /** Segundos de juego por mes que se suponen para la partida de referencia del bot. */

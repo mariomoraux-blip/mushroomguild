@@ -1,11 +1,11 @@
 import { validTargets } from './actions';
-import { COST, STARTING_GUILD } from './config';
-import { magicSpent, motherTile, motherTrees, neighbors, recruitableCount, recruitCost, revivedCount, touchesNet, workerAt } from './state';
+import { COST, RECRUITABLE } from './config';
+import { hasSpecies, magicSpent, motherTile, motherTrees, neighbors, recruitCost, revivedCount, workerAt } from './state';
 import type { GameState, Member, RecruitableSpecies, Spell, Tile } from './types';
 
 /** Siguiente paso sugerido al jugador (player-guidance). */
 export type Advice =
-  | { kind: 'awaken' | 'revive' | 'decompose'; memberId: number; target: Tile }
+  | { kind: 'awaken' | 'revive' | 'decompose' | 'heal' | 'cleanse' | 'breakRock' | 'puff'; memberId: number; target: Tile }
   | { kind: 'call'; memberId: number; target: Tile; calledId: number }
   | { kind: 'weave'; memberId: number; target: Tile; toward: 'tree' | 'mother' }
   | { kind: 'spell'; memberId: number; target: Tile; spell: Spell }
@@ -65,26 +65,21 @@ export function weaveGoal(s: GameState, o: PolicyOptions = {}): { goal: Tile; to
 }
 
 /**
- * Especie que conviene reclutar: un segundo Lactarius mientras la red no llegue al Árbol Padre;
- * después una Gliophorus (para repetir la mejor jugada del mes); después otra Amanita.
+ * Especie que conviene reclutar (039): la primera que falta en el gremio, en el orden Gliophorus, Morchella,
+ * Ganoderma, Lycoperdon. El experto usa su propio orden (`recruitOrder`) con la misma regla.
  */
 export function recruitPick(s: GameState, o: PolicyOptions = {}): RecruitableSpecies {
-  const mother = motherTile(s);
-  const count = (sp: string) => s.members.filter((m) => m.species === sp).length;
-  // Orden fijo del experto: el n-ésimo recluta es la n-ésima especie de la lista (y vuelve a empezar).
-  if (o.recruitOrder?.length) return o.recruitOrder[(recruitableCount(s) - STARTING_GUILD.length) % o.recruitOrder.length]!;
-  if (!touchesNet(s, mother.x, mother.y) && count('lactarius') < 2) return 'lactarius';
-  if (count('gliophorus') === 0) return 'gliophorus';
-  return 'amanita';
+  const order = o.recruitOrder?.length ? o.recruitOrder : RECRUITABLE;
+  return order.find((sp) => !hasSpecies(s, sp)) ?? RECRUITABLE.find((sp) => !hasSpecies(s, sp)) ?? RECRUITABLE[0]!;
 }
 
 /**
  * A quién conviene que la Gliophorus le pase la voz: el compañero que ya trabajó este mes y que,
- * despierto, tendría trabajo útil. Rango: 0 Amanita, 1 Champiñón, 2 Lactarius.
+ * despierto, tendría trabajo útil. Rango: 0 Amanita o Ganoderma, 1 Champiñón, 2 Lactarius o Morchella.
  */
 function callOption(s: GameState, glio: Member): (Advice & { kind: 'call'; rank: number }) | null {
   if (s.spores < COST.call) return null;
-  const rank: Record<string, number> = { amanita: 0, champi: 1, lactarius: 2 };
+  const rank: Record<string, number> = { amanita: 0, ganoderma: 0, champi: 1, lactarius: 2, morchella: 2 };
   let best: (Advice & { kind: 'call'; rank: number }) | null = null;
   for (const t of s.tiles) {
     const w = workerAt(s, t.x, t.y);
@@ -111,16 +106,17 @@ export function missingMessenger(s: GameState): boolean {
   if (s.members.some((m) => m.species === 'gliophorus')) return false;
   return s.tiles.some((t) => {
     const w = workerAt(s, t.x, t.y);
-    if (!w || (w.species !== 'amanita' && w.species !== 'champi')) return false;
+    if (!w || (w.species !== 'amanita' && w.species !== 'champi' && w.species !== 'ganoderma')) return false;
     const awake: GameState = { ...s, members: s.members.map((m) => (m.id === w.id ? { ...m, used: false } : m)) };
     return validTargets(awake, w.id).length > 0;
   });
 }
 
 /**
- * Siguiente paso sugerido. Prioridad: despertar al Árbol Padre > revivir > hechizo > pasar la voz a una
- * Amanita > descomponer > pasar la voz a un Champiñón > tejer > pasar la voz a un Lactarius > reclutar >
- * terminar el mes. Reclutar solo se sugiere si nadie tiene una acción útil, o si falta la Gliophorus que
+ * Siguiente paso sugerido. Prioridad: despertar al Árbol Padre > revivir > curar a distancia > hechizo >
+ * pasar la voz a una Amanita o un Ganoderma > descomponer > pasar la voz a un Champiñón > romper una roca que
+ * acorta el camino > tejer > pasar la voz a un Lactarius o una Morchella > limpiar la plaga > soplar esporas >
+ * reclutar > terminar el mes. Reclutar solo se sugiere si nadie tiene una acción útil, o si falta la Gliophorus que
  * pide el siguiente paso (player-guidance › Cómo reclutar).
  */
 export function advise(s: GameState, o: PolicyOptions = {}): Advice {
@@ -148,6 +144,11 @@ function adviseWork(s: GameState, o: PolicyOptions): Advice {
     const t = (o.saveMarked && targets.find((tt) => tt.fading)) || closest(targets, mother);
     if (t) return { kind: 'revive', memberId: m.id, target: t };
   }
+  for (const m of of('ganoderma')) {
+    const targets = targetsOf(m).filter((tt) => tt.kind === 'tree');
+    const t = (o.saveMarked && targets.find((tt) => tt.fading)) || closest(targets, mother);
+    if (t) return { kind: 'heal', memberId: m.id, target: t };
+  }
   for (const m of of('mago')) {
     if (magicSpent(s)) break;
     const rock = closest(targetsOf(m, 'sprout'), mother);
@@ -169,6 +170,10 @@ function adviseWork(s: GameState, o: PolicyOptions): Advice {
   const callChampi = call(1);
   if (callChampi) return callChampi;
   const { goal, toward } = weaveGoal(s, o);
+  for (const m of of('morchella')) {
+    const t = shortcutRock(s, targetsOf(m), goal);
+    if (t) return { kind: 'breakRock', memberId: m.id, target: t };
+  }
   const toGoal = distTo(s, goal, o);
   for (const m of of('lactarius')) {
     const t = closestBy(targetsOf(m), toGoal);
@@ -176,5 +181,40 @@ function adviseWork(s: GameState, o: PolicyOptions): Advice {
   }
   const callAny = call(2);
   if (callAny) return callAny;
+  for (const m of of('ganoderma')) {
+    const t = closest(targetsOf(m).filter((tt) => tt.blighted), mother);
+    if (t) return { kind: 'cleanse', memberId: m.id, target: t };
+  }
+  for (const m of of('lycoperdon')) {
+    if (!sporesWanted(s)) break;
+    const t = closest(targetsOf(m), mother);
+    if (t) return { kind: 'puff', memberId: m.id, target: t };
+  }
   return { kind: 'endMonth' };
+}
+
+/**
+ * Roca que conviene romper (039): la que, vuelta tierra, acorta en 2 pasos o más el camino de la red a la meta
+ * (romper cuesta 2 nutrientes; cada paso ahorrado es un tejido menos). Devuelve la que más acorta.
+ */
+function shortcutRock(s: GameState, rocks: readonly Tile[], goal: Tile): Tile | undefined {
+  if (!rocks.length) return undefined;
+  const from = pathFrom(s, goal);
+  const now = Math.min(...s.tiles.filter((t) => t.net).map(from));
+  let best: { t: Tile; d: number } | undefined;
+  for (const r of rocks) {
+    const beyond = neighbors(s, r.x, r.y).filter((n) => n.kind !== 'rock');
+    const d = beyond.length ? 1 + Math.min(...beyond.map(from)) : 99;
+    if (d <= now - 2 && (!best || d < best.d)) best = { t: r, d };
+  }
+  return best?.t;
+}
+
+/**
+ * Hay en qué gastar esporas (039): cupo para reclutar, o una Gliophorus o un Ganoderma en el gremio. Así el
+ * Lycoperdon solo sopla con nutrientes de sobra para revivir.
+ */
+function sporesWanted(s: GameState): boolean {
+  if (s.nutrients < COST.puff + COST.revive) return false;
+  return recruitCost(s) !== null || hasSpecies(s, 'gliophorus') || hasSpecies(s, 'ganoderma');
 }

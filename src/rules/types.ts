@@ -1,7 +1,11 @@
 export type TileKind = 'home' | 'mother' | 'soil' | 'log' | 'tree' | 'rock';
-export type SpeciesId = 'champi' | 'lactarius' | 'amanita' | 'gliophorus' | 'mago';
-/** Especies que se pueden reclutar con esporas (la maga llega sola). */
-export type RecruitableSpecies = Exclude<SpeciesId, 'mago'>;
+export type SpeciesId = 'champi' | 'lactarius' | 'amanita' | 'gliophorus' | 'morchella' | 'ganoderma' | 'lycoperdon' | 'mago';
+/** Especies del gremio que no son la maga: las tres del inicio y las que se reclutan. */
+export type GuildSpecies = Exclude<SpeciesId, 'mago'>;
+/** Especies del gremio al empezar la partida (039: no se reclutan). */
+export type StartingSpecies = 'champi' | 'lactarius' | 'amanita';
+/** Especies que se pueden reclutar con esporas, una vez cada una (039); la maga llega sola. */
+export type RecruitableSpecies = Exclude<GuildSpecies, StartingSpecies>;
 /** Hechizos de Maestra Bruma: Brote arcano y Lluvia de esporas. */
 export type Spell = 'sprout' | 'rain';
 export type GameStatus = 'playing' | 'won' | 'lost';
@@ -61,7 +65,7 @@ export interface GameState {
   readonly status: GameStatus;
   readonly wonMonth: number | null;
   readonly members: readonly Member[];
-  readonly nameIdx: Readonly<Record<RecruitableSpecies, number>>;
+  readonly nameIdx: Readonly<Record<GuildSpecies, number>>;
   readonly nextId: number;
   /** Se revivió el segundo árbol: Maestra Bruma llega al próximo cambio de mes. */
   readonly mageDue: boolean;

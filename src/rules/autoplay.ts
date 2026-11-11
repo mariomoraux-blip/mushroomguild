@@ -23,9 +23,9 @@ export function playAdvised(start: GameState, o: PolicyOptions = {}): GameState 
  */
 export const EXPERT_VARIANTS: readonly PolicyOptions[] = [
   { path: true, saveMarked: true },
-  { path: true, saveMarked: true, recruitOrder: ['lactarius', 'gliophorus', 'amanita'] },
-  { path: true, saveMarked: true, recruitOrder: ['gliophorus', 'lactarius', 'amanita'] },
-  { path: true, saveMarked: true, recruitOrder: ['champi', 'lactarius', 'gliophorus'] },
+  { path: true, saveMarked: true, recruitOrder: ['ganoderma', 'gliophorus', 'morchella'] },
+  { path: true, saveMarked: true, recruitOrder: ['gliophorus', 'ganoderma', 'lycoperdon'] },
+  { path: true, saveMarked: true, recruitOrder: ['morchella', 'ganoderma', 'gliophorus'] },
   {},
 ];
 
@@ -43,7 +43,7 @@ export function playExpert(start: GameState): GameState {
 const SEARCH_VARIANTS: readonly PolicyOptions[] = [
   ...EXPERT_VARIANTS,
   { path: true },
-  { path: true, recruitOrder: ['amanita', 'lactarius', 'gliophorus'] },
+  { path: true, recruitOrder: ['lycoperdon', 'ganoderma', 'gliophorus'] },
 ];
 /** Estados que la búsqueda conserva por mes. */
 export const CERTIFY_BEAM = 12;

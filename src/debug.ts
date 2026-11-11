@@ -7,7 +7,7 @@ const presets: Record<string, () => GameState> = {
     let s: GameState = { ...newGame(), spores: 20, nutrients: 10 };
     const tiles = s.tiles.map((t) => (t.kind === 'tree' && (t.x + t.y) % 2 === 0 ? { ...t, alive: true, net: true } : t));
     s = { ...s, tiles, mageDue: true };
-    (['lactarius', 'champi', 'gliophorus'] as RecruitableSpecies[]).forEach((sp) => (s = recruit(s, sp).state));
+    (['gliophorus', 'morchella', 'ganoderma'] as RecruitableSpecies[]).forEach((sp) => (s = recruit(s, sp).state));
     return endMonth(s).state;
   },
   /** Maestra Bruma llega al terminar el mes (carta de su llegada). */

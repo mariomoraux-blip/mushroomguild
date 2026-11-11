@@ -148,9 +148,17 @@ export function adviceText(game: GameState, a: Advice): string {
     case 'revive':
       return es.advice.revive(name);
     case 'recruit':
-      return es.advice.recruit(game.spores, es.species[a.species].short);
+      return es.advice.recruit(game.spores, `${es.species[a.species].article} ${es.species[a.species].short}`);
     case 'decompose':
       return es.advice.decompose(name);
+    case 'heal':
+      return es.advice.heal(name);
+    case 'cleanse':
+      return es.advice.cleanse(name);
+    case 'breakRock':
+      return es.advice.breakRock(name);
+    case 'puff':
+      return es.advice.puff(name);
     case 'weave':
       return a.toward === 'tree' ? es.advice.weaveTree(name) : es.advice.weaveMother(name);
     case 'call':

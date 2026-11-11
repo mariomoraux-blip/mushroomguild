@@ -35,7 +35,7 @@ Al abrir el juego sin `?map`, `?seed`, `?nivel` ni `?debugState`, el juego SHALL
 - THEN ve una tarjeta del dock con «Zz» y el botón «Fin del mes» como en el tablero, y ninguno recibe el foco
 
 ### Requirement: El gremio
-"El gremio" SHALL listar las cinco especies con su retrato, nombre, rol y qué hacen; tocar una SHALL abrir su ficha encima de la pantalla.
+"El gremio" SHALL listar las ocho especies con su retrato (o su silueta si aún no tiene arte), nombre, rol y qué hacen, y decir cuáles solo llegan reclutando; tocar una SHALL abrir su ficha encima de la pantalla.
 
 #### Scenario: Ver una ficha
 - WHEN el jugador toca a Maestra Bruma en "El gremio"

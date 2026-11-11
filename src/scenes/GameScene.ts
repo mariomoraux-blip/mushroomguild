@@ -7,7 +7,7 @@ import { highlighted, suggestedTile, type AppState, type Store } from '../store'
 import { BOARD_ART, BOARD_HEADROOM, boardArtKeys, boardArtUrl, FATHER_SCALE, fatherKey, FROST_PULSE, FROST_PULSE_MS, hex, LIGHT_TRANSITION_MS, MOTION, MYCELIUM_GLOW, portraitKey, renderResolution, SEASON_SLUGS, SPRITE_SPECIES, spriteUrl, type ColorToken } from '../theme';
 
 /** Color de la silueta de respaldo si falta el retrato de una especie. */
-const SILHOUETTE: Readonly<Record<string, ColorToken>> = { champi: 'wood', lactarius: 'indigo', amanita: 'berry', gliophorus: 'leaf', mago: 'peach' };
+const SILHOUETTE: Readonly<Record<string, ColorToken>> = { champi: 'wood', lactarius: 'indigo', amanita: 'berry', gliophorus: 'leaf', morchella: 'honey', ganoderma: 'lacquer', lycoperdon: 'puff', mago: 'peach' };
 const BOARD_KEY = 'claro';
 const GLOW_KEY = 'micelio';
 const FROST_KEY = 'escarcha';

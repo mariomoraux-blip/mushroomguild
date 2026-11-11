@@ -30,6 +30,14 @@ export const RECIPES: Readonly<Record<SpeciesId, readonly Recipe[]>> = {
   lactarius: [{ before: [NET, { ground: 'grass', valid: true }], after: [NET, NET], chips: [{ icon: 'nutrients', n: -COST.weave }], label: es.recipe.lactarius }],
   champi: [{ before: [NET, { ground: 'grass', object: 'log', valid: true }], after: [NET, { ground: 'grass', object: 'logUsed' }], chips: [{ icon: 'nutrients', n: GAIN.log }], label: es.recipe.champi }],
   amanita: [{ before: [NET, { ground: 'grass', object: 'grey', valid: true }], after: [NET, { ground: 'net', object: 'alive' }], chips: [{ icon: 'nutrients', n: -COST.revive }], label: es.recipe.amanita }],
+  morchella: [{ before: [NET, { ground: 'grass', object: 'rock', valid: true }], after: [NET, { ground: 'grass' }], chips: [{ icon: 'nutrients', n: -COST.breakRock }], label: es.recipe.morchella }],
+  ganoderma: [{
+    before: [NET, { ground: 'grass' }, { ground: 'grass', object: 'grey', valid: true }],
+    after: [{ ground: 'net', object: 'alive' }],
+    chips: [{ icon: 'nutrients', n: -COST.revive }, { icon: 'spores', n: -COST.heal }],
+    label: es.recipe.ganoderma,
+  }],
+  lycoperdon: [{ before: [{ ground: 'net', object: 'alive', valid: true }], after: [{ ground: 'net', object: 'alive' }], chips: [{ icon: 'nutrients', n: -COST.puff }, { icon: 'spores', n: GAIN.puff }], label: es.recipe.lycoperdon }],
   gliophorus: [{ before: [{ member: 'champi', tired: true }], after: [{ member: 'champi', tired: false }], chips: [{ icon: 'spores', n: -COST.call }], label: es.recipe.gliophorus }],
   mago: [
     { before: [NET, { ground: 'grass', object: 'rock', valid: true }], after: [NET, NET], chips: [], label: es.recipe.sprout, title: es.spells.sprout },

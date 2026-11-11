@@ -1,7 +1,7 @@
 import { es } from '../copy/es';
-import { COST, FADED_REVIVE, FROST_WEAVE, LEVELS, MAX_GUILD, MONTHS, MONTHS_PER_SEASON, H, KIND, MAP, PLAGUE_REACH, RECRUIT_COSTS, START_NUTRIENTS, START_SPORES, STARTING_GUILD, W } from './config';
+import { COST, FADED_REVIVE, FROST_WEAVE, HEAL_REACH, LEVELS, MAX_GUILD, MONTHS, MONTHS_PER_SEASON, H, KIND, MAP, PLAGUE_REACH, RECRUIT_COSTS, START_NUTRIENTS, START_SPORES, STARTING_GUILD, W } from './config';
 import { hashString, mulberry32 } from './rng';
-import type { GameState, Level, Member, Mutable, Point, RecruitableSpecies, Tile } from './types';
+import type { GameState, GuildSpecies, Level, Member, Mutable, Point, Tile } from './types';
 
 export type MutableState = Mutable<GameState> & { tiles: Mutable<Tile>[]; members: Mutable<Member>[] };
 
@@ -27,7 +27,7 @@ export function newGame(map: readonly string[] = MAP, mapId: string = map === MA
     status: 'playing',
     wonMonth: null,
     members: [],
-    nameIdx: { champi: 0, lactarius: 0, amanita: 0, gliophorus: 0 },
+    nameIdx: { champi: 0, lactarius: 0, amanita: 0, gliophorus: 0, morchella: 0, ganoderma: 0, lycoperdon: 0 },
     nextId: 1,
     mageDue: false,
     mageArrived: false,
@@ -38,7 +38,7 @@ export function newGame(map: readonly string[] = MAP, mapId: string = map === MA
 }
 
 /** Agrega un miembro reclutable a un estado ya copiado (uso interno). */
-export function addMember(s: MutableState, species: RecruitableSpecies): Mutable<Member> {
+export function addMember(s: MutableState, species: GuildSpecies): Mutable<Member> {
   const list = es.memberNames[species];
   const name = list[s.nameIdx[species] % list.length] ?? species;
   s.nameIdx[species]++;
@@ -124,7 +124,7 @@ export const reviveCost = (t: Tile): number => (t.faded ? FADED_REVIVE : COST.re
 export const plagueStarts = (s: GameState, month = s.month): boolean =>
   LEVELS[s.level].plague.includes(seasonIndex(month)) && (month - 1) % MONTHS_PER_SEASON === 0;
 
-const steps = (a: Point, b: Point) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+export const steps = (a: Point, b: Point): number => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 
 /**
  * Casilla que marca la plaga (032): una casilla tejida (tierra de la red; nunca el Hogar, un árbol ni el Árbol Padre)
@@ -141,6 +141,13 @@ export function plagueTarget(s: GameState): Tile | null {
 
 /** Algún hongo trabajó este mes a `PLAGUE_REACH` casillas o menos de `t` (032). */
 export const guarded = (s: GameState, t: Point): boolean => s.members.some((m) => m.at && steps(m.at, t) <= PLAGUE_REACH);
+
+/** Pasos en cruz desde la casilla de la red más cercana, sin importar las rocas (039 · Ganoderma). Sin red, `Infinity`. */
+export const netDistance = (s: GameState, t: Point): number => Math.min(...s.tiles.filter((n) => n.net).map((n) => steps(n, t)));
+/** El Ganoderma alcanza la casilla (039): a `HEAL_REACH` pasos o menos de la red. */
+export const inHealReach = (s: GameState, t: Point): boolean => netDistance(s, t) <= HEAL_REACH;
+/** La especie ya está en el gremio (039: cada especie reclutable llega una sola vez). */
+export const hasSpecies = (s: GameState, species: GuildSpecies): boolean => s.members.some((m) => m.species === species);
 
 export function farthestGreyTree(s: GameState): Tile | null {
   const dist = new Map<Tile, number>();

@@ -11,7 +11,7 @@ const TREE = { x: 2, y: 5 };
 
 describe('Requirement: Temporadas frías', () => {
   it('Scenario: El gremio come en otoño — 1 árbol y 3 nutrientes dejan 3 y nadie con hambre', () => {
-    const s = at('bosque', { month: 7, nutrients: 3, alive: [TREE], extraMembers: ['champi'] });
+    const s = at('bosque', { month: 7, nutrients: 3, alive: [TREE], extraMembers: ['morchella'] });
     const { state, message } = endMonth(s);
     expect(state.nutrients).toBe(3);
     expect(state.members.every((m) => !m.used && !m.hungry)).toBe(true);

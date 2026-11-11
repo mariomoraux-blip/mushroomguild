@@ -352,7 +352,7 @@ describe('Requirement: Reclutar', () => {
     expect(RECRUIT_COSTS).toHaveLength(MAX_GUILD - STARTING_GUILD.length);
     let s = setup({ spores: 15 });
     const paid: number[] = [];
-    for (const sp of ['lactarius', 'gliophorus', 'amanita'] as const) {
+    for (const sp of ['morchella', 'gliophorus', 'ganoderma'] as const) {
       const before = s.spores;
       expect(recruitCost(s)).toBe(RECRUIT_COSTS[recruitedCount(s)]);
       s = recruit(s, sp).state;
@@ -366,32 +366,32 @@ describe('Requirement: Reclutar', () => {
   it('Scenario: Los iniciales y Maestra Bruma no cuentan como reclutados', () => {
     expect(recruitedCount(newGame())).toBe(0);
     expect(recruitCost(newGame())).toBe(3);
-    const withMage = setup({ spores: 5, extraMembers: ['champi'], mage: true });
+    const withMage = setup({ spores: 5, extraMembers: ['lycoperdon'], mage: true });
     expect(recruitedCount(withMage)).toBe(1);
     expect(recruitCost(withMage)).toBe(5);
   });
 
   it('Scenario: Gremio completo — reclutar se rechaza con "El gremio está completo." (la maga no cuenta)', () => {
-    const s = setup({ spores: 10, extraMembers: ['lactarius', 'champi', 'gliophorus'], mage: true });
+    const s = setup({ spores: 10, extraMembers: ['morchella', 'ganoderma', 'gliophorus'], mage: true });
     expect(s.members).toHaveLength(MAX_GUILD + 1);
-    expect(() => recruit(s, 'lactarius')).toThrow(new RuleError('El gremio está completo.'));
+    expect(() => recruit(s, 'lycoperdon')).toThrow(new RuleError('El gremio está completo.'));
     // Sin la maga y con 5 reclutables todavía cabe uno más (el tercero: 7 esporas).
-    const five = setup({ spores: 7, extraMembers: ['lactarius', 'champi'], mage: true });
+    const five = setup({ spores: 7, extraMembers: ['morchella', 'ganoderma'], mage: true });
     expect(recruit(five, 'gliophorus').state.members.filter((m) => m.species !== 'mago')).toHaveLength(MAX_GUILD);
   });
 
   it('sin esporas suficientes se rechaza con el costo del próximo recluta', () => {
-    expect(() => recruit(setup({ spores: 2 }), 'lactarius')).toThrow(new RuleError('Reclutar cuesta 3 esporas.', 'spores'));
-    expect(() => recruit(setup({ spores: 4, extraMembers: ['champi'] }), 'lactarius')).toThrow(new RuleError('Reclutar cuesta 5 esporas.', 'spores'));
-    expect(() => recruit(setup({ spores: 6, extraMembers: ['champi', 'lactarius'] }), 'amanita')).toThrow(new RuleError('Reclutar cuesta 7 esporas.', 'spores'));
+    expect(() => recruit(setup({ spores: 2 }), 'gliophorus')).toThrow(new RuleError('Reclutar cuesta 3 esporas.', 'spores'));
+    expect(() => recruit(setup({ spores: 4, extraMembers: ['morchella'] }), 'gliophorus')).toThrow(new RuleError('Reclutar cuesta 5 esporas.', 'spores'));
+    expect(() => recruit(setup({ spores: 6, extraMembers: ['morchella', 'gliophorus'] }), 'ganoderma')).toThrow(new RuleError('Reclutar cuesta 7 esporas.', 'spores'));
   });
 
   it('los reclutas reciben los nombres en orden', () => {
     let s = setup({ spores: 15 });
-    s = recruit(s, 'lactarius').state;
+    s = recruit(s, 'morchella').state;
     s = recruit(s, 'gliophorus').state;
-    s = recruit(s, 'champi').state;
-    expect(s.members.slice(3).map((m) => m.name)).toEqual(['Ola', 'Chispa', 'Tomillo']);
+    s = recruit(s, 'lycoperdon').state;
+    expect(s.members.slice(3).map((m) => m.name)).toEqual(['Panal', 'Chispa', 'Pompón']);
   });
 });
 
@@ -449,7 +449,7 @@ describe('Requirement: Final suave', () => {
     const again = endMonth(lost);
     expect(again.state).toBe(lost);
     expect(again.message).toBe('');
-    expect(() => recruit(lost, 'lactarius')).toThrow(RuleError);
+    expect(() => recruit(lost, 'gliophorus')).toThrow(RuleError);
     expect(newGame().status).toBe('playing');
   });
 });

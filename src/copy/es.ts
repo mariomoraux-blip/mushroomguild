@@ -1,6 +1,6 @@
-import { COST, FADED_REVIVE, FROST_WEAVE, GAIN, LEVELS, LOG_USES, PLAGUE_REACH, RECRUIT_COSTS, UPKEEP } from '../rules/config';
+import { COST, FADED_REVIVE, FROST_WEAVE, GAIN, HEAL_REACH, LEVELS, LOG_USES, PLAGUE_REACH, RECRUIT_COSTS, UPKEEP } from '../rules/config';
 import type { IdleReason } from '../rules/idle';
-import type { Level, RecruitableSpecies, SpeciesId } from '../rules/types';
+import type { GuildSpecies, Level, SpeciesId } from '../rules/types';
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 /** «3, 5 y 7». */
@@ -26,36 +26,54 @@ export const es = {
 
   species: {
     champi: {
-      name: 'Champiñón', short: 'Champiñón', scientific: 'Agaricus bisporus', role: 'Descompositor',
+      name: 'Champiñón', short: 'Champiñón', article: 'un', scientific: 'Agaricus bisporus', role: 'Descompositor',
       verb: `Descompone un tronco vecino a la red (+${plural(GAIN.log, 'nutriente')}).`,
       quip: 'Comestible: sí, y lo sabe. Por eso trabaja rápido.',
       action: `Descompone · +${GAIN.log} nutrientes`,
     },
     lactarius: {
-      name: 'Lactarius indigo', short: 'Lactarius', scientific: 'Lactarius indigo', role: 'Tejedor',
+      name: 'Lactarius indigo', short: 'Lactarius', article: 'un', scientific: 'Lactarius indigo', role: 'Tejedor',
       verb: `Teje micelio en tierra vecina a la red (${plural(COST.weave, 'nutriente')}).`,
       quip: 'Si lo cortas, sangra tinta azul. Preferiría que no lo cortaras.',
       action: `Teje · −${plural(COST.weave, 'nutriente')}`,
     },
     amanita: {
-      name: 'Amanita muscaria', short: 'Amanita', scientific: 'Amanita muscaria', role: 'Sanadora',
+      name: 'Amanita muscaria', short: 'Amanita', article: 'una', scientific: 'Amanita muscaria', role: 'Sanadora',
       verb: `Revive un árbol gris vecino a la red (${plural(COST.revive, 'nutriente')}).`,
       quip: 'Comestible: no. Bonita: muchísimo. Úsese solo para curar árboles.',
       action: `Revive · −${plural(COST.revive, 'nutriente')}`,
     },
     gliophorus: {
-      name: 'Gliophorus psittacinus', short: 'Gliophorus', scientific: 'Gliophorus psittacinus', role: 'Mensajera',
+      name: 'Gliophorus psittacinus', short: 'Gliophorus', article: 'una', scientific: 'Gliophorus psittacinus', role: 'Mensajera',
       verb: `Pasa la voz: un compañero que ya trabajó este mes vuelve a trabajar (${plural(COST.call, 'espora')}).`,
       quip: 'Viscosa como un caramelo y habladora como un loro. Cambia de color con los meses.',
       action: `Llama · −${plural(COST.call, 'espora')}`,
     },
+    morchella: {
+      name: 'Morchella esculenta', short: 'Morchella', article: 'una', scientific: 'Morchella esculenta', role: 'Rompe-rocas',
+      verb: `Rompe una roca vecina a la red y deja tierra para tejer (${plural(COST.breakRock, 'nutriente')}).`,
+      quip: 'Para ella, cada roca es una puerta que nadie ha abierto todavía.',
+      action: `Rompe · −${plural(COST.breakRock, 'nutriente')}`,
+    },
+    ganoderma: {
+      name: 'Ganoderma lucidum', short: 'Ganoderma', article: 'un', scientific: 'Ganoderma lucidum', role: 'Boticaria',
+      verb: `Revive un árbol gris a ${HEAL_REACH} casillas o menos de la red (${plural(COST.revive, 'nutriente')} y ${plural(COST.heal, 'espora')}).`,
+      quip: 'Lleva siglos en las tazas de té. Brilla como si la hubieran barnizado, y es verdad.',
+      action: `Cura a distancia · −${COST.revive} nutrientes, −${plural(COST.heal, 'espora')}`,
+    },
+    lycoperdon: {
+      name: 'Lycoperdon perlatum', short: 'Lycoperdon', article: 'un', scientific: 'Lycoperdon perlatum', role: 'Soplador',
+      verb: `Desde un árbol vivo, cambia ${plural(COST.puff, 'nutriente')} por ${plural(GAIN.puff, 'espora')}.`,
+      quip: 'Tiene cosquillas: lo tocas y sopla una nube de esporas.',
+      action: `Sopla · −${COST.puff} nutriente, +${plural(GAIN.puff, 'espora')}`,
+    },
     mago: {
-      name: 'Conocybe arcana', short: 'Conocybe', scientific: 'Conocybe arcana', role: 'Maga',
+      name: 'Conocybe arcana', short: 'Conocybe', article: 'una', scientific: 'Conocybe arcana', role: 'Maga',
       verb: 'Lanza un hechizo por estación: Brote arcano o Lluvia de esporas.',
       quip: 'No aparece en ningún libro. Ella dice que fueron los libros los que no la encontraron.',
       action: '1 hechizo por estación',
     },
-  } satisfies Record<SpeciesId, { name: string; short: string; scientific: string; role: string; verb: string; quip: string; action: string }>,
+  } satisfies Record<SpeciesId, { name: string; short: string; article: 'un' | 'una'; scientific: string; role: string; verb: string; quip: string; action: string }>,
 
   /** Nombres de los miembros, en orden de llegada. */
   memberNames: {
@@ -63,7 +81,10 @@ export const es = {
     lactarius: ['Indi', 'Ola', 'Nube', 'Brisa'],
     amanita: ['Rubí', 'Cereza', 'Lunar', 'Pimienta'],
     gliophorus: ['Chispa', 'Pluma', 'Trina', 'Gota'],
-  } satisfies Record<RecruitableSpecies, readonly string[]>,
+    morchella: ['Panal'],
+    ganoderma: ['Ámbar'],
+    lycoperdon: ['Pompón'],
+  } satisfies Record<GuildSpecies, readonly string[]>,
   mageName: 'Maestra Bruma',
 
   spells: {
@@ -102,6 +123,15 @@ export const es = {
     magicSpent: 'Maestra Bruma descansa: su magia vuelve con la próxima estación.',
     sproutNeedsRock: 'El Brote arcano solo despierta rocas que tocan la red.',
     rainNeedsTree: 'La Lluvia de esporas se lanza sobre un árbol vivo.',
+    morchellaNeedsRock: 'La Morchella solo rompe rocas.',
+    farRock: 'Muy lejos: la roca debe tocar la red.',
+    breakCost: (n: number) => `Faltan nutrientes: romper una roca cuesta ${n}.`,
+    ganodermaNeedsTree: 'El Ganoderma cura árboles grises y limpia la plaga.',
+    farHeal: (n: number) => `Muy lejos: el Ganoderma cura árboles a ${n} casillas o menos de la red.`,
+    healSpores: (n: number) => `Falta${n === 1 ? '' : 'n'} ${plural(n, 'espora')}: curar a distancia cuesta ${n}.`,
+    lycoperdonNeedsTree: 'El Lycoperdon sopla esporas desde un árbol vivo.',
+    puffCost: (n: number) => `Falta${n === 1 ? '' : 'n'} ${plural(n, 'nutriente')} para soplar esporas.`,
+    speciesTaken: (article: string, species: string) => `Ya hay ${article} ${species} en el gremio.`,
     guildFull: 'El gremio está completo.',
     recruitCost: (n: number) => `Reclutar cuesta ${n} esporas.`,
   },
@@ -115,6 +145,10 @@ export const es = {
     noSpores: `falta${COST.call === 1 ? '' : 'n'} ${plural(COST.call, 'espora')}: pasar la voz cuesta ${COST.call}.`,
     noWorkers: 'nadie ha trabajado todavía este mes. Pasa la voz después de que trabaje un compañero.',
     magicSpent: 'su magia vuelve con la próxima estación.',
+    noRocks: 'no hay rocas junto a la red.',
+    noHealSpores: `falta${COST.heal === 1 ? '' : 'n'} ${plural(COST.heal, 'espora')}: curar a distancia cuesta ${COST.heal}.`,
+    noTreesInReach: `no hay árboles grises a ${HEAL_REACH} casillas o menos de la red.`,
+    noLiveTrees: 'todavía no hay árboles vivos para soplar desde ellos.',
   } satisfies Record<IdleReason, string>,
   idleLine: (name: string, reason: string) => `${name}: ${reason}`,
   /** Acción del Tejedor con el costo de este mes (con escarcha, 2). */
@@ -124,8 +158,12 @@ export const es = {
   advice: {
     awaken: (n: string) => `Pista: ${n} puede despertar al Árbol Padre. ¡Es la meta!`,
     revive: (n: string) => `Pista: ${n} puede revivir un árbol gris. Cada árbol vivo da esporas y nutrientes.`,
-    recruit: (spores: number, species: string) => `Pista: tienes ${plural(spores, 'espora')}. Recluta un ${species} en «+ Reclutar» o tocando las esporas.`,
+    recruit: (spores: number, species: string) => `Pista: tienes ${plural(spores, 'espora')}. Recluta ${species} en «+ Reclutar» o tocando las esporas.`,
     decompose: (n: string) => `Pista: ${n} puede descomponer un tronco junto a la red (+${GAIN.log} nutrientes).`,
+    heal: (n: string) => `Pista: ${n} puede curar un árbol gris a distancia. Entra a la red de un salto.`,
+    cleanse: (n: string) => `Pista: ${n} puede limpiar la plaga por ${plural(COST.heal, 'espora')}.`,
+    breakRock: (n: string) => `Pista: ${n} puede romper una roca que acorta el camino (★).`,
+    puff: (n: string) => `Pista: ${n} puede soplar esporas desde un árbol vivo (+${GAIN.puff}).`,
     weaveTree: (n: string) => `Pista: ${n} puede tejer la red hacia un árbol gris (★).`,
     weaveMother: (n: string) => `Pista: ${n} puede tejer la red hacia el Árbol Padre (★).`,
     call: (n: string, other: string) => `Pista: ${n} puede pasar la voz a ${other} para que trabaje otra vez (★).`,
@@ -149,7 +187,7 @@ export const es = {
     treeFading: `Árbol gris con escarcha: se apagará al terminar el mes si la Amanita no lo revive (${plural(COST.revive, 'nutriente')}).`,
     treeFaded: `Árbol apagado: la Amanita aún puede revivirlo, pero cuesta ${plural(FADED_REVIVE, 'nutriente')}.`,
     treeAlive: `Árbol vivo: al empezar cada mes da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}.`,
-    rock: 'Roca: bloquea la red. Maestra Bruma puede convertirla en tierra.',
+    rock: 'Roca: bloquea la red. La Morchella la rompe y Maestra Bruma la convierte en tierra.',
   },
 
   /** Ficha de cada especie al seleccionarla (player-guidance). */
@@ -173,6 +211,9 @@ export const es = {
     lactarius: `Antes: la red y una tierra resaltada. Después: la red creció una casilla. Gasta ${plural(COST.weave, 'nutriente')}.`,
     champi: `Antes: la red y un tronco resaltado. Después: el tronco usado y ${plural(GAIN.log, 'nutriente')} más.`,
     amanita: `Antes: la red y un árbol gris resaltado. Después: el árbol vivo. Gasta ${COST.revive} nutrientes.`,
+    morchella: `Antes: la red y una roca resaltada. Después: la roca es tierra libre. Gasta ${plural(COST.breakRock, 'nutriente')}.`,
+    ganoderma: `Antes: la red y un árbol gris a dos casillas, resaltado. Después: el árbol vivo y en la red. Gasta ${COST.revive} nutrientes y ${plural(COST.heal, 'espora')}.`,
+    lycoperdon: `Antes: un árbol vivo resaltado. Después: el mismo árbol y ${plural(GAIN.puff, 'espora')} más. Gasta ${plural(COST.puff, 'nutriente')}.`,
     gliophorus: `Antes: un compañero cansado. Después: el compañero, listo para trabajar otra vez. Gasta ${plural(COST.call, 'espora')}.`,
     sprout: 'Brote arcano. Antes: la red y una roca resaltada. Después: la roca es red.',
     rain: 'Lluvia de esporas. Antes: un árbol vivo resaltado. Después: esporas y nutrientes extra por cada árbol vivo.',
@@ -207,6 +248,27 @@ export const es = {
       movement: 'No camina: su voz viaja por toda la red, así que llega a cualquier compañero, esté donde esté.',
       nutrients: 'No consigue nutrientes ella misma, pero hace que otro los consiga dos veces: un Champiñón que descompone de nuevo, o una Amanita que revive otro árbol el mismo mes.',
       messenger: 'Es una segunda jugada: convierte esporas en trabajo extra. Úsala con quien más te convenga repetir; no puede llamar a otra Gliophorus ni a Maestra Bruma.',
+    },
+    morchella: {
+      context: 'La cantera del gremio. Terca y alegre: cada roca es una puerta que nadie ha abierto todavía.',
+      ability: 'Rompe una roca vecina a la red y la deja como tierra libre.',
+      howTo: 'Tócala y después toca una roca resaltada que toque la red. Luego el Lactarius puede tejer ahí.',
+      movement: 'No camina: trabaja en las rocas vecinas a la red. Sirve para abrir atajos donde las rocas cierran el paso.',
+      nutrients: `Gasta ${plural(COST.breakRock, 'nutriente')} por roca, también con escarcha. La tierra que deja todavía no es red: tejerla cuesta aparte.`,
+    },
+    ganoderma: {
+      context: 'Boticaria tranquila y sabia, como el reishi de una taza de té. Cura de lejos con un hilo de micelio dorado.',
+      ability: `Revive árboles grises a ${HEAL_REACH} casillas o menos de la red, aunque la red no los toque. En Ancestral también limpia la plaga.`,
+      howTo: 'Tócala y después toca un árbol resaltado, cerca de la red pero no necesariamente junto a ella.',
+      movement: `No camina: su hilo dorado alcanza ${HEAL_REACH} pasos en cruz desde la red, por encima de las rocas. El árbol curado entra a la red de un salto.`,
+      nutrients: `Gasta ${COST.revive} nutrientes y ${plural(COST.heal, 'espora')} por árbol (${FADED_REVIVE} nutrientes si está apagado). Limpiar la plaga cuesta ${plural(COST.heal, 'espora')}. No despierta al Árbol Padre: eso es de la Amanita.`,
+    },
+    lycoperdon: {
+      context: 'Redondo, juguetón y con cosquillas: cualquier toque le hace soplar una nube de esporas.',
+      ability: `Desde un árbol vivo, cambia ${plural(COST.puff, 'nutriente')} por ${plural(GAIN.puff, 'espora')}.`,
+      howTo: 'Tócalo y después toca un árbol vivo resaltado.',
+      movement: 'No camina: sopla desde cualquier árbol vivo del claro, esté donde esté. El Árbol Padre no cuenta.',
+      nutrients: `Nunca consigue nutrientes: gasta ${plural(COST.puff, 'nutriente')} para dar ${plural(GAIN.puff, 'espora')}. Sirve para reclutar, pasar la voz o curar antes.`,
     },
     mago: {
       context: 'Nadie la recluta: llega sola al empezar el mes siguiente a revivir el segundo árbol, cuando el bosque vuelve a hablar.',
@@ -265,8 +327,10 @@ export const es = {
 
   guild: {
     title: 'El gremio',
-    intro: 'Cinco especies, un oficio cada una. Toca una para ver su ficha.',
+    intro: 'Ocho especies, un oficio cada una. Toca una para ver su ficha.',
     open: (name: string) => `Ver la ficha de ${name}`,
+    /** 039: las que no están al empezar. */
+    recruitOnly: 'Solo reclutando',
     back: 'Volver',
   },
 
@@ -452,6 +516,8 @@ export const es = {
         ? `El gremio está completo: ${max} miembros.`
         : `El próximo recluta cuesta ${cost} esporas; cada uno cuesta más (${listY(RECRUIT_COSTS)}). Hasta ${max} miembros; trabaja desde el mes siguiente.`,
     recruitAction: 'Reclutar',
+    /** 039: una de cada especie. */
+    inGuild: 'Ya está en el gremio.',
     info: (name: string) => `Ficha de ${name}`,
     mageArrives: 'Llega sola, al empezar el mes siguiente al segundo árbol revivido.',
     spellTitle: 'Elige un hechizo',
@@ -485,6 +551,10 @@ export const es = {
     motherAwake: (name: string) => `${name} despertó al Árbol Padre.`,
     revived: (name: string) => `${name} revivió un árbol. Al empezar cada mes dará una espora y un nutriente.`,
     called: (name: string, other: string) => `${name} pasó la voz: ${other} puede trabajar otra vez.`,
+    brokeRock: (name: string) => `${name} rompió la roca. Ahora es tierra lista para tejer.`,
+    healed: (name: string) => `${name} curó un árbol a distancia: entró a la red. Al empezar cada mes dará una espora y un nutriente.`,
+    plagueHealed: (name: string) => `${name} limpió la plaga.`,
+    puffed: (name: string, n: number) => `${name} sopló una nube: +${plural(n, 'espora')}.`,
     sprouted: (name: string) => `${name} lanzó el Brote arcano. La roca ahora es tierra con micelio.`,
     rained: (name: string, spores: number, nutrients: number) =>
       `${name} lanzó la Lluvia de esporas: +${plural(spores, 'espora')} y +${plural(nutrients, 'nutriente')}.`,
