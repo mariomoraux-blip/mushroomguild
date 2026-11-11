@@ -215,7 +215,7 @@ Solo la victoria da puntaje; la derrota sigue siendo suave, sin puntaje ni estre
 
 ### Ranking del gremio (036)
 - **Una tabla general** con el mejor total de cada jugador (ya multiplicado por el nivel). Cada `SCORE_VERSION` abre una temporada nueva.
-- **Sin cuentas:** el dispositivo guarda una clave anónima y un alias generado («Bruno del Musgo»), que se puede volver a sortear. Sin texto libre.
+- **Sin cuentas:** el dispositivo guarda una clave anónima y un alias generado («Bruno del Musgo»), que se puede volver a sortear. Desde el 038 también se puede escribir un nombre propio: de 3 a 16 letras y espacios, filtrado con una lista negra compartida por el cliente y el servidor.
 - **Verificado:** el servidor (funciones de Vercel + Upstash Redis) rejuega el registro de acciones con las mismas reglas antes de aceptar un puntaje; el tiempo solo se acota.
 - **Solo cuentan** las partidas que empiezan desde «Nueva partida». Tras registrarse, las victorias se envían solas; sin conexión, quedan pendientes.
 - **Idea para después:** el "claro del día", una semilla por fecha igual para todos, con su propia tabla.

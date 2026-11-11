@@ -87,16 +87,20 @@ export function createLeaderboardClient(env: ClientEnv = defaultEnv()) {
   const post = (path: string, body: unknown) =>
     env.fetch(`${env.base}/${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 
-  /** Guarda el alias en el dispositivo y avisa al servidor (si falla la red, el próximo envío lo lleva). */
-  async function saveAlias(alias: string): Promise<boolean> {
+  /**
+   * Avisa al servidor y guarda el nombre en el dispositivo (036, 038). Si el servidor lo rechaza (400), no lo guarda.
+   * Sin conexión lo guarda igual, porque el cliente ya lo validó con las mismas reglas, y el próximo envío lo lleva.
+   */
+  async function saveAlias(alias: string): Promise<'saved' | 'rejected' | 'failed'> {
     const token = ensureToken();
-    if (!token || !write(PLAYER_KEY, { token, alias } satisfies Player)) return false;
+    if (!token) return 'failed';
     try {
-      await post('player', { token, alias });
+      const res = await post('player', { token, alias });
+      if (res.status === 400) return 'rejected';
     } catch {
       /* sin conexión */
     }
-    return true;
+    return write(PLAYER_KEY, { token, alias } satisfies Player) ? 'saved' : 'failed';
   }
 
   const pending = () => read<ScoreResult>(PENDING_KEY);

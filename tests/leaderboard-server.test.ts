@@ -91,11 +91,19 @@ describe('Requirement: Verificación en el servidor', () => {
     expect((await submit(d, 501, r, '9.9.9.9')).status).toBe(200);
   });
 
-  it('Scenario: Alias inventado — 400 y no se guarda nada', async () => {
+  it('Scenario: Nombre inválido en el servidor — 400 y no se guarda nada (038)', async () => {
     const d = deps();
-    expect((await post(d, 'player', { token: tokenOf(1), alias: 'xXx' })).status).toBe(400);
-    expect((await post(d, 'scores', { token: tokenOf(1), alias: 'xXx', result: win(1) })).status).toBe(400);
+    for (const alias of ['Ana92', 'Al', 'P u u t a', ' Ana Lucía', 'Ana  Lucía', 42]) {
+      expect((await post(d, 'player', { token: tokenOf(1), alias })).status).toBe(400);
+      expect((await post(d, 'scores', { token: tokenOf(1), alias, result: win(1) })).status).toBe(400);
+    }
     expect((await board(d)).players).toBe(0);
+  });
+
+  it('un nombre escrito válido se acepta y aparece en el ranking (038)', async () => {
+    const d = deps();
+    expect((await post(d, 'scores', { token: tokenOf(1), alias: 'Ana Lucía', result: win(1) })).status).toBe(200);
+    expect((await board(d, 1)).top[0]).toMatchObject({ alias: 'Ana Lucía', me: true });
   });
 
   it('clave inválida, cuerpo roto o demasiado grande: 400', async () => {

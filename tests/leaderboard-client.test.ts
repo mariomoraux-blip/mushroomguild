@@ -42,13 +42,31 @@ function setup(storage: ClientEnv['storage'] = memStorage()) {
   return { client: createLeaderboardClient(env), net, storage };
 }
 
+describe('Requirement: Nombre en el gremio (038)', () => {
+  it('un nombre escrito válido se guarda; uno de la lista negra lo rechaza el servidor y no se guarda', async () => {
+    const { client } = setup();
+    client.ensureToken();
+    expect(await client.saveAlias('Bitchy Ana')).toBe('rejected'); // «bitch» dentro, tras normalizar
+    expect(client.readPlayer()?.alias).toBeNull();
+    expect(await client.saveAlias('Ana Lucía')).toBe('saved');
+    expect(client.readPlayer()?.alias).toBe('Ana Lucía');
+  });
+
+  it('sin conexión, un nombre escrito ya validado se guarda igual', async () => {
+    const { client, net } = setup();
+    net.online = false;
+    expect(await client.saveAlias('Ana Lucía')).toBe('saved');
+    expect(client.readPlayer()?.alias).toBe('Ana Lucía');
+  });
+});
+
 describe('Requirement: Jugador del dispositivo', () => {
   it('Scenario: Jugador que vuelve — la clave y el alias quedan en el dispositivo', async () => {
     const { client, storage } = setup();
     const token = client.ensureToken()!;
     expect(client.ensureToken()).toBe(token);
     const alias = aliasFor(token, 0);
-    expect(await client.saveAlias(alias)).toBe(true);
+    expect(await client.saveAlias(alias)).toBe('saved');
     expect(createLeaderboardClient({ storage, base: '', uuid: () => 'x', fetch }).readPlayer()).toEqual({ token, alias });
   });
 
@@ -56,7 +74,7 @@ describe('Requirement: Jugador del dispositivo', () => {
     const { client } = setup(brokenStorage);
     expect(client.ensureToken()).toBeNull();
     expect(client.readPlayer()).toBeNull();
-    expect(await client.saveAlias('Bruno del Musgo')).toBe(false);
+    expect(await client.saveAlias('Bruno del Musgo')).toBe('failed');
     expect((await client.board()).kind).toBe('ready');
   });
 

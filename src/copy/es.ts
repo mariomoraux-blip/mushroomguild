@@ -347,6 +347,16 @@ export const es = {
       confirm: 'Registrar',
       save: 'Guardar',
       later: 'Ahora no',
+      // Nombre escrito (038).
+      write: 'Escribir el mío',
+      pick: 'Elegir uno del gremio',
+      label: 'Tu nombre',
+      hint: 'De 3 a 16 letras, sin números ni signos.',
+      problems: {
+        length: 'Usa de 3 a 16 letras.',
+        chars: 'Solo letras y espacios, sin números ni signos.',
+        blocked: 'Ese nombre no está permitido en el gremio. Prueba con otro.',
+      },
     },
     /** Alias generados (036): «<nombre> del/de la <lugar>». Sin texto libre, sin moderación. */
     alias: {

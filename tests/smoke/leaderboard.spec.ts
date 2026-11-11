@@ -143,6 +143,49 @@ test('registrar y volver: primer registro desde la carta, ranking encima de la c
   expect(calls.filter((c) => c.url.endsWith('/api/scores')).length).toBe(before + 1);
 });
 
+test('nombre escrito (038): «Escribir el mío», error junto al campo sin borrar lo escrito y Enter registra', async ({ page }, info) => {
+  test.setTimeout(60_000);
+  const calls = await mockApi(page);
+  await page.goto('/');
+  await winFromTitle(page);
+  await page.getByRole('button', { name: 'Registra tu puntaje' }).click();
+  const shot = (name: string) =>
+    info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390' ? page.screenshot({ path: `docs/screenshots/038-${name}-${info.project.name}.png` }) : null;
+  await shot('nombre');
+  await page.getByRole('button', { name: 'Escribir el mío' }).click();
+  const input = page.getByRole('textbox', { name: 'Tu nombre' });
+  await expect(input).toBeFocused();
+  await expect(page.locator('.alias__hint')).toHaveText('De 3 a 16 letras, sin números ni signos.');
+  // Formato inválido: el problema queda junto al campo, la hoja sigue abierta con lo escrito y no se envía nada.
+  await input.fill('Ana92');
+  await page.getByRole('button', { name: 'Registrar' }).click();
+  await expect(page.locator('.alias__hint')).toHaveText('Solo letras y espacios, sin números ni signos.');
+  await expect(input).toHaveValue('Ana92');
+  await expect(input).toHaveAttribute('aria-invalid', 'true');
+  await expect(input).toBeFocused();
+  await shot('nombre-error');
+  expect(calls.some((c) => c.url.endsWith('/api/player') || c.url.endsWith('/api/scores'))).toBe(false);
+  // Nombre no permitido.
+  await input.fill('P u u t a');
+  await expect(input).not.toHaveAttribute('aria-invalid', 'true'); // escribir limpia el aviso
+  await input.press('Enter');
+  await expect(page.locator('.alias__hint')).toHaveText('Ese nombre no está permitido en el gremio. Prueba con otro.');
+  // «Elegir uno del gremio» vuelve a los alias; «Escribir el mío» recupera lo escrito.
+  await page.getByRole('button', { name: 'Elegir uno del gremio' }).click();
+  await expect(page.locator('.alias__name')).toBeVisible();
+  await page.getByRole('button', { name: 'Escribir el mío' }).click();
+  await expect(input).toHaveValue('P u u t a');
+  // Escribir el nombre: se limpia y Enter registra.
+  await input.fill('  Ana   Lucía ');
+  await input.press('Enter');
+  await expect(page.locator('#story .story__rank')).toHaveText('Puesto 3 de 40');
+  const sent = calls.find((c) => c.url.endsWith('/api/player'))!;
+  expect(JSON.parse(sent.body!).alias).toBe('Ana Lucía');
+  expect(JSON.parse(calls.find((c) => c.url.endsWith('/api/scores'))!.body!).alias).toBe('Ana Lucía');
+  await page.goto('/');
+  await expect(page.locator('.title__hello')).toHaveText('Hola de nuevo, Ana Lucía');
+});
+
 test('sin conexión: la carta lo dice, el puntaje queda pendiente y se envía al abrir el ranking', async ({ page }, info) => {
   test.skip(info.project.name !== 'vertical-390x844', 'un tamaño basta');
   test.setTimeout(60_000);

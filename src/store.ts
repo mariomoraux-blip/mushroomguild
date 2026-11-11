@@ -28,6 +28,7 @@ import {
   type Advice,
   type Resource,
   type Tile,
+  type NameProblem,
 } from './rules';
 import type { BoardView, Submission } from './leaderboard';
 
@@ -37,8 +38,11 @@ export type Sheet =
   | { kind: 'member'; id: number }
   | { kind: 'spell' }
   | { kind: 'help' }
-  /** «Tu nombre en el gremio» (036): alias propuesto, su número de sorteo y para qué se abrió. */
-  | { kind: 'alias'; alias: string; n: number; purpose: 'register' | 'rename' };
+  /**
+   * «Tu nombre en el gremio» (036): alias propuesto, su número de sorteo y para qué se abrió. `writing`: el campo
+   * para escribir el nombre (038); `problem`: por qué no vale lo escrito.
+   */
+  | { kind: 'alias'; alias: string; n: number; purpose: 'register' | 'rename'; writing?: boolean; problem?: NameProblem | null };
 
 /** Carta de historia (003): intro de 3 pasos, llegada de Maestra Bruma o final. */
 /** Carta de historia. `then`: la que sigue al cerrarla (028: la del frío después de la de la maga). */

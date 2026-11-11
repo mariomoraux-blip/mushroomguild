@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
 import {
   aliasFor,
+  checkName,
   firstCertified,
   isValidAlias,
   LEADERBOARD,
@@ -25,7 +26,7 @@ function botWin(seed: number, level: 'brote' | 'bosque' = 'brote', timeMs = 200_
   return scoreResult(final, timeMs, thresholds(start));
 }
 
-describe('Requirement: Alias generado', () => {
+describe('Requirement: Nombre en el gremio · alias generado', () => {
   it('Scenario: Sortear — «Otro nombre» da un alias distinto, formado con las listas del juego', () => {
     const a = aliasFor('token-a', 0);
     let n = 1;
@@ -41,8 +42,7 @@ describe('Requirement: Alias generado', () => {
     expect(aliasFor('token-a', 3)).toBe(aliasFor('token-a', 3));
   });
 
-  it('Scenario: Alias inventado — «xXx» no es válido', () => {
-    expect(isValidAlias('xXx')).toBe(false);
+  it('un alias con espacios de más o que no es texto no es válido', () => {
     expect(isValidAlias('Bruno del Musgo ')).toBe(false);
     expect(isValidAlias(42)).toBe(false);
   });
@@ -51,6 +51,40 @@ describe('Requirement: Alias generado', () => {
     const rng = mulberry32(7);
     for (let i = 0; i < 200; i++) expect(isValidAlias(rollAlias(rng))).toBe(true);
     expect(es.leaderboard.alias.names.length * es.leaderboard.alias.places.length).toBe(576);
+  });
+});
+
+describe('Requirement: Nombre en el gremio · nombre escrito (038)', () => {
+  it('Scenario: Escribir el nombre — se recortan los espacios de los extremos y los repetidos', () => {
+    expect(checkName('  Ana   Lucía ')).toEqual({ ok: true, name: 'Ana Lucía' });
+    expect(isValidAlias('Ana Lucía')).toBe(true);
+    expect(isValidAlias('  Ana   Lucía ')).toBe(false); // el servidor exige la forma limpia
+  });
+
+  it('Scenario: Formato inválido — largo, números y signos', () => {
+    expect(checkName('Al')).toEqual({ ok: false, problem: 'length' });
+    expect(checkName('   ')).toEqual({ ok: false, problem: 'length' });
+    expect(checkName('Abcdefghijklmnopq')).toEqual({ ok: false, problem: 'length' });
+    expect(checkName('Abcdefghijklmnop').ok).toBe(true);
+    for (const bad of ['Ana92', 'p3nd3j0', 'Ana_Lu', 'Ana!', 'Ana.Lu', 'Ana 🍄', 'Аnа', 'Ana×Lu']) expect(checkName(bad)).toEqual({ ok: false, problem: 'chars' });
+  });
+
+  it('letras latinas con tildes, ñ y ü valen', () => {
+    for (const ok of ['Ñandú Güemes', 'Zoë', 'José María', 'Ixchel', 'Brisa del Musgo']) expect(checkName(ok).ok).toBe(true);
+  });
+
+  it('Scenario: Nombre no permitido — con tildes, mayúsculas, espacios o letras repetidas', () => {
+    for (const bad of ['puta', 'PÚTA', 'P u t a', 'P u u t a', 'Puuuuta', 'Hijueputa', 'Shit Happens', 'mi Pene', 'Pe ne', 'Admin', 'El Nazi'])
+      expect(checkName(bad), bad).toEqual({ ok: false, problem: 'blocked' });
+  });
+
+  it('sin falsos positivos en nombres comunes', () => {
+    for (const ok of ['Vergara', 'Nazario', 'Penélope', 'Maricarmen', 'Escoger', 'Vehículo', 'Dickens', 'Grapefruit', 'Kiki', 'Xochitl', 'Anabel', 'Pitágoras', 'Peacock'])
+      expect(checkName(ok).ok, ok).toBe(true);
+  });
+
+  it('todos los alias generados siguen siendo válidos', () => {
+    for (const n of es.leaderboard.alias.names) for (const [a, p] of es.leaderboard.alias.places) expect(isValidAlias(`${n} ${a} ${p}`)).toBe(true);
   });
 });
 
