@@ -12,4 +12,4 @@
 - [x] 3.2 Humo: escribir un nombre, error y registro; `npm run test`, `npm run build`; capturas `docs/screenshots/038-*`.
 
 ## 4. Cierre
-- [ ] 4.1 Fusionar el delta y archivar.
+- [x] 4.1 Fusionar el delta y archivar.

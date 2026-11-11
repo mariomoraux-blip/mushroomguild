@@ -1,7 +1,7 @@
 # leaderboard
 
 ## Purpose
-Ranking global: jugador reconocido por el dispositivo, alias generado, registro y envío de victorias, verificación en el servidor rejugando el `ScoreResult`, pantalla «Ranking», sin conexión y temporadas por `SCORE_VERSION`. Origen: cambio 036 (archivado). Implementado en `src/rules/verify.ts`, `src/rules/alias.ts`, `src/leaderboard.ts`, `src/api-types.ts`, `src/store.ts`, `src/ui/screens.ts`, `src/ui/story.ts`, `src/ui/sheet.ts` y `server/` (publicado en `/api` por `scripts/build-vercel.mjs`, con Upstash Redis).
+Ranking global: jugador reconocido por el dispositivo, nombre en el gremio (alias generado o escrito), registro y envío de victorias, verificación en el servidor rejugando el `ScoreResult`, pantalla «Ranking», sin conexión y temporadas por `SCORE_VERSION`. Origen: cambio 036 (archivado); el 038 agregó el nombre escrito. Implementado en `src/rules/verify.ts`, `src/rules/alias.ts`, `src/rules/blocklist.ts`, `src/leaderboard.ts`, `src/api-types.ts`, `src/store.ts`, `src/ui/screens.ts`, `src/ui/story.ts`, `src/ui/sheet.ts` y `server/` (publicado en `/api` por `scripts/build-vercel.mjs`, con Upstash Redis).
 
 ## Requirements
 
@@ -21,15 +21,27 @@ El juego SHALL reconocer al jugador por una clave anónima creada en el disposit
 - WHEN `localStorage` lanza un error
 - THEN la carta de victoria no ofrece «Registra tu puntaje» y no hay errores sin manejar
 
-### Requirement: Alias generado
-El nombre del jugador SHALL ser un alias generado de la forma «<nombre> del/de la <lugar>», con las listas en `src/copy/es.ts`. «Otro nombre» SHALL sortear otro. El jugador no SHALL poder escribir texto libre; el servidor SHALL rechazar un alias que no salga de las listas. Dos jugadores pueden compartir alias. El alias se puede cambiar desde el ranking sin perder el puntaje.
+### Requirement: Nombre en el gremio
+El nombre del jugador SHALL ser un alias generado de la forma «<nombre> del/de la <lugar>», con las listas de `src/copy/es.ts`, o un nombre que el jugador escribe. «Otro nombre» SHALL sortear otro alias; «Escribir el mío» SHALL mostrar un campo de texto y «Elegir uno del gremio» SHALL volver a los alias. Un nombre escrito SHALL tener de 3 a 16 caracteres, solo letras latinas (con tildes, ñ y ü) y espacios. Se recortan los espacios de los extremos y los repetidos. No SHALL contener ninguna palabra de la lista negra (`src/rules/blocklist.ts`), comparada sin tildes, mayúsculas, espacios ni letras repetidas. La hoja SHALL explicar el error junto al campo sin borrar lo escrito. El servidor SHALL rechazar con 400 un nombre que no sea un alias generado ni un nombre escrito válido. Dos jugadores pueden compartir nombre. El nombre se puede cambiar desde el ranking sin perder el puntaje.
 
 #### Scenario: Sortear
 - WHEN el jugador abre «Tu nombre en el gremio» y pulsa «Otro nombre»
 - THEN ve un alias distinto, formado con las listas del juego
 
-#### Scenario: Alias inventado
-- WHEN llega al servidor el alias «xXx»
+#### Scenario: Escribir el nombre
+- WHEN el jugador pulsa «Escribir el mío», escribe «  Ana   Lucía » y pulsa «Registrar»
+- THEN su nombre en el ranking es «Ana Lucía»
+
+#### Scenario: Formato inválido
+- WHEN el jugador escribe «Ana92» o «Al»
+- THEN la hoja dice qué falta, sigue abierta con lo escrito y no se envía nada
+
+#### Scenario: Nombre no permitido
+- WHEN el jugador escribe un nombre que contiene una palabra de la lista negra, aunque sea con tildes, mayúsculas, espacios o letras repetidas
+- THEN la hoja dice «Ese nombre no está permitido en el gremio. Prueba con otro.»
+
+#### Scenario: Nombre inválido en el servidor
+- WHEN llega al servidor el nombre «Ana92» o uno de la lista negra
 - THEN la respuesta es 400 y no se guarda nada
 
 ### Requirement: Registrar un puntaje
