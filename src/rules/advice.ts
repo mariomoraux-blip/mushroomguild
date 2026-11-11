@@ -1,11 +1,12 @@
 import { validTargets } from './actions';
 import { COST, RECRUITABLE } from './config';
 import { hasSpecies, magicSpent, motherTile, motherTrees, neighbors, recruitCost, revivedCount, workerAt } from './state';
-import type { GameState, Member, RecruitableSpecies, Spell, Tile } from './types';
+import type { Choice, GameState, Member, Puff, RecruitableSpecies, Spell, Tile } from './types';
 
 /** Siguiente paso sugerido al jugador (player-guidance). */
 export type Advice =
-  | { kind: 'awaken' | 'revive' | 'decompose' | 'heal' | 'cleanse' | 'breakRock' | 'puff'; memberId: number; target: Tile }
+  | { kind: 'awaken' | 'revive' | 'decompose' | 'heal' | 'cleanse' | 'breakRock'; memberId: number; target: Tile }
+  | { kind: 'puff'; memberId: number; target: Tile; puff: Puff }
   | { kind: 'call'; memberId: number; target: Tile; calledId: number }
   | { kind: 'weave'; memberId: number; target: Tile; toward: 'tree' | 'mother' }
   | { kind: 'spell'; memberId: number; target: Tile; spell: Spell }
@@ -186,9 +187,10 @@ function adviseWork(s: GameState, o: PolicyOptions): Advice {
     if (t) return { kind: 'cleanse', memberId: m.id, target: t };
   }
   for (const m of of('lycoperdon')) {
-    if (!sporesWanted(s)) break;
-    const t = closest(targetsOf(m), mother);
-    if (t) return { kind: 'puff', memberId: m.id, target: t };
+    const puff = puffPick(s);
+    if (!puff) break;
+    const t = closest(validTargets(s, m.id, puff), mother);
+    if (t) return { kind: 'puff', memberId: m.id, target: t, puff };
   }
   return { kind: 'endMonth' };
 }
@@ -209,6 +211,21 @@ function shortcutRock(s: GameState, rocks: readonly Tile[], goal: Tile): Tile | 
   }
   return best?.t;
 }
+
+/**
+ * Qué conviene que haga Pompón (040): con el gremio completo, abonar con las esporas que sobran (guarda una si hay
+ * Gliophorus o Ganoderma); si no, soplar cuando hay en qué gastar esporas.
+ */
+function puffPick(s: GameState): Puff | null {
+  if (recruitCost(s) === null) {
+    const keep = hasSpecies(s, 'gliophorus') || hasSpecies(s, 'ganoderma') ? 1 : 0;
+    return s.spores >= COST.compost + keep ? 'nutrients' : null;
+  }
+  return sporesWanted(s) ? 'spores' : null;
+}
+
+/** Hechizo o cambio de un consejo, para `act` (040). */
+export const adviceChoice = (a: Advice): Choice | undefined => (a.kind === 'spell' ? a.spell : a.kind === 'puff' ? a.puff : undefined);
 
 /**
  * Hay en qué gastar esporas (039): cupo para reclutar, o una Gliophorus o un Ganoderma en el gremio. Así el

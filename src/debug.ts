@@ -10,6 +10,13 @@ const presets: Record<string, () => GameState> = {
     (['gliophorus', 'morchella', 'ganoderma'] as RecruitableSpecies[]).forEach((sp) => (s = recruit(s, sp).state));
     return endMonth(s).state;
   },
+  /** Pompón listo, con árboles vivos, 1 nutriente y 2 esporas: puede soplar o abonar (040). */
+  pompon: () => {
+    let s: GameState = { ...newGame(), spores: 10 };
+    const tiles = s.tiles.map((t) => (t.kind === 'tree' && (t.x + t.y) % 2 === 0 ? { ...t, alive: true, net: true } : t));
+    s = recruit({ ...s, tiles }, 'lycoperdon').state;
+    return { ...endMonth(s).state, nutrients: 1, spores: 2 };
+  },
   /** Maestra Bruma llega al terminar el mes (carta de su llegada). */
   mageNextMonth: () => ({ ...newGame(), tiles: newGame().tiles.map((t) => (t.kind === 'tree' && (t.x + t.y) % 2 === 0 ? { ...t, alive: true, net: true } : t)), mageDue: true }),
   /** A un toque de ganar: 3 árboles vivos, 10 nutrientes y la red tocando al Árbol Padre (carta de victoria). */

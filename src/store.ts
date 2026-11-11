@@ -22,9 +22,9 @@ import {
   validTargets,
   type GameState,
   type ScoreResult,
+  type Choice,
   type RecruitableSpecies,
   type SpeciesId,
-  type Spell,
   type Advice,
   type Resource,
   type Tile,
@@ -80,7 +80,8 @@ export interface UiState {
   /** Miembro seleccionado. */
   readonly selected: number | null;
   /** Hechizo elegido para Maestra Bruma. */
-  readonly spell: Spell | null;
+  /** Hechizo de Maestra Bruma o cambio de Pompón elegido en su hoja (040). */
+  readonly spell: Choice | null;
   readonly sheet: Sheet | null;
   /** Carta de historia abierta sobre el tablero. */
   readonly story: Story | null;
@@ -106,7 +107,7 @@ export interface AppState {
 
 export type Action =
   | { type: 'select'; id: number }
-  | { type: 'chooseSpell'; spell: Spell }
+  | { type: 'chooseSpell'; spell: Choice }
   | { type: 'tapTile'; x: number; y: number }
   | { type: 'recruit'; species: RecruitableSpecies }
   | { type: 'endMonth' }
@@ -158,7 +159,7 @@ export function adviceText(game: GameState, a: Advice): string {
     case 'breakRock':
       return es.advice.breakRock(name);
     case 'puff':
-      return es.advice.puff(name);
+      return a.puff === 'nutrients' ? es.advice.compost(name) : es.advice.puff(name);
     case 'weave':
       return a.toward === 'tree' ? es.advice.weaveTree(name) : es.advice.weaveMother(name);
     case 'call':
@@ -206,7 +207,7 @@ export function suggestedTile(state: AppState): Tile | null {
   if (!hintsOn(state.game)) return null;
   const a = advise(state.game);
   if (!('memberId' in a) || a.memberId !== state.ui.selected) return null;
-  if (a.kind === 'spell' && a.spell !== state.ui.spell) return null;
+  if ((a.kind === 'spell' && a.spell !== state.ui.spell) || (a.kind === 'puff' && a.puff !== state.ui.spell)) return null;
   return a.target;
 }
 
@@ -286,10 +287,14 @@ function sheetSpecies(game: GameState, sheet: Sheet): SpeciesId | null {
 const pickHint = (state: AppState, id: number, name: string): string =>
   suggestedMember(state) === id ? es.advice.pickTile(name) : es.hints.pickTile(name);
 
-/** ¿Está abierta la ficha de Maestra Bruma seleccionada, todavía sin hechizo? */
+/** Maestra Bruma y Pompón (040) eligen primero (hechizo o cambio) y después la casilla. */
+export const choosesFirst = (species?: string): boolean => species === 'mago' || species === 'lycoperdon';
+const pickChoice = (m: { species: string; name: string }) => (m.species === 'mago' ? es.hints.pickSpell(m.name) : es.hints.pickPuff(m.name));
+
+/** ¿Está abierta la ficha de Maestra Bruma (o Pompón) seleccionada, todavía sin elegir? */
 function mageCardOpen(state: AppState): boolean {
   const { game, ui } = state;
-  return ui.sheet?.kind === 'member' && ui.selected === ui.sheet.id && !ui.spell && member(game, ui.sheet.id)?.species === 'mago';
+  return ui.sheet?.kind === 'member' && ui.selected === ui.sheet.id && !ui.spell && choosesFirst(member(game, ui.sheet.id)?.species);
 }
 
 /** Al cerrar una hoja: la del hechizo cancela la selección; la ficha dla maga da paso a elegir el hechizo. */
@@ -299,7 +304,7 @@ function afterSheet(state: AppState): AppState {
   if (sheet?.kind === 'spell') return { game, ui: { ...ui, sheet: null, selected: null } };
   if (sheet?.kind === 'member' && ui.selected === sheet.id) {
     const m = member(game, sheet.id);
-    if (m?.species === 'mago' && !ui.spell && !idleReason(game, m.id)) return { game, ui: { ...ui, sheet: { kind: 'spell' } } };
+    if (choosesFirst(m?.species) && !ui.spell && !idleReason(game, m!.id)) return { game, ui: { ...ui, sheet: { kind: 'spell' } } };
   }
   return { game, ui: { ...ui, sheet: null } };
 }
@@ -309,7 +314,7 @@ export function highlighted(state: AppState): Tile[] {
   const { selected, spell } = state.ui;
   if (selected === null) return [];
   const m = member(state.game, selected);
-  if (!m || (m.species === 'mago' && !spell)) return [];
+  if (!m || (choosesFirst(m.species) && !spell)) return [];
   return validTargets(state.game, selected, spell ?? undefined);
 }
 
@@ -333,12 +338,12 @@ export function reduce(state: AppState, action: Action): AppState {
       // La ficha nunca se abre sola (022): la primera vez, la bitácora invita a tocar "Ficha" (que lleva un punto).
       const pick = ui.seen.includes(m.species) ? pickHint(state, m.id, m.name) : es.hints.meetCard(m.name);
       if (idle) return { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: warn(es.idleLine(m.name, es.idle[idle]), idleShort(idle)) } };
-      if (m.species === 'mago') return { game, ui: { ...ui, selected: m.id, spell: null, sheet: { kind: 'spell' }, notice: info(es.hints.pickSpell(m.name)) } };
+      if (choosesFirst(m.species)) return { game, ui: { ...ui, selected: m.id, spell: null, sheet: { kind: 'spell' }, notice: info(pickChoice(m)) } };
       return { game, ui: { ...ui, selected: m.id, spell: null, sheet: null, notice: info(pick) } };
     }
     case 'chooseSpell': {
       const m = ui.selected === null ? undefined : member(game, ui.selected);
-      if (!m || m.species !== 'mago') return state;
+      if (!m || !choosesFirst(m.species)) return state;
       return { game, ui: { ...ui, spell: action.spell, sheet: null, notice: info(es.hints.pickTile(m.name)) } };
     }
     case 'tapTile': {
@@ -351,12 +356,12 @@ export function reduce(state: AppState, action: Action): AppState {
       }
       const m = member(game, ui.selected);
       if (!m) return state;
-      if (m.species === 'mago' && !ui.spell) {
-        return { game, ui: { ...ui, sheet: { kind: 'spell' }, notice: info(es.hints.pickSpell(m.name)) } };
+      if (choosesFirst(m.species) && !ui.spell) {
+        return { game, ui: { ...ui, sheet: { kind: 'spell' }, notice: info(pickChoice(m)) } };
       }
       const c = check(game, m.id, action.x, action.y, ui.spell ?? undefined);
       if (!c.ok) return { game, ui: { ...ui, notice: warn(c.reason, c.short) } };
-      const r = act(game, m.id, action.x, action.y);
+      const r = act(game, m.id, action.x, action.y, ui.spell ?? undefined);
       return { game: r.state, ui: advance(game, r.state, cleared(ui, info(r.message))) };
     }
     case 'recruit': {

@@ -65,9 +65,9 @@ export function mountFlyers(store: Store, board: HTMLElement, tileSize: () => nu
     if (reducedMotion()) return;
     const fx = effects.find((e) => e.kind === 'spores');
     if (!fx || fx.kind !== 'spores') return;
-    const pieces = fx.leaves ? Math.floor(MAX_FLYERS / 2) : MAX_FLYERS;
-    fly(fx.from.slice(0, pieces), 'spores', 'fx-spore', fx.amount);
-    if (fx.leaves) fly(fx.from.slice(0, pieces), 'nutrients', 'fx-leaf', fx.leaves, FLY_STAGGER / 2);
+    const pieces = fx.leaves && fx.amount ? Math.floor(MAX_FLYERS / 2) : MAX_FLYERS;
+    if (fx.amount) fly(fx.from.slice(0, pieces), 'spores', 'fx-spore', fx.amount);
+    if (fx.leaves) fly(fx.from.slice(0, pieces), 'nutrients', 'fx-leaf', fx.leaves, fx.amount ? FLY_STAGGER / 2 : 0);
   });
 
   /** Vuela una pieza desde cada casilla hasta el ícono del contador; la primera que llega pone el «+n». */

@@ -115,7 +115,7 @@ export function replay(mapId: string, level: Level, log: readonly LoggedAction[]
   let s = startOf(mapId, level);
   if (!s) throw new Error(`No se puede reconstruir el claro ${mapId}`);
   for (const a of log) {
-    if (a.type === 'act') s = act(s, a.memberId, a.x, a.y).state;
+    if (a.type === 'act') s = act(s, a.memberId, a.x, a.y, a.spell).state;
     else if (a.type === 'recruit') s = recruit(s, a.species).state;
     else s = endMonth(s).state;
   }

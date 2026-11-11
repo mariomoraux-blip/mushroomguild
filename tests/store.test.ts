@@ -71,6 +71,33 @@ describe('Requirement: Hechizos dla maga', () => {
   });
 });
 
+describe('Pompón elige qué cambiar (040)', () => {
+  const withPompon = () => init(setup({ nutrients: 1, spores: 2, alive: [{ x: 4, y: 6 }], extraMembers: ['lycoperdon'] }));
+
+  it('Scenario: Se elige como un hechizo — se abre la hoja y no se resalta nada', () => {
+    const s0 = withPompon();
+    const s = run(s0, { type: 'select', id: idOf(s0.game, 'lycoperdon') });
+    expect(s.ui.sheet).toEqual({ kind: 'spell' });
+    expect(s.ui.notice.text).toBe(es.hints.pickPuff(s.game.members.at(-1)!.name));
+    expect(pts(s)).toEqual([]);
+  });
+
+  it('abonar: elegir «Abonar el árbol» y tocar el árbol vivo cambia 2 esporas por 1 nutriente', () => {
+    const s0 = withPompon();
+    const s = run(s0, { type: 'select', id: idOf(s0.game, 'lycoperdon') }, { type: 'chooseSpell', spell: 'nutrients' });
+    expect(pts(s)).toEqual([{ x: 4, y: 6 }]);
+    const done = run(s, { type: 'tapTile', x: 4, y: 6 });
+    expect([done.game.nutrients, done.game.spores]).toEqual([2, 0]);
+    expect(done.ui.notice.text).toBe(es.log.composted(s.game.members.at(-1)!.name, 1));
+  });
+
+  it('soplar sigue igual: 1 nutriente por 2 esporas', () => {
+    const s0 = withPompon();
+    const s = run(s0, { type: 'select', id: idOf(s0.game, 'lycoperdon') }, { type: 'chooseSpell', spell: 'spores' }, { type: 'tapTile', x: 4, y: 6 });
+    expect([s.game.nutrients, s.game.spores]).toEqual([0, 4]);
+  });
+});
+
 describe('Requirement: Feedback de acción inválida', () => {
   it('Scenario: Toque en una casilla no válida — motivo exacto de check() y el miembro sigue seleccionado', () => {
     const s = run(init(), { type: 'select', id: INDI }, { type: 'tapTile', x: 0, y: 0 });

@@ -17,7 +17,7 @@ export interface Recipe {
   readonly after: readonly Piece[];
   readonly chips: readonly Chip[];
   readonly label: string;
-  /** Nombre del hechizo, arriba de la tira (Maestra Bruma). */
+  /** Nombre del hechizo o del cambio, arriba de la tira (Maestra Bruma y Pompón). */
   readonly title?: string;
 }
 
@@ -37,7 +37,11 @@ export const RECIPES: Readonly<Record<SpeciesId, readonly Recipe[]>> = {
     chips: [{ icon: 'nutrients', n: -COST.revive }, { icon: 'spores', n: -COST.heal }],
     label: es.recipe.ganoderma,
   }],
-  lycoperdon: [{ before: [{ ground: 'net', object: 'alive', valid: true }], after: [{ ground: 'net', object: 'alive' }], chips: [{ icon: 'nutrients', n: -COST.puff }, { icon: 'spores', n: GAIN.puff }], label: es.recipe.lycoperdon }],
+  // 040: Pompón tiene una receta por cambio, como Maestra Bruma.
+  lycoperdon: [
+    { before: [{ ground: 'net', object: 'alive', valid: true }], after: [{ ground: 'net', object: 'alive' }], chips: [{ icon: 'nutrients', n: -COST.puff }, { icon: 'spores', n: GAIN.puff }], label: es.recipe.lycoperdon, title: es.puffs.spores },
+    { before: [{ ground: 'net', object: 'alive', valid: true }], after: [{ ground: 'net', object: 'alive' }], chips: [{ icon: 'spores', n: -COST.compost }, { icon: 'nutrients', n: GAIN.compost }], label: es.recipe.compost, title: es.puffs.nutrients },
+  ],
   gliophorus: [{ before: [{ member: 'champi', tired: true }], after: [{ member: 'champi', tired: false }], chips: [{ icon: 'spores', n: -COST.call }], label: es.recipe.gliophorus }],
   mago: [
     { before: [NET, { ground: 'grass', object: 'rock', valid: true }], after: [NET, NET], chips: [], label: es.recipe.sprout, title: es.spells.sprout },
@@ -94,6 +98,6 @@ export function recipe(r: Recipe, seasonIndex: number, delay = 0): HTMLElement {
   return node;
 }
 
-/** Las recetas de una especie (Maestra Bruma, dos). */
+/** Las recetas de una especie (Maestra Bruma y Pompón, dos). */
 export const recipesFor = (species: SpeciesId, seasonIndex: number, delay = 0): HTMLElement[] =>
   RECIPES[species].map((r, i) => recipe(r, seasonIndex, delay + i * RECIPE_STAGGER));

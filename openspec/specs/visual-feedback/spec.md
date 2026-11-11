@@ -32,6 +32,10 @@ Cada acción válida SHALL tener una animación de 400 ms o menos que muestre su
 - WHEN el Lycoperdon sopla esporas
 - THEN una nube de esporas sale del árbol y vuela al contador de esporas
 
+#### Scenario: Abonar el árbol
+- WHEN el Lycoperdon abona un árbol
+- THEN unas hojas salen del árbol y vuelan al contador de nutrientes
+
 ### Requirement: Esporas al contador
 Al empezar el mes, por cada árbol vivo (hasta 12) SHALL volar una espora al contador de esporas del HUD, que da un saltito al recibirlas. Con la Lluvia de esporas, las esporas salen del árbol del hechizo.
 
