@@ -142,7 +142,7 @@ export function levelMap(seed: number, level: Level): readonly string[] {
   if (known === '-') return fallback();
   const hit = known
     ? levelAttempt(seed, level, (_map, i) => i === parseInt(known, 36))
-    : levelAttempt(seed, level, (map) => reachable(map) && playExpert(newGame(map, 'custom', level)).status === 'won', MAP_GEN.levelAttemptsOutside);
+    : levelAttempt(seed, level, (map) => reachable(map) && playExpert(newGame(map, `seed-${seed}`, level)).status === 'won', MAP_GEN.levelAttemptsOutside);
   return hit?.map ?? fallback();
 }
 

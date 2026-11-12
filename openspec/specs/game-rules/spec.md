@@ -201,8 +201,8 @@ Si termina el mes 12 sin victoria, la partida SHALL terminar en estado `lost` si
 ### Requirement: Dificultad medida
 El balance SHALL verificarse por simulación en 100 mapas generados por nivel, con semillas fijas (en Bosque y Ancestral, las certificadas de la tabla precalculada):
 - **Brote:** la política de las pistas gana el 100 % de los mapas aceptados con un mes medio entre 8 y 10, y un bot que juega al azar gana entre el 5 % y el 30 %.
-- **Bosque:** el bot experto gana el 100 % de los mapas aceptados, la política de las pistas gana entre el 55 % y el 70 %, y el bot al azar gana como máximo el 10 %.
-- **Ancestral:** el bot experto gana el 100 % de los mapas aceptados, la política de las pistas gana entre el 10 % y el 25 %, y el bot al azar gana como máximo el 5 %.
+- **Bosque:** el bot experto gana el 100 % de los mapas aceptados, la política de las pistas gana entre el 35 % y el 50 %, y el bot al azar gana como máximo el 10 %.
+- **Ancestral:** el bot experto gana el 100 % de los mapas aceptados, la política de las pistas gana entre el 10 % y el 20 %, y el bot al azar gana como máximo el 5 %.
 
 Generar un claro de Bosque o Ancestral de la tabla certificada SHALL tardar menos de 300 ms en un teléfono de gama media; uno fuera de la tabla (solo con `?seed=` mayor que 1000) SHALL tardar menos de 800 ms.
 
@@ -217,17 +217,17 @@ Cada partida SHALL jugarse en uno de tres niveles: Brote, Bosque o Ancestral. El
 | | Brote | Bosque | Ancestral |
 | --- | --- | --- | --- |
 | Rocas | 6 | 9 | 11 |
-| Escarcha | — | Otoño | Otoño e Invierno |
-| Se apaga un árbol al final del mes | — | 6 | 3, 5, 7, 9 y 11 |
+| Escarcha | — | Otoño e Invierno | Otoño e Invierno |
+| Se apaga un árbol al final del mes | — | 4 y 6 | 2, 3, 5, 7, 9 y 11 |
 | El gremio come 1 nutriente al terminar el mes | — | Otoño e Invierno | Otoño e Invierno |
 | Los árboles no dan esporas | — | Invierno | Invierno |
-| Plaga (una casilla tejida por estación) | — | — | Otoño e Invierno |
+| Plaga (una casilla tejida por estación) | — | Invierno | Otoño e Invierno |
 | Árboles revividos que pide el Árbol Padre | 3 | 3 | 4 |
 | Nutrientes del Árbol Padre | 10 | 11 | 13 |
 | Pistas | sí | sí | no |
 | Multiplicador | ×1 | ×1,5 | ×2 |
 
-Ninguna regla de nivel SHALL quitar árboles vivos. La red solo cambia por las acciones del jugador y por la plaga de Ancestral, que quita a lo más una casilla tejida al terminar un mes. Las esporas y los nutrientes solo cambian por las acciones del jugador, la producción de los árboles y lo que come el gremio en otoño e invierno.
+Ninguna regla de nivel SHALL quitar árboles vivos. La red solo cambia por las acciones del jugador y por la plaga de Bosque y Ancestral, que quita a lo más una casilla tejida al terminar un mes. Las esporas y los nutrientes solo cambian por las acciones del jugador, la producción de los árboles y lo que come el gremio en otoño e invierno.
 
 #### Scenario: Brote es el juego de siempre
 - WHEN se juega en Brote
@@ -251,7 +251,8 @@ En las estaciones con escarcha del nivel, tejer SHALL costar 2 nutrientes en vez
 
 #### Scenario: Invierno en Bosque
 - WHEN empieza el mes 10 (Invierno) en Bosque
-- THEN tejer vuelve a costar 1 nutriente
+- THEN tejer sigue costando 2 nutrientes
+- AND WHEN empieza el mes 4 (Verano) THEN tejer cuesta 1 nutriente
 
 ### Requirement: Temporadas frías
 En Bosque y Ancestral, al terminar cada mes de Otoño e Invierno el gremio SHALL comer 1 nutriente en total, después de sumar lo que dan los árboles. Si no hay, el primer miembro en llegar al gremio que no sea Maestra Bruma SHALL empezar el mes siguiente descansando, con hambre; los nutrientes nunca bajan de 0. Terminar el mes 12 no hace comer al gremio. En Invierno, lo que dan los árboles al empezar el mes SHALL ser solo nutrientes; la Lluvia de esporas sigue dando esporas.
@@ -281,7 +282,7 @@ En Bosque y Ancestral, al terminar cada mes de Otoño e Invierno el gremio SHALL
 - THEN el gremio no come y los árboles dan esporas y nutrientes como siempre
 
 ### Requirement: Plaga
-En Ancestral, al empezar el otoño y el invierno (meses 7 y 10) la plaga SHALL marcar una casilla tejida de la red (tierra de la red; nunca el Hogar, un árbol ni el Árbol Padre): una de las más cercanas al Árbol Padre en pasos en cruz, elegida al azar con el claro y el mes (la misma partida marca siempre la misma). La casilla SHALL seguir con plaga hasta que termine un mes en que algún hongo trabajó a 2 casillas o menos de ella (pasos en cruz; cualquier miembro, también Maestra Bruma). Al terminar un mes sin hongos cerca, una casilla con plaga aún tejida SHALL marchitarse: sale de la red y sigue con plaga; una ya marchita sigue igual. Mientras tenga plaga, el Lactarius no SHALL poder tejerla. Al terminar un mes con un hongo cerca, la plaga se va: si la casilla seguía tejida sigue en la red (los hongos la frenaron) y si estaba marchita vuelve a ser tierra, que se puede tejer otra vez a su costo (los hongos la limpiaron). La plaga del otoño SHALL poder seguir cuando el invierno marca otra casilla; la nueva se elige entre las casillas tejidas sin plaga. Sin casillas tejidas, no se marca ninguna. Brote y Bosque no tienen plaga.
+En las estaciones con plaga del nivel (Bosque: invierno; Ancestral: otoño e invierno), al empezar la estación (mes 7 o 10) la plaga SHALL marcar una casilla tejida de la red (tierra de la red; nunca el Hogar, un árbol ni el Árbol Padre): una de las más cercanas al Árbol Padre en pasos en cruz, elegida al azar con el claro y el mes (la misma partida marca siempre la misma). La casilla SHALL seguir con plaga hasta que termine un mes en que algún hongo trabajó a 2 casillas o menos de ella (pasos en cruz; cualquier miembro, también Maestra Bruma). Al terminar un mes sin hongos cerca, una casilla con plaga aún tejida SHALL marchitarse: sale de la red y sigue con plaga; una ya marchita sigue igual. Mientras tenga plaga, el Lactarius no SHALL poder tejerla. Al terminar un mes con un hongo cerca, la plaga se va: si la casilla seguía tejida sigue en la red (los hongos la frenaron) y si estaba marchita vuelve a ser tierra, que se puede tejer otra vez a su costo (los hongos la limpiaron). La plaga del otoño SHALL poder seguir cuando el invierno marca otra casilla; la nueva se elige entre las casillas tejidas sin plaga. Sin casillas tejidas, no se marca ninguna. Brote no tiene plaga.
 
 #### Scenario: La plaga marca
 - WHEN empieza el mes 7 en Ancestral con la red tejida en (2,6), (2,5), (2,4) y (2,3) del mapa clásico
@@ -297,8 +298,12 @@ En Ancestral, al empezar el otoño y el invierno (meses 7 y 10) la plaga SHALL m
 - THEN la casilla sigue en la red y la bitácora dice "Los hongos frenaron la plaga."
 
 #### Scenario: Bosque sin plaga
-- WHEN empieza el mes 7 o el 10 en Bosque
+- WHEN empieza el mes 7 en Bosque o cualquier mes en Brote
 - THEN no se marca ninguna casilla
+
+#### Scenario: Plaga del invierno en Bosque
+- WHEN empieza el mes 10 en Bosque con casillas tejidas
+- THEN la plaga marca una casilla tejida, como en Ancestral
 
 #### Scenario: No se puede tejer
 - WHEN el Lactarius intenta tejer una casilla marchita con plaga
@@ -315,25 +320,6 @@ En Ancestral, al empezar el otoño y el invierno (meses 7 y 10) la plaga SHALL m
 #### Scenario: Dos plagas
 - WHEN empieza el mes 10 en Ancestral y la casilla que marcó el otoño sigue marchita
 - THEN la plaga marca otra casilla tejida y las dos tienen plaga
-
-### Requirement: Árboles marcados
-Al empezar un mes en el que el nivel apaga un árbol, el juego SHALL marcar el árbol gris (ni vivo ni apagado) más lejano de la red: el de mayor distancia en pasos ortogonales desde la red sin atravesar rocas; si hay empate, el de la fila más alta y después el de la columna menor. Si al terminar ese mes el árbol marcado sigue gris, SHALL apagarse. Revivirlo durante ese mes lo salva. Revivir un árbol apagado SHALL costar 7 nutrientes. Si no queda ningún árbol gris sin apagar, no se marca ninguno.
-
-#### Scenario: Se marca el más lejano
-- WHEN empieza el mes 6 en Bosque
-- THEN el árbol gris más lejano de la red queda marcado
-
-#### Scenario: Se apaga
-- WHEN termina el mes 6 en Bosque y el árbol marcado sigue gris
-- THEN el árbol queda apagado y revivirlo cuesta 7 nutrientes
-
-#### Scenario: Se salva
-- WHEN la Amanita revive el árbol marcado durante el mes 6
-- THEN el árbol queda vivo y no se apaga ningún otro al terminar el mes
-
-#### Scenario: Ancestral, cinco veces
-- WHEN se juega Ancestral sin revivir los árboles marcados
-- THEN al terminar los meses 3, 5, 7, 9 y 11 se apaga un árbol cada vez
 
 ### Requirement: Romper rocas (Morchella esculenta)
 La Morchella esculenta SHALL, por 2 nutrientes, convertir en tierra sin tejer una roca vecina a la red. La casilla queda fuera de la red y después se puede tejer. La escarcha no cambia su costo.
@@ -420,3 +406,26 @@ La Amanita muscaria SHALL despertar al Árbol Padre si este toca la red y hay lo
 - WHEN en Ancestral la Amanita muscaria intenta despertar al Árbol Padre con 4 árboles revividos y 12 nutrientes
 - THEN la acción se rechaza con "El Árbol Padre necesita 13 nutrientes."
 - AND con 13 nutrientes lo despierta y gana
+
+### Requirement: Árboles que se apagan
+Al empezar un mes en el que el nivel apaga un árbol, el juego SHALL marcar el árbol gris (ni vivo ni apagado) más lejano de la red: el de mayor distancia en pasos ortogonales desde la red sin atravesar rocas; si hay empate, el de la fila más alta y después el de la columna menor. Si al terminar ese mes el árbol marcado sigue gris, SHALL apagarse. Revivirlo durante ese mes lo salva. Revivir un árbol apagado SHALL costar 7 nutrientes. Si no queda ningún árbol gris sin apagar, no se marca ninguno.
+
+#### Scenario: Se marca el más lejano
+- WHEN empieza el mes 6 en Bosque
+- THEN el árbol gris más lejano de la red queda marcado
+
+#### Scenario: Se apaga
+- WHEN termina el mes 6 en Bosque y el árbol marcado sigue gris
+- THEN el árbol queda apagado y revivirlo cuesta 7 nutrientes
+
+#### Scenario: Se salva
+- WHEN la Amanita revive el árbol marcado durante el mes 6
+- THEN el árbol queda vivo y no se apaga ningún otro al terminar el mes
+
+#### Scenario: Bosque, dos veces
+- WHEN se juega Bosque sin revivir los árboles marcados
+- THEN al terminar los meses 4 y 6 se apaga un árbol cada vez
+
+#### Scenario: Ancestral, seis veces
+- WHEN se juega Ancestral sin revivir los árboles marcados
+- THEN al terminar los meses 2, 3, 5, 7, 9 y 11 se apaga un árbol cada vez

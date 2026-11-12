@@ -82,11 +82,13 @@ describe('Requirement: Escarcha', () => {
     expect(check(at('bosque', { month: 7, nutrients: 1 }), INDI, 3, 7)).toEqual({ ok: false, reason: 'Faltan 2 nutrientes para tejer con escarcha.', short: 'nutrients' });
   });
 
-  it('Scenario: Invierno en Bosque — tejer vuelve a costar 1; en Ancestral, el invierno sigue con escarcha y no se anuncia otra vez', () => {
-    expect(weaveCost(toMonth(at('bosque', { month: 9 }), 10))).toBe(1);
-    const { state, message } = endMonth(at('ancestral', { month: 9 }));
-    expect(weaveCost(state)).toBe(2);
-    expect(message).not.toContain(es.log.frostStart(2));
+  it('Scenario: Invierno en Bosque — (042) el invierno sigue con escarcha, no se anuncia otra vez, y en verano tejer cuesta 1', () => {
+    for (const level of ['bosque', 'ancestral'] as const) {
+      const { state, message } = endMonth(at(level, { month: 9 }));
+      expect(weaveCost(state)).toBe(2);
+      expect(message).not.toContain(es.log.frostStart(2));
+    }
+    expect(weaveCost(toMonth(at('bosque', { month: 3 }), 4))).toBe(1);
   });
 });
 
@@ -125,15 +127,27 @@ describe('Requirement: Árboles que se apagan', () => {
     expect(message).not.toContain(es.log.treeFaded(FADED_REVIVE));
   });
 
-  it('Scenario: Ancestral, cinco veces', () => {
-    let s = at('ancestral');
+  it('Scenario: Bosque, dos veces', () => {
+    let s = at('bosque');
     const faded: number[] = [];
     while (s.month < 12) {
       s = endMonth(s).state;
       faded.push(fadedCount(s));
     }
-    // Índice = mes que empieza − 2: se apaga al terminar los meses 3, 5, 7, 9 y 11 (034).
-    expect(faded).toEqual([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5]);
+    // Índice = mes que empieza − 2: se apaga al terminar los meses 4 y 6 (042: también el 4).
+    expect(faded).toEqual([0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2]);
+  });
+
+  it('Scenario: Ancestral, seis veces', () => {
+    // El mapa clásico tiene 5 árboles; este claro tiene 7, así que el sexto también se apaga.
+    let s = newGame(['.TM.T', 'T....', '..T..', '.....', 'T...T', '.....', '..T..', '..H..'], 'custom', 'ancestral');
+    const faded: number[] = [];
+    while (s.month < 12) {
+      s = endMonth(s).state;
+      faded.push(fadedCount(s));
+    }
+    // Índice = mes que empieza − 2: se apaga al terminar los meses 2, 3, 5, 7, 9 y 11 (034; 042: también el 2).
+    expect(faded).toEqual([0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6]);
   });
 
   it('sin árboles grises sin apagar, no se marca ninguno', () => {
