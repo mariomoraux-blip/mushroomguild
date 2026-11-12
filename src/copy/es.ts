@@ -271,7 +271,7 @@ export const es = {
     },
     ganoderma: {
       context: 'Boticaria tranquila y sabia, como el reishi de una taza de té. Cura de lejos con un hilo de micelio dorado.',
-      ability: `Revive árboles grises a ${HEAL_REACH} casillas o menos de la red, aunque la red no los toque. En Ancestral también limpia la plaga.`,
+      ability: `Revive árboles grises a ${HEAL_REACH} casillas o menos de la red, aunque la red no los toque. En Bosque y Ancestral también limpia la plaga.`,
       howTo: 'Tócala y después toca un árbol resaltado, cerca de la red pero no necesariamente junto a ella.',
       movement: `No camina: su hilo dorado alcanza ${HEAL_REACH} pasos en cruz desde la red, por encima de las rocas. El árbol curado entra a la red de un salto.`,
       nutrients: `Gasta ${COST.revive} nutrientes y ${plural(COST.heal, 'espora')} por árbol (${FADED_REVIVE} nutrientes si está apagado). Limpiar la plaga cuesta ${plural(COST.heal, 'espora')}. No despierta al Árbol Padre: eso es de la Amanita.`,
@@ -301,8 +301,8 @@ export const es = {
     names: { brote: 'Brote', bosque: 'Bosque', ancestral: 'Ancestral' },
     lines: {
       brote: 'El claro de siempre, con la ★ para guiarte.',
-      bosque: 'Más rocas, escarcha en otoño, un árbol que se apaga y un Árbol Padre más exigente.',
-      ancestral: 'Más rocas aún, escarcha hasta el final, cinco árboles que se apagan, plaga, un Árbol Padre aún más exigente y sin ★.',
+      bosque: 'Más rocas, escarcha en otoño e invierno, dos árboles que se apagan, plaga en invierno y un Árbol Padre más exigente.',
+      ancestral: 'Más rocas aún, escarcha hasta el final, seis árboles que se apagan, plaga desde el otoño, un Árbol Padre aún más exigente y sin ★.',
     },
     multiplier: (m: number) => `Puntaje ${times(m)}`,
     back: 'Volver a la portada',
@@ -363,7 +363,7 @@ export const es = {
     tilesTitle: 'Las casillas',
     tip: 'Si no sabes qué hacer, sigue la ★: marca el hongo sugerido y la casilla que acerca la red a tu meta.',
     levelsTitle: 'Bosque y Ancestral',
-    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En otoño e invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente). En invierno los árboles no dan esporas. Nunca se pierden los árboles vivos. En Ancestral, al empezar el otoño y el invierno la plaga marca una casilla tejida cerca del Árbol Padre: al terminar el mes se marchita si ningún hongo trabajó a ${PLAGUE_REACH} casillas o menos, y la plaga sigue ahí (no se puede tejer) hasta que un hongo trabaje así de cerca. En Ancestral no hay ★ y el Árbol Padre pide ${A.motherTrees} árboles revividos y ${plural(A.mother, 'nutriente')}.`,
+    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En otoño e invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente). En invierno los árboles no dan esporas. Nunca se pierden los árboles vivos. Al empezar el invierno en Bosque, y el otoño y el invierno en Ancestral, la plaga marca una casilla tejida cerca del Árbol Padre: al terminar el mes se marchita si ningún hongo trabajó a ${PLAGUE_REACH} casillas o menos, y la plaga sigue ahí (no se puede tejer) hasta que un hongo trabaje así de cerca. En Ancestral no hay ★ y el Árbol Padre pide ${A.motherTrees} árboles revividos y ${plural(A.mother, 'nutriente')}.`,
     start: '¡A jugar!',
   },
 
@@ -510,8 +510,8 @@ export const es = {
       'Si no hay, el primero en llegar al gremio se queda con hambre y descansa el mes siguiente.',
       'En invierno, los árboles no dan esporas.',
     ],
-    /** Regla extra de la carta en Ancestral (032). */
-    coldPlague: `Cada estación, la plaga marca una casilla de la red cerca del Árbol Padre: se marchita al terminar el mes si ningún hongo trabaja a ${PLAGUE_REACH} casillas o menos, y se queda hasta que uno lo haga.`,
+    /** Regla extra de la carta en los niveles con plaga (032; 042: Bosque solo en invierno). */
+    coldPlague: (winterOnly: boolean) => `${winterOnly ? 'Al empezar el invierno' : 'Cada estación'}, la plaga marca una casilla de la red cerca del Árbol Padre: se marchita al terminar el mes si ningún hongo trabaja a ${PLAGUE_REACH} casillas o menos, y se queda hasta que uno lo haga.`,
     coldOk: 'Seguir',
     wonTitle: '¡El bosque despertó!',
     wonText: (month: number) => `El Árbol Padre despertó en el mes ${month}.`,

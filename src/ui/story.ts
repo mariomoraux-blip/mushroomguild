@@ -108,7 +108,7 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
         art = el('div', { class: 'story__cast' }, ...GUILD.map((sp) => portrait(sp, 'reposo', season, 'md')));
         body.push(
           el('p', { class: 'story__text' }, es.story.coldText),
-          el('ul', { class: 'story__spells' }, ...[...es.story.coldRules, ...(LEVELS[g.level].plague.length ? [es.story.coldPlague] : [])].map((r) => el('li', {}, r))),
+          el('ul', { class: 'story__spells' }, ...[...es.story.coldRules, ...(LEVELS[g.level].plague.length ? [es.story.coldPlague(LEVELS[g.level].plague.every((season) => season === 3))] : [])].map((r) => el('li', {}, r))),
         );
         actions.push(button('close', es.story.coldOk, true));
         break;

@@ -701,7 +701,7 @@ test('Niveles: Elige tu dificultad con teclado, Ancestral sin ★, árbol marcad
   await expect(card).toHaveCount(0);
   await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
 
-  // Bosque: al empezar el mes 6 se marca un árbol; al terminarlo se apaga y empieza el otoño con escarcha.
+  // Bosque: al empezar el mes 6 se marca un árbol; al terminarlo se apaga y empieza el otoño con escarcha (042: el del mes 4 ya se apagó).
   await page.goto('/?nivel=bosque&seed=1');
   for (let m = 1; m < 6; m++) await page.locator('.end').click();
   await expect(page.locator('#notice')).toContainText('Este árbol se apagará al terminar el mes si nadie lo revive.');
@@ -714,7 +714,7 @@ test('Niveles: Elige tu dificultad con teclado, Ancestral sin ★, árbol marcad
   await expect(card).toHaveCount(0);
   await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', 'Otoño, con escarcha · Bosque');
   await expect(page.locator('.hud__frost')).toBeVisible();
-  await expect(page.locator('.cell[aria-label*="apagado: revivirlo cuesta 7 nutrientes"]')).toHaveCount(1);
+  await expect(page.locator('.cell[aria-label*="apagado: revivirlo cuesta 7 nutrientes"]')).toHaveCount(2);
   await expect(page.locator('.card--lactarius')).toHaveAttribute('aria-label', /Teje · −2 nutrientes/);
   await shot('escarcha');
   // "Jugar de nuevo" conserva el nivel.
@@ -1019,6 +1019,7 @@ test('Temporadas frías (028, 030): carta «Llega el frío» al empezar el otoñ
   await expect(card).toContainText('Llegó el otoño');
   await expect(card).toContainText('Al terminar cada mes de otoño e invierno, el gremio come 1 nutriente.');
   await expect(card).toContainText('En invierno, los árboles no dan esporas.');
+  await expect(card).toContainText('Al empezar el invierno, la plaga marca una casilla de la red'); // 042
   const overflow = await card.evaluate((n) => n.scrollWidth - n.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/030-frio-390x844.png' });
@@ -1128,17 +1129,40 @@ test('Plaga de Ancestral (032, 033, 035): la carta del frío la explica y la cas
   }
 });
 
-test('Ancestral cada dos meses (034): Elige tu dificultad lo dice y al empezar el mes 5 ya hay un árbol apagado y otro marcado', async ({ page }, info) => {
+test('Ancestral cada dos meses (034, 042): Elige tu dificultad lo dice y al empezar el mes 5 ya hay dos árboles apagados y otro marcado', async ({ page }, info) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Nueva partida' }).click();
-  await expect(page.locator('#screen')).toContainText('cinco árboles que se apagan');
+  await expect(page.locator('#screen')).toContainText('seis árboles que se apagan');
   await page.goto('/?nivel=ancestral&seed=1');
   for (let m = 1; m < 5; m++) await page.locator('.end').click();
   await expect(page.locator('.hud__month-value')).toHaveText('Mes 5/12');
   await expect(page.locator('#notice')).toContainText('Este árbol se apagará al terminar el mes si nadie lo revive.');
   await expect(page.locator('.cell[aria-label*="se apagará al terminar el mes"]')).toHaveCount(1);
-  await expect(page.locator('.cell[aria-label*="apagado: revivirlo cuesta 7 nutrientes"]')).toHaveCount(1);
+  await expect(page.locator('.cell[aria-label*="apagado: revivirlo cuesta 7 nutrientes"]')).toHaveCount(2);
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/034-ancestral-mes-5-390x844.png' });
+});
+
+test('Invierno en Bosque (042): sigue la escarcha y llega la plaga a la casilla tejida más cercana al Árbol Padre', async ({ page }, info) => {
+  await page.goto('/?map=clasico&nivel=bosque');
+  await page.evaluate(() => {
+    type T = { x: number; y: number; net: boolean };
+    type S = { getState(): { game: { tiles: T[] } }; dispatch(a: object): void };
+    const store = (window as unknown as { store: S }).store;
+    const g = store.getState().game;
+    const woven = ['2,6', '2,4', '2,3'];
+    const tiles = g.tiles.map((t) => ({ ...t, net: t.net || woven.includes(`${t.x},${t.y}`) }));
+    store.dispatch({ type: 'start', game: { ...g, month: 9, nutrients: 4, tiles }, intro: false });
+  });
+  await page.locator('.end').click();
+  await expect(page.locator('.hud__month-value')).toHaveText('Mes 10/12');
+  await expect(page.locator('#notice')).toContainText('La plaga llegó a la red');
+  await expect(cell(page, 2, 3)).toHaveAttribute('aria-label', /con plaga/);
+  await expect(page.locator('.hud__plague')).toBeVisible();
+  await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', /escarcha/);
+  if (info.project.name === 'vertical-390x844') {
+    await page.waitForTimeout(1500); // que termine el cambio de estación
+    await page.screenshot({ path: 'docs/screenshots/042-bosque-invierno-390x844.png' });
+  }
 });
 
 test('Hongos para reclutar (039): Ámbar cura a distancia con su ficha completa', async ({ page }, info) => {

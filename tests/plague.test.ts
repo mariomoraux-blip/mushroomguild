@@ -11,11 +11,13 @@ const NET: Point[] = [{ x: 2, y: 6 }, { x: 2, y: 5 }, { x: 2, y: 4 }, { x: 2, y:
 const marked = (s: GameState) => s.tiles.filter((t) => t.blighted);
 
 describe('Requirement: Plaga', () => {
-  it('solo Ancestral tiene plaga, en otoño e invierno, y salva a 2 casillas', () => {
-    expect([LEVELS.brote.plague, LEVELS.bosque.plague, LEVELS.ancestral.plague]).toEqual([[], [], [2, 3]]);
+  it('Bosque tiene plaga en invierno (042) y Ancestral en otoño e invierno; salva a 2 casillas', () => {
+    expect([LEVELS.brote.plague, LEVELS.bosque.plague, LEVELS.ancestral.plague]).toEqual([[], [3], [2, 3]]);
     expect(PLAGUE_REACH).toBe(2);
-    const months = Array.from({ length: 12 }, (_, i) => i + 1).filter((m) => plagueStarts(at('ancestral'), m));
-    expect(months).toEqual([7, 10]);
+    const months = (level: Level) => Array.from({ length: 12 }, (_, i) => i + 1).filter((m) => plagueStarts(at(level), m));
+    expect(months('ancestral')).toEqual([7, 10]);
+    expect(months('bosque')).toEqual([10]);
+    expect(months('brote')).toEqual([]);
   });
 
   it('Scenario: La plaga marca — al empezar el mes 7 en Ancestral se marca la casilla tejida más cercana al Árbol Padre', () => {
@@ -104,9 +106,15 @@ describe('Requirement: Plaga', () => {
     expect(tile(endMonth(worked).state, 2, 3)!.net).toBe(false);
   });
 
-  it('Scenario: Bosque sin plaga', () => {
+  it('Scenario: Bosque sin plaga — ni en otoño ni en Brote', () => {
     expect(marked(endMonth(at('bosque', { month: 6, net: NET })).state)).toEqual([]);
-    expect(marked(endMonth(at('bosque', { month: 9, net: NET })).state)).toEqual([]);
+    expect(marked(endMonth(at('brote', { month: 9, net: NET })).state)).toEqual([]);
+  });
+
+  it('Scenario: Plaga del invierno en Bosque — al empezar el mes 10 marca una casilla tejida', () => {
+    const { state, message } = endMonth(at('bosque', { month: 9, net: NET }));
+    expect(marked(state).map(({ x, y }) => ({ x, y }))).toEqual([{ x: 2, y: 3 }]);
+    expect(message).toContain(es.log.plagueMarked(2));
   });
 
   it('el invierno vuelve a marcar (mes 10) y los meses sin inicio de estación no marcan', () => {
@@ -116,11 +124,13 @@ describe('Requirement: Plaga', () => {
   });
 });
 
-describe('Requirement: Llega el frío (Ancestral con plaga)', () => {
-  it('la carta del frío de Ancestral suma la regla de la plaga; la de Bosque no', () => {
+describe('Requirement: Llega el frío (con plaga)', () => {
+  it('la carta del frío suma la regla de la plaga: en Bosque, la del invierno; en Ancestral, la de cada estación', () => {
     const story = (level: Level) => reduce(initialState(at(level, { month: 6 })), { type: 'endMonth' }).ui.story;
     expect(story('ancestral')).toEqual({ kind: 'cold' });
-    expect(es.story.coldPlague).toContain('la plaga marca una casilla');
+    expect(story('bosque')).toEqual({ kind: 'cold' });
+    expect(es.story.coldPlague(false)).toMatch(/^Cada estación, la plaga marca una casilla/);
+    expect(es.story.coldPlague(true)).toMatch(/^Al empezar el invierno, la plaga marca una casilla/);
   });
 });
 
