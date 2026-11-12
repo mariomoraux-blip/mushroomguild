@@ -1182,6 +1182,15 @@ test('La plaga crece y corta la red (043): en Bosque marca más casillas cada me
     store.dispatch({ type: 'start', game: { ...g, month: 10, nutrients: 6, tiles }, intro: false });
   });
   await page.locator('.end').click();
+  // 044: el primer árbol suelto de la partida abre su carta, con la insignia del hilo cortado.
+  const card = page.locator('#story [role="dialog"]');
+  await expect(card).toContainText('Un árbol suelto');
+  await expect(card).toContainText('Teje un camino de red desde el Hogar hasta él');
+  await expect(card.locator('.story__badge')).toBeVisible();
+  expect(await card.evaluate((n) => n.scrollWidth - n.clientWidth)).toBeLessThanOrEqual(0);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/044-carta-suelto-390x844.png' });
+  await page.keyboard.press('Escape');
+  await expect(card).toHaveCount(0);
   await expect(page.locator('.hud__month-value')).toHaveText('Mes 11/12');
   await expect(page.locator('#notice')).toContainText('La plaga crece: 2 casillas de la red');
   await expect(page.locator('#notice')).toContainText('Un árbol no dio nada: la red no lo une al Hogar.');
@@ -1196,6 +1205,8 @@ test('La plaga crece y corta la red (043): en Bosque marca más casillas cada me
   if (info.project.name === 'vertical-390x844') {
     await page.waitForTimeout(1500);
     await page.screenshot({ path: 'docs/screenshots/043-plaga-crece-390x844.png' });
+    // 044: el árbol suelto conserva su color y lleva la insignia.
+    await page.screenshot({ path: 'docs/screenshots/044-arbol-suelto-390x844.png' });
   }
   await noScrollNoZoom(page);
 });

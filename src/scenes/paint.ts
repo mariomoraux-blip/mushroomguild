@@ -573,38 +573,39 @@ function paintFaded(ctx: Ctx, T: number, x: number, y: number) {
 }
 
 /**
- * Árbol suelto (043): la red no lo une al Hogar. Pierde el color (modo "saturation", como el claro dormido) y lleva una
- * raíz cortada en la esquina inferior: dos trazos de corteza con un hueco, con contorno de tinta, para no depender del color.
+ * Árbol suelto (043, 044): la red no lo une al Hogar. Conserva su color y lleva la insignia del hilo cortado
+ * (`board/trees/loose-badge`) en la esquina superior derecha. Sin la pieza, un disco de papel con una raíz cortada:
+ * dos trazos de corteza con un hueco y contorno de tinta, para no depender del color.
  */
-function paintLoose(ctx: Ctx, T: number, x: number, y: number) {
-  ctx.save();
-  roundRect(ctx, x * T, y * T, T, T, T * 0.18);
-  ctx.clip();
-  ctx.globalCompositeOperation = 'saturation';
-  ctx.fillStyle = rgba('neutral', 0.85);
-  ctx.fillRect(x * T, y * T, T, T);
-  ctx.restore();
-  const cx = (x + 0.8) * T;
-  const cy = (y + 0.8) * T;
-  const r = T * 0.13;
+const LOOSE_BADGE = { cx: 0.77, cy: 0.23, size: 0.42 } as const;
+
+function paintLoose(ctx: Ctx, T: number, x: number, y: number, badge?: CanvasImageSource) {
+  const cx = (x + LOOSE_BADGE.cx) * T;
+  const cy = (y + LOOSE_BADGE.cy) * T;
+  const d = T * LOOSE_BADGE.size;
+  if (badge) {
+    ctx.drawImage(badge, cx - d / 2, cy - d / 2, d, d);
+    return;
+  }
+  const r = d / 2;
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.fillStyle = rgba('paper');
   ctx.fill();
   ctx.strokeStyle = rgba('ink');
-  ctx.lineWidth = T * 0.02;
+  ctx.lineWidth = T * 0.025;
   ctx.stroke();
   ctx.lineCap = 'round';
-  for (const [a, b] of [[-0.75, -0.2], [0.2, 0.75]] as const) {
+  for (const [a, b] of [[-0.6, -0.15], [0.15, 0.6]] as const) {
     ctx.beginPath();
-    ctx.moveTo(cx + a * r * 0.8, cy + a * r * 0.8);
-    ctx.lineTo(cx + b * r * 0.8, cy + b * r * 0.8);
+    ctx.moveTo(cx + a * r, cy + a * r * 0.4);
+    ctx.lineTo(cx + b * r, cy + b * r * 0.4);
     ctx.strokeStyle = rgba('ink');
-    ctx.lineWidth = T * 0.05;
+    ctx.lineWidth = T * 0.06;
     ctx.stroke();
     ctx.strokeStyle = rgba('bark');
-    ctx.lineWidth = T * 0.028;
+    ctx.lineWidth = T * 0.034;
     ctx.stroke();
   }
   ctx.restore();
@@ -876,11 +877,12 @@ export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
     paintFaded(ctx, T, t.x, t.y);
     painted[i] = { ...painted[i]!, faded: true };
   });
-  // Árboles sueltos (043): sin red hasta el Hogar no dan nada.
+  // Árboles sueltos (043, 044): sin red hasta el Hogar no dan nada. La insignia va sobre la saturación, a color.
   const loose = new Set(unrootedTrees(game));
+  const badge = art?.get(BOARD_ART.looseBadge);
   game.tiles.forEach((t, i) => {
     if (!loose.has(t)) return;
-    paintLoose(ctx, T, t.x, t.y);
+    paintLoose(ctx, T, t.x, t.y, badge);
     painted[i] = { ...painted[i]!, loose: true };
   });
   for (const key of valid) {

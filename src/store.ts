@@ -50,7 +50,9 @@ export type Sheet =
 export type Story =
   | { kind: 'intro'; step: number }
   | { kind: 'mage'; then?: Story }
-  | { kind: 'cold' }
+  | { kind: 'cold'; then?: Story }
+  /** 044: la primera vez en la partida que un árbol queda suelto. */
+  | { kind: 'loose' }
   | { kind: 'won' }
   | { kind: 'lost' };
 /** Al cerrar una carta: la que sigue, si hay. */
@@ -95,6 +97,8 @@ export interface UiState {
   readonly seen: readonly SpeciesId[];
   /** Alias del jugador registrado en este dispositivo (036), o `null`. */
   readonly player: string | null;
+  /** ¿Ya se mostró en esta partida la carta «Un árbol suelto»? (044) */
+  readonly looseShown?: boolean;
   /** Envío de la victoria actual al ranking; `null` si la partida no cuenta. */
   readonly submission: Submission | null;
   /** Lo que muestra la pantalla «Ranking». */
@@ -257,24 +261,36 @@ export function clockShouldRun(state: AppState, visible: boolean): boolean {
 const backFrom = (screen: Screen | null): Screen | null =>
   screen && (screen.kind === 'level' || (screen.kind !== 'title' && screen.back === 'title')) ? { kind: 'title' } : null;
 
+/** ¿Quedó suelto algún árbol que antes no lo estaba? (044) */
+function newlyLoose(prev: GameState, next: GameState): boolean {
+  const before = new Set(unrootedTrees(prev).map((t) => `${t.x},${t.y}`));
+  return unrootedTrees(next).some((t) => !before.has(`${t.x},${t.y}`));
+}
+
 /**
  * Carta que abre un cambio del juego: final al ganar o al acabar el invierno; presentación al llegar la maga;
- * aviso al empezar las temporadas frías (028), después de la de la maga si llegan juntas.
+ * aviso al empezar las temporadas frías (028), después de la de la maga si llegan juntas; y la del primer árbol
+ * suelto de la partida (044), al final de las que coincidan.
  */
-function storyFor(prev: GameState, next: GameState): Story | null {
+function storyFor(prev: GameState, next: GameState, looseShown = false): Story | null {
   if (prev.status === 'playing' && next.status === 'won') return { kind: 'won' };
   if (prev.status === 'playing' && next.status === 'lost') return { kind: 'lost' };
   if (next.status !== 'playing') return null;
   const mages = (g: GameState) => g.members.filter((m) => m.species === 'mago').length;
-  const cold: Story | null = next.month > prev.month && isCold(next) && !isCold(prev) ? { kind: 'cold' } : null;
+  const loose: Story | null = !looseShown && newlyLoose(prev, next) ? { kind: 'loose' } : null;
+  const isColdStart = next.month > prev.month && isCold(next) && !isCold(prev);
+  const cold: Story | null = isColdStart ? (loose ? { kind: 'cold', then: loose } : { kind: 'cold' }) : loose;
   if (mages(next) > mages(prev)) return cold ? { kind: 'mage', then: cold } : { kind: 'mage' };
   return cold;
 }
 
+/** ¿Hay una carta «Un árbol suelto» en la cadena? */
+const hasLoose = (st: Story | null): boolean => !!st && (st.kind === 'loose' || ('then' in st && hasLoose(st.then ?? null)));
+
 /** Aplica un nuevo estado del juego y abre la carta de historia que corresponda. */
 function advance(game: GameState, next: GameState, ui: UiState): UiState {
-  const story = storyFor(game, next);
-  return story ? { ...ui, story } : ui;
+  const story = storyFor(game, next, ui.looseShown);
+  return story ? { ...ui, story, ...(hasLoose(story) ? { looseShown: true } : {}) } : ui;
 }
 
 /** Especie cuya ficha muestra una hoja (de miembro o de criatura), para marcarla como vista. */

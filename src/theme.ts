@@ -126,6 +126,8 @@ export const BOARD_ART = {
   rock: { spring: 'board/rocks/rock', summer: 'board/rocks/rock', autumn: 'board/rocks/rock', winter: 'board/rocks/rock-winter' },
   tree: { grey: 'board/trees/grey', waking: 'board/trees/waking', spring: 'board/trees/alive', summer: 'board/trees/alive', autumn: 'board/trees/autumn', winter: 'board/trees/winter' },
   star: 'ui/icons/star',
+  // Insignia del árbol suelto (044): el hilo de micelio cortado, una pieza para todas las estaciones.
+  looseBadge: 'board/trees/loose-badge',
   // Plaga de Ancestral (033): la casilla tejida marcada (otoño / invierno) y el instante en que se marchita.
   plague: { blight: 'board/plague/blight', winter: 'board/plague/blight-winter', withered: 'board/plague/withered' },
 } as const;

@@ -80,15 +80,18 @@ export function neighbors(s: GameState, x: number, y: number): Tile[] {
 export const touchesNet = (s: GameState, x: number, y: number): boolean => neighbors(s, x, y).some((n) => n.net);
 export const revivedCount = (s: GameState): number => s.tiles.filter((t) => t.kind === 'tree' && t.alive).length;
 
-/** Casillas de la red unidas al Hogar por casillas de la red (pasos en cruz; 043). */
-export function rootedNet(s: GameState): ReadonlySet<Tile> {
+/**
+ * Casillas de la red unidas al Hogar por casillas de la red (pasos en cruz; 043). `withoutBlight` (044): como si las
+ * casillas tejidas con plaga ya se hubieran marchitado.
+ */
+export function rootedNet(s: GameState, withoutBlight = false): ReadonlySet<Tile> {
   const home = s.tiles.find((t) => t.kind === 'home')!;
   const seen = new Set<Tile>([home]);
   const queue = [home];
   for (let i = 0; i < queue.length; i++) {
     const p = queue[i]!;
     for (const n of neighbors(s, p.x, p.y)) {
-      if (seen.has(n) || !n.net) continue;
+      if (seen.has(n) || !n.net || (withoutBlight && n.blighted)) continue;
       seen.add(n);
       queue.push(n);
     }
@@ -101,6 +104,14 @@ export function unrootedTrees(s: GameState): Tile[] {
   if (!LEVELS[s.level].rooted) return [];
   const rooted = rootedNet(s);
   return s.tiles.filter((t) => t.kind === 'tree' && t.alive && !rooted.has(t));
+}
+
+/** Árboles vivos que hoy la red une al Hogar y que quedarían sueltos si se marchitaran las casillas con plaga (044). */
+export function looseAtRisk(s: GameState): number {
+  if (!LEVELS[s.level].rooted || !s.tiles.some((t) => t.blighted && t.net)) return 0;
+  const now = rootedNet(s);
+  const after = rootedNet(s, true);
+  return s.tiles.filter((t) => t.kind === 'tree' && t.alive && now.has(t) && !after.has(t)).length;
 }
 
 /** Árboles que producen al terminar el mes (043: solo los que la red une al Hogar, en niveles con `rooted`). */
