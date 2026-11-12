@@ -76,10 +76,12 @@ export function mountHud(root: HTMLElement, store: Store) {
     lastNotice = n;
     setText(monthValue, `${es.hud.month} ${g.month}${es.hud.of(MONTHS)}`);
     const frosty = hasFrost(g);
-    const blighted = g.tiles.some((t) => t.blighted);
+    const blighted = g.tiles.filter((t) => t.blighted).length;
     seasonIcon.setAttribute('aria-label', es.hud.season(season(g.month), frosty, es.levels.names[g.level], blighted));
     frost.hidden = !frosty;
     plague.hidden = !blighted;
+    // 043: con más de una casilla con plaga, el número junto al ícono.
+    plague.dataset.count = blighted > 1 ? String(blighted) : '';
     const slug = SEASON_SLUGS[seasonIndex(g.month)] ?? 'spring';
     // Estación nueva (022): el ícono cambia en un fundido, junto con el claro.
     if (seasonIcon.dataset.season && seasonIcon.dataset.season !== slug) replay(seasonIcon, 'is-new-season');

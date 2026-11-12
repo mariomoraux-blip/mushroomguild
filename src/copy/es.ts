@@ -198,6 +198,7 @@ export const es = {
     plagueWithered: `Plaga marchita: no se puede tejer. Se limpia al terminar un mes en que un hongo trabaje a ${PLAGUE_REACH} casillas o menos; entonces vuelve a ser tierra.`,
     treeFading: `Árbol gris con escarcha: se apagará al terminar el mes si la Amanita no lo revive (${plural(COST.revive, 'nutriente')}).`,
     treeFaded: `Árbol apagado: la Amanita aún puede revivirlo, pero cuesta ${plural(FADED_REVIVE, 'nutriente')}.`,
+    treeUnrooted: 'Árbol vivo, pero suelto: la red no lo une al Hogar, así que no da nada. Teje un camino de red hasta él.',
     treeAlive: `Árbol vivo: al empezar cada mes da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}.`,
     rock: 'Roca: bloquea la red. La Morchella la rompe y Maestra Bruma la convierte en tierra.',
   },
@@ -301,8 +302,8 @@ export const es = {
     names: { brote: 'Brote', bosque: 'Bosque', ancestral: 'Ancestral' },
     lines: {
       brote: 'El claro de siempre, con la ★ para guiarte.',
-      bosque: 'Más rocas, escarcha en otoño e invierno, dos árboles que se apagan, plaga en invierno y un Árbol Padre más exigente.',
-      ancestral: 'Más rocas aún, escarcha hasta el final, seis árboles que se apagan, plaga desde el otoño, un Árbol Padre aún más exigente y sin ★.',
+      bosque: 'Más rocas, escarcha en otoño e invierno, dos árboles que se apagan, una plaga que crece en invierno y un Árbol Padre más exigente. Los árboles solo dan si la red los une al Hogar.',
+      ancestral: 'Más rocas aún, escarcha hasta el final, seis árboles que se apagan, una plaga que crece desde el otoño, un Árbol Padre aún más exigente y sin ★. Los árboles solo dan si la red los une al Hogar.',
     },
     multiplier: (m: number) => `Puntaje ${times(m)}`,
     back: 'Volver a la portada',
@@ -363,7 +364,7 @@ export const es = {
     tilesTitle: 'Las casillas',
     tip: 'Si no sabes qué hacer, sigue la ★: marca el hongo sugerido y la casilla que acerca la red a tu meta.',
     levelsTitle: 'Bosque y Ancestral',
-    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En otoño e invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente). En invierno los árboles no dan esporas. Nunca se pierden los árboles vivos. Al empezar el invierno en Bosque, y el otoño y el invierno en Ancestral, la plaga marca una casilla tejida cerca del Árbol Padre: al terminar el mes se marchita si ningún hongo trabajó a ${PLAGUE_REACH} casillas o menos, y la plaga sigue ahí (no se puede tejer) hasta que un hongo trabaje así de cerca. En Ancestral no hay ★ y el Árbol Padre pide ${A.motherTrees} árboles revividos y ${plural(A.mother, 'nutriente')}.`,
+    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En otoño e invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente). En invierno los árboles no dan esporas. Nunca se pierden los árboles vivos, pero solo dan si la red los une al Hogar. En invierno en Bosque, y en otoño e invierno en Ancestral, la plaga marca casillas tejidas cerca del Hogar, cada mes de la estación más (1, 2 y 3): al terminar el mes se marchitan si ningún hongo trabajó a ${PLAGUE_REACH} casillas o menos, y la plaga sigue ahí (no se puede tejer) hasta que un hongo trabaje así de cerca. Si corta la red, los árboles del otro lado dejan de dar. En Ancestral no hay ★ y el Árbol Padre pide ${A.motherTrees} árboles revividos y ${plural(A.mother, 'nutriente')}.`,
     start: '¡A jugar!',
   },
 
@@ -393,7 +394,8 @@ export const es = {
     treesShort: 'árboles',
     time: (t: string) => `Tiempo de juego: ${t}`,
     /** Etiqueta del ícono de la estación: estación, escarcha y nivel (019). */
-    season: (season: string, frost: boolean, level: string, plague = false) => `${season}${frost ? ', con escarcha' : ''}${plague ? ', con plaga' : ''} · ${level}`,
+    season: (season: string, frost: boolean, level: string, plague = 0) =>
+      `${season}${frost ? ', con escarcha' : ''}${plague ? `, con plaga${plague > 1 ? ` en ${plague} casillas` : ''}` : ''} · ${level}`,
   },
 
   /** Ranking global (036). */
@@ -511,7 +513,7 @@ export const es = {
       'En invierno, los árboles no dan esporas.',
     ],
     /** Regla extra de la carta en los niveles con plaga (032; 042: Bosque solo en invierno). */
-    coldPlague: (winterOnly: boolean) => `${winterOnly ? 'Al empezar el invierno' : 'Cada estación'}, la plaga marca una casilla de la red cerca del Árbol Padre: se marchita al terminar el mes si ningún hongo trabaja a ${PLAGUE_REACH} casillas o menos, y se queda hasta que uno lo haga.`,
+    coldPlague: (winterOnly: boolean) => `${winterOnly ? 'En invierno' : 'En otoño y en invierno'}, la plaga marca casillas de la red cerca del Hogar, cada mes más: 1, 2 y 3. Se marchitan al terminar el mes si ningún hongo trabaja a ${PLAGUE_REACH} casillas o menos. Un árbol que la red ya no une al Hogar no da nada.`,
     coldOk: 'Seguir',
     wonTitle: '¡El bosque despertó!',
     wonText: (month: number) => `El Árbol Padre despertó en el mes ${month}.`,
@@ -555,6 +557,7 @@ export const es = {
     goal: 'la meta',
     fading: `con escarcha: se apagará al terminar el mes, revivirlo cuesta ${plural(COST.revive, 'nutriente')}`,
     faded: `apagado: revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}`,
+    unrooted: 'suelto: la red no lo une al Hogar y no da nada',
     plague: `con plaga: se marchitará al terminar el mes si ningún hongo trabaja a ${PLAGUE_REACH} casillas o menos`,
     plagueWithered: `con plaga marchita: no se puede tejer hasta que un hongo trabaje a ${PLAGUE_REACH} casillas o menos`,
     position: (x: number, y: number) => `columna ${x + 1}, fila ${y + 1}`,
@@ -571,6 +574,7 @@ export const es = {
     called: (name: string, other: string) => `${name} pasó la voz: ${other} puede trabajar otra vez.`,
     brokeRock: (name: string) => `${name} rompió la roca. Ahora es tierra lista para tejer.`,
     healed: (name: string) => `${name} curó un árbol a distancia: entró a la red. Al empezar cada mes dará una espora y un nutriente.`,
+    healedLoose: (name: string) => `${name} curó un árbol a distancia, pero queda suelto: dará algo cuando la red lo una al Hogar.`,
     plagueHealed: (name: string) => `${name} limpió la plaga.`,
     composted: (name: string, n: number) => `${name} abonó el árbol: +${plural(n, 'nutriente')}.`,
     puffed: (name: string, n: number) => `${name} sopló una nube: +${plural(n, 'espora')}.`,
@@ -592,6 +596,8 @@ export const es = {
     treeFading: 'Este árbol se apagará al terminar el mes si nadie lo revive.',
     plagueMarked: (reach: number) => `La plaga llegó a la red: esa casilla se marchitará al terminar el mes si ningún hongo trabaja a ${reach} casillas o menos.`,
     plagueWithered: (reach: number) => `La plaga marchitó una casilla de la red: no se puede tejer hasta que un hongo trabaje a ${reach} casillas o menos.`,
+    plagueMarkedMany: (n: number, reach: number) => `La plaga crece: ${n} casillas de la red se marchitarán al terminar el mes si ningún hongo trabaja a ${reach} casillas o menos de cada una.`,
+    treesUnrooted: (n: number) => `${n === 1 ? 'Un árbol no dio nada' : `${n} árboles no dieron nada`}: la red no ${n === 1 ? 'lo' : 'los'} une al Hogar.`,
     plagueStopped: 'Los hongos frenaron la plaga.',
     plagueCleared: 'Los hongos limpiaron la plaga: la casilla volvió a ser tierra.',
     treeFaded: (n: number) => `Un árbol se apagó: revivirlo ahora cuesta ${plural(n, 'nutriente')}.`,

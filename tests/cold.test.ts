@@ -8,10 +8,12 @@ import { RUBI, setup, type Setup } from './helpers';
 
 const at = (level: Level, o: Setup = {}): GameState => ({ ...setup(o), level });
 const TREE = { x: 2, y: 5 };
+// 043: en Bosque y Ancestral los árboles solo producen si la red los une al Hogar (2,7): (2,6) une a (2,5); (3,7) y (4,7) a (4,6).
+const ROOTS = [{ x: 2, y: 6 }, { x: 3, y: 7 }, { x: 4, y: 7 }];
 
 describe('Requirement: Temporadas frías', () => {
   it('Scenario: El gremio come en otoño — 1 árbol y 3 nutrientes dejan 3 y nadie con hambre', () => {
-    const s = at('bosque', { month: 7, nutrients: 3, alive: [TREE], extraMembers: ['morchella'] });
+    const s = at('bosque', { month: 7, nutrients: 3, alive: [TREE], net: ROOTS, extraMembers: ['morchella'] });
     const { state, message } = endMonth(s);
     expect(state.nutrients).toBe(3);
     expect(state.members.every((m) => !m.used && !m.hungry)).toBe(true);
@@ -39,7 +41,7 @@ describe('Requirement: Temporadas frías', () => {
   });
 
   it('Scenario: Invierno sin esporas — al terminar el mes 9 los árboles solo dan nutrientes y la bitácora lo avisa', () => {
-    const s = at('bosque', { month: 9, nutrients: 10, alive: [TREE, { x: 4, y: 6 }] });
+    const s = at('bosque', { month: 9, nutrients: 10, alive: [TREE, { x: 4, y: 6 }], net: ROOTS });
     const { state, message } = endMonth(s);
     expect(state.spores).toBe(s.spores);
     // Los árboles dan 2 nutrientes y el gremio come 1 (el mes 9 es de otoño).
@@ -50,7 +52,7 @@ describe('Requirement: Temporadas frías', () => {
   });
 
   it('Scenario: Otoño con esporas — al terminar el mes 6 los árboles dan esporas y nutrientes', () => {
-    const s = at('bosque', { month: 6, nutrients: 0, alive: [TREE, { x: 4, y: 6 }] });
+    const s = at('bosque', { month: 6, nutrients: 0, alive: [TREE, { x: 4, y: 6 }], net: ROOTS });
     const { state } = endMonth(s);
     expect(state.spores).toBe(s.spores + 2);
     expect(state.nutrients).toBe(2);

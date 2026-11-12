@@ -34,8 +34,9 @@ export const TREES_FOR_MAGE = 2;
  * con escarcha; `fading`: meses que empiezan marcando un árbol gris que se apaga al terminarlos;
  * `upkeep`: temporadas frías, en que el gremio come `UPKEEP` al terminar cada mes (028); `sporeless`: estaciones en que
  * los árboles no dan esporas (028); `mother`: nutrientes para despertar al Árbol Padre (028); `motherTrees`: árboles revividos que pide (031); `plague`: estaciones en cuyo primer mes la plaga marca una casilla
- * tejida (032);
- * `hints`: se muestran las pistas; `multiplier`: del puntaje. Ninguna regla de nivel quita progreso del tablero.
+ * tejida (032; 043: marca casillas cada mes de esas estaciones, 1, 2 y 3); `rooted`: los árboles solo producen si la red los
+ * une al Hogar (043);
+ * `hints`: se muestran las pistas; `multiplier`: del puntaje. Ninguna regla de nivel quita árboles vivos.
  */
 export interface LevelRules {
   readonly rocks: number;
@@ -46,13 +47,14 @@ export interface LevelRules {
   readonly mother: number;
   readonly motherTrees: number;
   readonly plague: readonly number[];
+  readonly rooted: boolean;
   readonly hints: boolean;
   readonly multiplier: number;
 }
 export const LEVELS: Readonly<Record<Level, LevelRules>> = {
-  brote: { rocks: 6, frost: [], fading: [], upkeep: [], sporeless: [], mother: 10, motherTrees: TREES_FOR_MOTHER, plague: [], hints: true, multiplier: 1 },
-  bosque: { rocks: 9, frost: [2, 3], fading: [4, 6], upkeep: [2, 3], sporeless: [3], mother: 11, motherTrees: TREES_FOR_MOTHER, plague: [3], hints: true, multiplier: 1.5 },
-  ancestral: { rocks: 11, frost: [2, 3], fading: [2, 3, 5, 7, 9, 11], upkeep: [2, 3], sporeless: [3], mother: 13, motherTrees: 4, plague: [2, 3], hints: false, multiplier: 2 },
+  brote: { rocks: 6, frost: [], fading: [], upkeep: [], sporeless: [], mother: 10, motherTrees: TREES_FOR_MOTHER, plague: [], rooted: false, hints: true, multiplier: 1 },
+  bosque: { rocks: 9, frost: [2, 3], fading: [4, 6], upkeep: [2, 3], sporeless: [3], mother: 11, motherTrees: TREES_FOR_MOTHER, plague: [3], rooted: true, hints: true, multiplier: 1.5 },
+  ancestral: { rocks: 11, frost: [2, 3], fading: [2, 3, 5, 7, 9, 11], upkeep: [2, 3], sporeless: [3], mother: 13, motherTrees: 4, plague: [2, 3], rooted: true, hints: false, multiplier: 2 },
 };
 export const LEVEL_IDS: readonly Level[] = ['brote', 'bosque', 'ancestral'];
 /** Costo de tejer con escarcha. */
@@ -85,7 +87,7 @@ export const SCORE = {
   timeParS: 480, // 1 punto por segundo por debajo de 8:00
 } as const;
 /** Versión de la fórmula: cambia la clave del récord guardado y el `ScoreResult`. */
-export const SCORE_VERSION = 12;
+export const SCORE_VERSION = 13;
 /** Estrellas por claro: 2 desde el 90 % y 3 desde el 110 % del puntaje del bot con criterio en ese claro. */
 export const STARS = { two: 0.9, three: 1.1 } as const;
 /** Segundos de juego por mes que se suponen para la partida de referencia del bot. */
@@ -95,7 +97,7 @@ export const REFERENCE_SECONDS_PER_MONTH = 25;
  * Generador de mapas (cada partida nueva es un claro distinto). Un mapa solo se acepta si la
  * política de las pistas (`advise`) lo gana entre `minMonth` y `maxMonth`: ni regalado ni imposible.
  */
-export const MAP_GEN = { trees: 7, logs: 5, rocks: 6, minMonth: 8, maxMonth: 11, attempts: 400, levelAttempts: 20, levelAttemptsOutside: 10 } as const;
+export const MAP_GEN = { trees: 7, logs: 5, rocks: 6, minMonth: 8, maxMonth: 11, attempts: 400, levelAttempts: 20, levelAttemptsOutside: 7 } as const;
 
 // Capítulo 1 · El Claro Gris (mapa clásico, el del PoC rotado 90°: (x, y) del PoC → (y, 7 - x)).
 // Se usa en las pruebas y como respaldo si el generador no encuentra un mapa válido.

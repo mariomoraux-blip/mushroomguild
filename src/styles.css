@@ -111,6 +111,9 @@ button { font: inherit; color: inherit; }
 .hud__frost[hidden] { display: none; }
 .hud__plague { flex: 0 0 auto; width: 12px; height: 14px; background: var(--art-plague) center / contain no-repeat; }
 .hud__plague[hidden] { display: none; }
+/* 043: cuántas casillas tienen plaga, si son más de una: una insignia sobre la hoja, sin ocupar ancho. */
+.hud__plague { position: relative; }
+.hud__plague[data-count]:not([data-count=''])::after { content: attr(data-count); position: absolute; right: -5px; bottom: -4px; min-width: 10px; padding: 0 2px; border-radius: 6px; background: var(--ink); color: var(--cream); font-size: 9px; font-weight: 700; line-height: 10px; text-align: center; }
 .chip {
   display: flex;
   flex-direction: column;

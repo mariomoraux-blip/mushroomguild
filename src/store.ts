@@ -29,6 +29,7 @@ import {
   type Resource,
   type Tile,
   type NameProblem,
+  unrootedTrees,
 } from './rules';
 import type { BoardView, Submission } from './leaderboard';
 
@@ -213,7 +214,7 @@ export function suggestedTile(state: AppState): Tile | null {
 
 function tileHelp(g: GameState, t: Tile): string {
   if (t.kind === 'mother') return t.alive ? es.tileHelp.motherAwake : es.tileHelp.mother(motherCost(g), motherTrees(g));
-  if (t.kind === 'tree') return t.alive ? es.tileHelp.treeAlive : t.faded ? es.tileHelp.treeFaded : t.fading ? es.tileHelp.treeFading : es.tileHelp.tree;
+  if (t.kind === 'tree') return t.alive ? (unrootedTrees(g).includes(t) ? es.tileHelp.treeUnrooted : es.tileHelp.treeAlive) : t.faded ? es.tileHelp.treeFaded : t.fading ? es.tileHelp.treeFading : es.tileHelp.tree;
   if (t.blighted) return t.net ? es.tileHelp.plague : es.tileHelp.plagueWithered;
   if (t.kind === 'soil') return t.net ? es.tileHelp.soilNet : es.tileHelp.soil;
   return es.tileHelp[t.kind];
