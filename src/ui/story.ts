@@ -4,12 +4,12 @@ import { formatClock } from '../clock';
 import type { Submission } from '../leaderboard';
 import { INTRO_STEPS, type AppState, type Story, type Store } from '../store';
 import { reducedMotion } from '../scenes/fx';
-import { MOTION } from '../theme';
+import { BOARD_ART, MOTION, assetUrl } from '../theme';
 import { el, portrait } from './dom';
 import { hideLayer, showLayer, turnCard } from './motion';
 
 /** Fondo pintado de cada carta (se descarga solo cuando la carta se muestra). */
-const BACKGROUND: Record<Story['kind'], 'intro' | 'victory'> = { intro: 'intro', mage: 'intro', cold: 'intro', won: 'victory', lost: 'intro' };
+const BACKGROUND: Record<Story['kind'], 'intro' | 'victory'> = { intro: 'intro', mage: 'intro', cold: 'intro', loose: 'intro', won: 'victory', lost: 'intro' };
 const GUILD: SpeciesId[] = ['lactarius', 'champi', 'amanita'];
 
 /**
@@ -111,6 +111,16 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
           el('ul', { class: 'story__spells' }, ...[...es.story.coldRules, ...(LEVELS[g.level].plague.length ? [es.story.coldPlague(LEVELS[g.level].plague.every((season) => season === 3))] : [])].map((r) => el('li', {}, r))),
         );
         actions.push(button('close', es.story.coldOk, true));
+        break;
+      case 'loose':
+        // Un árbol suelto (044): la insignia grande y cómo volver a unirlo al Hogar.
+        title = es.story.looseTitle;
+        art = el('div', { class: 'story__cast' }, el('img', { class: 'story__badge', src: assetUrl(BOARD_ART.looseBadge), alt: '', width: '80', height: '80' }));
+        body.push(
+          el('p', { class: 'story__text' }, es.story.looseText),
+          el('ul', { class: 'story__spells' }, ...es.story.looseRules.map((r) => el('li', {}, r))),
+        );
+        actions.push(button('close', es.story.looseOk, true));
         break;
       case 'won':
       case 'lost': {

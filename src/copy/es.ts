@@ -515,6 +515,15 @@ export const es = {
     /** Regla extra de la carta en los niveles con plaga (032; 042: Bosque solo en invierno). */
     coldPlague: (winterOnly: boolean) => `${winterOnly ? 'En invierno' : 'En otoño y en invierno'}, la plaga marca casillas de la red cerca del Hogar, cada mes más: 1, 2 y 3. Se marchitan al terminar el mes si ningún hongo trabaja a ${PLAGUE_REACH} casillas o menos. Un árbol que la red ya no une al Hogar no da nada.`,
     coldOk: 'Seguir',
+    /** 044: la primera vez en la partida que un árbol queda suelto. */
+    looseTitle: 'Un árbol suelto',
+    looseText: 'La red ya no une este árbol al Hogar.',
+    looseRules: [
+      'Sigue vivo y cuenta para el Árbol Padre, pero no da esporas ni nutrientes.',
+      'Lo verás con esta insignia: el hilo de micelio cortado.',
+      'Teje un camino de red desde el Hogar hasta él y volverá a dar.',
+    ],
+    looseOk: 'Entendido',
     wonTitle: '¡El bosque despertó!',
     wonText: (month: number) => `El Árbol Padre despertó en el mes ${month}.`,
     lostTitle: 'Llegó el invierno',
@@ -597,6 +606,9 @@ export const es = {
     plagueMarked: (reach: number) => `La plaga llegó a la red: esa casilla se marchitará al terminar el mes si ningún hongo trabaja a ${reach} casillas o menos.`,
     plagueWithered: (reach: number) => `La plaga marchitó una casilla de la red: no se puede tejer hasta que un hongo trabaje a ${reach} casillas o menos.`,
     plagueMarkedMany: (n: number, reach: number) => `La plaga crece: ${n} casillas de la red se marchitarán al terminar el mes si ningún hongo trabaja a ${reach} casillas o menos de cada una.`,
+    /** 044: aviso previo al marcar la plaga. `marked`: cuántas casillas marcó (concuerda «se marchita» / «se marchitan»). */
+    looseAtRisk: (n: number, marked: number) =>
+      `Si ${marked === 1 ? 'se marchita' : 'se marchitan'}, ${n === 1 ? 'un árbol quedará suelto y no dará nada' : `${n} árboles quedarán sueltos y no darán nada`}.`,
     treesUnrooted: (n: number) => `${n === 1 ? 'Un árbol no dio nada' : `${n} árboles no dieron nada`}: la red no ${n === 1 ? 'lo' : 'los'} une al Hogar.`,
     plagueStopped: 'Los hongos frenaron la plaga.',
     plagueCleared: 'Los hongos limpiaron la plaga: la casilla volvió a ser tierra.',

@@ -13,6 +13,7 @@ import {
   guarded,
   hasSpecies,
   inHealReach,
+  looseAtRisk,
   plagueTarget,
   plagueCount,
   producingCount,
@@ -326,7 +327,12 @@ export function endMonth(s: GameState): ActionResult {
     n.tiles.find((t) => t === target)!.blighted = true;
     blights++;
   }
-  if (blights) parts.push(blights === 1 ? es.log.plagueMarked(PLAGUE_REACH) : es.log.plagueMarkedMany(blights, PLAGUE_REACH));
+  if (blights) {
+    parts.push(blights === 1 ? es.log.plagueMarked(PLAGUE_REACH) : es.log.plagueMarkedMany(blights, PLAGUE_REACH));
+    // Aviso previo (044): árboles que quedarían sueltos si la plaga marchita esas casillas.
+    const atRisk = looseAtRisk(n);
+    if (atRisk) parts.push(es.log.looseAtRisk(atRisk, blights));
+  }
   if (n.mageDue) {
     addMage(n);
     parts.push(es.log.mageArrives);
