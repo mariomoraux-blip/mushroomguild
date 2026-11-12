@@ -1,6 +1,6 @@
 import { es } from '../copy/es';
 import { tileToScreen } from '../layout';
-import { H, W, type Tile } from '../rules';
+import { H, unrootedTrees, W, type Tile } from '../rules';
 import { highlighted, suggestedTile, type AppState, type Store } from '../store';
 import { el } from './dom';
 import { replay } from './motion';
@@ -55,6 +55,7 @@ export function mountBoardOverlay(root: HTMLElement, store: Store) {
   const render = (state: AppState) => {
     const valid = new Set(highlighted(state).map((t) => `${t.x},${t.y}`));
     const star = suggestedTile(state);
+    const loose = new Set(unrootedTrees(state.game));
     state.game.tiles.forEach((t, i) => {
       const b = buttons[i]!;
       const ok = valid.has(`${t.x},${t.y}`);
@@ -62,6 +63,7 @@ export function mountBoardOverlay(root: HTMLElement, store: Store) {
       if (t.kind === 'mother') parts.push(es.tiles.goal);
       if (t.kind === 'tree' && !t.alive && t.faded) parts.push(es.tiles.faded);
       else if (t.kind === 'tree' && !t.alive && t.fading) parts.push(es.tiles.fading);
+      if (loose.has(t)) parts.push(es.tiles.unrooted);
       if (t.net && t.kind !== 'home') parts.push(es.tiles.inNet);
       if (t.blighted) parts.push(t.net ? es.tiles.plague : es.tiles.plagueWithered);
       if (ok) parts.push(es.tiles.valid);

@@ -13,8 +13,10 @@ import {
   guarded,
   hasSpecies,
   inHealReach,
-  plagueStarts,
   plagueTarget,
+  plagueCount,
+  producingCount,
+  unrootedTrees,
   magicSpent,
   member,
   recruitableCount,
@@ -199,7 +201,7 @@ export function act(s: GameState, id: number, x: number, y: number, choice?: Cho
         return { state: n, message: es.log.plagueHealed(m.name) };
       }
       revive(n, t);
-      return { state: n, message: es.log.healed(m.name) };
+      return { state: n, message: unrootedTrees(n).includes(t) ? es.log.healedLoose(m.name) : es.log.healed(m.name) };
     case 'lycoperdon':
       if (puffOf(choice) === 'nutrients') {
         n.spores -= COST.compost;
@@ -272,7 +274,9 @@ export function endMonth(s: GameState): ActionResult {
   }
   const cold = isCold(s);
   n.month++;
-  const trees = revivedCount(n);
+  // Red unida al Hogar (043): en Bosque y Ancestral solo producen los árboles que la red une al Hogar.
+  const trees = producingCount(n);
+  const unrooted = revivedCount(n) - trees;
   // Invierno sin esporas (028): los árboles solo dan nutrientes.
   const spores = isSporeless(n) ? 0 : trees * GAIN.treeSpores;
   n.spores += spores;
@@ -302,6 +306,7 @@ export function endMonth(s: GameState): ActionResult {
   const now = season(n.month);
   parts.unshift(es.log.newMonth(n.month));
   if (trees) parts.push(es.log.treesGave(spores, trees * GAIN.treeNutrients));
+  if (unrooted) parts.push(es.log.treesUnrooted(unrooted));
   if (ate) parts.push(es.log.guildAte(ate));
   if (hungry.length) parts.push(es.log.hungry(hungry));
   if (now !== before) parts.push(es.log.seasonStart(now));
@@ -314,13 +319,14 @@ export function endMonth(s: GameState): ActionResult {
       parts.push(es.log.treeFading);
     }
   }
-  if (plagueStarts(n)) {
-    const target = plagueTarget(n);
-    if (target) {
-      n.tiles.find((t) => t === target)!.blighted = true;
-      parts.push(es.log.plagueMarked(PLAGUE_REACH));
-    }
+  let blights = 0;
+  for (let k = 0; k < plagueCount(n); k++) {
+    const target = plagueTarget(n, k);
+    if (!target) break;
+    n.tiles.find((t) => t === target)!.blighted = true;
+    blights++;
   }
+  if (blights) parts.push(blights === 1 ? es.log.plagueMarked(PLAGUE_REACH) : es.log.plagueMarkedMany(blights, PLAGUE_REACH));
   if (n.mageDue) {
     addMage(n);
     parts.push(es.log.mageArrives);

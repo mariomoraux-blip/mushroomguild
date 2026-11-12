@@ -1,7 +1,7 @@
 // Pintor del claro (Canvas2D): pradera con textura, micelio luminoso y objetos ilustrados.
 // Solo dibuja a partir de datos; los colores salen de theme.ts. Es determinista (sin Math.random):
 // la variación sale de un hash de la casilla.
-import { H, neighbors, seasonIndex, W, type GameState, type Tile } from '../rules';
+import { H, neighbors, seasonIndex, unrootedTrees, W, type GameState, type Tile } from '../rules';
 import { BOARD_ART, FROST_FADED, rgba, SEASON_SLUGS, type ColorToken, type SeasonSlug } from '../theme';
 
 /** Busca una pieza pintada ya cargada (clave = ruta bajo `public/assets/`). */
@@ -45,6 +45,8 @@ export interface Painted {
   readonly art?: string;
   /** Árbol apagado: lleva el velo fijo y el copo (019). */
   readonly faded?: boolean;
+  /** Árbol vivo suelto: la red no lo une al Hogar (043); pierde el color y lleva la raíz cortada. */
+  readonly loose?: boolean;
 }
 
 type Ctx = CanvasRenderingContext2D;
@@ -570,6 +572,44 @@ function paintFaded(ctx: Ctx, T: number, x: number, y: number) {
   snowflake(ctx, (x + 0.8) * T, (y + 0.2) * T, T * 0.13);
 }
 
+/**
+ * Árbol suelto (043): la red no lo une al Hogar. Pierde el color (modo "saturation", como el claro dormido) y lleva una
+ * raíz cortada en la esquina inferior: dos trazos de corteza con un hueco, con contorno de tinta, para no depender del color.
+ */
+function paintLoose(ctx: Ctx, T: number, x: number, y: number) {
+  ctx.save();
+  roundRect(ctx, x * T, y * T, T, T, T * 0.18);
+  ctx.clip();
+  ctx.globalCompositeOperation = 'saturation';
+  ctx.fillStyle = rgba('neutral', 0.85);
+  ctx.fillRect(x * T, y * T, T, T);
+  ctx.restore();
+  const cx = (x + 0.8) * T;
+  const cy = (y + 0.8) * T;
+  const r = T * 0.13;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fillStyle = rgba('paper');
+  ctx.fill();
+  ctx.strokeStyle = rgba('ink');
+  ctx.lineWidth = T * 0.02;
+  ctx.stroke();
+  ctx.lineCap = 'round';
+  for (const [a, b] of [[-0.75, -0.2], [0.2, 0.75]] as const) {
+    ctx.beginPath();
+    ctx.moveTo(cx + a * r * 0.8, cy + a * r * 0.8);
+    ctx.lineTo(cx + b * r * 0.8, cy + b * r * 0.8);
+    ctx.strokeStyle = rgba('ink');
+    ctx.lineWidth = T * 0.05;
+    ctx.stroke();
+    ctx.strokeStyle = rgba('bark');
+    ctx.lineWidth = T * 0.028;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 /** Contorno punteado de tinta de una casilla marcada (019, 032). */
 function dashedFrame(ctx: Ctx, T: number, x: number, y: number) {
   const inset = T * 0.08;
@@ -835,6 +875,13 @@ export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
     if (t.kind !== 'tree' || !t.faded || t.alive) return;
     paintFaded(ctx, T, t.x, t.y);
     painted[i] = { ...painted[i]!, faded: true };
+  });
+  // Árboles sueltos (043): sin red hasta el Hogar no dan nada.
+  const loose = new Set(unrootedTrees(game));
+  game.tiles.forEach((t, i) => {
+    if (!loose.has(t)) return;
+    paintLoose(ctx, T, t.x, t.y);
+    painted[i] = { ...painted[i]!, loose: true };
   });
   for (const key of valid) {
     const [x, y] = key.split(',').map(Number) as [number, number];

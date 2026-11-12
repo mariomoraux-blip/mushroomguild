@@ -1,6 +1,6 @@
 import { validTargets } from './actions';
-import { COST, RECRUITABLE } from './config';
-import { hasSpecies, magicSpent, motherTile, motherTrees, neighbors, recruitCost, revivedCount, workerAt } from './state';
+import { COST, PLAGUE_REACH, RECRUITABLE } from './config';
+import { guarded, hasSpecies, magicSpent, steps, motherTile, motherTrees, neighbors, recruitCost, revivedCount, unrootedTrees, workerAt } from './state';
 import type { Choice, GameState, Member, Puff, RecruitableSpecies, Spell, Tile } from './types';
 
 /** Siguiente paso sugerido al jugador (player-guidance). */
@@ -53,8 +53,10 @@ export function weaveGoal(s: GameState, o: PolicyOptions = {}): { goal: Tile; to
   const mother = motherTile(s);
   if (revivedCount(s) >= motherTrees(s)) return { goal: mother, toward: 'mother' };
   const net = s.tiles.filter((t) => t.net);
-  // El experto prefiere el árbol marcado y evita los apagados (cuestan más).
-  const grey = s.tiles.filter((t) => t.kind === 'tree' && !t.alive && !(o.saveMarked && t.faded));
+  // El experto prefiere el árbol marcado y evita los apagados (cuestan más). 043: un árbol vivo que la red no une al
+  // Hogar también es meta, para volver a unirlo.
+  const loose = new Set(unrootedTrees(s));
+  const grey = s.tiles.filter((t) => t.kind === 'tree' && ((!t.alive && !(o.saveMarked && t.faded)) || loose.has(t)));
   const marked = o.saveMarked ? grey.find((t) => t.fading) : undefined;
   if (marked) return { goal: marked, toward: 'tree' };
   const nearest = grey.reduce<{ t: Tile; d: number } | undefined>((best, t) => {
@@ -150,6 +152,8 @@ function adviseWork(s: GameState, o: PolicyOptions): Advice {
     const t = (o.saveMarked && targets.find((tt) => tt.fading)) || closest(targets, mother);
     if (t) return { kind: 'heal', memberId: m.id, target: t };
   }
+  const guard = guardPlague(s, ready, o);
+  if (guard) return guard;
   for (const m of of('mago')) {
     if (magicSpent(s)) break;
     const rock = closest(targetsOf(m, 'sprout'), mother);
@@ -193,6 +197,34 @@ function adviseWork(s: GameState, o: PolicyOptions): Advice {
     if (t) return { kind: 'puff', memberId: m.id, target: t, puff };
   }
   return { kind: 'endMonth' };
+}
+
+/**
+ * Frenar la plaga (043): para la casilla tejida con plaga que nadie frena este mes (primero la más cercana al Hogar), el
+ * Ganoderma la limpia; si no, un miembro listo hace una acción útil a `PLAGUE_REACH` casillas o menos de ella.
+ */
+function guardPlague(s: GameState, ready: readonly Member[], o: PolicyOptions): Advice | null {
+  const mother = motherTile(s);
+  const home = s.tiles.find((t) => t.kind === 'home')!;
+  const threats = s.tiles.filter((t) => t.blighted && t.net && !guarded(s, t)).sort((a, b) => dist(a, home) - dist(b, home));
+  for (const threat of threats) {
+    const near = (t: Tile) => steps(t, threat) <= PLAGUE_REACH;
+    for (const m of ready.filter((mm) => mm.species === 'ganoderma'))
+      if (validTargets(s, m.id).some((t) => t === threat)) return { kind: 'cleanse', memberId: m.id, target: threat };
+    for (const m of ready) {
+      if (!['lactarius', 'champi', 'morchella', 'amanita'].includes(m.species)) continue;
+      const targets = validTargets(s, m.id).filter(near);
+      if (!targets.length) continue;
+      if (m.species === 'lactarius') {
+        const { goal, toward } = weaveGoal(s, o);
+        return { kind: 'weave', memberId: m.id, target: closestBy(targets, distTo(s, goal, o))!, toward };
+      }
+      if (m.species === 'champi') return { kind: 'decompose', memberId: m.id, target: closest(targets, mother)! };
+      if (m.species === 'morchella') return { kind: 'breakRock', memberId: m.id, target: closest(targets, mother)! };
+      if (m.species === 'amanita') return { kind: 'revive', memberId: m.id, target: closest(targets, mother)! };
+    }
+  }
+  return null;
 }
 
 /**

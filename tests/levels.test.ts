@@ -34,7 +34,7 @@ describe('Requirement: Niveles de dificultad', () => {
     expect(fadedCount(s)).toBe(0);
   });
 
-  it('Scenario: Nada se pierde — en 1000 partidas al azar por nivel, terminar el mes nunca quita árboles vivos y solo la plaga de Ancestral quita una casilla de red (las reservas solo bajan por lo que come el gremio en otoño e invierno)', () => {
+  it('Scenario: Nada se pierde — en 1000 partidas al azar por nivel, terminar el mes nunca quita árboles vivos y solo la plaga de Bosque y Ancestral quita casillas de red (las tejidas con plaga) (las reservas solo bajan por lo que come el gremio en otoño e invierno)', () => {
     const rng = mulberry32(19);
     const starts = Object.fromEntries(LEVEL_IDS.map((l) => [l, Array.from({ length: 10 }, (_, i) => newRandomGame(i + 1, l))]));
     const count = (s: GameState) => ({ net: s.tiles.filter((t) => t.net).length, alive: s.tiles.filter((t) => t.alive).length });
@@ -50,8 +50,8 @@ describe('Requirement: Niveles de dificultad', () => {
           const after = count(next);
           // Lo único que puede bajar es lo que come el gremio en otoño e invierno (028, 030): UPKEEP nutrientes, nunca esporas.
           const eaters = isCold(s) ? UPKEEP : 0;
-          // La plaga (032) puede quitar la casilla tejida marcada: a lo más una por mes.
-          const plague = s.tiles.some((t) => t.blighted) ? 1 : 0;
+          // La plaga (032, 043) puede quitar las casillas tejidas marcadas.
+          const plague = s.tiles.filter((t) => t.blighted && t.net).length;
           if (after.net < before.net - plague || after.alive < before.alive || next.nutrients < s.nutrients - eaters || next.nutrients < 0 || next.spores < s.spores)
             throw new Error(`${level}: se perdió progreso en el mes ${s.month}`);
           s = next;
@@ -62,7 +62,7 @@ describe('Requirement: Niveles de dificultad', () => {
 
 describe('Requirement: Escarcha', () => {
   it('Scenario: Llega la escarcha — en Bosque, el otoño cuesta 2 por tejer y los árboles siguen produciendo', () => {
-    const before = at('bosque', { month: 6, alive: [{ x: 2, y: 5 }] });
+    const before = at('bosque', { month: 6, alive: [{ x: 2, y: 5 }], net: [{ x: 2, y: 6 }] });
     const { state, message } = endMonth(before);
     expect(state.month).toBe(7);
     expect(weaveCost(state)).toBe(2);

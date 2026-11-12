@@ -79,6 +79,32 @@ export function neighbors(s: GameState, x: number, y: number): Tile[] {
 
 export const touchesNet = (s: GameState, x: number, y: number): boolean => neighbors(s, x, y).some((n) => n.net);
 export const revivedCount = (s: GameState): number => s.tiles.filter((t) => t.kind === 'tree' && t.alive).length;
+
+/** Casillas de la red unidas al Hogar por casillas de la red (pasos en cruz; 043). */
+export function rootedNet(s: GameState): ReadonlySet<Tile> {
+  const home = s.tiles.find((t) => t.kind === 'home')!;
+  const seen = new Set<Tile>([home]);
+  const queue = [home];
+  for (let i = 0; i < queue.length; i++) {
+    const p = queue[i]!;
+    for (const n of neighbors(s, p.x, p.y)) {
+      if (seen.has(n) || !n.net) continue;
+      seen.add(n);
+      queue.push(n);
+    }
+  }
+  return seen;
+}
+
+/** Árboles vivos que no producen porque la red no los une al Hogar (043; solo en niveles con `rooted`). */
+export function unrootedTrees(s: GameState): Tile[] {
+  if (!LEVELS[s.level].rooted) return [];
+  const rooted = rootedNet(s);
+  return s.tiles.filter((t) => t.kind === 'tree' && t.alive && !rooted.has(t));
+}
+
+/** Árboles que producen al terminar el mes (043: solo los que la red une al Hogar, en niveles con `rooted`). */
+export const producingCount = (s: GameState): number => revivedCount(s) - unrootedTrees(s).length;
 export const treeTotal = (s: GameState): number => s.tiles.filter((t) => t.kind === 'tree').length;
 export const member = (s: GameState, id: number): Member | undefined => s.members.find((m) => m.id === id);
 /** Compañero que ya trabajó este mes en (x, y) y al que la Gliophorus puede llamar (ni Gliophorus ni la maga). */
@@ -120,24 +146,24 @@ export const reviveCost = (t: Tile): number => (t.faded ? FADED_REVIVE : COST.re
  * Árbol gris (ni vivo ni apagado) más lejano de la red: mayor distancia en pasos ortogonales desde la red sin
  * atravesar rocas; si hay empate, el de la fila más alta (y menor) y después el de la columna menor (019).
  */
-/** Empieza una estación con plaga (032): primer mes de una estación de `LEVELS › plague`. */
-export const plagueStarts = (s: GameState, month = s.month): boolean =>
-  LEVELS[s.level].plague.includes(seasonIndex(month)) && (month - 1) % MONTHS_PER_SEASON === 0;
-
 export const steps = (a: Point, b: Point): number => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 
 /**
- * Casilla que marca la plaga (032): una casilla tejida (tierra de la red; nunca el Hogar, un árbol ni el Árbol Padre)
- * entre las más cercanas al Árbol Padre, al azar con el claro y el mes (`hashString(mapId) ^ month`).
+ * Casilla que marca la plaga (032; 043: cerca del Hogar): una casilla tejida (tierra de la red; nunca el Hogar, un árbol ni
+ * el Árbol Padre) entre las más cercanas al Hogar, al azar con el claro, el mes y `k` (la `k`-ésima que marca ese mes).
  */
-export function plagueTarget(s: GameState): Tile | null {
-  const mother = s.tiles.find((t) => t.kind === 'mother');
+export function plagueTarget(s: GameState, k = 0): Tile | null {
+  const home = s.tiles.find((t) => t.kind === 'home');
   const woven = s.tiles.filter((t) => t.net && t.kind === 'soil' && !t.blighted);
-  if (!mother || !woven.length) return null;
-  const near = Math.min(...woven.map((t) => steps(t, mother)));
-  const ties = woven.filter((t) => steps(t, mother) === near);
-  return ties[Math.floor(mulberry32((hashString(s.mapId) ^ s.month) >>> 0)() * ties.length)]!;
+  if (!home || !woven.length) return null;
+  const near = Math.min(...woven.map((t) => steps(t, home)));
+  const ties = woven.filter((t) => steps(t, home) === near);
+  return ties[Math.floor(mulberry32((hashString(s.mapId) ^ s.month ^ (k << 8)) >>> 0)() * ties.length)]!;
 }
+
+/** Casillas que marca la plaga al empezar el mes (043): en las estaciones con plaga, 1, 2 y 3 según el mes de la estación. */
+export const plagueCount = (s: GameState, month = s.month): number =>
+  LEVELS[s.level].plague.includes(seasonIndex(month)) ? ((month - 1) % MONTHS_PER_SEASON) + 1 : 0;
 
 /** Algún hongo trabajó este mes a `PLAGUE_REACH` casillas o menos de `t` (032). */
 export const guarded = (s: GameState, t: Point): boolean => s.members.some((m) => m.at && steps(m.at, t) <= PLAGUE_REACH);

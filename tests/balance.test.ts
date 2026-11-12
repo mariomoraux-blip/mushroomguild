@@ -72,7 +72,9 @@ const TARGETS = {
   // 034: un árbol se apaga cada dos meses; se certifican 86 de los 100 primeros (861 de 1000) y las pistas bajan a 10–25 %.
   // 041: con 11 rocas y 13 nutrientes se certifican 77 de los 100 primeros; el piso baja a 75.
   // 042: un apagado más en el mes 2; las pistas bajan al 15 % y se certifican 65 de 100.
-  ancestral: { hints: [0.1, 0.2], random: 0.05, certified: 60 },
+  // 043: la plaga crece cerca del Hogar y los árboles solo producen unidos a la red; las pistas frenan la plaga.
+  // Bosque: 45 %, 85 de 100. Ancestral: 17 %, 42 de 100 (501 de 1000); el piso baja a 40.
+  ancestral: { hints: [0.1, 0.2], random: 0.05, certified: 40 },
 } as const;
 
 describe.each(['bosque', 'ancestral'] as const)('balance en %s', (level) => {

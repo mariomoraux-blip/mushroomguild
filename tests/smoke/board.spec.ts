@@ -1019,7 +1019,7 @@ test('Temporadas frías (028, 030): carta «Llega el frío» al empezar el otoñ
   await expect(card).toContainText('Llegó el otoño');
   await expect(card).toContainText('Al terminar cada mes de otoño e invierno, el gremio come 1 nutriente.');
   await expect(card).toContainText('En invierno, los árboles no dan esporas.');
-  await expect(card).toContainText('Al empezar el invierno, la plaga marca una casilla de la red'); // 042
+  await expect(card).toContainText('En invierno, la plaga marca casillas de la red cerca del Hogar'); // 042, 043
   const overflow = await card.evaluate((n) => n.scrollWidth - n.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/030-frio-390x844.png' });
@@ -1094,25 +1094,26 @@ test('Plaga de Ancestral (032, 033, 035): la carta del frío la explica y la cas
   await weave(6);
   await page.locator('.end').click();
   const card = page.locator('#story [role="dialog"]');
-  await expect(card).toContainText('la plaga marca una casilla de la red');
+  await expect(card).toContainText('la plaga marca casillas de la red');
   await page.keyboard.press('Escape');
   await expect(card).toHaveCount(0);
   await expect(page.locator('#notice')).toContainText('La plaga llegó a la red');
-  await expect(cell(page, 2, 3)).toHaveAttribute('aria-label', /con plaga/);
+  // 043: la casilla tejida más cercana al Hogar.
+  await expect(cell(page, 2, 6)).toHaveAttribute('aria-label', /con plaga/);
   await expect(cell(page, 2, 4)).not.toHaveAttribute('aria-label', /con plaga/);
   // La hoja podrida junto a la estación (033) y la etiqueta de la estación lo dicen.
   await expect(page.locator('.hud__plague')).toBeVisible();
   await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', /con plaga/);
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/033-plaga-390x844.png' });
-  await cell(page, 2, 3).click();
+  await cell(page, 2, 6).click();
   await expect(page.locator('#notice')).toContainText('Red con plaga: se marchitará al terminar el mes');
   // Nadie trabaja cerca: al terminar el mes se marchita, deja de estar en la red y la plaga se queda (035).
   await page.locator('.end').click();
   await expect(page.locator('#notice')).toContainText('La plaga marchitó una casilla de la red: no se puede tejer');
-  await expect(cell(page, 2, 3)).toHaveAttribute('aria-label', /con plaga marchita/);
-  await expect(cell(page, 2, 3)).not.toHaveAttribute('aria-label', /en la red/);
+  await expect(cell(page, 2, 6)).toHaveAttribute('aria-label', /con plaga marchita/);
+  await expect(cell(page, 2, 6)).not.toHaveAttribute('aria-label', /en la red/);
   await expect(page.locator('.hud__plague')).toBeVisible();
-  await cell(page, 2, 3).click();
+  await cell(page, 2, 6).click();
   await expect(page.locator('#notice')).toContainText('Plaga marchita: no se puede tejer.');
   if (info.project.name === 'vertical-390x844') {
     await page.waitForTimeout(1500); // que termine el fundido de la plaga viva sobre la red muerta
@@ -1121,7 +1122,7 @@ test('Plaga de Ancestral (032, 033, 035): la carta del frío la explica y la cas
   // En invierno (mes 10) la casilla usa su variante con nieve.
   await weave(9);
   await page.locator('.end').click();
-  await expect(cell(page, 2, 3)).toHaveAttribute('aria-label', /con plaga/);
+  await expect(cell(page, 2, 6)).toHaveAttribute('aria-label', /con plaga/);
   // Solo para la captura: que terminen el fundido de la casilla marchita (~0,9 s) y el cambio de estación.
   if (info.project.name === 'vertical-390x844') {
     await page.waitForTimeout(1500);
@@ -1142,7 +1143,7 @@ test('Ancestral cada dos meses (034, 042): Elige tu dificultad lo dice y al empe
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/034-ancestral-mes-5-390x844.png' });
 });
 
-test('Invierno en Bosque (042): sigue la escarcha y llega la plaga a la casilla tejida más cercana al Árbol Padre', async ({ page }, info) => {
+test('Invierno en Bosque (042, 043): sigue la escarcha y llega la plaga a la casilla tejida más cercana al Hogar', async ({ page }, info) => {
   await page.goto('/?map=clasico&nivel=bosque');
   await page.evaluate(() => {
     type T = { x: number; y: number; net: boolean };
@@ -1156,13 +1157,47 @@ test('Invierno en Bosque (042): sigue la escarcha y llega la plaga a la casilla 
   await page.locator('.end').click();
   await expect(page.locator('.hud__month-value')).toHaveText('Mes 10/12');
   await expect(page.locator('#notice')).toContainText('La plaga llegó a la red');
-  await expect(cell(page, 2, 3)).toHaveAttribute('aria-label', /con plaga/);
+  await expect(cell(page, 2, 6)).toHaveAttribute('aria-label', /con plaga/);
   await expect(page.locator('.hud__plague')).toBeVisible();
   await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', /escarcha/);
   if (info.project.name === 'vertical-390x844') {
     await page.waitForTimeout(1500); // que termine el cambio de estación
     await page.screenshot({ path: 'docs/screenshots/042-bosque-invierno-390x844.png' });
   }
+});
+
+test('La plaga crece y corta la red (043): en Bosque marca más casillas cada mes y el árbol que queda suelto no da nada', async ({ page }, info) => {
+  await page.goto('/?map=clasico&nivel=bosque');
+  await page.evaluate(() => {
+    type T = { x: number; y: number; net: boolean; alive: boolean; blighted?: boolean };
+    type S = { getState(): { game: { tiles: T[] } }; dispatch(a: object): void };
+    const store = (window as unknown as { store: S }).store;
+    const g = store.getState().game;
+    // Red por la columna 2 con el árbol (2,5) vivo; la plaga ya marcó (2,6), la que lo une al Hogar.
+    const woven = ['2,6', '2,5', '2,4', '2,3'];
+    const tiles = g.tiles.map((t) => {
+      const k = `${t.x},${t.y}`;
+      return { ...t, net: t.net || woven.includes(k), alive: t.alive || k === '2,5', blighted: k === '2,6' };
+    });
+    store.dispatch({ type: 'start', game: { ...g, month: 10, nutrients: 6, tiles }, intro: false });
+  });
+  await page.locator('.end').click();
+  await expect(page.locator('.hud__month-value')).toHaveText('Mes 11/12');
+  await expect(page.locator('#notice')).toContainText('La plaga crece: 2 casillas de la red');
+  await expect(page.locator('#notice')).toContainText('Un árbol no dio nada: la red no lo une al Hogar.');
+  await expect(cell(page, 2, 6)).toHaveAttribute('aria-label', /con plaga marchita/);
+  await expect(cell(page, 2, 4)).toHaveAttribute('aria-label', /con plaga/);
+  await expect(cell(page, 2, 3)).toHaveAttribute('aria-label', /con plaga/);
+  await expect(cell(page, 2, 5)).toHaveAttribute('aria-label', /suelto: la red no lo une al Hogar/);
+  await expect(page.locator('.hud__plague')).toHaveAttribute('data-count', '3');
+  await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', /con plaga en 3 casillas/);
+  await cell(page, 2, 5).click();
+  await expect(page.locator('#notice')).toContainText('Árbol vivo, pero suelto');
+  if (info.project.name === 'vertical-390x844') {
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: 'docs/screenshots/043-plaga-crece-390x844.png' });
+  }
+  await noScrollNoZoom(page);
 });
 
 test('Hongos para reclutar (039): Ámbar cura a distancia con su ficha completa', async ({ page }, info) => {
