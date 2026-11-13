@@ -1,9 +1,9 @@
 import { playAdvised, playExpert } from './autoplay';
-import { H, LEVEL_SALT, LEVELS, MAP, MAP_GEN, TREES_FOR_MOTHER, W } from './config';
+import { H, LEVEL_SALT, LEVELS, MAP, MAP_GEN, TREES_FOR_MOTHER, TUTORIAL_MAP, W } from './config';
 import { LEVEL_SEEDS } from './level-seeds';
 import { mulberry32 } from './rng';
 import { newGame } from './state';
-import type { GameState, Level } from './types';
+import type { GameState, Level, ScaledLevel } from './types';
 
 type Rng = () => number;
 const int = (rng: Rng, n: number) => Math.floor(rng() * n);
@@ -99,7 +99,7 @@ const broteMap = (seed: number): readonly string[] => (seed === 0 ? MAP : genera
  */
 export function levelAttempt(
   seed: number,
-  level: Exclude<Level, 'brote'>,
+  level: ScaledLevel,
   accept: (map: readonly string[], i: number) => boolean,
   attempts: number = MAP_GEN.levelAttempts,
 ): { map: readonly string[]; index: number } | null {
@@ -136,6 +136,7 @@ export function levelAttempt(
  * certificadas o, si no hay, tal cual.
  */
 export function levelMap(seed: number, level: Level): readonly string[] {
+  if (level === 'tutorial') return TUTORIAL_MAP; // 046: siempre el mismo claro
   if (level === 'brote') return broteMap(seed);
   const fallback = () => (seed === 0 ? MAP : levelMap(firstCertified(level), level));
   const known = LEVEL_SEEDS[level].charAt(seed);
@@ -147,10 +148,11 @@ export function levelMap(seed: number, level: Level): readonly string[] {
 }
 
 /** Primera semilla (desde la 1) con claro certificado en el nivel. */
-export const firstCertified = (level: Exclude<Level, 'brote'>): number => [...LEVEL_SEEDS[level]].findIndex((c, i) => i > 0 && c !== '-');
+export const firstCertified = (level: ScaledLevel): number => [...LEVEL_SEEDS[level]].findIndex((c, i) => i > 0 && c !== '-');
 
 /** Semilla para una partida nueva: en Brote cualquiera; en Bosque y Ancestral, una de la tabla certificada. */
 export function randomSeed(level: Level, now: number): number {
+  if (level === 'tutorial') return 1;
   if (level === 'brote') return (now % 2147483647) + 1;
   const table = LEVEL_SEEDS[level];
   const seeds = [...table].flatMap((c, i) => (i > 0 && c !== '-' ? [i] : []));
@@ -159,5 +161,6 @@ export function randomSeed(level: Level, now: number): number {
 
 /** Partida nueva sobre un claro generado con la semilla dada (la 0 es el clásico). */
 export function newRandomGame(seed: number, level: Level = 'brote'): GameState {
+  if (level === 'tutorial') return newGame(TUTORIAL_MAP, 'tutorial', 'tutorial');
   return newGame(levelMap(seed, level), seed === 0 ? 'clasico' : `seed-${seed}`, level);
 }

@@ -845,6 +845,7 @@ button { font: inherit; color: inherit; }
 .level__text { flex: 1; min-width: 0; display: grid; gap: 2px; }
 .level__name { font-family: var(--font-display); font-size: 20px; color: var(--moss); }
 .level__line { font-size: 14px; font-weight: 700; color: var(--ink-soft); line-height: 1.3; }
+.level--tutorial { background: var(--grain), linear-gradient(var(--cream), color-mix(in srgb, var(--sun) 35%, var(--paper)) 70%, var(--peach)); }
 .level__mult { flex: 0 0 auto; padding: 3px 10px; font-family: var(--font-display); font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; border: 2px solid var(--ink); border-radius: 12px; background: var(--sun); }
 
 /* ─── Puntaje en la carta de victoria (015) ───────────────────────────────── */
@@ -1151,6 +1152,79 @@ button { font: inherit; color: inherit; }
   }
 }
 
+/* ─── Primeros pasos (046): viñetas del tutorial ───────────────────────────── */
+/* Sobre todo (hojas 40): la sombra del aro es la máscara; los bloques atrapan los toques fuera del hueco. */
+.coach { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+.coach[hidden] { display: none; }
+.coach__block { position: fixed; pointer-events: auto; touch-action: none; }
+.coach__ring {
+  position: fixed;
+  border-radius: 16px;
+  border: 3px solid var(--sun);
+  box-shadow: 0 0 0 200vmax color-mix(in srgb, var(--ink) 62%, transparent);
+  outline: 0 solid color-mix(in srgb, var(--sun) 0%, transparent);
+  outline-offset: 0;
+  pointer-events: none;
+  transition: left var(--motion-fast) var(--ease-settle), top var(--motion-fast) var(--ease-settle), width var(--motion-fast) var(--ease-settle), height var(--motion-fast) var(--ease-settle);
+  animation: coach-pulse calc(2 * var(--motion-narrative)) var(--ease-soft) infinite alternate;
+}
+.coach__ring.is-empty { border-color: transparent; animation: none; }
+/* En un paso «Ver», el hueco tampoco responde: solo «Siguiente». */
+.coach[data-mode='see'] .coach__ring { pointer-events: auto; }
+@keyframes coach-pulse { to { outline: 6px solid color-mix(in srgb, var(--sun) 45%, transparent); outline-offset: 3px; } }
+.coach__bubble {
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  pointer-events: auto;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background: var(--grain), linear-gradient(var(--cream), var(--paper) 70%, color-mix(in srgb, var(--peach) 50%, var(--paper)));
+  box-shadow: 0 4px 0 var(--ink), 0 12px 24px color-mix(in srgb, var(--ink) 35%, transparent);
+  animation: fade-in var(--motion-fast) var(--ease-settle);
+}
+.coach__text { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.35; }
+.coach__foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.coach__foot[hidden], .coach__confirm[hidden], .coach__next[hidden] { display: none; }
+.coach__count { flex: 1 1 auto; font-size: 14px; font-weight: 800; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.coach__skip {
+  min-height: var(--touch);
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.coach__next { min-width: 120px; font-size: 16px; }
+.coach__confirm { display: grid; gap: 8px; }
+.coach__ask { margin: 0; font-size: 16px; font-weight: 800; }
+.coach__row { display: flex; gap: 8px; }
+.coach__row .btn { flex: 1 1 0; font-size: 16px; }
+/* Flecha hacia el hueco: un cuadrado girado en el borde del globo que da al objetivo. */
+.coach__arrow {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  rotate: 45deg;
+}
+.coach__bubble[data-side='below'] .coach__arrow { top: -9px; translate: -50% 0; border-right: 0; border-bottom: 0; }
+.coach__bubble[data-side='above'] .coach__arrow { top: auto; bottom: -9px; translate: -50% 0; border-left: 0; border-top: 0; background: color-mix(in srgb, var(--peach) 50%, var(--paper)); }
+.coach__bubble[data-side='right'] .coach__arrow { left: -9px; translate: 0 -50%; border-top: 0; border-right: 0; }
+.coach__bubble[data-side='left'] .coach__arrow { left: auto; right: -9px; translate: 0 -50%; border-bottom: 0; border-left: 0; }
+.coach__bubble:is([data-side='center'], [data-side='top']) .coach__arrow { display: none; }
+.level__mult--tip { background: var(--meadow); }
+
 /* Movimiento reducido (022): sin desplazamiento, escala, rotación ni rebotes; quedan los cambios de color y opacidad. */
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; }
@@ -1164,6 +1238,8 @@ button { font: inherit; color: inherit; }
   .sheet__panel, .story__card, .story__again, .screen__panel.is-entering, .story[data-kind='mage'] .story__card, .story__card.is-in { animation-name: fade-in; animation-duration: var(--motion-fast); }
   .recipe__arrow, .recipe__after > *, .story__dot.is-active, .card.is-picked .portrait, .card.is-picked .card__medal, .card.is-waking, .end.is-turning .end__moon { animation: none; }
   .card[aria-pressed='true'] .portrait { transform: none; }
+  .coach__ring { animation: none; }
+  .coach__bubble { animation-duration: var(--motion-fast); }
   .card.is-joining, .card.is-arriving, .hud__season.is-new-season, .portrait.is-new-season img { animation-name: fade-in; animation-duration: var(--motion-fast); }
   .story__card.is-out, .sheet.is-leaving .sheet__panel, .story.is-leaving .story__card, .story.is-leaving .story__again, .screen.is-leaving .screen__panel { animation-name: fade-out; }
 }

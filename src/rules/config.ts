@@ -38,7 +38,8 @@ export const TREES_FOR_MAGE = 2;
  * los árboles no dan esporas (028); `mother`: nutrientes para despertar al Árbol Padre (028); `motherTrees`: árboles revividos que pide (031); `plague`: estaciones en cuyo primer mes la plaga marca una casilla
  * tejida (032; 043: marca casillas cada mes de esas estaciones, 1, 2 y 3); `rooted`: los árboles solo producen si la red los
  * une al Hogar (043);
- * `hints`: se muestran las pistas; `multiplier`: del puntaje. Ninguna regla de nivel quita árboles vivos.
+ * `hints`: se muestran las pistas; `multiplier`: del puntaje; `start`: nutrientes y esporas al empezar, si no son los de
+ * siempre (046). Ninguna regla de nivel quita árboles vivos.
  */
 export interface LevelRules {
   readonly rocks: number;
@@ -52,13 +53,19 @@ export interface LevelRules {
   readonly rooted: boolean;
   readonly hints: boolean;
   readonly multiplier: number;
+  readonly start?: { readonly nutrients: number; readonly spores: number };
 }
 export const LEVELS: Readonly<Record<Level, LevelRules>> = {
+  // 046: «Primeros pasos». Recursos y Árbol Padre ajustados para que el guion (`src/tutorial.ts`) se gane en el mes 6.
+  tutorial: { rocks: 3, frost: [], fading: [], upkeep: [], sporeless: [], mother: 9, motherTrees: 2, plague: [], rooted: false, hints: false, multiplier: 0, start: { nutrients: 2, spores: 4 } },
   brote: { rocks: 6, frost: [], fading: [], upkeep: [], sporeless: [], mother: 10, motherTrees: TREES_FOR_MOTHER, plague: [], rooted: false, hints: true, multiplier: 1 },
   bosque: { rocks: 9, frost: [2, 3], fading: [4, 6], upkeep: [2, 3], sporeless: [3], mother: 11, motherTrees: TREES_FOR_MOTHER, plague: [3], rooted: true, hints: true, multiplier: 1.5 },
   ancestral: { rocks: 11, frost: [2, 3], fading: [2, 3, 5, 7, 9, 11], upkeep: [2, 3], sporeless: [3], mother: 13, motherTrees: 4, plague: [2, 3], rooted: true, hints: false, multiplier: 2 },
 };
+/** Niveles con puntaje y ranking (el servidor rechaza los demás). */
 export const LEVEL_IDS: readonly Level[] = ['brote', 'bosque', 'ancestral'];
+/** Niveles de «Elige tu dificultad», en orden (046: «Primeros pasos» primero). */
+export const PLAY_LEVELS: readonly Level[] = ['tutorial', ...LEVEL_IDS];
 /** Costo de tejer con escarcha. */
 export const FROST_WEAVE = 2;
 /** Nutrientes que come el gremio, en total, al terminar un mes de temporada fría (028). */
@@ -112,6 +119,21 @@ export const MAP: readonly string[] = [
   'RR...',
   '..TR.',
   'L...T',
+  '.LH..',
+];
+
+/**
+ * Claro de «Primeros pasos» (046), hecho a mano para el guion: un tronco junto al Hogar, dos árboles en fila, una barrera
+ * de rocas que Maestra Bruma abre con el Brote arcano y el Árbol Padre detrás.
+ */
+export const TUTORIAL_MAP: readonly string[] = [
+  '...M.',
+  '.....',
+  '.RRR.',
+  '...T.',
+  '.L..L',
+  '..T..',
+  '.....',
   '.LH..',
 ];
 

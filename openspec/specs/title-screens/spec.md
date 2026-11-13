@@ -61,7 +61,7 @@ La portada SHALL mostrar, fija al borde inferior de la pantalla y centrada, con 
 - THEN el crédito sigue fijo abajo y centrado, se ve completo y no se superpone al logo ni al menú, y la página no hace scroll
 
 ### Requirement: Elige tu dificultad
-"Nueva partida" SHALL abrir la pantalla "Elige tu dificultad" con los tres niveles (Brote, Bosque y Ancestral), cada uno con su nombre, una línea que diga qué cambia y su multiplicador de puntaje. Cada nivel SHALL ser un botón de al menos 44 px de alto. El foco SHALL ir al último nivel elegido (Brote la primera vez), recordado entre visitas; si el almacenamiento falla, el foco va a Brote. Esc SHALL volver a la portada. Elegir un nivel SHALL abrir la intro la primera vez que se juega ese nivel y el tablero las demás. "Jugar de nuevo" SHALL conservar el nivel. `?nivel=brote|bosque|ancestral` SHALL entrar directo al tablero en ese nivel.
+"Nueva partida" SHALL abrir la pantalla "Elige tu dificultad" con «Primeros pasos» primero (046: el tutorial, marcado «Recomendado» hasta que se complete o se salte, sin multiplicador) y los tres niveles (Brote, Bosque y Ancestral), cada uno con su nombre, una línea que diga qué cambia y su multiplicador de puntaje. Cada nivel SHALL ser un botón de al menos 44 px de alto. El foco SHALL ir al último nivel elegido (la primera vez, «Primeros pasos»; después del tutorial, Brote), recordado entre visitas; si el almacenamiento falla, el foco va a «Primeros pasos». Esc SHALL volver a la portada. Elegir un nivel SHALL abrir la intro la primera vez que se juega ese nivel y el tablero las demás; la intro vista en el tutorial no se repite en Brote. "Jugar de nuevo" SHALL conservar el nivel. `?nivel=tutorial|brote|bosque|ancestral` SHALL entrar directo al tablero en ese nivel.
 
 #### Scenario: Elegir Ancestral
 - WHEN el jugador pulsa "Nueva partida" y elige Ancestral
@@ -75,3 +75,7 @@ La portada SHALL mostrar, fija al borde inferior de la pantalla y centrada, con 
 #### Scenario: Jugar de nuevo conserva el nivel
 - WHEN el jugador termina una partida en Bosque y pulsa "Jugar de nuevo"
 - THEN la partida nueva es en Bosque
+
+#### Scenario: Primera vez
+- WHEN el jugador pulsa "Nueva partida" por primera vez
+- THEN «Primeros pasos» aparece primero, con «Recomendado» y el foco

@@ -9,7 +9,7 @@ import { el, portrait } from './dom';
 import { hideLayer, showLayer, turnCard } from './motion';
 
 /** Fondo pintado de cada carta (se descarga solo cuando la carta se muestra). */
-const BACKGROUND: Record<Story['kind'], 'intro' | 'victory'> = { intro: 'intro', mage: 'intro', cold: 'intro', loose: 'intro', won: 'victory', lost: 'intro' };
+const BACKGROUND: Record<Story['kind'], 'intro' | 'victory'> = { intro: 'intro', mage: 'intro', cold: 'intro', loose: 'intro', won: 'victory', lost: 'intro', tutorial: 'victory' };
 const GUILD: SpeciesId[] = ['lactarius', 'champi', 'amanita'];
 
 /**
@@ -22,7 +22,13 @@ export interface RankingActions {
   open(): void;
 }
 
-export function mountStory(root: HTMLElement, store: Store, onRestart: () => void, ranking: RankingActions) {
+/** Final de «Primeros pasos» (046): empezar Brote o volver a la portada. */
+export interface TutorialActions {
+  playBrote(): void;
+  toTitle(): void;
+}
+
+export function mountStory(root: HTMLElement, store: Store, onRestart: () => void, ranking: RankingActions, tutorial: TutorialActions) {
   let shown = '';
   let opener: HTMLElement | null = null;
 
@@ -35,6 +41,8 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
     if (action === 'again') onRestart();
     if (action === 'register') ranking.register();
     if (action === 'ranking') ranking.open();
+    if (action === 'playBrote') tutorial.playBrote();
+    if (action === 'toTitle') tutorial.toTitle();
   });
 
   const button = (action: string, label: string, primary = false) =>
@@ -121,6 +129,13 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
           el('ul', { class: 'story__spells' }, ...es.story.looseRules.map((r) => el('li', {}, r))),
         );
         actions.push(button('close', es.story.looseOk, true));
+        break;
+      case 'tutorial':
+        // 046: el gremio inicial, feliz, y a jugar de verdad.
+        title = es.tutorial.doneTitle;
+        art = el('div', { class: 'story__cast' }, ...GUILD.map((sp) => portrait(sp, 'feliz', season, 'md')));
+        body.push(el('p', { class: 'story__text' }, es.tutorial.doneText));
+        actions.push(button('toTitle', es.tutorial.toTitle), button('playBrote', es.tutorial.playBrote, true));
         break;
       case 'won':
       case 'lost': {
@@ -221,7 +236,8 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
 
   return (state: AppState) => {
     const story = state.ui.story;
-    const ending = story?.kind === 'won' || story?.kind === 'lost';
+    // 046: el final del tutorial también espera a que despierte el Árbol Padre.
+    const ending = story?.kind === 'won' || story?.kind === 'lost' || story?.kind === 'tutorial';
     const ended = lastStatus === 'playing' && state.game.status !== 'playing';
     lastStatus = state.game.status;
     // El fin del invierno sin ganar deja el claro en penumbra (022).
@@ -230,7 +246,7 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
       if (ending) return void (held.state = state); // el puntaje llega durante la espera
       stopHold();
     }
-    if (ended && ending) return hold(state, story.kind === 'won');
+    if (ended && ending) return hold(state, story.kind !== 'lost');
     show(state);
   };
 
