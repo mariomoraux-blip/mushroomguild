@@ -1,5 +1,5 @@
 import { es } from '../copy/es';
-import { COST, FADED_REVIVE, FROST_WEAVE, HEAL_REACH, LEVELS, MAX_GUILD, MONTHS, MONTHS_PER_SEASON, H, KIND, MAP, PLAGUE_REACH, RECRUIT_COSTS, START_NUTRIENTS, START_SPORES, STARTING_GUILD, W } from './config';
+import { COST, FADED_REVIVE, FROST_WEAVE, HEAL_REACH, LEVELS, MAX_GUILD, MONTHS, MONTHS_PER_SEASON, H, KIND, MAP, PLAGUE_HOME_GAP, PLAGUE_REACH, RECRUIT_COSTS, START_NUTRIENTS, START_SPORES, STARTING_GUILD, W } from './config';
 import { hashString, mulberry32 } from './rng';
 import type { GameState, GuildSpecies, Level, Member, Mutable, Point, Tile } from './types';
 
@@ -106,6 +106,24 @@ export function unrootedTrees(s: GameState): Tile[] {
   return s.tiles.filter((t) => t.kind === 'tree' && t.alive && !rooted.has(t));
 }
 
+/**
+ * Red cortada (045): casillas de la red, sin plaga, que ya no llegan al Hogar (solo en niveles con `rooted`). Se ven
+ * apagadas, sin la luz de la red.
+ */
+export function cutNet(s: GameState): Tile[] {
+  if (!LEVELS[s.level].rooted) return [];
+  const rooted = rootedNet(s);
+  return s.tiles.filter((t) => t.net && !t.blighted && t.kind !== 'home' && !rooted.has(t));
+}
+
+/**
+ * Casillas desde donde un hongo frena la plaga (045): las que están a `PLAGUE_REACH` pasos o menos de una casilla con
+ * plaga (tejida o marchita) que nadie frenó este mes.
+ */
+export function guardsPlague(s: GameState, t: Point): boolean {
+  return s.tiles.some((b) => b.blighted && !guarded(s, b) && steps(b, t) <= PLAGUE_REACH);
+}
+
 /** Árboles vivos que hoy la red une al Hogar y que quedarían sueltos si se marchitaran las casillas con plaga (044). */
 export function looseAtRisk(s: GameState): number {
   if (!LEVELS[s.level].rooted || !s.tiles.some((t) => t.blighted && t.net)) return 0;
@@ -160,16 +178,23 @@ export const reviveCost = (t: Tile): number => (t.faded ? FADED_REVIVE : COST.re
 export const steps = (a: Point, b: Point): number => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 
 /**
- * Casilla que marca la plaga (032; 043: cerca del Hogar): una casilla tejida (tierra de la red; nunca el Hogar, un árbol ni
- * el Árbol Padre) entre las más cercanas al Hogar, al azar con el claro, el mes y `k` (la `k`-ésima que marca ese mes).
+ * Casilla que marca la plaga (032; 043; 045: junto a un árbol): una casilla tejida sin plaga (tierra de la red; nunca el
+ * Hogar, un árbol ni el Árbol Padre) a 2 pasos o más del Hogar y vecina en cruz de un árbol vivo. Si no hay, la más
+ * cercana al Hogar entre las de 2 pasos o más; si tampoco, entre todas las tejidas. Al azar con el claro, el mes y `k`
+ * (la `k`-ésima que marca ese mes).
  */
 export function plagueTarget(s: GameState, k = 0): Tile | null {
   const home = s.tiles.find((t) => t.kind === 'home');
   const woven = s.tiles.filter((t) => t.net && t.kind === 'soil' && !t.blighted);
   if (!home || !woven.length) return null;
-  const near = Math.min(...woven.map((t) => steps(t, home)));
-  const ties = woven.filter((t) => steps(t, home) === near);
-  return ties[Math.floor(mulberry32((hashString(s.mapId) ^ s.month ^ (k << 8)) >>> 0)() * ties.length)]!;
+  const pick = (list: Tile[]) => list[Math.floor(mulberry32((hashString(s.mapId) ^ s.month ^ (k << 8)) >>> 0)() * list.length)]!;
+  const far = woven.filter((t) => steps(t, home) >= PLAGUE_HOME_GAP);
+  const pool = far.length ? far : woven;
+  const alive = s.tiles.filter((t) => t.kind === 'tree' && t.alive);
+  const byTree = pool.filter((t) => alive.some((a) => steps(a, t) === 1));
+  if (byTree.length) return pick(byTree);
+  const near = Math.min(...pool.map((t) => steps(t, home)));
+  return pick(pool.filter((t) => steps(t, home) === near));
 }
 
 /** Casillas que marca la plaga al empezar el mes (043): en las estaciones con plaga, 1, 2 y 3 según el mes de la estación. */

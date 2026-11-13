@@ -1,6 +1,7 @@
 import { es } from '../copy/es';
 import { canRecruit, hasSpecies, LEADERBOARD, MAX_GUILD, motherCost, motherTrees, RECRUITABLE, STARTING_GUILD, recruitCost, seasonIndex, member, validTargets, type Choice, type SpeciesId } from '../rules';
 import type { AppState, Sheet, Store } from '../store';
+import { SEASON_SLUGS } from '../theme';
 import { el, portrait } from './dom';
 import { recipesFor, RECIPE_STAGGER } from './recipe';
 import { hideLayer, showLayer } from './motion';
@@ -133,6 +134,20 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
     );
   }
 
+  /** «Ver el mes» (045): lo que pasó al empezar el mes, una línea con su ícono por cada cosa. */
+  function monthSheet(state: AppState) {
+    const report = state.ui.month;
+    const season = SEASON_SLUGS[seasonIndex(state.game.month)] ?? 'spring';
+    return panel(
+      es.month.title(report?.month ?? state.game.month),
+      el('ul', { class: 'month' },
+        ...(report?.lines ?? []).map((l) =>
+          el('li', { class: 'month__row', 'data-kind': l.kind, 'data-season': season },
+            el('span', { class: 'month__icon', 'aria-hidden': 'true' }), el('span', {}, l.text)))),
+      el('button', { class: 'btn btn--wide', type: 'button', 'data-action': 'close' }, es.card.understood),
+    );
+  }
+
   function helpSheet() {
     const season = currentSeason;
     const h = es.help;
@@ -256,6 +271,7 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
       },
       spell: () => spellSheet(state),
       help: () => helpSheet(),
+      month: () => monthSheet(state),
       alias: () => aliasSheet(sheet as Extract<Sheet, { kind: 'alias' }>),
     };
     // «Otro nombre» (036) y el problema de lo escrito (038): cambian en el lugar, sin volver a abrir la hoja, sin

@@ -24,6 +24,8 @@ export const LOG_USES = 2;
 export const TREES_FOR_MOTHER = 3;
 /** Plaga (032): la casilla marcada se salva si algún hongo trabajó ese mes a esta distancia o menos (pasos en cruz). */
 export const PLAGUE_REACH = 2;
+/** La plaga no marca casillas a menos de estos pasos del Hogar (045): va por los árboles, no por el tronco de la red. */
+export const PLAGUE_HOME_GAP = 2;
 /** Ganoderma (039): cura árboles y limpia plagas a esta distancia de la red o menos (pasos en cruz, sin importar las rocas). */
 export const HEAL_REACH = 2;
 /** Árboles revividos que hacen llegar a Maestra Bruma al empezar el mes siguiente. */
@@ -87,7 +89,7 @@ export const SCORE = {
   timeParS: 480, // 1 punto por segundo por debajo de 8:00
 } as const;
 /** Versión de la fórmula: cambia la clave del récord guardado y el `ScoreResult`. */
-export const SCORE_VERSION = 13;
+export const SCORE_VERSION = 14;
 /** Estrellas por claro: 2 desde el 90 % y 3 desde el 110 % del puntaje del bot con criterio en ese claro. */
 export const STARS = { two: 0.9, three: 1.1 } as const;
 /** Segundos de juego por mes que se suponen para la partida de referencia del bot. */

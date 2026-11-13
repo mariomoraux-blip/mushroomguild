@@ -169,6 +169,8 @@ const UI_ART: Record<string, string> = {
   trees: 'ui/icons/trees',
   book: 'ui/icons/book',
   plague: 'ui/icons/plague',
+  // 045: la insignia del árbol suelto también en «Ver el mes».
+  loose: 'board/trees/loose-badge',
   // Fondo de la partida (011): el del menú hasta que haya uno propio.
   'bg-game': 'backgrounds/menu',
   'bg-game-wide': 'backgrounds/menu-landscape',

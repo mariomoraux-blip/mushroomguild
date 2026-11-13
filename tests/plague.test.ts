@@ -31,13 +31,18 @@ describe('Requirement: Plaga', () => {
     expect(counts('brote')).toEqual(Array(12).fill(0));
   });
 
-  it('Scenario: La plaga marca — al empezar el mes 7 en Ancestral se marca la casilla tejida más cercana al Hogar', () => {
-    const { state, message } = endMonth(at('ancestral', { month: 6, net: NET }));
-    expect(marked(state)).toEqual([{ x: 2, y: 6 }]);
+  it('Scenario: La plaga marca — al empezar el mes 7 en Ancestral marca una casilla tejida junto a un árbol vivo, no junto al Hogar (045)', () => {
+    const { state, message } = endMonth(at('ancestral', { month: 6, net: NET, alive: [{ x: 2, y: 5 }] }));
+    // (2,6) también toca el árbol, pero está a 1 paso del Hogar: la plaga va por la raíz, no por el tronco.
+    expect(marked(state)).toEqual([{ x: 2, y: 4 }]);
     expect(message).toContain(es.log.plagueMarked(2));
   });
 
-  it('Scenario: La plaga crece — al empezar el mes 8 marca dos casillas tejidas más, las más cercanas al Hogar', () => {
+  it('sin árboles vivos, marca la casilla tejida más cercana al Hogar entre las de 2 pasos o más', () => {
+    expect(marked(endMonth(at('ancestral', { month: 6, net: NET })).state)).toEqual([{ x: 2, y: 4 }]);
+  });
+
+  it('Scenario: La plaga crece — al empezar el mes 8 marca dos casillas tejidas más', () => {
     const s = blight(at('ancestral', { month: 7, net: NET }), [{ x: 2, y: 6 }], true);
     const { state, message } = endMonth(s);
     expect(marked(state)).toEqual([{ x: 2, y: 3 }, { x: 2, y: 4 }, { x: 2, y: 6 }]);
@@ -49,19 +54,15 @@ describe('Requirement: Plaga', () => {
     expect(marked(state)).toEqual([{ x: 2, y: 6 }]);
   });
 
-  it('al azar entre las más cercanas: el mismo claro y el mismo mes marcan siempre la misma', () => {
-    const s = at('ancestral', { month: 7, net: [...NET, { x: 3, y: 7 }] });
-    const home = s.tiles.find((t) => t.kind === 'home')!;
-    const steps = (t: Point) => Math.abs(t.x - home.x) + Math.abs(t.y - home.y);
-    const woven = s.tiles.filter((t) => t.net && t.kind === 'soil');
-    const near = Math.min(...woven.map(steps));
-    const ties = woven.filter((t) => steps(t) === near).map((t) => `${t.x},${t.y}`);
-    expect(ties.length).toBeGreaterThan(1);
+  it('al azar entre las casillas junto a árboles vivos: el mismo claro y el mismo mes marcan siempre la misma', () => {
+    // (2,4) y (1,5) tocan el árbol (2,5) y están a 2 pasos o más del Hogar.
+    const s = at('ancestral', { month: 7, net: [...NET, { x: 1, y: 5 }], alive: [{ x: 2, y: 5 }] });
+    const ties = ['1,5', '2,4'];
     const a = plagueTarget(s)!;
     expect(ties).toContain(`${a.x},${a.y}`);
     expect(plagueTarget(s)).toEqual(a);
     const picks = new Set(Array.from({ length: 40 }, (_, i) => plagueTarget({ ...s, mapId: `seed-${i}` })!).map((t) => `${t.x},${t.y}`));
-    expect([...picks].sort()).toEqual([...ties].sort());
+    expect([...picks].sort()).toEqual(ties);
   });
 
   it('nunca marca el Hogar, un árbol vivo ni el Árbol Padre; sin casillas tejidas no marca', () => {
@@ -72,7 +73,7 @@ describe('Requirement: Plaga', () => {
   it('Scenario: Se marchita — sin hongos cerca, la casilla sale de la red y sigue con plaga', () => {
     const { state, message } = endMonth(blight(at('ancestral', { month: 10, net: NET }), [{ x: 2, y: 3 }]));
     expect(tile(state, 2, 3)).toMatchObject({ kind: 'soil', net: false, blighted: true });
-    expect(message).toContain(es.log.plagueWithered(PLAGUE_REACH));
+    expect(message).toContain(es.log.plagueWithered(1, PLAGUE_REACH));
   });
 
   it('Scenario: No se puede tejer — la casilla marchita rechaza al Lactarius', () => {
@@ -83,7 +84,7 @@ describe('Requirement: Plaga', () => {
   it('Scenario: Se queda — otro mes sin hongos cerca, sigue con plaga y la bitácora no repite el aviso', () => {
     const { state, message } = endMonth(blight(at('ancestral', { month: 7, net: NET }), [{ x: 2, y: 3 }], true));
     expect(tile(state, 2, 3)).toMatchObject({ net: false, blighted: true });
-    expect(message).not.toContain(es.log.plagueWithered(PLAGUE_REACH));
+    expect(message).not.toContain(es.log.plagueWithered(1, PLAGUE_REACH));
   });
 
   it('Scenario: Los hongos la limpian — un hongo a 2 casillas la deja como tierra que se puede tejer', () => {
@@ -92,14 +93,14 @@ describe('Requirement: Plaga', () => {
     const { state, message } = endMonth(act(s, INDI, 3, 4).state);
     expect(tile(state, 2, 3)).toMatchObject({ kind: 'soil', net: false });
     expect(tile(state, 2, 3)!.blighted).toBeUndefined();
-    expect(message).toContain(es.log.plagueCleared);
+    expect(message).toContain(es.log.plagueCleared(1));
     const again = act({ ...state, nutrients: 2 }, INDI, 2, 3).state;
     expect(tile(again, 2, 3)!.net).toBe(true);
   });
 
   it('Scenario: Dos plagas — la del otoño sigue cuando el invierno marca otra casilla', () => {
     const s = blight(at('ancestral', { month: 9, net: NET }), [{ x: 2, y: 3 }], true);
-    expect(marked(endMonth(s).state)).toEqual([{ x: 2, y: 3 }, { x: 2, y: 6 }]);
+    expect(marked(endMonth(s).state)).toEqual([{ x: 2, y: 3 }, { x: 2, y: 4 }]);
   });
 
   it('Scenario: Los hongos la frenan — un hongo que trabajó a 2 casillas salva la casilla', () => {
@@ -109,7 +110,7 @@ describe('Requirement: Plaga', () => {
     const { state, message } = endMonth(worked);
     expect(tile(state, 2, 3)).toMatchObject({ net: true });
     expect(tile(state, 2, 3)!.blighted).toBeUndefined();
-    expect(message).toContain(es.log.plagueStopped);
+    expect(message).toContain(es.log.plagueStopped(1));
   });
 
   it('a 3 casillas ya no la salva', () => {
@@ -125,9 +126,9 @@ describe('Requirement: Plaga', () => {
     expect(marked(endMonth(at('brote', { month: 9, net: NET })).state)).toEqual([]);
   });
 
-  it('Scenario: Plaga del invierno en Bosque — al empezar el mes 10 marca la casilla tejida más cercana al Hogar', () => {
+  it('Scenario: Plaga del invierno en Bosque — al empezar el mes 10 marca una casilla tejida, como en Ancestral', () => {
     const { state, message } = endMonth(at('bosque', { month: 9, net: NET }));
-    expect(marked(state)).toEqual([{ x: 2, y: 6 }]);
+    expect(marked(state)).toEqual([{ x: 2, y: 4 }]);
     expect(message).toContain(es.log.plagueMarked(2));
   });
 });
@@ -177,7 +178,7 @@ describe('Requirement: Llega el frío (con plaga)', () => {
     const story = (level: Level) => reduce(initialState(at(level, { month: 6 })), { type: 'endMonth' }).ui.story;
     expect(story('ancestral')).toEqual({ kind: 'cold' });
     expect(story('bosque')).toEqual({ kind: 'cold' });
-    expect(es.story.coldPlague(false)).toMatch(/^En otoño y en invierno, la plaga marca casillas de la red cerca del Hogar, cada mes más/);
+    expect(es.story.coldPlague(false)).toMatch(/^En otoño y en invierno, la plaga marca casillas de la red junto a los árboles vivos, cada mes más/);
     expect(es.story.coldPlague(true)).toMatch(/^En invierno, la plaga marca casillas/);
     expect(es.story.coldPlague(true)).toContain('Un árbol que la red ya no une al Hogar no da nada.');
   });
@@ -186,10 +187,10 @@ describe('Requirement: Llega el frío (con plaga)', () => {
 describe('Requirement: Avisos de la presión (plaga)', () => {
   it('tocar la casilla con plaga sin miembro seleccionado la explica', () => {
     const g = endMonth(at('ancestral', { month: 6, net: NET })).state;
-    const s = reduce(initialState(g), { type: 'tapTile', x: 2, y: 6 });
+    const s = reduce(initialState(g), { type: 'tapTile', x: 2, y: 4 });
     expect(s.ui.notice.text).toBe(es.tileHelp.plague);
     // Marchita, explica que no se puede tejer hasta limpiarla (035).
-    const w = reduce(initialState(blight(g, [{ x: 2, y: 6 }], true)), { type: 'tapTile', x: 2, y: 6 });
+    const w = reduce(initialState(blight(g, [{ x: 2, y: 4 }], true)), { type: 'tapTile', x: 2, y: 4 });
     expect(w.ui.notice.text).toBe(es.tileHelp.plagueWithered);
   });
 });

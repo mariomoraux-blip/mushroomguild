@@ -75,10 +75,10 @@ describe('Plaga (033): efecto al marchitarse', () => {
     const base = { ...setup({ month: 6, net: [{ x: 2, y: 6 }, { x: 2, y: 4 }, { x: 2, y: 3 }] }), level: 'ancestral' as const };
     const marked = endMonth(base).state;
     const withered = endMonth(marked).state;
-    // 043: la plaga marca la casilla tejida más cercana al Hogar.
-    expect(diffEffects(marked, withered)).toContainEqual({ kind: 'wither', at: { x: 2, y: 6 } });
+    // 045: sin árboles vivos, la casilla tejida más cercana al Hogar a 2 pasos o más.
+    expect(diffEffects(marked, withered)).toContainEqual({ kind: 'wither', at: { x: 2, y: 4 } });
     const nutrients = { ...marked, nutrients: 4 };
-    const saved = act(nutrients, INDI, 1, 6).state;
+    const saved = act(nutrients, INDI, 3, 4).state;
     expect(kinds(saved, endMonth(saved).state)).not.toContain('wither');
   });
 });

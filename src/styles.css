@@ -615,6 +615,21 @@ button { font: inherit; color: inherit; }
 .story__cast { display: flex; justify-content: center; align-items: flex-end; gap: 4px; margin: -4px 0 -2px; }
 .story__cast .portrait--md { width: 80px; }
 .story__badge { width: 80px; height: 80px; }
+/* «Ver el mes» (045): una línea con ícono por cada cosa que pasó al empezar el mes. */
+.month { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
+.month__row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: color-mix(in srgb, var(--paper) 70%, transparent); line-height: 1.3; }
+.month__icon { flex: 0 0 28px; height: 28px; background: var(--art-trees) center / contain no-repeat; }
+.month__row:is([data-kind='ate'], [data-kind='hungry']) .month__icon { background-image: var(--art-nutrients); }
+.month__row:is([data-kind='sporeless']) .month__icon { background-image: var(--art-spores); }
+.month__row:is([data-kind='withered'], [data-kind='plague'], [data-kind='stopped'], [data-kind='cleared']) .month__icon { background-image: var(--art-plague); }
+.month__row:is([data-kind='unrooted'], [data-kind='atRisk']) .month__icon { background-image: var(--art-loose); }
+.month__row:is([data-kind='frost'], [data-kind='fading'], [data-kind='faded']) .month__icon { background-image: var(--art-season-winter); }
+.month__row[data-kind='mage'] .month__icon { background-image: var(--art-star); }
+.month__row[data-kind='season'] .month__icon { background-image: var(--art-season-spring); }
+.month__row[data-kind='season'][data-season='summer'] .month__icon { background-image: var(--art-season-summer); }
+.month__row[data-kind='season'][data-season='autumn'] .month__icon { background-image: var(--art-season-autumn); }
+.month__row[data-kind='season'][data-season='winter'] .month__icon { background-image: var(--art-season-winter); }
+.month__row:is([data-kind='plague'], [data-kind='atRisk'], [data-kind='fading'], [data-kind='hungry']) { box-shadow: inset 3px 0 0 var(--accent); }
 .story__dots { display: flex; justify-content: center; gap: 8px; }
 .story__dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--ink); background: var(--paper); }
 .story__dot.is-active { background: var(--sun); }

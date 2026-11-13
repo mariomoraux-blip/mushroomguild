@@ -34,6 +34,8 @@ import {
 import {
   RuleError,
   type ActionResult,
+  type MonthLine,
+  type MonthLineKind,
   type CheckResult,
   type GameState,
   type RecruitableSpecies,
@@ -252,27 +254,36 @@ export function endMonth(s: GameState): ActionResult {
     return { state: n, message: es.log.winterEnd };
   }
   const before = season(n.month);
-  const parts: string[] = [];
+  const lines: MonthLine[] = [];
+  const line = (kind: MonthLineKind, text: string, count?: number) => lines.push(count === undefined ? { kind, text } : { kind, text, n: count });
   // Árbol marcado que sigue gris: se apaga al terminar su mes (019). Nunca toca la red ni árboles vivos.
   const marked = n.tiles.find((t) => t.fading);
   if (marked) {
     marked.fading = false;
     if (!marked.alive) {
       marked.faded = true;
-      parts.push(es.log.treeFaded(FADED_REVIVE));
+      line('faded', es.log.treeFaded(FADED_REVIVE));
     }
   }
   // Plaga (032, 035): la casilla con plaga sigue así hasta que un hongo trabaje cerca. Si no, se marchita: sale de la red
   // y no se puede tejer. Al frenarla, una casilla aún tejida sigue en la red y una marchita vuelve a ser tierra.
+  // 045: una línea por resultado, con cuántas casillas.
+  let stopped = 0;
+  let cleared = 0;
+  let withered = 0;
   for (const blighted of n.tiles.filter((t) => t.blighted)) {
     if (guarded(n, blighted)) {
       delete blighted.blighted;
-      parts.push(blighted.net ? es.log.plagueStopped : es.log.plagueCleared);
+      if (blighted.net) stopped++;
+      else cleared++;
     } else if (blighted.net) {
       blighted.net = false;
-      parts.push(es.log.plagueWithered(PLAGUE_REACH));
+      withered++;
     }
   }
+  if (withered) line('withered', es.log.plagueWithered(withered, PLAGUE_REACH), withered);
+  if (stopped) line('stopped', es.log.plagueStopped(stopped), stopped);
+  if (cleared) line('cleared', es.log.plagueCleared(cleared), cleared);
   const cold = isCold(s);
   n.month++;
   // Red unida al Hogar (043): en Bosque y Ancestral solo producen los árboles que la red une al Hogar.
@@ -305,19 +316,18 @@ export function endMonth(s: GameState): ActionResult {
     }
   }
   const now = season(n.month);
-  parts.unshift(es.log.newMonth(n.month));
-  if (trees) parts.push(es.log.treesGave(spores, trees * GAIN.treeNutrients));
-  if (unrooted) parts.push(es.log.treesUnrooted(unrooted));
-  if (ate) parts.push(es.log.guildAte(ate));
-  if (hungry.length) parts.push(es.log.hungry(hungry));
-  if (now !== before) parts.push(es.log.seasonStart(now));
-  if (hasFrost(n) && !hasFrost(s)) parts.push(es.log.frostStart(FROST_WEAVE));
-  if (isSporeless(n) && !isSporeless(s)) parts.push(es.log.sporelessStart);
+  if (trees) line('gave', es.log.treesGave(spores, trees * GAIN.treeNutrients), trees);
+  if (unrooted) line('unrooted', es.log.treesUnrooted(unrooted), unrooted);
+  if (ate) line('ate', es.log.guildAte(ate), ate);
+  if (hungry.length) line('hungry', es.log.hungry(hungry));
+  if (now !== before) line('season', es.log.seasonStart(now));
+  if (hasFrost(n) && !hasFrost(s)) line('frost', es.log.frostStart(FROST_WEAVE));
+  if (isSporeless(n) && !isSporeless(s)) line('sporeless', es.log.sporelessStart);
   if (LEVELS[n.level].fading.includes(n.month)) {
     const next = farthestGreyTree(n);
     if (next) {
       n.tiles.find((t) => t === next)!.fading = true;
-      parts.push(es.log.treeFading);
+      line('fading', es.log.treeFading);
     }
   }
   let blights = 0;
@@ -328,14 +338,15 @@ export function endMonth(s: GameState): ActionResult {
     blights++;
   }
   if (blights) {
-    parts.push(blights === 1 ? es.log.plagueMarked(PLAGUE_REACH) : es.log.plagueMarkedMany(blights, PLAGUE_REACH));
+    line('plague', blights === 1 ? es.log.plagueMarked(PLAGUE_REACH) : es.log.plagueMarkedMany(blights, PLAGUE_REACH), blights);
     // Aviso previo (044): árboles que quedarían sueltos si la plaga marchita esas casillas.
     const atRisk = looseAtRisk(n);
-    if (atRisk) parts.push(es.log.looseAtRisk(atRisk, blights));
+    if (atRisk) line('atRisk', es.log.looseAtRisk(atRisk, blights), atRisk);
   }
   if (n.mageDue) {
     addMage(n);
-    parts.push(es.log.mageArrives);
+    line('mage', es.log.mageArrives);
   }
-  return { state: n, message: parts.join(' ') };
+  const message = [es.log.newMonth(n.month), ...lines.map((l) => l.text)].join(' ');
+  return { state: n, message, report: { month: n.month, lines } };
 }

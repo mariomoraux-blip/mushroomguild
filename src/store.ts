@@ -30,6 +30,8 @@ import {
   type Tile,
   type NameProblem,
   unrootedTrees,
+  type MonthLine,
+  type MonthReport,
 } from './rules';
 import type { BoardView, Submission } from './leaderboard';
 
@@ -39,6 +41,8 @@ export type Sheet =
   | { kind: 'member'; id: number }
   | { kind: 'spell' }
   | { kind: 'help' }
+  /** «Ver el mes» (045): lo que pasó al empezar el mes, línea por línea. */
+  | { kind: 'month' }
   /**
    * «Tu nombre en el gremio» (036): alias propuesto, su número de sorteo y para qué se abrió. `writing`: el campo
    * para escribir el nombre (038); `problem`: por qué no vale lo escrito.
@@ -97,6 +101,8 @@ export interface UiState {
   readonly seen: readonly SpeciesId[];
   /** Alias del jugador registrado en este dispositivo (036), o `null`. */
   readonly player: string | null;
+  /** Lo que pasó al empezar el mes actual (045): «Ver el mes» lo muestra completo. */
+  readonly month?: MonthReport | null;
   /** ¿Ya se mostró en esta partida la carta «Un árbol suelto»? (044) */
   readonly looseShown?: boolean;
   /** Envío de la victoria actual al ranking; `null` si la partida no cuenta. */
@@ -188,6 +194,28 @@ const withEmptyMonth = (game: GameState, text: string): string => {
   const e = emptyMonth(game);
   return e ? `${text} ${e}` : text;
 };
+
+/**
+ * Resumen corto del cambio de mes (045): «Mes N · » y lo más urgente con qué hacer. Prioridad: la plaga que marcó
+ * casillas, el árbol que se apagará, el hambre, la escarcha, el mes vacío, los árboles sueltos, la plaga que marchitó y, si no hay
+ * nada de eso, lo que dieron los árboles. El detalle completo va en «Ver el mes».
+ */
+export function monthHeadline(game: GameState, report: MonthReport): string {
+  const find = (kind: MonthLine['kind']) => report.lines.find((l) => l.kind === kind);
+  const M = es.month;
+  const plague = find('plague');
+  const urgent =
+    (plague && M.plague(plague.n ?? 1, find('atRisk')?.n ?? 0)) ||
+    find('fading')?.text ||
+    find('hungry')?.text ||
+    find('frost')?.text ||
+    emptyMonth(game) ||
+    (find('unrooted') && M.unrooted(find('unrooted')!.n ?? 1)) ||
+    (find('withered') && M.withered(find('withered')!.n ?? 1)) ||
+    find('gave')?.text ||
+    M.quiet;
+  return M.prefix(report.month) + urgent;
+}
 
 /**
  * Pista de la bitácora cuando no hay nada seleccionado: el siguiente paso sugerido (en Ancestral, solo elegir).
@@ -393,7 +421,9 @@ export function reduce(state: AppState, action: Action): AppState {
     case 'endMonth': {
       const r = endMonth(game);
       if (r.state === game) return state;
-      return { game: r.state, ui: advance(game, r.state, cleared(ui, info(withEmptyMonth(r.state, r.message)))) };
+      const month = r.report ?? null;
+      const text = month ? monthHeadline(r.state, month) : withEmptyMonth(r.state, r.message);
+      return { game: r.state, ui: advance(game, r.state, { ...cleared(ui, info(text)), month }) };
     }
     case 'cancel':
       // Esc o «atrás» sobre la ficha de Maestra Bruma la cierran del todo (022): solo "Entendido" pide el hechizo.

@@ -141,7 +141,8 @@ export class GameScene extends Phaser.Scene {
     } else if (this.glowTex.width !== w || this.glowTex.height !== h) {
       this.glowTex.setSize(w, h);
     }
-    const net = state.game.tiles.filter((t) => t.net && !t.blighted).map((t) => `${t.x},${t.y}`).join(' ');
+    // 045: la plaga (y la red cortada que deja) cambia la luz aunque la casilla siga en la red.
+    const net = state.game.tiles.filter((t) => t.net || t.blighted).map((t) => `${t.x},${t.y}${t.net ? '' : 'w'}${t.blighted ? 'b' : ''}`).join(' ');
     const painted = `${T}|${net}`;
     if (painted !== this.glowPainted) {
       this.glowPainted = painted;
