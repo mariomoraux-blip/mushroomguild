@@ -173,6 +173,11 @@ cardBtn.addEventListener('click', () => {
   if (id !== null) store.dispatch({ type: 'openSheet', sheet: { kind: 'member', id } });
 });
 
+// «Ver el mes» (045): lo que pasó al empezar el mes, cuando no hay miembro seleccionado.
+const monthBtn = $<HTMLButtonElement>('month-btn');
+monthBtn.textContent = es.month.open;
+monthBtn.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'month' } }));
+
 const renderDom = () => {
   const state = store.getState();
   hud.render(state);
@@ -191,6 +196,9 @@ const renderDom = () => {
   // Especie que todavía no conoció (022): punto «nuevo» y un latido en "Ficha".
   cardBtn.classList.toggle('is-new', Boolean(selected && !state.ui.seen.includes(selected.species)));
   if (selected) cardBtn.setAttribute('aria-label', es.card.openLabel(selected.name));
+  const report = state.ui.month;
+  monthBtn.hidden = Boolean(selected) || !report || state.game.status !== 'playing';
+  if (report) monthBtn.setAttribute('aria-label', es.month.openLabel(report.month));
 };
 store.subscribe((state, prev) => {
   renderDom();

@@ -174,7 +174,9 @@ describe('store: reclutar, terminar el mes y fin de partida', () => {
   it('terminar el mes avanza el mes y muestra el cambio de mes', () => {
     const s = reduce(init(), { type: 'endMonth' });
     expect(s.game.month).toBe(2);
-    expect(s.ui.notice.text).toContain('Empieza el mes 2.');
+    // 045: la bitácora dice un resumen corto; «Ver el mes» guarda el detalle.
+    expect(s.ui.notice.text).toMatch(/^Mes 2 · /);
+    expect(s.ui.month?.month).toBe(2);
   });
 
   it('con la partida terminada no se puede seleccionar ni actuar', () => {
@@ -220,7 +222,7 @@ describe('Requirement: Pista y camino sugerido · Ancestral sin pistas (019)', (
 
   it('Scenario: Aviso de escarcha — al empezar el mes 7 en Ancestral (sin pistas) la bitácora avisa', () => {
     const s = reduce(initialState({ ...setup({ month: 6 }), level: 'ancestral' }), { type: 'endMonth' });
-    expect(s.ui.notice.text).toContain('Llegó la escarcha: tejer cuesta 2 nutrientes.');
+    expect(s.ui.month?.lines.map((l) => l.text)).toContain('Llegó la escarcha: tejer cuesta 2 nutrientes.');
   });
 });
 

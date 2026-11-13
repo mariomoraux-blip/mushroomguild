@@ -65,7 +65,7 @@ describe('Requirement: Aviso de mes vacío', () => {
   it('Ancestral: al empezar el mes vacío la bitácora lo dice, sin «Pista:»', () => {
     const next = reduce(initialState(report(false)), { type: 'endMonth' });
     expect(next.ui.notice.text).toContain(es.log.emptyMonth(1));
-    expect(next.ui.notice.text).toContain(es.log.newMonth(4));
+    expect(next.ui.notice.text).toContain(es.month.prefix(4));
     expect(next.ui.notice.text).not.toContain('Pista:');
     expect(initialState(next.game).ui.notice.text).toBe(es.log.emptyMonth(1));
   });

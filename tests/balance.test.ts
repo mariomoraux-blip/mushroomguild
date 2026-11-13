@@ -74,6 +74,8 @@ const TARGETS = {
   // 042: un apagado más en el mes 2; las pistas bajan al 15 % y se certifican 65 de 100.
   // 043: la plaga crece cerca del Hogar y los árboles solo producen unidos a la red; las pistas frenan la plaga.
   // Bosque: 45 %, 85 de 100. Ancestral: 17 %, 42 de 100 (501 de 1000); el piso baja a 40.
+  // 045: la plaga cae junto a los árboles vivos, no junto al Hogar. Bosque: 44 %, 87 de 100 (912 de 1000).
+  // Ancestral: 17 %, 48 de 100 (512 de 1000).
   ancestral: { hints: [0.1, 0.2], random: 0.05, certified: 40 },
 } as const;
 

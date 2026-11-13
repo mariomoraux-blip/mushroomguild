@@ -1,7 +1,7 @@
 // Pintor del claro (Canvas2D): pradera con textura, micelio luminoso y objetos ilustrados.
 // Solo dibuja a partir de datos; los colores salen de theme.ts. Es determinista (sin Math.random):
 // la variación sale de un hash de la casilla.
-import { H, neighbors, seasonIndex, unrootedTrees, W, type GameState, type Tile } from '../rules';
+import { cutNet, guardsPlague, H, neighbors, seasonIndex, unrootedTrees, W, type GameState, type Tile } from '../rules';
 import { BOARD_ART, FROST_FADED, rgba, SEASON_SLUGS, type ColorToken, type SeasonSlug } from '../theme';
 
 /** Busca una pieza pintada ya cargada (clave = ruta bajo `public/assets/`). */
@@ -45,8 +45,10 @@ export interface Painted {
   readonly art?: string;
   /** Árbol apagado: lleva el velo fijo y el copo (019). */
   readonly faded?: boolean;
-  /** Árbol vivo suelto: la red no lo une al Hogar (043); pierde el color y lleva la raíz cortada. */
+  /** Árbol vivo suelto: la red no lo une al Hogar (043); lleva la insignia del hilo cortado (044). */
   readonly loose?: boolean;
+  /** Red cortada (045): casilla de la red que no llega al Hogar, apagada. */
+  readonly cut?: boolean;
 }
 
 type Ctx = CanvasRenderingContext2D;
@@ -611,6 +613,53 @@ function paintLoose(ctx: Ctx, T: number, x: number, y: number, badge?: CanvasIma
   ctx.restore();
 }
 
+/** Red cortada (045): la casilla pierde el color (modo "saturation") y se oscurece un poco. */
+function paintCut(ctx: Ctx, T: number, x: number, y: number) {
+  ctx.save();
+  roundRect(ctx, x * T, y * T, T, T, T * 0.18);
+  ctx.clip();
+  ctx.globalCompositeOperation = 'saturation';
+  ctx.fillStyle = rgba('neutral', 0.9);
+  ctx.fillRect(x * T, y * T, T, T);
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = rgba('ink', 0.12);
+  ctx.fillRect(x * T, y * T, T, T);
+  ctx.restore();
+}
+
+/**
+ * Frena la plaga (045): un escudo de hoja en la esquina superior izquierda de la casilla válida. Forma propia, con
+ * contorno de tinta, para leerse sin color.
+ */
+function paintGuard(ctx: Ctx, T: number, x: number, y: number) {
+  const cx = (x + 0.24) * T;
+  const top = (y + 0.1) * T;
+  const w = T * 0.26;
+  const h = T * 0.3;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(cx, top);
+  ctx.quadraticCurveTo(cx + w * 0.5, top + h * 0.05, cx + w * 0.5, top + h * 0.12);
+  ctx.quadraticCurveTo(cx + w * 0.55, top + h * 0.75, cx, top + h);
+  ctx.quadraticCurveTo(cx - w * 0.55, top + h * 0.75, cx - w * 0.5, top + h * 0.12);
+  ctx.quadraticCurveTo(cx - w * 0.5, top + h * 0.05, cx, top);
+  ctx.closePath();
+  ctx.fillStyle = rgba('leaf');
+  ctx.fill();
+  ctx.strokeStyle = rgba('ink');
+  ctx.lineWidth = T * 0.03;
+  ctx.stroke();
+  // Nervio de hoja.
+  ctx.beginPath();
+  ctx.moveTo(cx, top + h * 0.2);
+  ctx.lineTo(cx, top + h * 0.78);
+  ctx.strokeStyle = rgba('paper');
+  ctx.lineWidth = T * 0.025;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.restore();
+}
+
 /** Contorno punteado de tinta de una casilla marcada (019, 032). */
 function dashedFrame(ctx: Ctx, T: number, x: number, y: number) {
   const inset = T * 0.08;
@@ -774,9 +823,12 @@ export function paintMyceliumGlow(ctx: Ctx, T: number, game: GameState): { x: nu
   roundRect(ctx, 0, 0, W * T, H * T, T * 0.16);
   ctx.clip();
   const lit: { x: number; y: number }[] = [];
+  // Red cortada (045): sin luz, como la casilla con plaga. También el anillo del árbol suelto.
+  const cut = new Set<Tile>(cutNet(game));
+  for (const t of unrootedTrees(game)) cut.add(t);
   for (const t of game.tiles) {
     // La casilla con plaga (033) pierde su luz: su pieza pintada ya trae los hilos, y el brillo la lavaría.
-    if (!t.net || t.blighted) continue;
+    if (!t.net || t.blighted || cut.has(t)) continue;
     lit.push({ x: t.x, y: t.y });
     const cx = (t.x + 0.5) * T;
     const cy = (t.y + 0.5) * T;
@@ -801,9 +853,9 @@ export function paintMyceliumGlow(ctx: Ctx, T: number, game: GameState): { x: nu
   ctx.shadowColor = rgba('mycelium');
   ctx.shadowBlur = T * 0.3;
   for (const t of game.tiles) {
-    if (!t.net || t.blighted) continue;
+    if (!t.net || t.blighted || cut.has(t)) continue;
     for (const n of neighbors(game, t.x, t.y)) {
-      if (!n.net || n.blighted || n.y * W + n.x < t.y * W + t.x) continue;
+      if (!n.net || n.blighted || cut.has(n) || n.y * W + n.x < t.y * W + t.x) continue;
       const w = hash(t.x + n.x, t.y + n.y, 5) - 0.5; // la misma curva que paintNet
       const [x0, y0, x1, y1] = [(t.x + 0.5) * T, (t.y + 0.5) * T, (n.x + 0.5) * T, (n.y + 0.5) * T];
       ctx.beginPath();
@@ -871,6 +923,13 @@ export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
     ctx.fillRect(0, 0, W * T, H * T);
     ctx.restore();
   }
+  // Red cortada (045): las casillas de la red que ya no llegan al Hogar se ven apagadas.
+  const cut = new Set(cutNet(game));
+  game.tiles.forEach((t, i) => {
+    if (!cut.has(t) || t.kind === 'tree') return;
+    paintCut(ctx, T, t.x, t.y);
+    painted[i] = { ...painted[i]!, cut: true };
+  });
   // Árboles apagados (019): el velo va sobre la saturación para que la escarcha siempre se lea.
   game.tiles.forEach((t, i) => {
     if (t.kind !== 'tree' || !t.faded || t.alive) return;
@@ -888,6 +947,8 @@ export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
   for (const key of valid) {
     const [x, y] = key.split(',').map(Number) as [number, number];
     paintValid(ctx, T, x, y);
+    // 045: trabajar aquí frena la plaga.
+    if (guardsPlague(game, { x, y })) paintGuard(ctx, T, x, y);
   }
   if (star && valid.has(`${star.x},${star.y}`)) {
     const img = art?.get(BOARD_ART.star);

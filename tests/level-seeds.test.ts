@@ -20,7 +20,7 @@ describe('tabla de semillas por nivel', () => {
       new URL('../src/rules/level-seeds.ts', import.meta.url),
       `// Generado por \`npm run certify\` (019); no se edita a mano.\n// Por nivel, el carácter \`n\` (base 36) es el intento de rocas que \`certify\` acepta para la semilla \`n\`; \`-\` = ninguno.\nexport const LEVEL_SEEDS: Readonly<Record<'bosque' | 'ancestral', string>> = {\n${body}\n};\n`,
     );
-  }, 3_600_000);
+  }, 4 * 3_600_000); // 045: puede pasar de una hora en una máquina cargada
 
   it.skipIf(Boolean(process.env.CERTIFY))(`cubre las semillas 0 a ${SEEDS}; si un intento no sirve, se juega el primer claro certificado`, () => {
     for (const level of LEVELS) {

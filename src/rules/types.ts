@@ -84,10 +84,27 @@ export type Resource = 'nutrients' | 'spores';
 
 export type CheckResult = { readonly ok: true } | { readonly ok: false; readonly reason: string; readonly short?: Resource };
 
+/** Qué pasó al cambiar de mes (045): cada línea del detalle «Ver el mes», con su tipo para el ícono y el resumen. */
+export type MonthLineKind =
+  | 'faded' | 'withered' | 'stopped' | 'cleared' | 'gave' | 'unrooted' | 'ate' | 'hungry'
+  | 'season' | 'frost' | 'sporeless' | 'fading' | 'plague' | 'atRisk' | 'mage';
+export interface MonthLine {
+  readonly kind: MonthLineKind;
+  readonly text: string;
+  /** Cuántos (casillas, árboles o nutrientes), cuando aplica. */
+  readonly n?: number;
+}
+export interface MonthReport {
+  readonly month: number;
+  readonly lines: readonly MonthLine[];
+}
+
 export interface ActionResult {
   readonly state: GameState;
   /** Texto para la bitácora. */
   readonly message: string;
+  /** Al terminar el mes (045): lo que pasó, línea por línea. */
+  readonly report?: MonthReport;
 }
 
 export class RuleError extends Error {

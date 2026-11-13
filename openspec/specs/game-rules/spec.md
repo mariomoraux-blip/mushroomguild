@@ -283,11 +283,11 @@ En Bosque y Ancestral, al terminar cada mes de Otoño e Invierno el gremio SHALL
 - THEN el gremio no come y los árboles dan esporas y nutrientes como siempre
 
 ### Requirement: Plaga
-En las estaciones con plaga del nivel (Bosque: invierno; Ancestral: otoño e invierno), al empezar cada mes de la estación la plaga SHALL marcar casillas tejidas de la red (tierra de la red; nunca el Hogar, un árbol ni el Árbol Padre), más cada mes: 1 el primer mes de la estación, 2 el segundo y 3 el tercero. Cada una SHALL ser una de las casillas tejidas sin plaga más cercanas al Hogar en pasos en cruz, elegida al azar con el claro, el mes y su orden (la misma partida marca siempre las mismas). Si hay menos casillas tejidas sin plaga, marca las que hay. Cada casilla SHALL seguir con plaga hasta que termine un mes en que algún hongo trabajó a 2 casillas o menos de ella (pasos en cruz; cualquier miembro, también Maestra Bruma). Al terminar un mes sin hongos cerca, una casilla con plaga aún tejida SHALL marchitarse: sale de la red y sigue con plaga; una ya marchita sigue igual. Mientras tenga plaga, el Lactarius no SHALL poder tejerla. Al terminar un mes con un hongo cerca, la plaga se va: si la casilla seguía tejida sigue en la red (los hongos la frenaron) y si estaba marchita vuelve a ser tierra, que se puede tejer otra vez a su costo (los hongos la limpiaron). Las casillas con plaga de meses anteriores SHALL seguir mientras se marcan otras. Brote no tiene plaga.
+En las estaciones con plaga del nivel (Bosque: invierno; Ancestral: otoño e invierno), al empezar cada mes de la estación la plaga SHALL marcar casillas tejidas de la red (tierra de la red; nunca el Hogar, un árbol ni el Árbol Padre), más cada mes: 1 el primer mes de la estación, 2 el segundo y 3 el tercero. Cada una SHALL ser una casilla tejida sin plaga a 2 pasos en cruz o más del Hogar y vecina en cruz de un árbol vivo; si no hay ninguna así, la más cercana al Hogar entre las tejidas a 2 pasos o más; si tampoco hay, la más cercana al Hogar entre todas. Se elige al azar con el claro, el mes y su orden (la misma partida marca siempre las mismas). Así la plaga va por la raíz de los árboles y no por el tronco de la red junto al Hogar. Si hay menos casillas tejidas sin plaga, marca las que hay. Cada casilla SHALL seguir con plaga hasta que termine un mes en que algún hongo trabajó a 2 casillas o menos de ella (pasos en cruz; cualquier miembro, también Maestra Bruma). Al terminar un mes sin hongos cerca, una casilla con plaga aún tejida SHALL marchitarse: sale de la red y sigue con plaga; una ya marchita sigue igual. Mientras tenga plaga, el Lactarius no SHALL poder tejerla. Al terminar un mes con un hongo cerca, la plaga se va: si la casilla seguía tejida sigue en la red (los hongos la frenaron) y si estaba marchita vuelve a ser tierra, que se puede tejer otra vez a su costo (los hongos la limpiaron). Las casillas con plaga de meses anteriores SHALL seguir mientras se marcan otras. Brote no tiene plaga.
 
 #### Scenario: La plaga marca
-- WHEN empieza el mes 7 en Ancestral con la red tejida en (2,6), (2,4) y (2,3) del mapa clásico
-- THEN se marca (2,6), la casilla tejida más cercana al Hogar
+- WHEN empieza el mes 7 en Ancestral con la red tejida en (2,6), (2,4) y (2,3) del mapa clásico y el árbol (2,5) vivo
+- THEN se marca (2,4), vecina del árbol; (2,6) también lo toca pero está a 1 paso del Hogar
 - AND la bitácora dice que se marchitará al terminar el mes si ningún hongo trabaja a 2 casillas o menos
 
 #### Scenario: La plaga crece
@@ -309,7 +309,7 @@ En las estaciones con plaga del nivel (Bosque: invierno; Ancestral: otoño e inv
 
 #### Scenario: Plaga del invierno en Bosque
 - WHEN empieza el mes 10 en Bosque con casillas tejidas
-- THEN la plaga marca la casilla tejida más cercana al Hogar, como en Ancestral
+- THEN la plaga marca una casilla tejida, como en Ancestral
 
 #### Scenario: No se puede tejer
 - WHEN el Lactarius intenta tejer una casilla marchita con plaga

@@ -1019,7 +1019,7 @@ test('Temporadas frías (028, 030): carta «Llega el frío» al empezar el otoñ
   await expect(card).toContainText('Llegó el otoño');
   await expect(card).toContainText('Al terminar cada mes de otoño e invierno, el gremio come 1 nutriente.');
   await expect(card).toContainText('En invierno, los árboles no dan esporas.');
-  await expect(card).toContainText('En invierno, la plaga marca casillas de la red cerca del Hogar'); // 042, 043
+  await expect(card).toContainText('En invierno, la plaga marca casillas de la red junto a los árboles vivos'); // 042, 045
   const overflow = await card.evaluate((n) => n.scrollWidth - n.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/030-frio-390x844.png' });
@@ -1097,23 +1097,27 @@ test('Plaga de Ancestral (032, 033, 035): la carta del frío la explica y la cas
   await expect(card).toContainText('la plaga marca casillas de la red');
   await page.keyboard.press('Escape');
   await expect(card).toHaveCount(0);
-  await expect(page.locator('#notice')).toContainText('La plaga llegó a la red');
-  // 043: la casilla tejida más cercana al Hogar.
-  await expect(cell(page, 2, 6)).toHaveAttribute('aria-label', /con plaga/);
-  await expect(cell(page, 2, 4)).not.toHaveAttribute('aria-label', /con plaga/);
+  await expect(page.locator('#notice')).toContainText('La plaga marcó una casilla. Trabaja a 2 o menos para frenarla.');
+  // 045: sin árboles vivos, la casilla tejida más cercana al Hogar a 2 pasos o más (no la vecina del Hogar).
+  await expect(cell(page, 2, 4)).toHaveAttribute('aria-label', /con plaga/);
+  await expect(cell(page, 2, 6)).not.toHaveAttribute('aria-label', /con plaga/);
   // La hoja podrida junto a la estación (033) y la etiqueta de la estación lo dicen.
   await expect(page.locator('.hud__plague')).toBeVisible();
   await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', /con plaga/);
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/033-plaga-390x844.png' });
-  await cell(page, 2, 6).click();
+  await cell(page, 2, 4).click();
   await expect(page.locator('#notice')).toContainText('Red con plaga: se marchitará al terminar el mes');
   // Nadie trabaja cerca: al terminar el mes se marchita, deja de estar en la red y la plaga se queda (035).
   await page.locator('.end').click();
-  await expect(page.locator('#notice')).toContainText('La plaga marchitó una casilla de la red: no se puede tejer');
-  await expect(cell(page, 2, 6)).toHaveAttribute('aria-label', /con plaga marchita/);
-  await expect(cell(page, 2, 6)).not.toHaveAttribute('aria-label', /en la red/);
+  // 045: el detalle de la marchita está en «Ver el mes».
+  await expect(page.locator('#notice')).toContainText('Mes 8 · ');
+  await expect(cell(page, 2, 4)).toHaveAttribute('aria-label', /con plaga marchita/);
+  await expect(cell(page, 2, 4)).not.toHaveAttribute('aria-label', /en la red/);
   await expect(page.locator('.hud__plague')).toBeVisible();
-  await cell(page, 2, 6).click();
+  await page.getByRole('button', { name: 'Ver lo que pasó al empezar el mes 8' }).click();
+  await expect(page.getByRole('dialog')).toContainText('La plaga marchitó una casilla de la red: no se puede tejer');
+  await page.keyboard.press('Escape');
+  await cell(page, 2, 4).click();
   await expect(page.locator('#notice')).toContainText('Plaga marchita: no se puede tejer.');
   if (info.project.name === 'vertical-390x844') {
     await page.waitForTimeout(1500); // que termine el fundido de la plaga viva sobre la red muerta
@@ -1122,7 +1126,7 @@ test('Plaga de Ancestral (032, 033, 035): la carta del frío la explica y la cas
   // En invierno (mes 10) la casilla usa su variante con nieve.
   await weave(9);
   await page.locator('.end').click();
-  await expect(cell(page, 2, 6)).toHaveAttribute('aria-label', /con plaga/);
+  await expect(cell(page, 2, 4)).toHaveAttribute('aria-label', /con plaga/);
   // Solo para la captura: que terminen el fundido de la casilla marchita (~0,9 s) y el cambio de estación.
   if (info.project.name === 'vertical-390x844') {
     await page.waitForTimeout(1500);
@@ -1143,7 +1147,7 @@ test('Ancestral cada dos meses (034, 042): Elige tu dificultad lo dice y al empe
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/034-ancestral-mes-5-390x844.png' });
 });
 
-test('Invierno en Bosque (042, 043): sigue la escarcha y llega la plaga a la casilla tejida más cercana al Hogar', async ({ page }, info) => {
+test('Invierno en Bosque (042, 045): sigue la escarcha y llega la plaga a una casilla tejida', async ({ page }, info) => {
   await page.goto('/?map=clasico&nivel=bosque');
   await page.evaluate(() => {
     type T = { x: number; y: number; net: boolean };
@@ -1156,8 +1160,8 @@ test('Invierno en Bosque (042, 043): sigue la escarcha y llega la plaga a la cas
   });
   await page.locator('.end').click();
   await expect(page.locator('.hud__month-value')).toHaveText('Mes 10/12');
-  await expect(page.locator('#notice')).toContainText('La plaga llegó a la red');
-  await expect(cell(page, 2, 6)).toHaveAttribute('aria-label', /con plaga/);
+  await expect(page.locator('#notice')).toContainText('La plaga marcó una casilla');
+  await expect(cell(page, 2, 4)).toHaveAttribute('aria-label', /con plaga/);
   await expect(page.locator('.hud__plague')).toBeVisible();
   await expect(page.locator('.hud__season')).toHaveAttribute('aria-label', /escarcha/);
   if (info.project.name === 'vertical-390x844') {
@@ -1192,8 +1196,7 @@ test('La plaga crece y corta la red (043): en Bosque marca más casillas cada me
   await page.keyboard.press('Escape');
   await expect(card).toHaveCount(0);
   await expect(page.locator('.hud__month-value')).toHaveText('Mes 11/12');
-  await expect(page.locator('#notice')).toContainText('La plaga crece: 2 casillas de la red');
-  await expect(page.locator('#notice')).toContainText('Un árbol no dio nada: la red no lo une al Hogar.');
+  await expect(page.locator('#notice')).toHaveText('Mes 11 · La plaga marcó 2 casillas. Trabaja a 2 o menos para frenarla.');
   await expect(cell(page, 2, 6)).toHaveAttribute('aria-label', /con plaga marchita/);
   await expect(cell(page, 2, 4)).toHaveAttribute('aria-label', /con plaga/);
   await expect(cell(page, 2, 3)).toHaveAttribute('aria-label', /con plaga/);
@@ -1267,4 +1270,48 @@ test('Partida nueva (041): el dock no guarda las tarjetas de los reclutas de la 
   });
   await expect(page.locator('.dock__item')).toHaveCount(3);
   for (const sp of ['ganoderma', 'morchella', 'gliophorus', 'lycoperdon', 'mago']) await expect(page.locator(`.card--${sp}`)).toHaveCount(0);
+});
+
+test('La plaga se entiende (045): resumen corto con «Ver el mes», red cortada apagada y casillas que la frenan', async ({ page }, info) => {
+  await page.goto('/?map=clasico&nivel=bosque');
+  await page.evaluate(() => {
+    type T = { x: number; y: number; net: boolean; alive: boolean; blighted?: boolean };
+    type S = { getState(): { game: { tiles: T[] } }; dispatch(a: object): void };
+    const store = (window as unknown as { store: S }).store;
+    const g = store.getState().game;
+    // Red por la columna 2 con el árbol (2,5) vivo; la plaga ya marcó (2,6), la que lo une al Hogar.
+    const woven = ['2,6', '2,5', '2,4', '2,3'];
+    const tiles = g.tiles.map((t) => {
+      const k = `${t.x},${t.y}`;
+      return { ...t, net: t.net || woven.includes(k), alive: t.alive || k === '2,5', blighted: k === '2,6' };
+    });
+    store.dispatch({ type: 'start', game: { ...g, month: 9, nutrients: 6, tiles }, intro: false });
+  });
+  await page.locator('.end').click();
+  await page.keyboard.press('Escape'); // carta «Un árbol suelto» (044)
+  // Una sola línea corta con lo urgente y qué hacer.
+  const notice = page.locator('#notice');
+  await expect(notice).toHaveText('Mes 10 · La plaga marcó una casilla. Trabaja a 2 o menos para frenarla.');
+  // La red que ya no llega al Hogar se ve apagada y se nombra.
+  await expect(cell(page, 2, 3)).toHaveAttribute('aria-label', /red cortada/);
+  // Con Indi, las casillas válidas cerca de la plaga llevan el escudo de hoja.
+  await page.locator('[data-id="1"]').click();
+  const guards = page.locator('.cell[data-valid="true"][aria-label*="frena la plaga"]');
+  expect(await guards.count()).toBeGreaterThan(0);
+  if (info.project.name === 'vertical-390x844') {
+    await page.waitForTimeout(1200);
+    await page.screenshot({ path: 'docs/screenshots/045-red-cortada-390x844.png' });
+  }
+  await page.keyboard.press('Escape');
+  // «Ver el mes»: el detalle con íconos.
+  await page.getByRole('button', { name: 'Ver lo que pasó al empezar el mes 10' }).click();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet).toContainText('Empieza el mes 10');
+  await expect(sheet.locator('.month__row[data-kind="withered"]')).toContainText('La plaga marchitó una casilla');
+  await expect(sheet.locator('.month__row[data-kind="unrooted"]')).toContainText('la red no lo une al Hogar');
+  expect(await sheet.evaluate((n) => n.scrollWidth - n.clientWidth)).toBeLessThanOrEqual(0);
+  if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/045-ver-el-mes-390x844.png' });
+  await page.keyboard.press('Escape');
+  await expect(sheet).toHaveCount(0);
+  await noScrollNoZoom(page);
 });

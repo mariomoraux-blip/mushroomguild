@@ -1,6 +1,6 @@
 import { es } from '../copy/es';
 import { tileToScreen } from '../layout';
-import { H, unrootedTrees, W, type Tile } from '../rules';
+import { cutNet, guardsPlague, H, unrootedTrees, W, type Tile } from '../rules';
 import { highlighted, suggestedTile, type AppState, type Store } from '../store';
 import { el } from './dom';
 import { replay } from './motion';
@@ -56,6 +56,7 @@ export function mountBoardOverlay(root: HTMLElement, store: Store) {
     const valid = new Set(highlighted(state).map((t) => `${t.x},${t.y}`));
     const star = suggestedTile(state);
     const loose = new Set(unrootedTrees(state.game));
+    const cut = new Set(cutNet(state.game));
     state.game.tiles.forEach((t, i) => {
       const b = buttons[i]!;
       const ok = valid.has(`${t.x},${t.y}`);
@@ -67,6 +68,8 @@ export function mountBoardOverlay(root: HTMLElement, store: Store) {
       if (t.net && t.kind !== 'home') parts.push(es.tiles.inNet);
       if (t.blighted) parts.push(t.net ? es.tiles.plague : es.tiles.plagueWithered);
       if (ok) parts.push(es.tiles.valid);
+      if (ok && guardsPlague(state.game, t)) parts.push(es.tiles.guards);
+      if (cut.has(t) && t.kind !== 'tree') parts.push(es.tiles.cut);
       if (ok && star && star.x === t.x && star.y === t.y) parts.push(`★ ${es.advice.star}`);
       b.setAttribute('aria-label', parts.join(', '));
       b.dataset.valid = String(ok);
