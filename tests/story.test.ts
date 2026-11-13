@@ -7,7 +7,7 @@ import { RUBI, setup } from './helpers';
 const run = (state: AppState, ...actions: Parameters<typeof reduce>[1][]) => actions.reduce(reduce, state);
 const mother = (g: GameState) => g.tiles.find((t) => t.kind === 'mother')!;
 
-/** Tres árboles vivos, 10 nutrientes y la red tocando al Árbol Padre: Rubí puede despertarlo. */
+/** Tres árboles vivos, 10 nutrientes y la red tocando al Árbol Ancestral: Rubí puede despertarlo. */
 function nearWin(): GameState {
   const g = newGame();
   const m = mother(g);
@@ -55,7 +55,7 @@ describe('Requirement: Llegada de la maga', () => {
 });
 
 describe('Requirement: Finales', () => {
-  it('Scenario: Victoria — al despertar al Árbol Padre se abre la carta de victoria', () => {
+  it('Scenario: Victoria — al despertar al Árbol Ancestral se abre la carta de victoria', () => {
     const g = nearWin();
     const m = mother(g);
     const next = run(initialState(g), { type: 'select', id: RUBI }, { type: 'tapTile', x: m.x, y: m.y });
@@ -94,7 +94,7 @@ describe('Requirement: Finales', () => {
 });
 
 describe('Requirement: El color vuelve', () => {
-  it('Scenario: Inicio y final — apagado al empezar, color pleno al despertar al Árbol Padre', () => {
+  it('Scenario: Inicio y final — apagado al empezar, color pleno al despertar al Árbol Ancestral', () => {
     const start = newGame();
     expect(progressSaturation(start)).toBeCloseTo(SATURATION_FLOOR, 5);
     const g = nearWin();

@@ -32,8 +32,8 @@ describe('Requirement: Casilla ocupada', () => {
   });
 });
 
-describe('Requirement: Árbol Padre de Blender', () => {
-  it('Scenario: Alguien trabaja sobre el Árbol Padre — con sprite, el árbol se sigue viendo (el miembro va delante)', () => {
+describe('Requirement: Árbol Ancestral de Blender', () => {
+  it('Scenario: Alguien trabaja sobre el Árbol Ancestral — con sprite, el árbol se sigue viendo (el miembro va delante)', () => {
     const game = newGame();
     const father = game.tiles.find((t) => t.kind === 'mother')!;
     const occupied = new Set([`${father.x},${father.y}`]);

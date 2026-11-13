@@ -46,13 +46,13 @@ La red de micelio es a la vez mecánica y progreso visible: define dónde puedes
 
 ## GDD mínimo
 
-La partida es un loop mensual de colocar, producir y expandir. Dura 12 meses y se gana despertando al Árbol Padre.
+La partida es un loop mensual de colocar, producir y expandir. Dura 12 meses y se gana despertando al Árbol Ancestral.
 
 ### Loop central
 Cada mes eliges a un miembro del gremio y una casilla. La acción gasta o produce nutrientes, y la red crece o un árbol revive. Al cerrar el mes, los árboles vivos pagan esporas y nutrientes, y las esporas reclutan más gremio.
 
 ### Tablero
-Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol Padre arriba. La red crece hacia el árbol y el tablero cabe en un teléfono en vertical. Solo se actúa sobre casillas que tocan la red (adyacencia ortogonal). Cada partida genera un claro distinto (7 árboles grises, 5 troncos, 6 rocas, Hogar abajo y Árbol Padre arriba). El generador solo acepta claros que un jugador que sigue las pistas gana entre el mes 8 y el 11. El mapa de la prueba de concepto, rotado, queda como "mapa clásico" para pruebas.
+Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol Ancestral arriba. La red crece hacia el árbol y el tablero cabe en un teléfono en vertical. Solo se actúa sobre casillas que tocan la red (adyacencia ortogonal). Cada partida genera un claro distinto (7 árboles grises, 5 troncos, 6 rocas, Hogar abajo y Árbol Ancestral arriba). El generador solo acepta claros que un jugador que sigue las pistas gana entre el mes 8 y el 11. El mapa de la prueba de concepto, rotado, queda como "mapa clásico" para pruebas.
 
 | Casilla | Comportamiento |
 | --- | --- |
@@ -61,14 +61,14 @@ Cuadrícula vertical de 5 columnas por 8 filas, con el Hogar abajo y el Árbol P
 | Tronco caído | Da nutrientes; aguanta 2 usos y queda tierra libre |
 | Árbol gris | Se puede revivir; al revivir entra en la red |
 | Roca | Bloquea la red |
-| Árbol Padre | Objetivo final, en el extremo opuesto al Hogar |
+| Árbol Ancestral | Objetivo final, en el extremo opuesto al Hogar |
 
 ### Especies
 | Especie | Rol | Disponibilidad | Acción | Efecto |
 | --- | --- | --- | --- | --- |
 | Champiñón | Descompositor | Inicial | Descompone un tronco | +2 nutrientes |
 | *Lactarius indigo* | Tejedor | Inicial | Teje micelio en tierra | −1 nutriente, la red crece |
-| *Amanita muscaria* | Sanadora | Inicial | Revive un árbol gris | −3 nutrientes; −6 en el Árbol Padre |
+| *Amanita muscaria* | Sanadora | Inicial | Revive un árbol gris | −3 nutrientes; −6 en el Árbol Ancestral |
 | *Gliophorus psittacinus* | Mensajera | Reclutable | "Pasa la voz" a un compañero que ya trabajó este mes | −1 espora; ese compañero trabaja otra vez |
 | *Morchella esculenta* "Panal" | Rompe-rocas | Reclutable | Rompe una roca vecina a la red | −2 nutrientes; queda tierra sin tejer |
 | *Ganoderma lucidum* "Ámbar" | Boticaria | Reclutable | Revive un árbol gris a 2 casillas o menos de la red (en Bosque y Ancestral queda suelto hasta que la red lo une al Hogar); en Bosque y Ancestral, también limpia la plaga | −3 nutrientes y −1 espora (apagado, −7 y −1); el árbol entra a la red · limpiar, −1 espora |
@@ -86,18 +86,18 @@ La Mensajera, **Chispa**, convierte esporas en una segunda jugada: despierta a l
 ### Economía
 | Recurso | Se gana | Se gasta |
 | --- | --- | --- |
-| Nutrientes | Tronco: +2 por uso · árbol vivo: +1 al empezar el mes · Lluvia de esporas · Lycoperdon abona +1 | Tejer 1 · revivir 3 · romper una roca 2 · soplar esporas 1 · Árbol Padre 10 (11 en Bosque, 13 en Ancestral) · en Bosque y Ancestral, el gremio come 1 al terminar cada mes de otoño e invierno |
+| Nutrientes | Tronco: +2 por uso · árbol vivo: +1 al empezar el mes · Lluvia de esporas · Lycoperdon abona +1 | Tejer 1 · revivir 3 · romper una roca 2 · soplar esporas 1 · Árbol Ancestral 10 (11 en Bosque, 13 en Ancestral) · en Bosque y Ancestral, el gremio come 1 al terminar cada mes de otoño e invierno |
 | Esporas | Árbol vivo: +1 al empezar el mes (en Bosque y Ancestral, nada en invierno) · Lluvia de esporas · Lycoperdon +2 | Reclutar 3, 4, 6 y 7 (sube con cada recluta) · Mensajera 1 · Ganoderma 1 · abonar 2 |
 
 Inicio: 3 miembros (uno de cada especie), 2 nutrientes, 0 esporas. Los troncos son finitos; los árboles vivos son la fuente renovable. Esa tensión es el corazón del juego.
 
 ### Tiempo y victoria
 - 4 estaciones de 3 meses. La estación cambia el color del follaje.
-- **Victoria:** la Amanita despierta al Árbol Padre. Requiere que toque la red, 10 nutrientes y al menos 3 árboles revividos (11 nutrientes en Bosque; 13 nutrientes y 4 árboles en Ancestral, desde el 031 y el 041).
+- **Victoria:** la Amanita despierta al Árbol Ancestral. Requiere que toque la red, 10 nutrientes y al menos 3 árboles revividos (11 nutrientes en Bosque; 13 nutrientes y 4 árboles en Ancestral, desde el 031 y el 041).
 - **Final suave:** si se acaba el invierno, el bosque espera la próxima primavera y se reintenta.
 
 ### Narrativa
-Tres cartas de intro, una frase cada una: el bosque se apaga; un gremio despierta; lleva la red al Árbol Padre antes del invierno. Una carta a mitad de partida, cuando llega Maestra Bruma. Dos cartas de final. Todo lo demás lo cuenta el mundo: color que vuelve, esporas flotando, el Árbol Padre que se ilumina.
+Tres cartas de intro, una frase cada una: el bosque se apaga; un gremio despierta; lleva la red al Árbol Ancestral antes del invierno. Una carta a mitad de partida, cuando llega Maestra Bruma. Dos cartas de final. Todo lo demás lo cuenta el mundo: color que vuelve, esporas flotando, el Árbol Ancestral que se ilumina.
 
 ### Dirección de arte
 Estilo ilustrado con contorno café, formas redondas y rubor. La luz del mundo avanza con las estaciones, de una mañana de primavera a un anochecer de invierno.
@@ -184,7 +184,7 @@ Medido por simulación (`tests/balance.test.ts`, 100 claros generados con semill
 | Jugador que sigue las pistas (`playAdvised`) | Gana el 100 % de los claros aceptados, mes medio ≈ 8,9 (entre el 8 y el 11) |
 | Bot que juega al azar (1.000 partidas) | Gana ≈ 17 % |
 
-Con las reglas de la prueba de concepto, un jugador atento ganaba hacia el mes 5–7 y el playtest lo confirmó: se sentía demasiado fácil. Desde el cambio 006 el Árbol Padre pide 3 árboles revividos y 10 nutrientes, cada tronco da +2 y el generador descarta claros regalados.
+Con las reglas de la prueba de concepto, un jugador atento ganaba hacia el mes 5–7 y el playtest lo confirmó: se sentía demasiado fácil. Desde el cambio 006 el Árbol Ancestral pide 3 árboles revividos y 10 nutrientes, cada tronco da +2 y el generador descarta claros regalados.
 
 Palancas de ajuste: coste de tejer, ganancia por tronco, número de troncos, meses totales y nutriente mensual por árbol.
 
@@ -200,24 +200,24 @@ Una vez aprendido, Brote ya no era un reto. «Nueva partida» abre «Elige tu cl
 | Los árboles no dan esporas | — | invierno | invierno |
 | Plaga que crece (1, 2 y 3 casillas por mes de la estación) | — | invierno | otoño e invierno |
 | Los árboles solo dan si la red los une al Hogar | no | sí | sí |
-| Árboles revividos que pide el Árbol Padre | 3 | 3 | 4 |
-| Nutrientes del Árbol Padre | 10 | 11 | 13 |
+| Árboles revividos que pide el Árbol Ancestral | 3 | 3 | 4 |
+| Nutrientes del Árbol Ancestral | 10 | 11 | 13 |
 | Pistas (★) | sí | sí | no |
 | Puntaje | ×1 | ×1,5 | ×2 |
 
 - **Árbol que se apaga:** al empezar ese mes, el árbol gris más lejano de la red se cubre de escarcha; si nadie lo revive ese mes, se apaga y revivirlo cuesta 7 nutrientes en vez de 3.
-- **Temporadas frías (028, 030):** al empezar el otoño, una carta («Llega el frío») avisa que al terminar cada mes el gremio come 1 nutriente, después de lo que dan los árboles; si no hay, el primero en llegar al gremio descansa el mes siguiente con hambre. En invierno, los árboles solo dan nutrientes; la Lluvia de esporas sigue dando esporas. Una primera versión (cada hongo come en otoño e invierno) dejaba el juego casi imposible: 1 % de victorias con pistas en Bosque. En el 028 el gremio comía solo en invierno y el Árbol Padre pedía 12; desde el 030 come desde el otoño y el Árbol Padre vuelve a 10.
-- **Plaga (032, 035, 042):** en Ancestral, al empezar el otoño y el invierno (en Bosque, solo el invierno, desde el 042) se marca una casilla tejida, al azar entre las más cercanas al Árbol Padre. Al terminar un mes sin hongos a 2 casillas o menos se marchita: sale de la red y la plaga se queda, sin poder tejerla, hasta que termine un mes con un hongo así de cerca; entonces vuelve a ser tierra y se puede tejer otra vez. La del otoño puede seguir cuando llega la del invierno. Da tensión más que dificultad: las pistas pasaron del 21 % al 22 % sobre los claros del 031. Que se quede (035) las deja en 16 % (antes 17 %), así que mantiene la dificultad del 034.
+- **Temporadas frías (028, 030):** al empezar el otoño, una carta («Llega el frío») avisa que al terminar cada mes el gremio come 1 nutriente, después de lo que dan los árboles; si no hay, el primero en llegar al gremio descansa el mes siguiente con hambre. En invierno, los árboles solo dan nutrientes; la Lluvia de esporas sigue dando esporas. Una primera versión (cada hongo come en otoño e invierno) dejaba el juego casi imposible: 1 % de victorias con pistas en Bosque. En el 028 el gremio comía solo en invierno y el Árbol Ancestral pedía 12; desde el 030 come desde el otoño y el Árbol Ancestral vuelve a 10.
+- **Plaga (032, 035, 042):** en Ancestral, al empezar el otoño y el invierno (en Bosque, solo el invierno, desde el 042) se marca una casilla tejida, al azar entre las más cercanas al Árbol Ancestral. Al terminar un mes sin hongos a 2 casillas o menos se marchita: sale de la red y la plaga se queda, sin poder tejerla, hasta que termine un mes con un hongo así de cerca; entonces vuelve a ser tierra y se puede tejer otra vez. La del otoño puede seguir cuando llega la del invierno. Da tensión más que dificultad: las pistas pasaron del 21 % al 22 % sobre los claros del 031. Que se quede (035) las deja en 16 % (antes 17 %), así que mantiene la dificultad del 034.
 - **La plaga crece y corta la red (043):** en Bosque y Ancestral la plaga marca casillas cada mes de sus estaciones (1, 2 y 3), entre las tejidas más cercanas al Hogar (045: junto a los árboles vivos, a 2 pasos o más del Hogar), y un árbol vivo solo da esporas y nutrientes si un camino de red lo une al Hogar. Si la plaga corta ese camino, los árboles del otro lado quedan sueltos hasta que la red los vuelva a unir (044: conservan su color y llevan la insignia del hilo de micelio cortado; la bitácora avisa antes, al marcar la plaga, cuántos quedarían sueltos, y la primera vez en la partida una carta explica cómo volver a unirlos). Antes de esto, perder una casilla no tenía consecuencias y ni la plaga que crece ni la plaga en un árbol movían las pistas más de 3 puntos. Con la red unida, la plaga castiga ignorarla y premia frenarla; las pistas aprenden a frenarla.
 - **La plaga se entiende (045):** tras jugar el 044, la bitácora pasa a un resumen de una frase («Mes N · » y lo urgente con qué hacer) con el detalle en «Ver el mes»; la red que ya no llega al Hogar se ve gris y sin luz, y las casillas desde donde un hongo frena la plaga llevan un escudo de hoja. La plaga deja de caer junto al Hogar (cortaba toda la red con una casilla) y va junto a los árboles vivos: se midieron cinco variantes y esta deja la dificultad igual (Bosque 44 %, Ancestral 17 %) con más claros certificados.
 - **Claros justos:** Bosque y Ancestral son el claro de Brote de la misma semilla con rocas extra, y solo se juegan los que un bot experto con búsqueda puede ganar (tabla precalculada de 1000 semillas por nivel).
-- **Medido** (100 claros por nivel): hasta el 027 las pistas ganaban el 83 % en Bosque y el 50 % en Ancestral (la meta para Ancestral era «el jugador con experiencia pierde seguido, ~50 %»). Con el invierno duro (028) ganan el 65 % y el 32 %; los rangos de la prueba bajan a 55–70 % y 20–35 %. Con el gremio comiendo desde el otoño y el Árbol Padre en 10 (030), el 63 % y el 28 %. Con el Árbol Padre de Ancestral en 4 árboles y 12 nutrientes (031), Ancestral baja al 21 % y certifica 905 de 1000 claros (el clásico ya no se gana ahí). Con un árbol que se apaga cada dos meses en Ancestral (034: meses 3, 5, 7, 9 y 11), las pistas ganan el 17 % y se certifican 861 de 1000 claros; el rango de la prueba baja a 10–25 %. Con los hongos nuevos (039) las pistas ganan el 74 % en Bosque y el 28–32 % en Ancestral: el Ganoderma funciona como segundo sanador y encarecerlo casi no cambia nada. Mario eligió ensanchar los rangos a 55–75 % y 10–35 %. La búsqueda gana Ancestral algo más tarde (mes 10,45 frente a 10,0). Con cuatro reclutas (041) los rangos vuelven a 55–70 % y 10–25 %: las rocas solas casi no movían las pistas, así que Bosque pasa a 9 rocas y Árbol Padre de 11 (61 %) y Ancestral a 11 rocas y 13 (21 %, con 77 de 100 claros certificados; el piso baja a 75). Con más eventos por estación (042: en Bosque, escarcha y plaga en invierno y árboles que se apagan en los meses 4 y 6; en Ancestral, un apagado más en el mes 2) las pistas ganan el 39 % en Bosque (89 de 100 certificados) y el 15 % en Ancestral (65); los rangos pasan a 35–50 % y 10–20 %. Escarcha desde verano dejaba Ancestral en 4,5 %, y Mario prefirió no apretarlo más. Con la plaga que crece y la red unida al Hogar (043) las pistas, que ahora frenan la plaga, ganan el 45 % en Bosque (85 de 100 certificados) y el 17 % en Ancestral (42 de 100, 501 de 1000; el piso baja a 40). Sin frenarla ganaban el 35 % y el 10 %: la dificultad nueva cae sobre quien no atiende la plaga.
+- **Medido** (100 claros por nivel): hasta el 027 las pistas ganaban el 83 % en Bosque y el 50 % en Ancestral (la meta para Ancestral era «el jugador con experiencia pierde seguido, ~50 %»). Con el invierno duro (028) ganan el 65 % y el 32 %; los rangos de la prueba bajan a 55–70 % y 20–35 %. Con el gremio comiendo desde el otoño y el Árbol Ancestral en 10 (030), el 63 % y el 28 %. Con el Árbol Ancestral de Ancestral en 4 árboles y 12 nutrientes (031), Ancestral baja al 21 % y certifica 905 de 1000 claros (el clásico ya no se gana ahí). Con un árbol que se apaga cada dos meses en Ancestral (034: meses 3, 5, 7, 9 y 11), las pistas ganan el 17 % y se certifican 861 de 1000 claros; el rango de la prueba baja a 10–25 %. Con los hongos nuevos (039) las pistas ganan el 74 % en Bosque y el 28–32 % en Ancestral: el Ganoderma funciona como segundo sanador y encarecerlo casi no cambia nada. Mario eligió ensanchar los rangos a 55–75 % y 10–35 %. La búsqueda gana Ancestral algo más tarde (mes 10,45 frente a 10,0). Con cuatro reclutas (041) los rangos vuelven a 55–70 % y 10–25 %: las rocas solas casi no movían las pistas, así que Bosque pasa a 9 rocas y Árbol Ancestral de 11 (61 %) y Ancestral a 11 rocas y 13 (21 %, con 77 de 100 claros certificados; el piso baja a 75). Con más eventos por estación (042: en Bosque, escarcha y plaga en invierno y árboles que se apagan en los meses 4 y 6; en Ancestral, un apagado más en el mes 2) las pistas ganan el 39 % en Bosque (89 de 100 certificados) y el 15 % en Ancestral (65); los rangos pasan a 35–50 % y 10–20 %. Escarcha desde verano dejaba Ancestral en 4,5 %, y Mario prefirió no apretarlo más. Con la plaga que crece y la red unida al Hogar (043) las pistas, que ahora frenan la plaga, ganan el 45 % en Bosque (85 de 100 certificados) y el 17 % en Ancestral (42 de 100, 501 de 1000; el piso baja a 40). Sin frenarla ganaban el 35 % y el 10 %: la dificultad nueva cae sobre quien no atiende la plaga.
 - **Puntaje:** un récord por claro con el total ya multiplicado; las estrellas usan la referencia de Brote, así que en Bosque y Ancestral se consiguen más fácil (premio por el riesgo, a revisar en playtest).
 
 ### Primeros pasos (046)
 Partida guiada antes de Brote: la primera opción de «Elige tu dificultad», marcada «Recomendado» hasta completarla o saltarla. Las 3 cartas de intro van antes y ya no se repiten en Brote.
-- **Claro fijo** (`TUTORIAL_MAP`): un tronco junto al Hogar, dos árboles en fila, otros dos troncos, una barrera de 3 rocas y el Árbol Padre detrás. Empieza con 2 nutrientes y 4 esporas; el Árbol Padre pide 2 árboles y 9 nutrientes; sin escarcha, apagados, hambre ni plaga. No da puntaje ni entra al ranking.
-- **Guion de 28 pasos** (`src/tutorial.ts`), que se gana justo en el mes 6: elegir, la ficha, descomponer, tejer, terminar el mes, «Ver el mes», revivir, reclutar a Chispa y pasar la voz, Maestra Bruma y el Brote arcano, reclutar a Pompón y abonar (al Árbol Padre le falta justo ese nutriente), la Libreta y la ★.
+- **Claro fijo** (`TUTORIAL_MAP`): un tronco junto al Hogar, dos árboles en fila, otros dos troncos, una barrera de 3 rocas y el Árbol Ancestral detrás. Empieza con 2 nutrientes y 4 esporas; el Árbol Ancestral pide 2 árboles y 9 nutrientes; sin escarcha, apagados, hambre ni plaga. No da puntaje ni entra al ranking.
+- **Guion de 28 pasos** (`src/tutorial.ts`), que se gana justo en el mes 6: elegir, la ficha, descomponer, tejer, terminar el mes, «Ver el mes», revivir, reclutar a Chispa y pasar la voz, Maestra Bruma y el Brote arcano, reclutar a Pompón y abonar (al Árbol Ancestral le falta justo ese nutriente), la Libreta y la ★.
 - **Viñetas:** una máscara oscura con un hueco sobre el objetivo y un globo de pergamino con flecha. Solo responde la acción del paso; los pasos «Ver» pasan con «Siguiente». «Saltar tutorial» pide confirmar y vuelve a los niveles con el foco en Brote.
 - **Final:** «¡Ya sabes jugar!» con «Jugar Brote» y «Volver a la portada».
 
@@ -289,7 +289,7 @@ Blender MCP corre en tu máquina, así que el arte se hace en una sesión local 
 4. Empacar en un atlas de sprites y subir a `assets/` en el repo.
 5. Claude Code en la nube los integra en Phaser.
 
-El escenario (tierra, micelio, troncos) puede seguir en vectores o shaders simples: Blender se reserva para lo que más luce, los personajes y el Árbol Padre.
+El escenario (tierra, micelio, troncos) puede seguir en vectores o shaders simples: Blender se reserva para lo que más luce, los personajes y el Árbol Ancestral.
 
 ### Flujo de trabajo en Claude Code en la nube
 1. Crear un repo en GitHub con `CLAUDE.md`, la carpeta `openspec/` y las reglas de la prueba de concepto.

@@ -72,7 +72,7 @@ test('recorre el tutorial: cada paso con su globo, lo demás no responde y termi
   const shot = (name: string) => (size ? page.screenshot({ path: `docs/screenshots/046-${name}-${size}.png` }) : undefined);
   await page.goto('/?nivel=tutorial');
   await expect(page.locator('#game canvas')).toBeVisible();
-  // Paso «Ver»: el Árbol Padre; el tablero y el dock no responden.
+  // Paso «Ver»: el Árbol Ancestral; el tablero y el dock no responden.
   await expect(page.locator('.coach__next')).toBeFocused();
   await checkBubble(page, { step: 0, part: 0 });
   await page.waitForTimeout(600);

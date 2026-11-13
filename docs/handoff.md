@@ -21,7 +21,7 @@ Candidatos para el siguiente cambio, en orden sugerido:
 | 006-deepen-game | Gliophorus "Chispa" (pasar la voz), claros aleatorios justos, dificultad medida |
 | 007-maga-sprite | Sprite propio de la maga (otra sesión) |
 | 008-illustrate-forest | Bosque ilustrado en Canvas2D/SVG/shader; casilla ocupada |
-| 009-father-tree-sprite | Árbol Padre de Blender (otra sesión) |
+| 009-father-tree-sprite | Árbol Ancestral de Blender (otra sesión) |
 | 010-painted-forest | Tablero con piezas pintadas por estación; retratos pintados en todas partes |
 | 011-reference-ui | HUD de pastillas, dock de medallones, fondo del bosque, bitácora en pergamino |
 | 012-title-screens | Portada, "Cómo jugar" (carrusel de 5) y "El gremio" |
@@ -37,7 +37,7 @@ Specs vivas: `game-rules`, `board-interaction`, `player-guidance`, `story-presen
 - **Ajustes visuales sin cambio de OpenSpec** (las specs no fijan qué pieza de arte se usa):
   - fondos nuevos de partida/portada (`fondo-claro-v2`) y victoria (`fondo-victoria-v2`), con la carta de final a un costado en apaisado;
   - estrellas de la carta de victoria con la pieza `ui/icons/star` (las no ganadas en gris).
-- **Arte:** los retratos pintados reemplazan a los sprites de Blender en todo el juego (los de Blender quedan como fuente en `assets/sprites/webp/`). El Árbol Padre usa solo `asleep-painted` y `awake-painted`: sus variantes por estación se ven como un árbol vivo y se confunden con "despierto". El micelio se dibuja con la losa completa `net`/`net-b`, no con conectores.
+- **Arte:** los retratos pintados reemplazan a los sprites de Blender en todo el juego (los de Blender quedan como fuente en `assets/sprites/webp/`). El Árbol Ancestral usa solo `asleep-painted` y `awake-painted`: sus variantes por estación se ven como un árbol vivo y se confunden con "despierto". El micelio se dibuja con la losa completa `net`/`net-b`, no con conectores.
 - **Semillas:** desde el 015 el generador acepta claros con la pista de reclutar nueva, así que `?seed=N` da claros distintos de los anteriores (reproducibles desde el 015 en adelante).
 - **Puntaje, observaciones de calibración** (están en el `design.md` archivado del 015, no en la spec): la velocidad cuenta dos veces ("Meses de sobra" y "Rapidez", ≈ 22 % del total); "Gremio eficiente" premia reclutar poco, y por eso el bot al azar llega a 3 estrellas en ~9 % de sus partidas; el bot con criterio saca siempre 2 estrellas (es la referencia).
 - **Leaderboard futuro:** la base sería el "claro del día" (semilla por fecha del calendario, igual para todos); un servidor rejugaría el `actionLog` del `ScoreResult`. El `timeMs` no se puede verificar en el servidor.

@@ -164,7 +164,7 @@ button { font: inherit; color: inherit; }
   touch-action: none;
 }
 .board__overlay { position: absolute; inset: 0; border-radius: 10px; overflow: hidden; }
-/* El canvas sube un poco por encima del claro: la copa del Árbol Padre sobresale del marco. Las esquinas redondeadas las pinta paint.ts. */
+/* El canvas sube un poco por encima del claro: la copa del Árbol Ancestral sobresale del marco. Las esquinas redondeadas las pinta paint.ts. */
 .board__canvas { position: absolute; inset: calc(-1 * var(--headroom, 0px)) 0 0 0; pointer-events: none; }
 .board__canvas canvas { display: block; }
 .cell {
@@ -1141,7 +1141,7 @@ button { font: inherit; color: inherit; }
   .title { justify-content: center; }
   .story[data-bg='intro'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 45%, transparent)), var(--art-bg-intro-wide); }
   .story[data-bg='victory'] { background-image: linear-gradient(transparent 40%, color-mix(in srgb, var(--ink) 35%, transparent)), var(--art-bg-victory-wide); }
-  /* El Árbol Padre queda al centro del fondo apaisado: la carta de final va a un costado. */
+  /* El Árbol Ancestral queda al centro del fondo apaisado: la carta de final va a un costado. */
   .story[data-kind='won'], .story[data-kind='lost'] { align-items: center; justify-content: flex-end; padding-right: max(24px, 5vw); }
   .story[data-kind='won'] .story__stack, .story[data-kind='lost'] .story__stack { width: min(360px, 46%); }
   body {

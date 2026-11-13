@@ -236,7 +236,7 @@ export function mountStory(root: HTMLElement, store: Store, onRestart: () => voi
 
   return (state: AppState) => {
     const story = state.ui.story;
-    // 046: el final del tutorial también espera a que despierte el Árbol Padre.
+    // 046: el final del tutorial también espera a que despierte el Árbol Ancestral.
     const ending = story?.kind === 'won' || story?.kind === 'lost' || story?.kind === 'tutorial';
     const ended = lastStatus === 'playing' && state.game.status !== 'playing';
     lastStatus = state.game.status;

@@ -6,7 +6,7 @@ Reglas del juego del Capítulo 1 (El Claro Gris): tablero, especies del gremio, 
 ## Requirements
 
 ### Requirement: Tablero inicial
-Cada partida nueva del juego SHALL generar un tablero vertical de 5 columnas por 8 filas con `newRandomGame(seed, level)`: el Hogar en la fila inferior y el Árbol Padre en la superior (columnas 2 a 4), un tronco junto al Hogar, 7 árboles grises a 2 o más casillas del Hogar, 5 troncos y las rocas del nivel (6 en Brote) en las filas intermedias. El Hogar es la única casilla con micelio. La semilla SHALL fijar el claro de Brote; Bosque y Ancestral le agregan rocas sobre casillas de tierra libres (nunca el Hogar, sus vecinas ni las vecinas del Árbol Padre), también según la semilla. En Brote, un mapa solo se acepta si la red puede llegar al Árbol Padre y a todos los árboles y si la política de las pistas lo gana entre el mes 8 y el 11; en Bosque y Ancestral, si la red puede llegar al Árbol Padre y a todos los árboles y si el bot experto (con su búsqueda) lo gana con las reglas del nivel; esa aceptación se precalcula para las semillas 0 a 1000 y las partidas nuevas de esos niveles eligen entre las aceptadas. Fuera de la tabla (`?seed=` mayor que 1000) se prueban hasta 10 intentos. Si no aparece ninguno, en Brote se usa el mapa clásico del Capítulo 1 y en Bosque y Ancestral el primer claro certificado del nivel (desde el 031 el clásico no se gana en Ancestral); la semilla 0 (`?map=clasico`) es el clásico, con las rocas certificadas del nivel si las hay. La misma semilla y el mismo nivel SHALL producir el mismo mapa.
+Cada partida nueva del juego SHALL generar un tablero vertical de 5 columnas por 8 filas con `newRandomGame(seed, level)`: el Hogar en la fila inferior y el Árbol Ancestral en la superior (columnas 2 a 4), un tronco junto al Hogar, 7 árboles grises a 2 o más casillas del Hogar, 5 troncos y las rocas del nivel (6 en Brote) en las filas intermedias. El Hogar es la única casilla con micelio. La semilla SHALL fijar el claro de Brote; Bosque y Ancestral le agregan rocas sobre casillas de tierra libres (nunca el Hogar, sus vecinas ni las vecinas del Árbol Ancestral), también según la semilla. En Brote, un mapa solo se acepta si la red puede llegar al Árbol Ancestral y a todos los árboles y si la política de las pistas lo gana entre el mes 8 y el 11; en Bosque y Ancestral, si la red puede llegar al Árbol Ancestral y a todos los árboles y si el bot experto (con su búsqueda) lo gana con las reglas del nivel; esa aceptación se precalcula para las semillas 0 a 1000 y las partidas nuevas de esos niveles eligen entre las aceptadas. Fuera de la tabla (`?seed=` mayor que 1000) se prueban hasta 10 intentos. Si no aparece ninguno, en Brote se usa el mapa clásico del Capítulo 1 y en Bosque y Ancestral el primer claro certificado del nivel (desde el 031 el clásico no se gana en Ancestral); la semilla 0 (`?map=clasico`) es el clásico, con las rocas certificadas del nivel si las hay. La misma semilla y el mismo nivel SHALL producir el mismo mapa.
 
 #### Scenario: Partida nueva
 - WHEN se inicia una partida
@@ -17,7 +17,7 @@ Cada partida nueva del juego SHALL generar un tablero vertical de 5 columnas por
 
 #### Scenario: Claros distintos
 - WHEN se generan partidas con semillas distintas
-- THEN los mapas cambian, y siempre tienen 7 árboles grises, el Hogar abajo y el Árbol Padre arriba
+- THEN los mapas cambian, y siempre tienen 7 árboles grises, el Hogar abajo y el Árbol Ancestral arriba
 
 #### Scenario: Misma semilla
 - WHEN se genera dos veces una partida con la misma semilla y el mismo nivel
@@ -212,7 +212,7 @@ En Bosque al menos 85 y en Ancestral al menos 40 de las semillas 1 a 100 SHALL t
 - AND en Bosque y Ancestral el bot experto gana todos, y la política de las pistas y el bot al azar quedan en sus rangos
 
 ### Requirement: Niveles de dificultad
-Cada partida SHALL jugarse en uno de tres niveles: Brote, Bosque o Ancestral. El nivel SHALL definir las rocas del claro, las estaciones con escarcha, los meses al final de los cuales se apaga un árbol, las estaciones en que come el gremio, las estaciones sin esporas, las estaciones con plaga, si los árboles solo producen unidos al Hogar, los árboles revividos y los nutrientes que pide el Árbol Padre, si hay pistas y el multiplicador de puntaje, todo en `config.ts › LEVELS`:
+Cada partida SHALL jugarse en uno de tres niveles: Brote, Bosque o Ancestral. El nivel SHALL definir las rocas del claro, las estaciones con escarcha, los meses al final de los cuales se apaga un árbol, las estaciones en que come el gremio, las estaciones sin esporas, las estaciones con plaga, si los árboles solo producen unidos al Hogar, los árboles revividos y los nutrientes que pide el Árbol Ancestral, si hay pistas y el multiplicador de puntaje, todo en `config.ts › LEVELS`:
 
 | | Brote | Bosque | Ancestral |
 | --- | --- | --- | --- |
@@ -223,8 +223,8 @@ Cada partida SHALL jugarse en uno de tres niveles: Brote, Bosque o Ancestral. El
 | Los árboles no dan esporas | — | Invierno | Invierno |
 | Plaga que crece (1, 2 y 3 casillas por mes de la estación) | — | Invierno | Otoño e Invierno |
 | Los árboles solo producen si la red los une al Hogar | no | sí | sí |
-| Árboles revividos que pide el Árbol Padre | 3 | 3 | 4 |
-| Nutrientes del Árbol Padre | 10 | 11 | 13 |
+| Árboles revividos que pide el Árbol Ancestral | 3 | 3 | 4 |
+| Nutrientes del Árbol Ancestral | 10 | 11 | 13 |
 | Pistas | sí | sí | no |
 | Multiplicador | ×1 | ×1,5 | ×2 |
 
@@ -232,7 +232,7 @@ Ninguna regla de nivel SHALL quitar árboles vivos. La red solo cambia por las a
 
 #### Scenario: Brote es el juego de siempre
 - WHEN se juega en Brote
-- THEN el claro tiene 6 rocas, tejer cuesta siempre 1 nutriente, ningún árbol se apaga, el gremio no come, todo árbol vivo produce y el Árbol Padre pide 3 árboles revividos y 10 nutrientes
+- THEN el claro tiene 6 rocas, tejer cuesta siempre 1 nutriente, ningún árbol se apaga, el gremio no come, todo árbol vivo produce y el Árbol Ancestral pide 3 árboles revividos y 10 nutrientes
 
 #### Scenario: Nada se pierde
 - WHEN termina cualquier mes en cualquier nivel
@@ -283,7 +283,7 @@ En Bosque y Ancestral, al terminar cada mes de Otoño e Invierno el gremio SHALL
 - THEN el gremio no come y los árboles dan esporas y nutrientes como siempre
 
 ### Requirement: Plaga
-En las estaciones con plaga del nivel (Bosque: invierno; Ancestral: otoño e invierno), al empezar cada mes de la estación la plaga SHALL marcar casillas tejidas de la red (tierra de la red; nunca el Hogar, un árbol ni el Árbol Padre), más cada mes: 1 el primer mes de la estación, 2 el segundo y 3 el tercero. Cada una SHALL ser una casilla tejida sin plaga a 2 pasos en cruz o más del Hogar y vecina en cruz de un árbol vivo; si no hay ninguna así, la más cercana al Hogar entre las tejidas a 2 pasos o más; si tampoco hay, la más cercana al Hogar entre todas. Se elige al azar con el claro, el mes y su orden (la misma partida marca siempre las mismas). Así la plaga va por la raíz de los árboles y no por el tronco de la red junto al Hogar. Si hay menos casillas tejidas sin plaga, marca las que hay. Cada casilla SHALL seguir con plaga hasta que termine un mes en que algún hongo trabajó a 2 casillas o menos de ella (pasos en cruz; cualquier miembro, también Maestra Bruma). Al terminar un mes sin hongos cerca, una casilla con plaga aún tejida SHALL marchitarse: sale de la red y sigue con plaga; una ya marchita sigue igual. Mientras tenga plaga, el Lactarius no SHALL poder tejerla. Al terminar un mes con un hongo cerca, la plaga se va: si la casilla seguía tejida sigue en la red (los hongos la frenaron) y si estaba marchita vuelve a ser tierra, que se puede tejer otra vez a su costo (los hongos la limpiaron). Las casillas con plaga de meses anteriores SHALL seguir mientras se marcan otras. Brote no tiene plaga.
+En las estaciones con plaga del nivel (Bosque: invierno; Ancestral: otoño e invierno), al empezar cada mes de la estación la plaga SHALL marcar casillas tejidas de la red (tierra de la red; nunca el Hogar, un árbol ni el Árbol Ancestral), más cada mes: 1 el primer mes de la estación, 2 el segundo y 3 el tercero. Cada una SHALL ser una casilla tejida sin plaga a 2 pasos en cruz o más del Hogar y vecina en cruz de un árbol vivo; si no hay ninguna así, la más cercana al Hogar entre las tejidas a 2 pasos o más; si tampoco hay, la más cercana al Hogar entre todas. Se elige al azar con el claro, el mes y su orden (la misma partida marca siempre las mismas). Así la plaga va por la raíz de los árboles y no por el tronco de la red junto al Hogar. Si hay menos casillas tejidas sin plaga, marca las que hay. Cada casilla SHALL seguir con plaga hasta que termine un mes en que algún hongo trabajó a 2 casillas o menos de ella (pasos en cruz; cualquier miembro, también Maestra Bruma). Al terminar un mes sin hongos cerca, una casilla con plaga aún tejida SHALL marchitarse: sale de la red y sigue con plaga; una ya marchita sigue igual. Mientras tenga plaga, el Lactarius no SHALL poder tejerla. Al terminar un mes con un hongo cerca, la plaga se va: si la casilla seguía tejida sigue en la red (los hongos la frenaron) y si estaba marchita vuelve a ser tierra, que se puede tejer otra vez a su costo (los hongos la limpiaron). Las casillas con plaga de meses anteriores SHALL seguir mientras se marcan otras. Brote no tiene plaga.
 
 #### Scenario: La plaga marca
 - WHEN empieza el mes 7 en Ancestral con la red tejida en (2,6), (2,4) y (2,3) del mapa clásico y el árbol (2,5) vivo
@@ -343,7 +343,7 @@ La Morchella esculenta SHALL, por 2 nutrientes, convertir en tierra sin tejer un
 - THEN la acción se rechaza con "Faltan nutrientes: romper una roca cuesta 2."
 
 ### Requirement: Curar a distancia (Ganoderma lucidum)
-El Ganoderma lucidum SHALL revivir un árbol gris a 2 casillas o menos de la red (pasos en cruz desde la casilla tejida más cercana, sin importar las rocas), aunque la red no lo toque, por 3 nutrientes y 1 espora; un árbol apagado cuesta 7 nutrientes y 1 espora. El árbol revivido SHALL quedar vivo y entrar a la red, como con la Amanita, y cuenta para la llegada de Maestra Bruma y para el Árbol Padre. No SHALL despertar al Árbol Padre. En los niveles con plaga, SHALL poder también quitar la plaga de una casilla a 2 casillas o menos de la red, por 1 espora: si seguía tejida sigue en la red y si estaba marchita vuelve a ser tierra. La escarcha no cambia sus costos.
+El Ganoderma lucidum SHALL revivir un árbol gris a 2 casillas o menos de la red (pasos en cruz desde la casilla tejida más cercana, sin importar las rocas), aunque la red no lo toque, por 3 nutrientes y 1 espora; un árbol apagado cuesta 7 nutrientes y 1 espora. El árbol revivido SHALL quedar vivo y entrar a la red, como con la Amanita, y cuenta para la llegada de Maestra Bruma y para el Árbol Ancestral. No SHALL despertar al Árbol Ancestral. En los niveles con plaga, SHALL poder también quitar la plaga de una casilla a 2 casillas o menos de la red, por 1 espora: si seguía tejida sigue en la red y si estaba marchita vuelve a ser tierra. La escarcha no cambia sus costos.
 
 #### Scenario: Cura sin que la red lo toque
 - WHEN hay 3 nutrientes y 1 espora, y un árbol gris está a 2 pasos de la red
@@ -362,7 +362,7 @@ El Ganoderma lucidum SHALL revivir un árbol gris a 2 casillas o menos de la red
 - THEN Ámbar la limpia: vuelve a ser tierra sin plaga y baja 1 espora
 
 ### Requirement: Soplar esporas (Lycoperdon perlatum)
-El Lycoperdon perlatum SHALL, sobre un árbol vivo (no el Árbol Padre), hacer uno de dos cambios a elección del jugador: «Soplar esporas», 1 nutriente por 2 esporas, o «Abonar el árbol», 2 esporas por 1 nutriente. El cambio elegido SHALL quedar en el registro de acciones para que la partida se pueda rejugar.
+El Lycoperdon perlatum SHALL, sobre un árbol vivo (no el Árbol Ancestral), hacer uno de dos cambios a elección del jugador: «Soplar esporas», 1 nutriente por 2 esporas, o «Abonar el árbol», 2 esporas por 1 nutriente. El cambio elegido SHALL quedar en el registro de acciones para que la partida se pueda rejugar.
 
 #### Scenario: Sopla
 - WHEN hay 1 nutriente y Pompón toca un árbol vivo con «Soplar esporas»
@@ -393,24 +393,24 @@ El Lycoperdon perlatum SHALL, sobre un árbol vivo (no el Árbol Padre), hacer u
 - THEN se abre «¿Qué cambia Pompón?» con «Soplar esporas» y «Abonar el árbol», cada uno deshabilitado si no alcanza, y después se toca un árbol vivo
 
 ### Requirement: Victoria por nivel
-La Amanita muscaria SHALL despertar al Árbol Padre si este toca la red y hay los árboles revividos y los nutrientes del nivel (`LEVELS › motherTrees` y `mother`): 3 árboles y 10 nutrientes en Brote, 3 árboles y 11 nutrientes en Bosque, 4 árboles y 13 nutrientes en Ancestral; eso SHALL terminar la partida con victoria.
+La Amanita muscaria SHALL despertar al Árbol Ancestral si este toca la red y hay los árboles revividos y los nutrientes del nivel (`LEVELS › motherTrees` y `mother`): 3 árboles y 10 nutrientes en Brote, 3 árboles y 11 nutrientes en Bosque, 4 árboles y 13 nutrientes en Ancestral; eso SHALL terminar la partida con victoria.
 
 #### Scenario: Bosque que aún no habla
-- WHEN la Amanita muscaria intenta despertar al Árbol Padre con 2 árboles revividos
+- WHEN la Amanita muscaria intenta despertar al Árbol Ancestral con 2 árboles revividos
 - THEN la acción se rechaza pidiendo revivir al menos 3 árboles
 
 #### Scenario: Once nutrientes en Bosque
-- WHEN en Bosque la Amanita muscaria intenta despertar al Árbol Padre con 3 árboles revividos y 10 nutrientes
-- THEN la acción se rechaza con "El Árbol Padre necesita 11 nutrientes."
+- WHEN en Bosque la Amanita muscaria intenta despertar al Árbol Ancestral con 3 árboles revividos y 10 nutrientes
+- THEN la acción se rechaza con "El Árbol Ancestral necesita 11 nutrientes."
 - AND con 11 nutrientes lo despierta y gana
 
 #### Scenario: Ancestral pide cuatro árboles
-- WHEN en Ancestral la Amanita muscaria intenta despertar al Árbol Padre con 3 árboles revividos y 13 nutrientes
+- WHEN en Ancestral la Amanita muscaria intenta despertar al Árbol Ancestral con 3 árboles revividos y 13 nutrientes
 - THEN la acción se rechaza con "El bosque aún no habla: revive al menos 4 árboles primero."
 
 #### Scenario: Trece nutrientes en Ancestral
-- WHEN en Ancestral la Amanita muscaria intenta despertar al Árbol Padre con 4 árboles revividos y 12 nutrientes
-- THEN la acción se rechaza con "El Árbol Padre necesita 13 nutrientes."
+- WHEN en Ancestral la Amanita muscaria intenta despertar al Árbol Ancestral con 4 árboles revividos y 12 nutrientes
+- THEN la acción se rechaza con "El Árbol Ancestral necesita 13 nutrientes."
 - AND con 13 nutrientes lo despierta y gana
 
 ### Requirement: Árboles que se apagan
@@ -437,7 +437,7 @@ Al empezar un mes en el que el nivel apaga un árbol, el juego SHALL marcar el �
 - THEN al terminar los meses 2, 3, 5, 7, 9 y 11 se apaga un árbol cada vez
 
 ### Requirement: Red unida al Hogar
-En Bosque y Ancestral, un árbol vivo SHALL producir al terminar el mes solo si la red lo une al Hogar: un camino de casillas de la red (pasos en cruz) desde el Hogar hasta el árbol. Un árbol vivo sin ese camino está suelto: sigue vivo, cuenta para el Árbol Padre, la maga y el puntaje, pero no da esporas ni nutrientes. Al terminar un mes con árboles sueltos, la bitácora SHALL decir cuántos no dieron nada y por qué. Un árbol que el Ganoderma cura a distancia o que la plaga separa del Hogar puede quedar suelto; vuelve a producir cuando la red lo une otra vez. La lluvia de Maestra Bruma hace producir a todos los árboles vivos, sueltos o no. En Brote todo árbol vivo produce.
+En Bosque y Ancestral, un árbol vivo SHALL producir al terminar el mes solo si la red lo une al Hogar: un camino de casillas de la red (pasos en cruz) desde el Hogar hasta el árbol. Un árbol vivo sin ese camino está suelto: sigue vivo, cuenta para el Árbol Ancestral, la maga y el puntaje, pero no da esporas ni nutrientes. Al terminar un mes con árboles sueltos, la bitácora SHALL decir cuántos no dieron nada y por qué. Un árbol que el Ganoderma cura a distancia o que la plaga separa del Hogar puede quedar suelto; vuelve a producir cuando la red lo une otra vez. La lluvia de Maestra Bruma hace producir a todos los árboles vivos, sueltos o no. En Brote todo árbol vivo produce.
 
 #### Scenario: Árbol unido
 - WHEN termina un mes en Bosque con el árbol (2,5) del clásico vivo y la red tejida en (2,6)

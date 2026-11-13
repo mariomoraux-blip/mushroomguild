@@ -6,18 +6,18 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 /** «3, 5 y 7». */
 const listY = (items: readonly (string | number)[]) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} y ${items.at(-1)}`);
 /**
- * Lo que pide el Árbol Padre fuera de la partida (028, 031): lo de Brote y Bosque, y entre paréntesis lo de Ancestral
+ * Lo que pide el Árbol Ancestral fuera de la partida (028, 031): lo de Brote y Bosque, y entre paréntesis lo de Ancestral
  * si es distinto. Dentro de la partida, la meta y la etiqueta usan lo del nivel (`motherCost`, `motherTrees`).
  */
 const B = LEVELS.brote;
 const W = LEVELS.bosque;
 const A = LEVELS.ancestral;
 // 041: cada nivel pide sus nutrientes (10, 11 y 13); se nombran solo los que cambian.
-const otherNutrients = [W.mother !== B.mother && `${W.mother} en Bosque`, A.mother !== B.mother && `${A.mother} en Ancestral`].filter((t): t is string => Boolean(t));
+const otherNutrients = [W.mother !== B.mother && `${W.mother} en Bosque`, A.mother !== B.mother && `${A.mother} en el nivel Ancestral`].filter((t): t is string => Boolean(t));
 const motherNutrients = otherNutrients.length ? `${B.mother} nutrientes (${listY(otherNutrients)})` : `${B.mother} nutrientes`;
 const motherNeeds = [
   `${B.motherTrees} árboles revividos y ${B.mother} nutrientes`,
-  [W.mother !== B.mother && `${W.mother} nutrientes en Bosque`, (A.mother !== B.mother || A.motherTrees !== B.motherTrees) && `${A.motherTrees} árboles y ${A.mother} nutrientes en Ancestral`].filter(Boolean).join('; '),
+  [W.mother !== B.mother && `${W.mother} nutrientes en Bosque`, (A.mother !== B.mother || A.motherTrees !== B.motherTrees) && `${A.motherTrees} árboles y ${A.mother} nutrientes en el nivel Ancestral`].filter(Boolean).join('; '),
 ].filter(Boolean).join(' (') + (W.mother !== B.mother || A.mother !== B.mother || A.motherTrees !== B.motherTrees ? ')' : '');
 /** Curva de reclutar (027): «cuesta 3, luego 5 y luego 7». */
 const recruitCurve = `cuesta ${listY(RECRUIT_COSTS.map((n, i) => (i === 0 ? n : `luego ${n}`)))}`;
@@ -120,9 +120,9 @@ export const es = {
     noNutrientWeaveFrost: (n: number) => `Falta${n === 1 ? '' : 'n'} ${plural(n, 'nutriente')} para tejer con escarcha.`,
     champiNeedsLog: 'El Champiñón necesita un tronco caído.',
     farLog: 'Muy lejos: el tronco debe tocar la red.',
-    motherFar: 'La red todavía no llega al Árbol Padre.',
+    motherFar: 'La red todavía no llega al Árbol Ancestral.',
     forestSilent: (n: number) => `El bosque aún no habla: revive al menos ${n} árboles primero.`,
-    motherCost: (n: number) => `El Árbol Padre necesita ${n} nutrientes.`,
+    motherCost: (n: number) => `El Árbol Ancestral necesita ${n} nutrientes.`,
     amanitaNeedsTree: 'La Amanita solo cura árboles.',
     treeAlive: 'Este árbol ya respira.',
     farTree: 'Muy lejos: el árbol debe tocar la red.',
@@ -167,7 +167,7 @@ export const es = {
 
   /** Pistas del siguiente paso (`advise`). */
   advice: {
-    awaken: (n: string) => `Pista: ${n} puede despertar al Árbol Padre. ¡Es la meta!`,
+    awaken: (n: string) => `Pista: ${n} puede despertar al Árbol Ancestral. ¡Es la meta!`,
     revive: (n: string) => `Pista: ${n} puede revivir un árbol gris. Cada árbol vivo da esporas y nutrientes.`,
     recruit: (spores: number, species: string) => `Pista: tienes ${plural(spores, 'espora')}. Recluta ${species} en «+ Reclutar» o tocando las esporas.`,
     decompose: (n: string) => `Pista: ${n} puede descomponer un tronco junto a la red (+${GAIN.log} nutrientes).`,
@@ -177,7 +177,7 @@ export const es = {
     puff: (n: string) => `Pista: ${n} puede soplar esporas desde un árbol vivo (+${GAIN.puff}).`,
     compost: (n: string) => `Pista: ${n} puede abonar un árbol: ${plural(COST.compost, 'espora')} se vuelven ${plural(GAIN.compost, 'nutriente')}.`,
     weaveTree: (n: string) => `Pista: ${n} puede tejer la red hacia un árbol gris (★).`,
-    weaveMother: (n: string) => `Pista: ${n} puede tejer la red hacia el Árbol Padre (★).`,
+    weaveMother: (n: string) => `Pista: ${n} puede tejer la red hacia el Árbol Ancestral (★).`,
     call: (n: string, other: string) => `Pista: ${n} puede pasar la voz a ${other} para que trabaje otra vez (★).`,
     spell: (n: string, spell: string) => `Pista: ${n} puede lanzar ${spell}.`,
     endMonth: `Nadie más puede trabajar este mes. Pulsa «Fin del mes»: cada árbol vivo dará ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}.`,
@@ -188,8 +188,8 @@ export const es = {
   /** Qué es cada casilla (al tocarla sin miembro elegido). */
   tileHelp: {
     home: 'Hogar del gremio: aquí empieza la red de micelio.',
-    mother: (n: number, trees: number) => `Árbol Padre: la meta. Llévale la red y despiértalo con la Amanita (${trees} árboles vivos y ${n} nutrientes).`,
-    motherAwake: 'Árbol Padre: despierto. ¡El bosque respira!',
+    mother: (n: number, trees: number) => `Árbol Ancestral: la meta. Llévale la red y despiértalo con la Amanita (${trees} árboles vivos y ${n} nutrientes).`,
+    motherAwake: 'Árbol Ancestral: despierto. ¡El bosque respira!',
     soil: 'Tierra: el Lactarius teje micelio aquí para extender la red.',
     soilNet: 'Tierra tejida: ya es parte de la red. Se trabaja en las casillas vecinas.',
     log: `Tronco caído: el Champiñón lo descompone (+${GAIN.log} nutrientes, ${LOG_USES} veces).`,
@@ -248,12 +248,12 @@ export const es = {
       nutrients: `Gasta ${plural(COST.weave, 'nutriente')} por cada casilla tejida. Con escarcha (Bosque y Ancestral), ${plural(FROST_WEAVE, 'nutriente')}.`,
     },
     amanita: {
-      context: 'Cura a los árboles dormidos del claro y, al final, despierta al Árbol Padre.',
-      ability: 'Revive árboles grises y despierta al Árbol Padre.',
+      context: 'Cura a los árboles dormidos del claro y, al final, despierta al Árbol Ancestral.',
+      ability: 'Revive árboles grises y despierta al Árbol Ancestral.',
       howTo: 'Tócala y después toca un árbol resaltado que toque la red.',
       movement: 'No camina: cura los árboles vecinos a la red. Teje la red hasta un árbol para poder curarlo.',
-      nutrients: `Gasta ${COST.revive} nutrientes por árbol, ${FADED_REVIVE} por un árbol apagado y ${motherNutrients} en el Árbol Padre.`,
-      heals: `Los árboles grises (copa gris y tronco), por ${COST.revive} nutrientes: al revivir entran a la red y al empezar cada mes dan ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. El Árbol Padre (aro dorado, arriba): se despierta cuando la red lo toca y hay ${motherNeeds}. Despertarlo es ganar. En Bosque y Ancestral, un árbol con escarcha se apaga al terminar el mes si nadie lo revive; apagado, revivirlo cuesta ${FADED_REVIVE}.`,
+      nutrients: `Gasta ${COST.revive} nutrientes por árbol, ${FADED_REVIVE} por un árbol apagado y ${motherNutrients} en el Árbol Ancestral.`,
+      heals: `Los árboles grises (copa gris y tronco), por ${COST.revive} nutrientes: al revivir entran a la red y al empezar cada mes dan ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. El Árbol Ancestral (aro dorado, arriba): se despierta cuando la red lo toca y hay ${motherNeeds}. Despertarlo es ganar. En Bosque y Ancestral, un árbol con escarcha se apaga al terminar el mes si nadie lo revive; apagado, revivirlo cuesta ${FADED_REVIVE}.`,
     },
     gliophorus: {
       context: 'Corre la voz por los hilos de micelio más rápido que el viento. Cuando ella avisa, nadie se queda dormido.',
@@ -275,14 +275,14 @@ export const es = {
       ability: `Revive árboles grises a ${HEAL_REACH} casillas o menos de la red, aunque la red no los toque. En Bosque y Ancestral también limpia la plaga.`,
       howTo: 'Tócala y después toca un árbol resaltado, cerca de la red pero no necesariamente junto a ella.',
       movement: `No camina: su hilo dorado alcanza ${HEAL_REACH} pasos en cruz desde la red, por encima de las rocas. El árbol curado entra a la red de un salto.`,
-      nutrients: `Gasta ${COST.revive} nutrientes y ${plural(COST.heal, 'espora')} por árbol (${FADED_REVIVE} nutrientes si está apagado). Limpiar la plaga cuesta ${plural(COST.heal, 'espora')}. No despierta al Árbol Padre: eso es de la Amanita.`,
+      nutrients: `Gasta ${COST.revive} nutrientes y ${plural(COST.heal, 'espora')} por árbol (${FADED_REVIVE} nutrientes si está apagado). Limpiar la plaga cuesta ${plural(COST.heal, 'espora')}. No despierta al Árbol Ancestral: eso es de la Amanita.`,
     },
     lycoperdon: {
       context: 'Redondo, juguetón y con cosquillas: cualquier toque le hace soplar una nube de esporas.',
       ability: `Desde un árbol vivo hace un cambio: sopla esporas (${plural(COST.puff, 'nutriente')} por ${plural(GAIN.puff, 'espora')}) o abona el árbol (${plural(COST.compost, 'espora')} por ${plural(GAIN.compost, 'nutriente')}).`,
       howTo: 'Tócalo, elige «Soplar esporas» o «Abonar el árbol» y después toca un árbol vivo resaltado.',
-      movement: 'No camina: trabaja desde cualquier árbol vivo del claro, esté donde esté. El Árbol Padre no cuenta.',
-      nutrients: 'Soplar sirve para reclutar, pasar la voz o curar antes; abonar, para llegar a los nutrientes del Árbol Padre cuando ya sobran esporas. Ida y vuelta no gana nada.',
+      movement: 'No camina: trabaja desde cualquier árbol vivo del claro, esté donde esté. El Árbol Ancestral no cuenta.',
+      nutrients: 'Soplar sirve para reclutar, pasar la voz o curar antes; abonar, para llegar a los nutrientes del Árbol Ancestral cuando ya sobran esporas. Ida y vuelta no gana nada.',
     },
     mago: {
       context: 'Nadie la recluta: llega sola al empezar el mes siguiente a revivir el segundo árbol, cuando el bosque vuelve a hablar.',
@@ -290,7 +290,7 @@ export const es = {
       howTo: 'Tócala, elige el hechizo y después toca la casilla resaltada.',
       movement: 'No camina: su magia alcanza rocas vecinas a la red y cualquier árbol vivo. Después de lanzar, descansa hasta la próxima estación.',
       nutrients: 'No gasta nutrientes. La Lluvia de esporas, además, los regala.',
-      powers: `Brote arcano: convierte una roca vecina a la red en tierra con micelio; sirve para abrir atajos hacia el Árbol Padre. Lluvia de esporas: sobre un árbol vivo, cada árbol vivo da ya ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')} extra; sirve para reclutar o revivir antes.`,
+      powers: `Brote arcano: convierte una roca vecina a la red en tierra con micelio; sirve para abrir atajos hacia el Árbol Ancestral. Lluvia de esporas: sobre un árbol vivo, cada árbol vivo da ya ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')} extra; sirve para reclutar o revivir antes.`,
     },
   } satisfies Record<SpeciesId, { context: string; ability: string; howTo: string; movement: string; nutrients: string; heals?: string; messenger?: string; powers?: string }>,
   quote: (text: string) => `«${text}»`,
@@ -303,8 +303,8 @@ export const es = {
     lines: {
       tutorial: 'Una partida corta y guiada: aprende a jugar paso a paso.',
       brote: 'El claro de siempre, con la ★ para guiarte.',
-      bosque: 'Más rocas, escarcha en otoño e invierno, dos árboles que se apagan, una plaga que crece en invierno y un Árbol Padre más exigente. Los árboles solo dan si la red los une al Hogar.',
-      ancestral: 'Más rocas aún, escarcha hasta el final, seis árboles que se apagan, una plaga que crece desde el otoño, un Árbol Padre aún más exigente y sin ★. Los árboles solo dan si la red los une al Hogar.',
+      bosque: 'Más rocas, escarcha en otoño e invierno, dos árboles que se apagan, una plaga que crece en invierno y un Árbol Ancestral más exigente. Los árboles solo dan si la red los une al Hogar.',
+      ancestral: 'Más rocas aún, escarcha hasta el final, seis árboles que se apagan, una plaga que crece desde el otoño, un Árbol Ancestral aún más exigente y sin ★. Los árboles solo dan si la red los une al Hogar.',
     },
     multiplier: (m: number) => `Puntaje ${times(m)}`,
     /** 046: «Primeros pasos» lo lleva hasta completarlo o saltarlo. */
@@ -332,7 +332,7 @@ export const es = {
       { title: 'Trabaja junto a la red', text: 'Toca una casilla resaltada. Solo se trabaja junto a la red de micelio.' },
       { title: 'Una vez por mes', text: 'Cada hongo trabaja una vez por mes. Después pulsa «Fin del mes».' },
       { title: 'Al empezar el mes', text: `Cada árbol vivo da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. Con esporas reclutas otro hongo: ${recruitCurve}.` },
-      { title: 'Despierta al Árbol Padre', text: `Antes de que acabe el invierno: que la red lo toque y ${motherNeeds}. Si dudas, sigue la ★.` },
+      { title: 'Despierta al Árbol Ancestral', text: `Antes de que acabe el invierno: que la red lo toque y ${motherNeeds}. Si dudas, sigue la ★.` },
     ],
     step: (n: number, total: number) => `Paso ${n} de ${total}`,
     prev: 'Paso anterior',
@@ -356,7 +356,7 @@ export const es = {
     button: 'Ayuda: Cómo jugar',
     title: 'Libreta de campo',
     goalTitle: 'La meta',
-    goal: (n: number, trees: number) => `Despierta al Árbol Padre (arriba) antes de que acabe el invierno. Necesitas que la red lo toque, ${trees} árboles revividos y ${n} nutrientes.`,
+    goal: (n: number, trees: number) => `Despierta al Árbol Ancestral (arriba) antes de que acabe el invierno. Necesitas que la red lo toque, ${trees} árboles revividos y ${n} nutrientes.`,
     howTitle: 'Cómo se juega',
     how: [
       'Toca un hongo del gremio: se resaltan las casillas donde puede trabajar.',
@@ -368,7 +368,7 @@ export const es = {
     tilesTitle: 'Las casillas',
     tip: 'Si no sabes qué hacer, sigue la ★: marca el hongo sugerido y la casilla que acerca la red a tu meta.',
     levelsTitle: 'Bosque y Ancestral',
-    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En otoño e invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente). En invierno los árboles no dan esporas. Nunca se pierden los árboles vivos, pero solo dan si la red los une al Hogar. En invierno en Bosque, y en otoño e invierno en Ancestral, la plaga marca casillas tejidas junto a los árboles vivos, cada mes de la estación más (1, 2 y 3): al terminar el mes se marchitan si ningún hongo trabajó a ${PLAGUE_REACH} casillas o menos, y la plaga sigue ahí (no se puede tejer) hasta que un hongo trabaje así de cerca. Si corta la red, los árboles del otro lado dejan de dar: la red cortada se ve gris. En Ancestral no hay ★ y el Árbol Padre pide ${A.motherTrees} árboles revividos y ${plural(A.mother, 'nutriente')}.`,
+    levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En otoño e invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente). En invierno los árboles no dan esporas. Nunca se pierden los árboles vivos, pero solo dan si la red los une al Hogar. En invierno en Bosque, y en otoño e invierno en Ancestral, la plaga marca casillas tejidas junto a los árboles vivos, cada mes de la estación más (1, 2 y 3): al terminar el mes se marchitan si ningún hongo trabajó a ${PLAGUE_REACH} casillas o menos, y la plaga sigue ahí (no se puede tejer) hasta que un hongo trabaje así de cerca. Si corta la red, los árboles del otro lado dejan de dar: la red cortada se ve gris. En el nivel Ancestral no hay ★ y el Árbol Ancestral pide ${A.motherTrees} árboles revividos y ${plural(A.mother, 'nutriente')}.`,
     start: '¡A jugar!',
   },
 
@@ -499,7 +499,7 @@ export const es = {
     intro: [
       { title: 'El bosque se apaga', text: 'Los árboles del claro se durmieron y el color se fue con ellos.' },
       { title: 'Un gremio despierta', text: 'Tres hongos se asoman bajo la casa-hongo, con ganas de trabajar.' },
-      { title: 'Antes del invierno', text: 'Lleva la red de micelio hasta el Árbol Padre y despiértalo antes de que termine el invierno.' },
+      { title: 'Antes del invierno', text: 'Lleva la red de micelio hasta el Árbol Ancestral y despiértalo antes de que termine el invierno.' },
     ],
     step: (n: number, total: number) => `Carta ${n} de ${total}`,
     next: 'Siguiente',
@@ -523,13 +523,13 @@ export const es = {
     looseTitle: 'Un árbol suelto',
     looseText: 'La red ya no une este árbol al Hogar.',
     looseRules: [
-      'Sigue vivo y cuenta para el Árbol Padre, pero no da esporas ni nutrientes.',
+      'Sigue vivo y cuenta para el Árbol Ancestral, pero no da esporas ni nutrientes.',
       'Lo verás con esta insignia: el hilo de micelio cortado.',
       'Teje un camino de red desde el Hogar hasta él y volverá a dar.',
     ],
     looseOk: 'Entendido',
     wonTitle: '¡El bosque despertó!',
-    wonText: (month: number) => `El Árbol Padre despertó en el mes ${month}.`,
+    wonText: (month: number) => `El Árbol Ancestral despertó en el mes ${month}.`,
     lostTitle: 'Llegó el invierno',
     lostText: 'El bosque esperará la próxima primavera.',
     lostTip: 'Consejo: revive árboles temprano. Cada árbol vivo da esporas cada mes.',
@@ -558,8 +558,8 @@ export const es = {
 
   tiles: {
     home: 'Hogar del gremio',
-    mother: 'Árbol Padre',
-    motherAwake: 'Árbol Padre despierto',
+    mother: 'Árbol Ancestral',
+    motherAwake: 'Árbol Ancestral despierto',
     soil: 'Tierra',
     log: 'Tronco caído',
     tree: 'Árbol gris',
@@ -599,7 +599,7 @@ export const es = {
     wove: (name: string) => `${name} tejió micelio. La red crece.`,
     logDone: (name: string, n: number) => `${name} terminó el tronco: +${n} nutrientes y queda tierra fértil.`,
     logUsed: (name: string, n: number) => `${name} descompuso el tronco: +${n} nutrientes.`,
-    motherAwake: (name: string) => `${name} despertó al Árbol Padre.`,
+    motherAwake: (name: string) => `${name} despertó al Árbol Ancestral.`,
     revived: (name: string) => `${name} revivió un árbol. Al empezar cada mes dará una espora y un nutriente.`,
     called: (name: string, other: string) => `${name} pasó la voz: ${other} puede trabajar otra vez.`,
     brokeRock: (name: string) => `${name} rompió la roca. Ahora es tierra lista para tejer.`,
@@ -653,7 +653,7 @@ export const es = {
     skipYes: 'Sí, saltar',
     skipNo: 'No, seguir',
     // Mes 1
-    mother: `Este es el Árbol Padre. Despiértalo y el claro vuelve a la vida: pide ${LEVELS.tutorial.motherTrees} árboles revividos y ${plural(LEVELS.tutorial.mother, 'nutriente')}.`,
+    mother: `Este es el Árbol Ancestral. Despiértalo y el claro vuelve a la vida: pide ${LEVELS.tutorial.motherTrees} árboles revividos y ${plural(LEVELS.tutorial.mother, 'nutriente')}.`,
     hud: 'Arriba ves tus nutrientes (para trabajar), tus esporas (para reclutar) y los árboles que reviviste.',
     pickBruno: 'Este es tu gremio. Elige a Bruno.',
     openCard: 'Toca Ficha para ver qué hace Bruno.',
@@ -687,18 +687,18 @@ export const es = {
     sproutRock: 'Toca la roca junto al árbol: se vuelve tierra con red.',
     recruitMore: 'Hay esporas para otro hongo. Toca Reclutar.',
     recruitPompon: `Recluta a Pompón (${plural(RECRUIT_COSTS[1], 'espora')}): cambia nutrientes por esporas, o al revés.`,
-    weaveMother: 'Indi teje hasta tocar al Árbol Padre.',
+    weaveMother: 'Indi teje hasta tocar al Árbol Ancestral.',
     help: 'Si dudas, el «?» abre Cómo jugar y la Libreta de campo: ahí está todo lo que aprendiste.',
     end5: 'Termina el mes.',
     // Mes 6
     star: 'Cuando juegues sin guía, la ★ te sugiere a quién elegir y dónde tocar.',
-    pickPompon: `Al Árbol Padre le falta ${plural(GAIN.compost, 'nutriente')}. Elige a Pompón.`,
+    pickPompon: `Al Árbol Ancestral le falta ${plural(GAIN.compost, 'nutriente')}. Elige a Pompón.`,
     compost: `Elige Abonar el árbol: ${plural(COST.compost, 'espora')} por ${plural(GAIN.compost, 'nutriente')}.`,
     compostTree: 'Toca un árbol vivo.',
-    wake: '¡Ya está todo! Elige a Rubí y despierta al Árbol Padre.',
+    wake: '¡Ya está todo! Elige a Rubí y despierta al Árbol Ancestral.',
     // Final
     doneTitle: '¡Ya sabes jugar!',
-    doneText: 'El Árbol Padre despertó. En Brote cada partida es un claro nuevo, y la ★ te acompaña.',
+    doneText: 'El Árbol Ancestral despertó. En Brote cada partida es un claro nuevo, y la ★ te acompaña.',
     playBrote: 'Jugar Brote',
     toTitle: 'Volver a la portada',
   },

@@ -231,7 +231,7 @@ const scene = new GameScene(store);
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
-  transparent: true, // el claro se pinta entero; el margen de arriba (copa del Árbol Padre) deja ver el marco
+  transparent: true, // el claro se pinta entero; el margen de arriba (copa del Árbol Ancestral) deja ver el marco
   width: 1,
   height: 1,
   scale: { mode: Phaser.Scale.NONE },

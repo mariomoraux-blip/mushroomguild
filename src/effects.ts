@@ -9,7 +9,7 @@ export type Effect =
   | { kind: 'decompose'; at: Point; before: Tile }
   /** Un árbol gris revivió. */
   | { kind: 'revive'; at: Point }
-  /** El Árbol Padre despertó. */
+  /** El Árbol Ancestral despertó. */
   | { kind: 'awaken'; at: Point }
   /**
    * Esporas ganadas: al empezar el mes (desde los árboles vivos) o por la Lluvia de esporas (desde el árbol del hechizo).

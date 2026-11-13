@@ -17,7 +17,7 @@ Cada acción válida SHALL tener una animación de 400 ms o menos que muestre su
 - THEN el tronco se encoge y desaparece con astillas en menos de 400 ms
 
 #### Scenario: Despertar
-- WHEN la Amanita despierta al Árbol Padre
+- WHEN la Amanita despierta al Árbol Ancestral
 - THEN un anillo de luz se abre desde el árbol y queda un halo cálido detrás de él
 
 #### Scenario: Romper una roca
@@ -76,7 +76,7 @@ El total de assets publicados (`public/assets/`) SHALL ser de 4 MB o menos, sin 
 - THEN no se descargan el logo ni los fondos de intro y victoria
 
 ### Requirement: La red alumbra el invierno
-La red de micelio SHALL tener su propia luz (salvo la casilla con plaga, que la pierde), encima del claro pintado y debajo del Árbol Padre, los retratos y las partículas, con una intensidad que crece con la estación: primavera 0,2, verano 0,4, otoño 0,65 e invierno 1,0. La saturación del progreso no SHALL afectar esa luz. Al cambiar de estación, la intensidad SHALL cambiar en 600 ms; con `prefers-reduced-motion`, de inmediato.
+La red de micelio SHALL tener su propia luz (salvo la casilla con plaga, que la pierde), encima del claro pintado y debajo del Árbol Ancestral, los retratos y las partículas, con una intensidad que crece con la estación: primavera 0,2, verano 0,4, otoño 0,65 e invierno 1,0. La saturación del progreso no SHALL afectar esa luz. Al cambiar de estación, la intensidad SHALL cambiar en 600 ms; con `prefers-reduced-motion`, de inmediato.
 
 #### Scenario: Primavera
 - WHEN empieza la partida
@@ -85,7 +85,7 @@ La red de micelio SHALL tener su propia luz (salvo la casilla con plaga, que la 
 #### Scenario: Invierno
 - WHEN llega el mes 10
 - THEN la red es lo más brillante del tablero y su luz alumbra las casillas vecinas
-- AND el Árbol Padre y los retratos se ven encima de esa luz, con sus colores
+- AND el Árbol Ancestral y los retratos se ven encima de esa luz, con sus colores
 
 #### Scenario: Movimiento reducido
 - WHEN el sistema pide movimiento reducido y llega el mes 10

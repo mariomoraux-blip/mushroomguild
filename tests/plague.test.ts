@@ -6,7 +6,7 @@ import { act, cloneState, endMonth, GAIN, guarded, LEVELS, plagueCount, plagueTa
 import { initialState, reduce } from '../src/store';
 import { INDI, setup, type Setup } from './helpers';
 
-// Mapa clásico: Hogar (2,7), Árbol Padre (2,0), árbol gris en (2,5). Una red tejida hacia arriba por la columna 2.
+// Mapa clásico: Hogar (2,7), Árbol Ancestral (2,0), árbol gris en (2,5). Una red tejida hacia arriba por la columna 2.
 const at = (level: Level, o: Setup = {}): GameState => ({ ...setup(o), level });
 const NET: Point[] = [{ x: 2, y: 6 }, { x: 2, y: 4 }, { x: 2, y: 3 }];
 const marked = (s: GameState) => s.tiles.filter((t) => t.blighted).map(({ x, y }) => ({ x, y }));
@@ -65,7 +65,7 @@ describe('Requirement: Plaga', () => {
     expect([...picks].sort()).toEqual(ties);
   });
 
-  it('nunca marca el Hogar, un árbol vivo ni el Árbol Padre; sin casillas tejidas no marca', () => {
+  it('nunca marca el Hogar, un árbol vivo ni el Árbol Ancestral; sin casillas tejidas no marca', () => {
     const { state } = endMonth(at('ancestral', { month: 6, alive: [{ x: 2, y: 5 }] }));
     expect(marked(state)).toEqual([]);
   });

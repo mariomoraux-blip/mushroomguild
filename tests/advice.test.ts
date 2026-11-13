@@ -21,7 +21,7 @@ describe('Requirement: Pista y camino sugerido', () => {
     expect(s.ui.notice.text).toBe(es.advice.pickTile('Indi'));
   });
 
-  it('con 3 árboles revividos, tejer apunta al Árbol Padre', () => {
+  it('con 3 árboles revividos, tejer apunta al Árbol Ancestral', () => {
     const s = setup({ alive: [{ x: 4, y: 6 }, { x: 2, y: 5 }, { x: 0, y: 3 }] });
     expect(weaveGoal(s)).toMatchObject({ toward: 'mother', goal: { x: 2, y: 0 } });
   });
@@ -33,7 +33,7 @@ describe('Requirement: Pista y camino sugerido', () => {
     expect(es.advice.endMonth).toContain('cada árbol vivo dará 1 espora y 1 nutriente');
   });
 
-  it('prioridad: despertar al Árbol Padre antes que revivir, y revivir antes que reclutar o descomponer', () => {
+  it('prioridad: despertar al Árbol Ancestral antes que revivir, y revivir antes que reclutar o descomponer', () => {
     const ready = setup({ net: [{ x: 2, y: 1 }], alive: [{ x: 4, y: 6 }, { x: 1, y: 0 }, { x: 0, y: 3 }], nutrients: 13, spores: 4 });
     expect(advise(ready)).toMatchObject({ kind: 'awaken', memberId: RUBI, target: { x: 2, y: 0 } });
     const revive = setup({ net: [{ x: 3, y: 6 }], nutrients: 3, spores: 4 });
@@ -158,7 +158,7 @@ describe('Requirement: Ficha al seleccionar un hongo', () => {
     const heals = es.guide.amanita.heals;
     expect(heals).toContain('árboles grises');
     expect(heals).toContain('3 nutrientes');
-    expect(heals).toContain('Árbol Padre');
+    expect(heals).toContain('Árbol Ancestral');
     expect(heals).toContain('10 nutrientes');
   });
 

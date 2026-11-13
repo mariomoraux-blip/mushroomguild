@@ -15,9 +15,9 @@ const DIRS = [
 ] as const;
 
 /**
- * Un intento de mapa (filas de texto como `MAP`): Hogar en la fila inferior y Árbol Padre en la
+ * Un intento de mapa (filas de texto como `MAP`): Hogar en la fila inferior y Árbol Ancestral en la
  * superior (columna 1–3), un tronco junto al Hogar, árboles a 2 o más casillas del Hogar y rocas
- * en las filas intermedias. Devuelve `null` si la red no podría llegar al Árbol Padre o a algún árbol.
+ * en las filas intermedias. Devuelve `null` si la red no podría llegar al Árbol Ancestral o a algún árbol.
  */
 export function roughMap(rng: Rng): string[] | null {
   const g: string[][] = Array.from({ length: H }, () => Array<string>(W).fill('.'));
@@ -48,7 +48,7 @@ export function roughMap(rng: Rng): string[] | null {
   return reachable(rows) ? rows : null;
 }
 
-/** ¿La red puede llegar desde el Hogar al Árbol Padre y a todos los árboles? Todo lo que no es roca es transitable. */
+/** ¿La red puede llegar desde el Hogar al Árbol Ancestral y a todos los árboles? Todo lo que no es roca es transitable. */
 export function reachable(map: readonly string[]): boolean {
   const find = (ch: string) => {
     const y = map.findIndex((row) => row.includes(ch));
@@ -94,7 +94,7 @@ const broteMap = (seed: number): readonly string[] => (seed === 0 ? MAP : genera
 
 /**
  * Intentos de rocas extra de un nivel sobre el claro de Brote (019): cada intento elige `rocks − 6` casillas de
- * tierra libres (nunca el Hogar, sus vecinas ni las vecinas del Árbol Padre) con `mulberry32(seed ^ LEVEL_SALT)`.
+ * tierra libres (nunca el Hogar, sus vecinas ni las vecinas del Árbol Ancestral) con `mulberry32(seed ^ LEVEL_SALT)`.
  * Devuelve el primer intento que `accept` acepta, con su número, o `null`.
  */
 export function levelAttempt(

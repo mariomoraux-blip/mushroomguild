@@ -223,7 +223,7 @@ No hagas más personajes hasta que lo apruebe.
 ### 5.3 Producción
 ```
 Aprobado el estilo. Con la misma cámara, luces y materiales:
-- Modela las otras cuatro especies (Maestra Bruma al final: es el más complejo) y el Árbol Padre (dormido y despierto).
+- Modela las otras cuatro especies (Maestra Bruma al final: es el más complejo) y el Árbol Ancestral (dormido y despierto).
 - Renderiza 3 poses por especie: reposo, trabajando, feliz.
 - Exporta los PNG con nombres <especie>-<pose>.png y arma un atlas (PNG + JSON
   compatible con Phaser) de 2048 px como máximo.

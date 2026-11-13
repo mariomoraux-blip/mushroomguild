@@ -20,7 +20,7 @@ export const color = {
   meadowDark: '#97A86A', // juntas y sombras de la pradera
   berry: '#C9503C', // sello de cera, sombrero de la casa-hongo
   peach: '#F6D7B0', // luz cálida del fondo
-  glow: '#FFF4C2', // brillos, aura del Árbol Padre, luciérnagas
+  glow: '#FFF4C2', // brillos, aura del Árbol Ancestral, luciérnagas
   stoneDark: '#6F675B', // sombra de rocas y copas dormidas
   frost: '#CFE8F5', // velo de escarcha: árbol marcado o apagado (019)
   blight: '#7E5A86', // plaga de Ancestral: velo violeta apagado sobre la casilla tejida marcada (032)
@@ -106,9 +106,9 @@ export function uiPortraitKey(species: string, seasonIndex = 0): string | null {
 }
 export const spriteUrl = (key: string) => assetUrl(key);
 
-/** Árbol Padre pintado: dormido (gris) o despierto (dorado). Ocupa su casilla y sobresale hacia arriba. */
+/** Árbol Ancestral pintado: dormido (gris) o despierto (dorado). Ocupa su casilla y sobresale hacia arriba. */
 export const fatherKey = (awake: boolean) => `board/father-tree/${awake ? 'awake' : 'asleep'}-painted`;
-/** Ancho del Árbol Padre en casillas (los personajes usan 0,92). */
+/** Ancho del Árbol Ancestral en casillas (los personajes usan 0,92). */
 export const FATHER_SCALE = 1.35;
 /** Margen del canvas sobre el claro, en casillas: deja que la copa sobresalga del marco. */
 export const BOARD_HEADROOM = 0.2;

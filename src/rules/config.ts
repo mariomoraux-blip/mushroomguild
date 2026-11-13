@@ -35,7 +35,7 @@ export const TREES_FOR_MAGE = 2;
  * Niveles de dificultad (019). `rocks`: rocas del claro; `frost`: estaciones (0 = Primavera … 3 = Invierno)
  * con escarcha; `fading`: meses que empiezan marcando un árbol gris que se apaga al terminarlos;
  * `upkeep`: temporadas frías, en que el gremio come `UPKEEP` al terminar cada mes (028); `sporeless`: estaciones en que
- * los árboles no dan esporas (028); `mother`: nutrientes para despertar al Árbol Padre (028); `motherTrees`: árboles revividos que pide (031); `plague`: estaciones en cuyo primer mes la plaga marca una casilla
+ * los árboles no dan esporas (028); `mother`: nutrientes para despertar al Árbol Ancestral (028); `motherTrees`: árboles revividos que pide (031); `plague`: estaciones en cuyo primer mes la plaga marca una casilla
  * tejida (032; 043: marca casillas cada mes de esas estaciones, 1, 2 y 3); `rooted`: los árboles solo producen si la red los
  * une al Hogar (043);
  * `hints`: se muestran las pistas; `multiplier`: del puntaje; `start`: nutrientes y esporas al empezar, si no son los de
@@ -56,7 +56,7 @@ export interface LevelRules {
   readonly start?: { readonly nutrients: number; readonly spores: number };
 }
 export const LEVELS: Readonly<Record<Level, LevelRules>> = {
-  // 046: «Primeros pasos». Recursos y Árbol Padre ajustados para que el guion (`src/tutorial.ts`) se gane en el mes 6.
+  // 046: «Primeros pasos». Recursos y Árbol Ancestral ajustados para que el guion (`src/tutorial.ts`) se gane en el mes 6.
   tutorial: { rocks: 3, frost: [], fading: [], upkeep: [], sporeless: [], mother: 9, motherTrees: 2, plague: [], rooted: false, hints: false, multiplier: 0, start: { nutrients: 2, spores: 4 } },
   brote: { rocks: 6, frost: [], fading: [], upkeep: [], sporeless: [], mother: 10, motherTrees: TREES_FOR_MOTHER, plague: [], rooted: false, hints: true, multiplier: 1 },
   bosque: { rocks: 9, frost: [2, 3], fading: [4, 6], upkeep: [2, 3], sporeless: [3], mother: 11, motherTrees: TREES_FOR_MOTHER, plague: [3], rooted: true, hints: true, multiplier: 1.5 },
@@ -85,7 +85,7 @@ export const STARTING_GUILD: readonly StartingSpecies[] = ['lactarius', 'champi'
 export const SCORE = {
   victory: 500,
   perMonthLeft: 80, // × (MONTHS − mes de victoria)
-  perTree: 120, // × árboles revividos, sin el Árbol Padre
+  perTree: 120, // × árboles revividos, sin el Árbol Ancestral
   perNutrient: 10,
   perSpore: 20,
   perFreeSlot: 60, // × (MAX_GUILD − miembros reclutables)
@@ -110,7 +110,7 @@ export const MAP_GEN = { trees: 7, logs: 5, rocks: 6, minMonth: 8, maxMonth: 11,
 
 // Capítulo 1 · El Claro Gris (mapa clásico, el del PoC rotado 90°: (x, y) del PoC → (y, 7 - x)).
 // Se usa en las pruebas y como respaldo si el generador no encuentra un mapa válido.
-// H hogar · M Árbol Padre · . tierra · L tronco · T árbol gris · R roca
+// H hogar · M Árbol Ancestral · . tierra · L tronco · T árbol gris · R roca
 export const MAP: readonly string[] = [
   '.TM..',
   '.L..T',
@@ -124,7 +124,7 @@ export const MAP: readonly string[] = [
 
 /**
  * Claro de «Primeros pasos» (046), hecho a mano para el guion: un tronco junto al Hogar, dos árboles en fila, una barrera
- * de rocas que Maestra Bruma abre con el Brote arcano y el Árbol Padre detrás.
+ * de rocas que Maestra Bruma abre con el Brote arcano y el Árbol Ancestral detrás.
  */
 export const TUTORIAL_MAP: readonly string[] = [
   '...M.',

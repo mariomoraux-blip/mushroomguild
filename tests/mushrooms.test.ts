@@ -85,7 +85,7 @@ describe('Requirement: Curar a distancia (Ganoderma lucidum)', () => {
     expect(idleReason(s, ambar)).toBe('noHealSpores');
   });
 
-  it('no despierta al Árbol Padre ni cura árboles vivos', () => {
+  it('no despierta al Árbol Ancestral ni cura árboles vivos', () => {
     const [s, ambar] = withSpecies('ganoderma', { nutrients: 20, spores: 2, net: [{ x: 2, y: 1 }], alive: [{ x: 2, y: 5 }] });
     expect(validTargets(s, ambar).some((t) => t.kind === 'mother')).toBe(false);
     expect(() => act(s, ambar, 2, 5)).toThrow(es.reasons.treeAlive);

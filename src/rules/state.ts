@@ -160,9 +160,9 @@ export const magicSpent = (s: GameState): boolean => s.lastSpellSeason === seaso
 export const hasFrost = (s: GameState): boolean => LEVELS[s.level].frost.includes(seasonIndex(s.month));
 /** Costo de tejer ahora: más caro con escarcha (019). */
 export const weaveCost = (s: GameState): number => (hasFrost(s) ? FROST_WEAVE : COST.weave);
-/** Nutrientes para despertar al Árbol Padre en el nivel (028). */
+/** Nutrientes para despertar al Árbol Ancestral en el nivel (028). */
 export const motherCost = (s: GameState): number => LEVELS[s.level].mother;
-/** Árboles revividos que pide el Árbol Padre en el nivel de la partida (031). */
+/** Árboles revividos que pide el Árbol Ancestral en el nivel de la partida (031). */
 export const motherTrees = (s: GameState): number => LEVELS[s.level].motherTrees;
 /** El mes es de una temporada fría del nivel: al terminarlo, el gremio come (028). */
 export const isCold = (s: GameState, month = s.month): boolean => LEVELS[s.level].upkeep.includes(seasonIndex(month));
@@ -179,7 +179,7 @@ export const steps = (a: Point, b: Point): number => Math.abs(a.x - b.x) + Math.
 
 /**
  * Casilla que marca la plaga (032; 043; 045: junto a un árbol): una casilla tejida sin plaga (tierra de la red; nunca el
- * Hogar, un árbol ni el Árbol Padre) a 2 pasos o más del Hogar y vecina en cruz de un árbol vivo. Si no hay, la más
+ * Hogar, un árbol ni el Árbol Ancestral) a 2 pasos o más del Hogar y vecina en cruz de un árbol vivo. Si no hay, la más
  * cercana al Hogar entre las de 2 pasos o más; si tampoco, entre todas las tejidas. Al azar con el claro, el mes y `k`
  * (la `k`-ésima que marca ese mes).
  */

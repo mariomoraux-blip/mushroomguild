@@ -48,7 +48,7 @@ const closestBy = (tiles: readonly Tile[], d: (t: Tile) => number) =>
 const dist = manhattan;
 const closest = (tiles: readonly Tile[], to: Tile) => closestBy(tiles, (t) => dist(t, to));
 
-/** Meta del tejido: el árbol gris más cercano a la red mientras falten árboles; después, el Árbol Padre. */
+/** Meta del tejido: el árbol gris más cercano a la red mientras falten árboles; después, el Árbol Ancestral. */
 export function weaveGoal(s: GameState, o: PolicyOptions = {}): { goal: Tile; toward: 'tree' | 'mother' } {
   const mother = motherTile(s);
   if (revivedCount(s) >= motherTrees(s)) return { goal: mother, toward: 'mother' };
@@ -116,7 +116,7 @@ export function missingMessenger(s: GameState): boolean {
 }
 
 /**
- * Siguiente paso sugerido. Prioridad: despertar al Árbol Padre > revivir > curar a distancia > hechizo >
+ * Siguiente paso sugerido. Prioridad: despertar al Árbol Ancestral > revivir > curar a distancia > hechizo >
  * pasar la voz a una Amanita o un Ganoderma > descomponer > pasar la voz a un Champiñón > romper una roca que
  * acorta el camino > tejer > pasar la voz a un Lactarius o una Morchella > limpiar la plaga > soplar esporas >
  * reclutar > terminar el mes. Reclutar solo se sugiere si nadie tiene una acción útil, o si falta la Gliophorus que

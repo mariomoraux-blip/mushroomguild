@@ -10,7 +10,7 @@
 // board-interaction › Retratos del gremio: "La maga en el tablero" → "Maestra Bruma: retrato propio…".
 // player-guidance › Libreta de campo: "Consultar la ayuda" → "Libreta de campo".
 // player-guidance › Meta visible: "Inicio" → "guía".
-// game-rules › Victoria (031): "Árbol Padre de Ancestral (031)".
+// game-rules › Victoria (031): "Árbol Ancestral de Ancestral (031)".
 // game-rules › Plaga y player-guidance › Avisos de la presión (plaga): "Plaga de Ancestral (032, 035)".
 // game-rules › Árboles marcados (Ancestral, cinco veces): "Ancestral cada dos meses (034)".
 // player-guidance › Recetas visuales: "Ficha de Bruno", "Libreta con las cinco recetas" y "Movimiento reducido" → "Recetas (026)".
@@ -238,7 +238,7 @@ test('Libreta de campo: no se abre sola; "?" abre Cómo jugar y de ahí la libre
   await expect(page.locator('#screen')).toContainText('Elige un hongo');
   await page.getByRole('button', { name: 'Libreta de campo' }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog).toContainText('Despierta al Árbol Padre');
+  await expect(dialog).toContainText('Despierta al Árbol Ancestral');
   await expect(dialog).toContainText('Gliophorus · Mensajera');
   await page.getByRole('button', { name: '¡A jugar!' }).first().click();
   await expect(dialog).toHaveCount(0);
@@ -353,7 +353,7 @@ test('fondo vivo: con movimiento reducido el shader pinta un solo cuadro', async
   await ctx.close();
 });
 
-test('Árbol Padre: pintado dormido y despierto, sobresaliendo de su casilla', async ({ page }, info) => {
+test('Árbol Ancestral: pintado dormido y despierto, sobresaliendo de su casilla', async ({ page }, info) => {
   const father = () =>
     page.evaluate(() => {
       const w = window as unknown as { game: { scene: { getScene: (k: string) => { children: { list: { type: string; visible: boolean; texture: { key: string }; displayWidth: number; displayHeight: number }[] } } } } };
@@ -385,7 +385,7 @@ test('Bosque pintado: el tablero usa las piezas de cada estación', async ({ pag
   }
 });
 
-test('La red alumbra el invierno: luz aditiva que crece con la estación, debajo del Árbol Padre', async ({ page }, info) => {
+test('La red alumbra el invierno: luz aditiva que crece con la estación, debajo del Árbol Ancestral', async ({ page }, info) => {
   const glow = () =>
     page.evaluate(() => {
       type Obj = { type: string; visible: boolean; texture?: { key: string }; alpha: number; depth: number; blendMode: number };
@@ -393,7 +393,7 @@ test('La red alumbra el invierno: luz aditiva que crece con la estación, debajo
       const list = w.game.scene.getScene('Game').children.list;
       const light = list.find((o) => o.texture?.key === 'micelio');
       const father = list.find((o) => o.visible && o.texture?.key.startsWith('board/father-tree/'));
-      // Phaser.BlendModes.ADD = 1; el Árbol Padre (4) y los retratos (5) van encima.
+      // Phaser.BlendModes.ADD = 1; el Árbol Ancestral (4) y los retratos (5) van encima.
       return light ? { alpha: Math.round(light.alpha * 100) / 100, add: light.blendMode === 1, below: father ? light.depth < father.depth && light.depth < 5 : null } : null;
     });
   const shot = (name: string) => page.screenshot({ path: `docs/screenshots/016-${name}.png` });
@@ -439,10 +439,10 @@ test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page 
   await shot('maga');
   await page.getByRole('button', { name: 'Seguir' }).click();
   await expect(card).toHaveCount(0);
-  // Victoria: Rubí despierta al Árbol Padre.
+  // Victoria: Rubí despierta al Árbol Ancestral.
   await page.goto('/?debugState=nearWin');
   await page.locator('.card--amanita').click();
-  await page.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
+  await page.locator('.cell[data-valid="true"][aria-label*="Árbol Ancestral"]').click();
   await expect(card).toContainText('¡El bosque despertó!');
   await shot('victoria');
   await page.getByRole('button', { name: 'Ver tablero' }).click();
@@ -502,7 +502,7 @@ test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la f
   await page.keyboard.press('ArrowRight');
   await expect(screen).toContainText('Paso 3 de 5');
   await page.getByRole('button', { name: 'Ir al paso 5' }).click();
-  await expect(screen).toContainText('Despierta al Árbol Padre');
+  await expect(screen).toContainText('Despierta al Árbol Ancestral');
   await expect(page.getByRole('button', { name: 'Paso siguiente' })).toBeDisabled();
   await shot('como-jugar');
   // Esc vuelve a la portada.
@@ -600,7 +600,7 @@ test('Puntaje: cronómetro que se pausa con una carta, carta de victoria con est
   // Victoria: estrellas legibles sin color, total, tiempo y desglose.
   await page.goto('/?debugState=nearWin');
   await page.locator('.card--amanita').click();
-  await page.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
+  await page.locator('.cell[data-valid="true"][aria-label*="Árbol Ancestral"]').click();
   const stars = page.locator('#story .score__stars');
   await expect(stars).toHaveAttribute('aria-label', /^[123] de 3 estrellas$/);
   await expect(page.locator('#story .score__row')).toHaveCount(8);
@@ -618,7 +618,7 @@ test('Puntaje: cronómetro que se pausa con una carta, carta de victoria con est
   });
   await p2.goto('/?debugState=nearWin');
   await p2.locator('.card--amanita').click();
-  await p2.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
+  await p2.locator('.cell[data-valid="true"][aria-label*="Árbol Ancestral"]').click();
   await expect(p2.locator('#story .score__stars')).toBeVisible();
   await expect(p2.locator('#story .score__row')).toHaveCount(8);
   expect(errors).toEqual([]);
@@ -876,7 +876,7 @@ test('Movimiento P1 (022): capas que entran y salen, intro, selección, gremio, 
   await page.locator('.card--recruit').click();
   await page.locator('#sheet [data-action="recruit"]').first().click();
   await expect(page.locator('.dock__item').nth(4).locator('.card')).toHaveClass(/is-joining/);
-  // Victoria: la carta espera para que se vea despertar al Árbol Padre; un toque la trae antes.
+  // Victoria: la carta espera para que se vea despertar al Árbol Ancestral; un toque la trae antes.
   // Todo dentro de la página: los temporizadores corren en orden y no dependen de la carga de la máquina.
   for (const skip of [false, true]) {
     await page.goto('/?debugState=nearWin');
@@ -917,7 +917,7 @@ test('Movimiento P1 (022) con movimiento reducido: fundidos cortos y la victoria
   await expect(page.locator('[data-id="1"]')).toHaveCSS('transform', 'none');
   await page.goto('/?debugState=nearWin');
   await page.locator('.card--amanita').click();
-  await page.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
+  await page.locator('.cell[data-valid="true"][aria-label*="Árbol Ancestral"]').click();
   await expect(page.locator('#story [role="dialog"]')).toBeVisible();
   await ctx.close();
 });
@@ -1060,7 +1060,7 @@ test('Cómo jugar (029): cada paso muestra la interfaz de la partida, decorativa
   await noScrollNoZoom(page);
 });
 
-test('Árbol Padre de Ancestral (031, 041): tocarlo y la Libreta dicen que pide 4 árboles y 13 nutrientes', async ({ page }, info) => {
+test('Árbol Ancestral de Ancestral (031, 041): tocarlo y la Libreta dicen que pide 4 árboles y 13 nutrientes', async ({ page }, info) => {
   await page.goto('/?map=clasico&nivel=ancestral');
   await cell(page, 2, 0).click();
   await expect(page.locator('#notice')).toContainText('(4 árboles vivos y 13 nutrientes)');
@@ -1068,7 +1068,7 @@ test('Árbol Padre de Ancestral (031, 041): tocarlo y la Libreta dicen que pide 
   await page.getByRole('button', { name: 'Libreta de campo' }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toContainText('Necesitas que la red lo toque, 4 árboles revividos y 13 nutrientes.');
-  await expect(dialog).toContainText('el Árbol Padre pide 4 árboles revividos y 13 nutrientes');
+  await expect(dialog).toContainText('el Árbol Ancestral pide 4 árboles revividos y 13 nutrientes');
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/031-libreta-ancestral-390x844.png' });
   // En Bosque pide 3 y 11 (041).
   await page.goto('/?map=clasico&nivel=bosque');
@@ -1078,7 +1078,7 @@ test('Árbol Padre de Ancestral (031, 041): tocarlo y la Libreta dicen que pide 
 
 test('Plaga de Ancestral (032, 033, 035): la carta del frío la explica y la casilla marcada se ve pintada, se nombra y se explica', async ({ page }, info) => {
   await page.goto('/?map=clasico&nivel=ancestral');
-  // Red tejida en (2,6), (2,4) y (2,3): la más cercana al Árbol Padre (2,0) es (2,3).
+  // Red tejida en (2,6), (2,4) y (2,3): la más cercana al Árbol Ancestral (2,0) es (2,3).
   const weave = (month: number) =>
     page.evaluate((m) => {
       type T = { x: number; y: number; net: boolean };
