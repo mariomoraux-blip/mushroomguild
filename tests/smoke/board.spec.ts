@@ -15,7 +15,6 @@
 // game-rules › Árboles marcados (Ancestral, cinco veces): "Ancestral cada dos meses (034)".
 // player-guidance › Recetas visuales: "Ficha de Bruno", "Libreta con las cinco recetas" y "Movimiento reducido" → "Recetas (026)".
 // story-presentation › Llega el frío y player-guidance › Avisos de la presión (hongo con hambre) → "Temporadas frías (028, 030)".
-// title-screens › Cómo jugar: "El paso se parece a la partida" → "Cómo jugar (029)".
 // title-screens › Elige tu dificultad y player-guidance › Ancestral sin pistas, board-interaction › Árbol marcado y apagado
 //   y Escarcha en el HUD (019) → "Niveles".
 import { expect, test, type Page } from '@playwright/test';
@@ -231,20 +230,18 @@ test('fichas de criatura: nombre científico, rol, acción y línea con humor', 
   await expect(dialog).toHaveCount(0);
 });
 
-test('Libreta de campo: no se abre sola; "?" abre Cómo jugar y de ahí la libreta', async ({ page }) => {
+test('Libreta de campo: no se abre sola; "?" la abre sobre el tablero (048)', async ({ page }) => {
   await page.goto('/?map=clasico');
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Ayuda: Cómo jugar' }).click();
-  await expect(page.locator('#screen')).toContainText('Elige un hongo');
-  await page.getByRole('button', { name: 'Libreta de campo' }).click();
+  await page.getByRole('button', { name: 'Ayuda: Libreta de campo' }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toContainText('Despierta al Árbol Ancestral');
   await expect(dialog).toContainText('Gliophorus · Mensajera');
   await page.getByRole('button', { name: '¡A jugar!' }).first().click();
   await expect(dialog).toHaveCount(0);
-  // "¡A jugar!" de Cómo jugar vuelve al tablero.
-  await page.locator('#screen').getByRole('button', { name: '¡A jugar!' }).click();
+  // Al cerrarla sigue la partida: no hay pantalla encima.
   await expect(page.locator('#screen')).toBeHidden();
+  await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
 });
 
 test('Ficha al seleccionar: nunca se abre sola, "Ficha" con punto la primera vez, "Entendido" mantiene la selección (022)', async ({ page }, info) => {
@@ -469,7 +466,7 @@ test('Historia: intro de 3 cartas, llegada de la maga y finales', async ({ page 
   await expect(page.locator('.hud__month-value')).toHaveText('Mes 1/12');
 });
 
-test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la ficha)', async ({ page }, info) => {
+test('Portada: Nueva partida, Cómo jugar (el tutorial) y El gremio (abre la ficha)', async ({ page }, info) => {
   const shot = (name: string) => (info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390' ? page.screenshot({ path: `docs/screenshots/012-${name}-${info.project.name}.png` }) : undefined);
   const screen = page.locator('#screen');
   await page.goto('/');
@@ -493,21 +490,13 @@ test('Portada: Nueva partida, Cómo jugar (carrusel de 5) y El gremio (abre la f
   });
   expect(edge).toBe(0);
   await shot('portada');
-  // Cómo jugar: ‹ › y puntos; la flecha anterior está desactivada en el paso 1 y la siguiente en el 5.
+  // Cómo jugar (048): empieza el tutorial; la primera vez, con la intro.
   await page.getByRole('button', { name: 'Cómo jugar', exact: true }).click();
-  await expect(screen).toContainText('Paso 1 de 5');
-  await expect(page.getByRole('button', { name: 'Paso anterior' })).toBeDisabled();
-  await page.getByRole('button', { name: 'Paso siguiente' }).click();
-  await expect(screen).toContainText('Trabaja junto a la red');
-  await page.keyboard.press('ArrowRight');
-  await expect(screen).toContainText('Paso 3 de 5');
-  await page.getByRole('button', { name: 'Ir al paso 5' }).click();
-  await expect(screen).toContainText('Despierta al Árbol Ancestral');
-  await expect(page.getByRole('button', { name: 'Paso siguiente' })).toBeDisabled();
-  await shot('como-jugar');
-  // Esc vuelve a la portada.
-  await page.keyboard.press('Escape');
-  await expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeVisible();
+  await expect(page.locator('#story')).toContainText('El bosque se apaga');
+  expect(await page.evaluate(() => (window as unknown as { store: { getState(): { game: { level: string } } } }).store.getState().game.level)).toBe('tutorial');
+  // La intro ya se vio con el tutorial (Brote no la repetiría): el resto de la prueba parte de cero.
+  await page.evaluate(() => localStorage.clear());
+  await page.goto('/');
   // El gremio: cinco especies; tocar una abre su ficha encima.
   await page.getByRole('button', { name: 'El gremio', exact: true }).click();
   await expect(screen.locator('.guild__row')).toHaveCount(8);
@@ -668,7 +657,7 @@ test('Niveles: Elige tu dificultad con teclado, Ancestral sin ★, árbol marcad
   const shot = (name: string) => (size ? page.screenshot({ path: `docs/screenshots/019-${name}-${size}.png` }) : undefined);
   const screen = page.locator('#screen');
   const card = page.locator('#story [role="dialog"]');
-  // Teclado: Enter en "Nueva partida" abre los niveles con el foco en «Primeros pasos» (046); Esc vuelve a la portada.
+  // Teclado: Enter en "Nueva partida" abre los niveles con el foco en «Cómo jugar» (046, 048); Esc vuelve a la portada.
   await page.goto('/');
   await expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeFocused();
   await page.keyboard.press('Enter');
@@ -933,8 +922,7 @@ test('Recetas (026): «Cómo usarlo» de la ficha y la Libreta muestran qué hac
   await expect(bruno.locator('.recipe__after > *').first()).toHaveCSS('animation-name', 'recipe-pop');
   if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/026-ficha-390x844.png' });
   await page.goto('/?map=clasico');
-  await page.getByRole('button', { name: 'Ayuda: Cómo jugar' }).click();
-  await page.getByRole('button', { name: 'Libreta de campo' }).click();
+  await page.getByRole('button', { name: 'Ayuda: Libreta de campo' }).click();
   const recipes = page.getByRole('dialog').locator('.recipe');
   await expect(recipes).toHaveCount(10);
   for (const name of [/la red creció/, /el tronco usado/, /un árbol gris resaltado\. Después: el árbol vivo/, /la roca es tierra libre/, /a dos casillas/, /^Soplar esporas/, /^Abonar el árbol/, /compañero cansado/, /^Brote arcano/, /^Lluvia de esporas/])
@@ -950,8 +938,7 @@ test('Recetas (026) con movimiento reducido: quietas desde el principio', async 
   const page = await ctx.newPage();
   await page.addInitScript(() => localStorage.setItem('gremio.seenSpecies', JSON.stringify(['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'])));
   await page.goto('/?map=clasico');
-  await page.getByRole('button', { name: 'Ayuda: Cómo jugar' }).click();
-  await page.getByRole('button', { name: 'Libreta de campo' }).click();
+  await page.getByRole('button', { name: 'Ayuda: Libreta de campo' }).click();
   const names = await page.locator('.recipe__arrow, .recipe__after > *').evaluateAll((ns) => [...new Set(ns.map((n) => getComputedStyle(n).animationName))]);
   expect(names).toEqual(['none']);
   await ctx.close();
@@ -1033,39 +1020,11 @@ test('Temporadas frías (028, 030): carta «Llega el frío» al empezar el otoñ
   await expect(page.locator('[data-id="2"]')).not.toHaveClass(/is-used/);
 });
 
-test('Cómo jugar (029): cada paso muestra la interfaz de la partida, decorativa y sin desbordarse', async ({ page }, info) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Cómo jugar', exact: true }).click();
-  const art = page.locator('.howto__art');
-  const expected = ['.card[aria-pressed="true"] .card__badge[data-kind="star"]', '.recipe__tile.is-valid', '.card.is-used .card__badge[data-kind="rest"]', '.card--recruit', '.chip--trees'];
-  for (let i = 0; i < 5; i++) {
-    await page.getByRole('button', { name: `Ir al paso ${i + 1}` }).click();
-    await expect(art.locator(expected[i]!).first()).toBeVisible();
-    await expect(art).toHaveAttribute('aria-hidden', 'true');
-    expect(await art.evaluate((n) => n.hasAttribute('inert') && n.querySelectorAll('button, a, [tabindex]').length === 0)).toBe(true);
-    // Ninguna pieza se sale de la tarjeta del paso.
-    const outside = await art.evaluate((n) => {
-      const box = n.closest('.howto__card')!.getBoundingClientRect();
-      return [...n.querySelectorAll('*')].filter((e) => {
-        const r = e.getBoundingClientRect();
-        return r.width > 0 && (r.left < box.left || r.right > box.right || r.top < box.top || r.bottom > box.bottom);
-      }).length;
-    });
-    expect(outside).toBe(0);
-    if (i === 2) {
-      await expect(art.locator('.end')).toHaveText('Fin del mes');
-      if (info.project.name === 'vertical-390x844') await page.screenshot({ path: 'docs/screenshots/029-como-jugar-390x844.png' });
-    }
-  }
-  await noScrollNoZoom(page);
-});
-
 test('Árbol Ancestral de Ancestral (031, 041): tocarlo y la Libreta dicen que pide 4 árboles y 13 nutrientes', async ({ page }, info) => {
   await page.goto('/?map=clasico&nivel=ancestral');
   await cell(page, 2, 0).click();
   await expect(page.locator('#notice')).toContainText('(4 árboles vivos y 13 nutrientes)');
-  await page.getByRole('button', { name: 'Ayuda: Cómo jugar' }).click();
-  await page.getByRole('button', { name: 'Libreta de campo' }).click();
+  await page.getByRole('button', { name: 'Ayuda: Libreta de campo' }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toContainText('Necesitas que la red lo toque, 4 árboles revividos y 13 nutrientes.');
   await expect(dialog).toContainText('el Árbol Ancestral pide 4 árboles revividos y 13 nutrientes');

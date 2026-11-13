@@ -1,12 +1,12 @@
 # tutorial
 
 ## Purpose
-«Primeros pasos»: la partida guiada antes de Brote, con viñetas (máscara con hueco y globo) sobre la interfaz real. Origen: cambio 046 (archivado). Nivel en `src/rules/config.ts` (`LEVELS.tutorial`, `TUTORIAL_MAP`), guion en `src/tutorial.ts`, bloqueo de acciones en `src/store.ts` y viñetas en `src/ui/coach.ts`.
+«Cómo jugar» (hasta el 048, «Primeros pasos»): la partida guiada antes de Brote, con viñetas (máscara con hueco y globo) sobre la interfaz real. Origen: cambio 046 (archivado); el 048 lo puso en la portada como «Cómo jugar» y lo saca de los niveles una vez visto. Nivel en `src/rules/config.ts` (`LEVELS.tutorial`, `TUTORIAL_MAP`), guion en `src/tutorial.ts`, bloqueo de acciones en `src/store.ts` y viñetas en `src/ui/coach.ts`.
 
 ## Requirements
 
 ### Requirement: Nivel Primeros pasos
-El juego SHALL tener un nivel «Primeros pasos» (`tutorial`) que se juega en un claro fijo, con un Árbol Ancestral que pide 2 árboles revividos, sin escarcha, árboles que se apagan, hambre ni plaga. Maestra Bruma SHALL llegar como en los demás niveles, al empezar el mes siguiente al segundo árbol revivido. El tutorial no SHALL dar puntaje ni entrar al ranking. `?nivel=tutorial` SHALL entrar directo al tutorial.
+El juego SHALL tener un tutorial (`tutorial`, «Cómo jugar» desde el 048) que se juega en un claro fijo, con un Árbol Ancestral que pide 2 árboles revividos, sin escarcha, árboles que se apagan, hambre ni plaga. Maestra Bruma SHALL llegar como en los demás niveles, al empezar el mes siguiente al segundo árbol revivido. El tutorial no SHALL dar puntaje ni entrar al ranking. Se empieza con «Cómo jugar» en la portada (siempre) o en «Elige tu dificultad» (solo mientras no se haya completado ni saltado). `?nivel=tutorial` SHALL entrar directo al tutorial.
 
 #### Scenario: Se gana siguiendo el guion
 - WHEN el jugador hace cada paso del guion
@@ -32,7 +32,7 @@ Durante el tutorial, el juego SHALL mostrar un paso a la vez: una máscara oscur
 
 #### Scenario: Saltar
 - WHEN el jugador pulsa «Saltar tutorial» y confirma
-- THEN vuelve a «Elige tu dificultad» y «Primeros pasos» ya no dice «Recomendado»
+- THEN vuelve a «Elige tu dificultad» y «Cómo jugar» ya no aparece ahí
 
 ### Requirement: Final del tutorial
 Al despertar al Árbol Ancestral en el tutorial, el juego SHALL mostrar la carta «¡Ya sabes jugar!» con «Jugar Brote» (principal) y «Volver a la portada», y el tutorial SHALL contar como visto.

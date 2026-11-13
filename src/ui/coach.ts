@@ -67,7 +67,7 @@ const union = (nodes: HTMLElement[]): Rect | null => {
 };
 
 /**
- * Viñetas de «Primeros pasos» (046): una máscara oscura con un hueco redondeado sobre el objetivo del paso, cuatro
+ * Viñetas de el tutorial «Cómo jugar» (046): una máscara oscura con un hueco redondeado sobre el objetivo del paso, cuatro
  * bloques alrededor que atrapan los toques (el hueco deja pasar el toque a la interfaz real) y un globo con el texto,
  * «Paso N de M», «Siguiente» (pasos «Ver») y «Saltar tutorial» con confirmación. Se esconde con una carta o una
  * pantalla encima. Tab solo recorre el objetivo y el globo; Esc no salta el tutorial.

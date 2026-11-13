@@ -51,13 +51,13 @@ Contraste mínimo de texto: Tinta sobre Pergamino, Crema o Sol (todos ≥ 7:1). 
 | Componente | Pieza | Estados / notas |
 | --- | --- | --- |
 | Logo | `ui/hud/logo`, `ui/hud/logo-small` | Solo en la portada (decisión del 011: no va en el HUD de la partida) |
-| Letrero colgante | `ui/panels/sign` | Títulos de hoja ("Cómo jugar", "El gremio"); 3 partes para estirarse |
+| Letrero colgante | `ui/panels/sign` | Títulos de hoja ("El gremio", "Ranking"); 3 partes para estirarse |
 | Pergamino | `ui/panels/parchment` | Cuerpo de las hojas y cartas; 9 partes (esquinas fijas, centro repetible) |
 | Bitácora | CSS + `ui/icons/book` | Pergamino con el libro de campo a la izquierda y texto en vivo (011) |
 | Botón principal | `ui/buttons/primary` | Pastilla amarilla con ícono: normal, pulsado (baja 2 px y pierde la sombra) y desactivado (60 % de opacidad) |
 | Botón secundario | `ui/buttons/secondary` | Pastilla crema con ícono a la izquierda |
 | Botón redondo | `ui/buttons/prev`, `-siguiente`, `-cerrar`, `-ayuda` | 44 × 44 mínimo; madera con contorno |
-| Paginación | `ui/buttons/page-dots` | 5 puntos del carrusel "Cómo jugar"; el activo en Sol |
+| Paginación | `ui/buttons/page-dots` | 5 puntos del carrusel "Cómo jugar" (sin uso desde el 048, que lo reemplazó por el tutorial); el activo en Sol |
 | Medallón del gremio | CSS + `characters/<personaje>/portrait` | Dock (011): aro de madera con el retrato, cinta con el nombre e insignia (★ sugerido, Zz descansa); seleccionado con aro Sol y halo; descansando desaturado. La acción se lee en la bitácora |
 | Pastilla de recurso | CSS + `ui/icons/nutrients`, `spores`, `trees` | Crema con contorno café: ícono + número arriba y etiqueta abajo (HUD, 011). El mes va en una pastilla verde con el ícono de la estación |
 | Fin del mes | CSS + `ui/icons/moon` | Píldora amarilla con la luna, a la derecha del dock (011) |
@@ -107,7 +107,7 @@ FICHA                          EL GREMIO                      INTRO / VICTORIA
 - **Juego:** HUD con logo mini, pastilla del mes y estación, tres pastillas de recurso y ayuda redonda. Árbol Ancestral grande sobre el tablero. Bitácora con la cinta "Pista del mes". Dock con tarjetas verticales y "Fin del mes" como pastilla amarilla a todo lo ancho, con ícono de luna.
   - **Pendiente de decidir:** el dock más alto y el logo restan alto al tablero. A 390 × 664 las casillas bajarían de 56 a unos 48 px (el mínimo de la spec es 56). Opciones: aceptar 48 en ese tamaño, ocultar el logo por debajo de 700 px de alto, o tarjetas más bajas.
 - **Portada (012, hecho):** logo y menú sobre el claro (los personajes se sacaron en el 018 para dejarla más limpia): Nueva partida (pastilla amarilla con ▶), Cómo jugar y El gremio (madera). "Opciones" se sacó hasta que haya algo que ajustar. En apaisado, logo a la izquierda y menú a la derecha.
-- **Cómo jugar (012, hecho):** carrusel de 5 pasos en pergamino, cada uno con una ilustración de piezas publicadas, ‹ › (`ui/buttons/prev`, `next`), puntos y deslizar. Es la ayuda principal (el "?" la abre); la Libreta de campo queda como detalle.
+- **Cómo jugar (012, reemplazado en el 048):** carrusel de 5 pasos en pergamino, cada uno con una ilustración de piezas publicadas, ‹ › (`ui/buttons/prev`, `next`), puntos y deslizar. Desde el 048 lo reemplaza el tutorial jugable (la portada lo empieza) y el "?" de la partida abre directo la Libreta de campo; `prev` sigue como flecha de «Volver».
 - **Ficha:** retrato grande, nombre, nombre científico y rol, contexto, frase entre comillas y secciones con etiqueta verde (Habilidad, Movimiento, Nutrientes…), como la ficha actual.
 - **El gremio (012, hecho):** lista de las cinco especies, cada fila con su medallón, nombre, rol y una línea; abre la ficha encima.
 - **Intro (003, hecho):** fondo `backgrounds/intro` (hoja `fondo-intro-v2`: camino del bosque al atardecer lila, con hongos de colores), tres cartas de pergamino con letrero de madera ("El bosque se apaga", "Un gremio despierta", "Antes del invierno"), puntos de progreso, "Saltar" y "Siguiente"/"Comenzar". La llegada de Maestra Bruma usa la misma carta con su retrato.

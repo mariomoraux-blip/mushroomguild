@@ -15,7 +15,7 @@ export type Choice = Spell | Puff;
 export type GameStatus = 'playing' | 'won' | 'lost';
 /**
  * Nivel de dificultad (019): Brote es el juego de siempre; Bosque y Ancestral suman presión. `tutorial` (046):
- * «Primeros pasos», la partida guiada en un claro fijo, sin puntaje ni ranking.
+ * el tutorial «Cómo jugar», la partida guiada en un claro fijo, sin puntaje ni ranking.
  */
 export type Level = 'tutorial' | 'brote' | 'bosque' | 'ancestral';
 /** Niveles con claro generado a partir de Brote y certificado (`LEVEL_SEEDS`). */

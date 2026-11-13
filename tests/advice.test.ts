@@ -75,7 +75,6 @@ describe('Requirement: Cómo reclutar', () => {
     expect(es.hud.sporesButton(2, 3)).toBe('Esporas: 2. El próximo recluta cuesta 3. Abrir reclutar.');
     expect(es.hud.sporesButton(4, null)).toBe('Esporas: 4. Gremio completo. Abrir reclutar.');
     const curve = 'Con esporas reclutas otro hongo: cuesta 3, luego 4, luego 6 y luego 7.';
-    expect(es.howto.steps[3]!.text).toContain(curve);
     expect(es.help.how[3]).toContain(curve);
     expect(JSON.stringify(es)).not.toContain('Con 2 esporas');
   });

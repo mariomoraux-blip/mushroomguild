@@ -60,24 +60,23 @@ export type Story =
   | { kind: 'loose' }
   | { kind: 'won' }
   | { kind: 'lost' }
-  /** 046: final de «Primeros pasos», «¡Ya sabes jugar!». */
+  /** 046: final de el tutorial «Cómo jugar», «¡Ya sabes jugar!». */
   | { kind: 'tutorial' };
 /** Al cerrar una carta: la que sigue, si hay. */
 const nextStory = (st: Story | null): Story | null => (st && 'then' in st && st.then) || null;
 export const INTRO_STEPS = 3;
 
 /**
- * Pantallas fuera de la partida (012): portada, "Elige tu dificultad" (019), "Cómo jugar" (carrusel) y "El gremio".
+ * Pantallas fuera de la partida (012): portada, "Elige tu dificultad" (019), "El gremio" y el ranking (036). «Cómo jugar»
+ * es el tutorial desde el 048: una partida, no una pantalla.
  * `back` dice a dónde vuelven; "Elige tu dificultad" siempre vuelve a la portada.
  */
 export type Screen =
   | { kind: 'title' }
   | { kind: 'level' }
-  | { kind: 'howto'; step: number; back: 'title' | 'game' }
   | { kind: 'guild'; back: 'title' | 'game' }
   /** Ranking (036): desde la portada o desde una carta de final (que sigue abierta debajo). */
   | { kind: 'ranking'; back: 'title' | 'game' };
-export const HOWTO_STEPS = 5;
 
 export interface Notice {
   readonly text: string;
@@ -112,7 +111,7 @@ export interface UiState {
   readonly submission: Submission | null;
   /** Lo que muestra la pantalla «Ranking». */
   readonly board: BoardView | null;
-  /** «Primeros pasos» (046): paso del guion en curso; `null` fuera del tutorial o al terminarlo. */
+  /** el tutorial «Cómo jugar» (046): paso del guion en curso; `null` fuera del tutorial o al terminarlo. */
   readonly tutorial?: TutorialState | null;
 }
 
@@ -131,8 +130,7 @@ export type Action =
   | { type: 'openSheet'; sheet: Sheet }
   | { type: 'closeSheet' }
   | { type: 'openScreen'; screen: Screen }
-  | { type: 'howtoStep'; step: number }
-  /** Vuelve de "Cómo jugar" o "El gremio" a donde se abrieron. */
+  /** Vuelve de "El gremio" o del ranking a donde se abrieron. */
   | { type: 'closeScreen' }
   /** "Nueva partida" en la portada: abre "Elige tu dificultad" (019). */
   | { type: 'play' }
@@ -305,7 +303,7 @@ export function clockShouldRun(state: AppState, visible: boolean): boolean {
   return visible && game.status === 'playing' && game.log.length > 0 && !ui.sheet && !ui.story && !ui.screen;
 }
 
-/** Pantalla a la que se vuelve al cerrar "Cómo jugar" o "El gremio". */
+/** Pantalla a la que se vuelve al cerrar "El gremio" o el ranking. */
 const backFrom = (screen: Screen | null): Screen | null =>
   screen && (screen.kind === 'level' || (screen.kind !== 'title' && screen.back === 'title')) ? { kind: 'title' } : null;
 
@@ -424,7 +422,7 @@ function matches(e: Expect, action: Action, state: AppState): boolean {
 }
 
 /**
- * «Primeros pasos» (046): solo pasa la acción que pide el guion, y al cumplirse avanza el paso. Las demás no tienen
+ * el tutorial «Cómo jugar» (046): solo pasa la acción que pide el guion, y al cumplirse avanza el paso. Las demás no tienen
  * efecto. Mientras hay una carta de historia que el guion no espera (la intro), se puede pasar y cerrar como siempre.
  */
 function reduceTutorial(state: AppState, action: Action, t: TutorialState): AppState {
@@ -525,9 +523,6 @@ function reduceGame(state: AppState, action: Action): AppState {
       return afterSheet(state);
     case 'openScreen':
       return { game, ui: { ...cleared(ui, ui.notice), screen: action.screen } };
-    case 'howtoStep':
-      if (ui.screen?.kind !== 'howto') return state;
-      return { game, ui: { ...ui, screen: { ...ui.screen, step: Math.max(0, Math.min(HOWTO_STEPS - 1, action.step)) } } };
     case 'closeScreen':
       return ui.screen ? { game, ui: { ...ui, sheet: null, screen: backFrom(ui.screen) } } : state;
     case 'play':

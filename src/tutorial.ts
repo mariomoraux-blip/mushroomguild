@@ -1,4 +1,4 @@
-// «Primeros pasos» (046): el guion de la partida guiada. Cada paso es «Ver» (pasa con «Siguiente») o «Hacer» (una o
+// el tutorial «Cómo jugar» (046): el guion de la partida guiada. Cada paso es «Ver» (pasa con «Siguiente») o «Hacer» (una o
 // más acciones del store, en orden). El store solo deja pasar la acción que toca; las viñetas (`ui/coach.ts`) resaltan
 // su objetivo. Los números del texto salen de `COST` y `GAIN` (en `es.tutorial`), nunca escritos aquí.
 import { es } from './copy/es';

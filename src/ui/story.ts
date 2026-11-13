@@ -22,7 +22,7 @@ export interface RankingActions {
   open(): void;
 }
 
-/** Final de «Primeros pasos» (046): empezar Brote o volver a la portada. */
+/** Final de el tutorial «Cómo jugar» (046): empezar Brote o volver a la portada. */
 export interface TutorialActions {
   playBrote(): void;
   toTitle(): void;

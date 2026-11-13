@@ -6,7 +6,7 @@ Puntaje de la victoria: cronómetro de juego activo, desglose, estrellas por cla
 ## Requirements
 
 ### Requirement: Cronómetro
-El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, solo durante el juego activo. SHALL empezar cuando el tablero acepta la primera acción del jugador (actuar sobre una casilla, reclutar o terminar el mes), haya intro o no; pausarse con cualquier hoja o pantalla encima del tablero (cartas de historia, fichas, hechizo, reclutar, Libreta de campo, "Cómo jugar", "El gremio") y con la pestaña oculta; y detenerse al despertar al Árbol Ancestral o al terminar el invierno. Los números SHALL ser tabulares y el cronómetro no SHALL anunciarse cada segundo al lector de pantalla.
+El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, solo durante el juego activo. SHALL empezar cuando el tablero acepta la primera acción del jugador (actuar sobre una casilla, reclutar o terminar el mes), haya intro o no; pausarse con cualquier hoja o pantalla encima del tablero (cartas de historia, fichas, hechizo, reclutar, Libreta de campo, "El gremio") y con la pestaña oculta; y detenerse al despertar al Árbol Ancestral o al terminar el invierno. Los números SHALL ser tabulares y el cronómetro no SHALL anunciarse cada segundo al lector de pantalla.
 
 #### Scenario: Antes de la primera acción
 - WHEN el jugador cierra la intro y mira el tablero 20 segundos sin actuar
@@ -19,7 +19,7 @@ El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, 
 - AND vuelve a correr al cerrarla
 
 #### Scenario: Hoja abierta
-- WHEN el jugador abre la ficha de un miembro, la hoja de reclutar o "Cómo jugar"
+- WHEN el jugador abre la ficha de un miembro, la hoja de reclutar o la Libreta de campo
 - THEN el cronómetro no avanza hasta que la cierra
 
 #### Scenario: Fin de la partida

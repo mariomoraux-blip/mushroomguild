@@ -134,13 +134,11 @@ describe('Requirement: Portada y pantallas (012)', () => {
     expect(run(levels, { type: 'closeScreen' }).ui.screen).toEqual({ kind: 'title' });
   });
 
-  it('Cómo jugar avanza entre 5 pasos sin salirse del rango y vuelve a donde se abrió', () => {
-    const open = run(title(), { type: 'openScreen', screen: { kind: 'howto', step: 0, back: 'title' } });
-    expect(run(open, { type: 'howtoStep', step: -1 }).ui.screen).toMatchObject({ step: 0 });
-    expect(run(open, { type: 'howtoStep', step: 9 }).ui.screen).toMatchObject({ step: 4 });
+  it('El gremio vuelve a donde se abrió: la portada o el tablero', () => {
+    const open = run(title(), { type: 'openScreen', screen: { kind: 'guild', back: 'title' } });
     expect(run(open, { type: 'closeScreen' }).ui.screen).toEqual({ kind: 'title' });
     expect(run(open, { type: 'cancel' }).ui.screen).toEqual({ kind: 'title' });
-    const inGame = run(initialState(newGame()), { type: 'openScreen', screen: { kind: 'howto', step: 2, back: 'game' } });
+    const inGame = run(initialState(newGame()), { type: 'openScreen', screen: { kind: 'guild', back: 'game' } });
     expect(run(inGame, { type: 'closeScreen' }).ui.screen).toBeNull();
   });
 
