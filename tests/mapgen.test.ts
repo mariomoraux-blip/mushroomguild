@@ -4,7 +4,7 @@ import { generateMap, H, MAP_GEN, newRandomGame, W } from '../src/rules';
 const count = (map: readonly string[], ch: string) => map.join('').split(ch).length - 1;
 
 describe('Requirement: Tablero inicial (claros aleatorios)', () => {
-  it('Scenario: Claros distintos — cambian con la semilla y siempre tienen 7 árboles, Hogar abajo y Árbol Padre arriba', () => {
+  it('Scenario: Claros distintos — cambian con la semilla y siempre tienen 7 árboles, Hogar abajo y Árbol Ancestral arriba', () => {
     const maps = [1, 2, 3, 4, 5].map(generateMap);
     expect(new Set(maps.map((m) => m.join('/'))).size).toBe(5);
     for (const m of maps) {

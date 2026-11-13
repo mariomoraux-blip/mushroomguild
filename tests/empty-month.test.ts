@@ -30,7 +30,7 @@ describe('Requirement: Aviso de mes vacío', () => {
     expect(s.nutrients).toBe(2);
     expect(s.spores).toBe(2);
     expect(noWorkThisMonth(s)).toBe(true);
-    // Hasta el 027 este estado todavía se podía ganar. Con el invierno duro (028) y el Árbol Padre de 12,
+    // Hasta el 027 este estado todavía se podía ganar. Con el invierno duro (028) y el Árbol Ancestral de 12,
     // este claro fijo ya no: la tabla certificada nueva no lo incluye.
   });
 

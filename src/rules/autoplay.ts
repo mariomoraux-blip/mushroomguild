@@ -61,7 +61,7 @@ function playMonth(start: GameState, o: PolicyOptions, noRecruit: boolean): Game
   return s;
 }
 
-/** Qué tan prometedor es un estado: árboles vivos, reservas y cercanía de la red al Árbol Padre. */
+/** Qué tan prometedor es un estado: árboles vivos, reservas y cercanía de la red al Árbol Ancestral. */
 function promise(s: GameState): number {
   const m = motherTile(s);
   const gap = Math.min(...s.tiles.filter((t) => t.net).map((t) => Math.abs(t.x - m.x) + Math.abs(t.y - m.y)));

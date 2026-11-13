@@ -49,14 +49,14 @@ function playScript(): AppState[] {
 }
 
 describe('Requirement: Nivel Primeros pasos', () => {
-  it('claro fijo, Árbol Padre de 2 árboles, sin escarcha, apagados, hambre ni plaga', () => {
+  it('claro fijo, Árbol Ancestral de 2 árboles, sin escarcha, apagados, hambre ni plaga', () => {
     const L = LEVELS.tutorial;
     expect([L.motherTrees, L.frost, L.fading, L.upkeep, L.plague, L.rooted]).toEqual([2, [], [], [], [], false]);
     expect(newRandomGame(123, 'tutorial').tiles).toEqual(newRandomGame(0, 'tutorial').tiles);
     expect(newRandomGame(0, 'tutorial').mapId).toBe('tutorial');
   });
 
-  it('Scenario: Se gana siguiendo el guion — despierta al Árbol Padre en el mes 6', () => {
+  it('Scenario: Se gana siguiendo el guion — despierta al Árbol Ancestral en el mes 6', () => {
     const end = playScript().at(-1)!;
     expect(end.game.status).toBe('won');
     expect(end.game.wonMonth).toBe(6);

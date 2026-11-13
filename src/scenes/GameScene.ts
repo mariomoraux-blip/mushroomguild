@@ -14,7 +14,7 @@ const FROST_KEY = 'escarcha';
 
 /**
  * Dibuja el claro 5×8 (pintado en Canvas2D por `paint.ts` con las piezas pintadas por estación),
- * el Árbol Padre y a los miembros que trabajaron este mes (su retrato sobre la casilla, que tapa el objeto de abajo).
+ * el Árbol Ancestral y a los miembros que trabajaron este mes (su retrato sobre la casilla, que tapa el objeto de abajo).
  * Entre el claro y lo demás va la luz de la red (016): una capa aditiva cuya intensidad sigue a la estación.
  * Encima, el velo del árbol marcado (019), que late suave (quieto con movimiento reducido).
  * Solo lee el estado del store; nunca lo cambia. La entrada la recibe la capa DOM de `ui/board.ts`.
@@ -93,7 +93,7 @@ export class GameScene extends Phaser.Scene {
     const T = Math.round(this.tile * renderResolution()); // px del canvas (≤ 2×)
     const tex = this.boardCanvas(T * W, T * H);
     if (!tex) return;
-    // El canvas tiene un margen arriba del claro para que la copa del Árbol Padre sobresalga del marco.
+    // El canvas tiene un margen arriba del claro para que la copa del Árbol Ancestral sobresalga del marco.
     this.cameras.main.setScroll(0, -Math.round(Math.round(BOARD_HEADROOM * this.tile) * renderResolution())); // igual que main.ts › resize
     const occupied = new Set(state.game.members.filter((m) => m.at).map((m) => `${m.at!.x},${m.at!.y}`));
     const star = suggestedTile(state);
@@ -136,7 +136,7 @@ export class GameScene extends Phaser.Scene {
     if (!this.glowTex) {
       this.glowTex = this.textures.createCanvas(GLOW_KEY, w, h);
       if (!this.glowTex) return;
-      // Encima del claro (0) y debajo de la animación de tejer (1), el Árbol Padre (4) y los retratos (5).
+      // Encima del claro (0) y debajo de la animación de tejer (1), el Árbol Ancestral (4) y los retratos (5).
       this.glowImage = this.add.image(0, 0, GLOW_KEY).setOrigin(0, 0).setDepth(0.5).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0);
     } else if (this.glowTex.width !== w || this.glowTex.height !== h) {
       this.glowTex.setSize(w, h);
@@ -177,7 +177,7 @@ export class GameScene extends Phaser.Scene {
     if (!this.frostTex) {
       this.frostTex = this.textures.createCanvas(FROST_KEY, T * W, T * H);
       if (!this.frostTex) return;
-      // Sobre la luz de la red (0.5) y debajo de la animación de tejer (1), el Árbol Padre y los retratos.
+      // Sobre la luz de la red (0.5) y debajo de la animación de tejer (1), el Árbol Ancestral y los retratos.
       this.frostImage = this.add.image(0, 0, FROST_KEY).setOrigin(0, 0).setDepth(0.7);
     } else if (this.frostTex.width !== T * W || this.frostTex.height !== T * H) {
       this.frostTex.setSize(T * W, T * H);
@@ -196,7 +196,7 @@ export class GameScene extends Phaser.Scene {
     this.frostTween = this.tweens.add({ targets: this.frostImage, alpha: FROST_PULSE.max, duration: FROST_PULSE_MS / 2, ease: MOTION.ease.soft.phaser, yoyo: true, repeat: -1 });
   }
 
-  /** Árbol Padre: dormido o despierto, apoyado en el borde inferior de su casilla y sobresaliendo hacia arriba. */
+  /** Árbol Ancestral: dormido o despierto, apoyado en el borde inferior de su casilla y sobresaliendo hacia arriba. */
   private drawFather(state: AppState, T: number): void {
     const tile = state.game.tiles.find((t) => t.kind === 'mother');
     this.fx?.fatherHalo(tile ?? null, Boolean(tile?.alive), T);

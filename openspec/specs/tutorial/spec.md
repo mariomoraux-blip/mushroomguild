@@ -6,11 +6,11 @@
 ## Requirements
 
 ### Requirement: Nivel Primeros pasos
-El juego SHALL tener un nivel «Primeros pasos» (`tutorial`) que se juega en un claro fijo, con un Árbol Padre que pide 2 árboles revividos, sin escarcha, árboles que se apagan, hambre ni plaga. Maestra Bruma SHALL llegar como en los demás niveles, al empezar el mes siguiente al segundo árbol revivido. El tutorial no SHALL dar puntaje ni entrar al ranking. `?nivel=tutorial` SHALL entrar directo al tutorial.
+El juego SHALL tener un nivel «Primeros pasos» (`tutorial`) que se juega en un claro fijo, con un Árbol Ancestral que pide 2 árboles revividos, sin escarcha, árboles que se apagan, hambre ni plaga. Maestra Bruma SHALL llegar como en los demás niveles, al empezar el mes siguiente al segundo árbol revivido. El tutorial no SHALL dar puntaje ni entrar al ranking. `?nivel=tutorial` SHALL entrar directo al tutorial.
 
 #### Scenario: Se gana siguiendo el guion
 - WHEN el jugador hace cada paso del guion
-- THEN despierta al Árbol Padre en el mes 6
+- THEN despierta al Árbol Ancestral en el mes 6
 
 #### Scenario: Sin puntaje
 - WHEN el jugador gana el tutorial
@@ -24,7 +24,7 @@ Durante el tutorial, el juego SHALL mostrar un paso a la vez: una máscara oscur
 - THEN solo Bruno responde al toque y, al elegirlo, el tutorial pasa al paso siguiente
 
 #### Scenario: Paso Ver
-- WHEN el paso muestra el Árbol Padre
+- WHEN el paso muestra el Árbol Ancestral
 - THEN el globo tiene «Siguiente» y el tablero no responde
 
 ### Requirement: Saltar el tutorial
@@ -35,10 +35,10 @@ Durante el tutorial, el juego SHALL mostrar un paso a la vez: una máscara oscur
 - THEN vuelve a «Elige tu dificultad» y «Primeros pasos» ya no dice «Recomendado»
 
 ### Requirement: Final del tutorial
-Al despertar al Árbol Padre en el tutorial, el juego SHALL mostrar la carta «¡Ya sabes jugar!» con «Jugar Brote» (principal) y «Volver a la portada», y el tutorial SHALL contar como visto.
+Al despertar al Árbol Ancestral en el tutorial, el juego SHALL mostrar la carta «¡Ya sabes jugar!» con «Jugar Brote» (principal) y «Volver a la portada», y el tutorial SHALL contar como visto.
 
 #### Scenario: Terminar
-- WHEN el jugador despierta al Árbol Padre en el tutorial
+- WHEN el jugador despierta al Árbol Ancestral en el tutorial
 - THEN aparece «¡Ya sabes jugar!» y «Jugar Brote» empieza una partida en Brote sin las cartas de intro
 
 ### Requirement: Viñetas accesibles

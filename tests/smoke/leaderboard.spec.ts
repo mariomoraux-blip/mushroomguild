@@ -213,7 +213,7 @@ test('no cuenta: una victoria de ?debugState no ofrece registrar ni envía nada'
   const calls = await mockApi(page);
   await page.goto('/?debugState=nearWin');
   await page.locator('.card--amanita').click();
-  await page.locator('.cell[data-valid="true"][aria-label*="Padre"]').click();
+  await page.locator('.cell[data-valid="true"][aria-label*="Árbol Ancestral"]').click();
   await expect(page.locator('#story .score__stars')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Registra tu puntaje' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Ver ranking' })).toBeVisible();

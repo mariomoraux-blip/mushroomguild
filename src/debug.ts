@@ -19,7 +19,7 @@ const presets: Record<string, () => GameState> = {
   },
   /** Maestra Bruma llega al terminar el mes (carta de su llegada). */
   mageNextMonth: () => ({ ...newGame(), tiles: newGame().tiles.map((t) => (t.kind === 'tree' && (t.x + t.y) % 2 === 0 ? { ...t, alive: true, net: true } : t)), mageDue: true }),
-  /** A un toque de ganar: 3 árboles vivos, 10 nutrientes y la red tocando al Árbol Padre (carta de victoria). */
+  /** A un toque de ganar: 3 árboles vivos, 10 nutrientes y la red tocando al Árbol Ancestral (carta de victoria). */
   nearWin: () => {
     const s = newGame();
     const mother = s.tiles.find((t) => t.kind === 'mother')!;
@@ -36,7 +36,7 @@ const presets: Record<string, () => GameState> = {
   /** Otoño e invierno con árboles vivos, red y troncos usados (para ver las piezas por estación). */
   autumn: () => seasonPreview(7),
   winter: () => seasonPreview(10),
-  /** Árbol Padre despierto (solo para ver su sprite; no dispara el final). */
+  /** Árbol Ancestral despierto (solo para ver su sprite; no dispara el final). */
   fatherAwake: () => {
     const s = newGame();
     return { ...s, tiles: s.tiles.map((t) => (t.kind === 'mother' ? { ...t, alive: true } : t)) };

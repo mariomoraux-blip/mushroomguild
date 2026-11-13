@@ -167,7 +167,7 @@ La pantalla de juego SHALL seguir el lenguaje del referente "Bosque pintado": el
 - THEN su medallón se ve apagado y lleva la insignia Zz
 
 ### Requirement: Casilla ocupada
-Cuando un miembro trabajó este mes en una casilla, su retrato SHALL ocupar la casilla y el objeto de abajo (tronco, árbol, roca, Hogar) no SHALL pintarse; el suelo, la red de micelio y el aura del Árbol Padre se mantienen. Sobre el Hogar queda la red. El Árbol Padre es la excepción: se sigue viendo y el miembro se dibuja delante.
+Cuando un miembro trabajó este mes en una casilla, su retrato SHALL ocupar la casilla y el objeto de abajo (tronco, árbol, roca, Hogar) no SHALL pintarse; el suelo, la red de micelio y el aura del Árbol Ancestral se mantienen. Sobre el Hogar queda la red. El Árbol Ancestral es la excepción: se sigue viendo y el miembro se dibuja delante.
 
 #### Scenario: Hongo sobre un tronco
 - WHEN Bruno descompone el tronco junto al Hogar
@@ -178,16 +178,16 @@ Cuando un miembro trabajó este mes en una casilla, su retrato SHALL ocupar la c
 - WHEN un miembro trabaja sobre el Hogar
 - THEN en esa casilla se ve al miembro sobre la red, sin la casa-hongo debajo
 
-### Requirement: Árbol Padre pintado
-El Árbol Padre SHALL dibujarse con su pieza pintada: dormido (gris) mientras no despierte y despierto (copa dorada, luces cálidas) desde que despierta. SHALL ocupar su casilla, ser mayor que los personajes y poder sobresalir hacia arriba, también por encima del marco del tablero.
+### Requirement: Árbol Ancestral pintado
+El Árbol Ancestral SHALL dibujarse con su pieza pintada: dormido (gris) mientras no despierte y despierto (copa dorada, luces cálidas) desde que despierta. SHALL ocupar su casilla, ser mayor que los personajes y poder sobresalir hacia arriba, también por encima del marco del tablero.
 
 #### Scenario: Dormido al empezar
 - WHEN empieza la partida
-- THEN el Árbol Padre se ve gris sobre su casilla, con el aro de meta punteado
+- THEN el Árbol Ancestral se ve gris sobre su casilla, con el aro de meta punteado
 
 #### Scenario: Despierto
-- WHEN la Amanita despierta al Árbol Padre
-- THEN el Árbol Padre se ve con la copa dorada encendida y su copa asoma por encima del marco
+- WHEN la Amanita despierta al Árbol Ancestral
+- THEN el Árbol Ancestral se ve con la copa dorada encendida y su copa asoma por encima del marco
 
 ### Requirement: Tablero pintado por estación
 El claro SHALL pintarse con las piezas pintadas de `public/assets/board/`, con la variante de la estación del mes cuando exista y la de primavera cuando no: pasto (primavera y verano alternan tres losas; otoño e invierno tienen la suya), red de micelio como losa dorada, troncos enteros y usados, rocas (nevadas en invierno), árboles dormidos, despertando (la red ya los alcanza) y vivos (de otoño o nevados), y la casa-hongo. Si una pieza no carga, la casilla SHALL pintarse con el dibujo vectorial.

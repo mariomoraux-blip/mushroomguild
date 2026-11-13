@@ -6,7 +6,7 @@ Puntaje de la victoria: cronómetro de juego activo, desglose, estrellas por cla
 ## Requirements
 
 ### Requirement: Cronómetro
-El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, solo durante el juego activo. SHALL empezar cuando el tablero acepta la primera acción del jugador (actuar sobre una casilla, reclutar o terminar el mes), haya intro o no; pausarse con cualquier hoja o pantalla encima del tablero (cartas de historia, fichas, hechizo, reclutar, Libreta de campo, "Cómo jugar", "El gremio") y con la pestaña oculta; y detenerse al despertar al Árbol Padre o al terminar el invierno. Los números SHALL ser tabulares y el cronómetro no SHALL anunciarse cada segundo al lector de pantalla.
+El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, solo durante el juego activo. SHALL empezar cuando el tablero acepta la primera acción del jugador (actuar sobre una casilla, reclutar o terminar el mes), haya intro o no; pausarse con cualquier hoja o pantalla encima del tablero (cartas de historia, fichas, hechizo, reclutar, Libreta de campo, "Cómo jugar", "El gremio") y con la pestaña oculta; y detenerse al despertar al Árbol Ancestral o al terminar el invierno. Los números SHALL ser tabulares y el cronómetro no SHALL anunciarse cada segundo al lector de pantalla.
 
 #### Scenario: Antes de la primera acción
 - WHEN el jugador cierra la intro y mira el tablero 20 segundos sin actuar
@@ -23,11 +23,11 @@ El HUD SHALL mostrar un cronómetro mm:ss que cuenta hacia arriba, sin límite, 
 - THEN el cronómetro no avanza hasta que la cierra
 
 #### Scenario: Fin de la partida
-- WHEN la Amanita despierta al Árbol Padre
+- WHEN la Amanita despierta al Árbol Ancestral
 - THEN el cronómetro se detiene y la carta de victoria muestra ese tiempo
 
 ### Requirement: Puntaje
-Al ganar, el juego SHALL calcular un puntaje con `score(estadoFinal, timeMs)`, función pura que devuelve el total y el desglose: victoria 500; meses 80 × (12 − mes de victoria); árboles 120 × árboles revividos sin contar el Árbol Padre; reservas 10 × nutrientes + 20 × esporas; gremio eficiente 60 × (7 − miembros reclutables); actividad 5 × acciones con tope de 40 acciones; variedad si todas las especies del gremio al ganar actuaron al menos una vez (Maestra Bruma, si llegó, cuenta con un hechizo), que vale según las especies reclutables del gremio: 150 con ninguna o una, 250 con dos, 350 con tres y 450 con las cuatro; tiempo 1 punto por segundo por debajo de 8:00, con máximo de 480. La fila de variedad del desglose SHALL decir «Todo el gremio actuó» con ninguna o una especie reclutable, «2 especies reclutadas», «3 especies reclutadas» o «Las 4 especies reclutadas». El total SHALL multiplicarse por el multiplicador del nivel (×1 Brote, ×1,5 Bosque, ×2 Ancestral) y redondearse; el desglose SHALL incluir la fila del nivel. Los pesos, la escala de variedad y los topes SHALL vivir en `config.ts › SCORE` y los multiplicadores en `config.ts › LEVELS`.
+Al ganar, el juego SHALL calcular un puntaje con `score(estadoFinal, timeMs)`, función pura que devuelve el total y el desglose: victoria 500; meses 80 × (12 − mes de victoria); árboles 120 × árboles revividos sin contar el Árbol Ancestral; reservas 10 × nutrientes + 20 × esporas; gremio eficiente 60 × (7 − miembros reclutables); actividad 5 × acciones con tope de 40 acciones; variedad si todas las especies del gremio al ganar actuaron al menos una vez (Maestra Bruma, si llegó, cuenta con un hechizo), que vale según las especies reclutables del gremio: 150 con ninguna o una, 250 con dos, 350 con tres y 450 con las cuatro; tiempo 1 punto por segundo por debajo de 8:00, con máximo de 480. La fila de variedad del desglose SHALL decir «Todo el gremio actuó» con ninguna o una especie reclutable, «2 especies reclutadas», «3 especies reclutadas» o «Las 4 especies reclutadas». El total SHALL multiplicarse por el multiplicador del nivel (×1 Brote, ×1,5 Bosque, ×2 Ancestral) y redondearse; el desglose SHALL incluir la fila del nivel. Los pesos, la escala de variedad y los topes SHALL vivir en `config.ts › SCORE` y los multiplicadores en `config.ts › LEVELS`.
 
 #### Scenario: Victoria conocida
 - WHEN se gana en Brote en el mes 8 con 5 árboles revividos, 4 nutrientes, 3 esporas, 5 miembros reclutables (2 especies reclutadas), 30 acciones, todas las especies de su gremio y 3:20 de juego
@@ -48,7 +48,7 @@ Al ganar, el juego SHALL calcular un puntaje con `score(estadoFinal, timeMs)`, f
 - THEN la variedad vale 0
 
 #### Scenario: Derrota
-- WHEN termina el invierno sin despertar al Árbol Padre
+- WHEN termina el invierno sin despertar al Árbol Ancestral
 - THEN no se calcula puntaje y la carta de final no muestra puntaje ni estrellas
 
 #### Scenario: Variedad con el gremio inicial

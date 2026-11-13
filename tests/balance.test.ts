@@ -40,7 +40,7 @@ describe('balance en claros generados', () => {
     expect(end.status).toBe('won');
   });
 
-  it(`despertar al Árbol Padre exige ${TREES_FOR_MOTHER} árboles revividos`, () => {
+  it(`despertar al Árbol Ancestral exige ${TREES_FOR_MOTHER} árboles revividos`, () => {
     expect(TREES_FOR_MOTHER).toBe(3);
     expect(newRandomGame(7).status).toBe('playing');
   });
@@ -68,7 +68,7 @@ const TARGETS = {
   // 041: con cuatro reclutas, Bosque sube a 9 rocas y 11 nutrientes, Ancestral a 11 rocas y 13; las pistas vuelven a los rangos de antes de 039.
   // 042: escarcha y plaga en invierno y apagados en los meses 4 y 6; las pistas bajan al 39 % y se certifican 89 de 100.
   bosque: { hints: [0.35, 0.5], random: 0.1, certified: 85 }, // 028: invierno duro
-  // 031: con el Árbol Padre en 4 árboles y 12 nutrientes se certifican 85 de los 100 primeros (905 de 1000); solo se sirven esos.
+  // 031: con el Árbol Ancestral en 4 árboles y 12 nutrientes se certifican 85 de los 100 primeros (905 de 1000); solo se sirven esos.
   // 034: un árbol se apaga cada dos meses; se certifican 86 de los 100 primeros (861 de 1000) y las pistas bajan a 10–25 %.
   // 041: con 11 rocas y 13 nutrientes se certifican 77 de los 100 primeros; el piso baja a 75.
   // 042: un apagado más en el mes 2; las pistas bajan al 15 % y se certifican 65 de 100.

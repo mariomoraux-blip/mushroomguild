@@ -95,7 +95,7 @@ export const TUTORIAL: readonly TutorialStep[] = [
   doIt('indi4', [pick('lactarius'), T.weaveMother], [tap(3, 1), T.weaveMother]),
   see('help', T.help, { kind: 'help' }),
   doIt('end5', [end, T.end5]),
-  // Mes 6: las ★, abonar y despertar al Árbol Padre.
+  // Mes 6: las ★, abonar y despertar al Árbol Ancestral.
   see('star', T.star, { kind: 'member', species: 'lycoperdon' }, true),
   doIt('compost', [pick('lycoperdon'), T.pickPompon], [{ type: 'chooseSpell', spell: 'nutrients' }, T.compost], [tap(S.tree2.x, S.tree2.y), T.compostTree]),
   doIt('wake', [pick('amanita'), T.wake], [tap(S.mother.x, S.mother.y), T.wake]),

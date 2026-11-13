@@ -66,7 +66,7 @@ describe('Requirement: Tablero inicial', () => {
     expect(net[0]).toMatchObject({ ...HOME, kind: 'home' });
   });
 
-  it('el tablero es vertical de 5×8, con el Hogar en la fila inferior y el Árbol Padre en la superior', () => {
+  it('el tablero es vertical de 5×8, con el Hogar en la fila inferior y el Árbol Ancestral en la superior', () => {
     const s = newGame();
     expect([W, H]).toEqual([5, 8]);
     expect(s.tiles).toHaveLength(40);
@@ -424,7 +424,7 @@ describe('Requirement: Victoria', () => {
     expect(reasonOf(s, RUBI, MOTHER)).toContain('revive al menos 3 árboles');
   });
 
-  it('con la red tocándolo, 10 nutrientes y 3 árboles revividos, despertar al Árbol Padre gana la partida', () => {
+  it('con la red tocándolo, 10 nutrientes y 3 árboles revividos, despertar al Árbol Ancestral gana la partida', () => {
     const s = setup({ month: 7, net: [SOIL_NEAR_MOTHER], alive: [TREE, OTHER_TREE, FAR_TREE], nutrients: 10 });
     const { state } = pure(s, (s) => act(s, RUBI, MOTHER.x, MOTHER.y));
     expect(state.status).toBe('won');

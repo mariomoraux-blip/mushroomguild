@@ -10,7 +10,7 @@ Un claro de bosque pintado a mano que **abraza** la pantalla: follaje, flores y 
 1. **El bosque enmarca, el tablero manda.** Los bordes van cargados (follaje, flores, hongos); el centro se mantiene limpio y legible. Nada decorativo invade una casilla ni un control.
 2. **Dos materiales, siempre los mismos.** Madera para lo que se toca y señala (letreros, botones redondos, marcos); pergamino para lo que se lee (hojas, pistas, fichas). Botón principal: pastilla amarilla.
 3. **Relieve suave, contorno café.** Cada pieza tiene volumen pintado (luz arriba a la izquierda, sombra abajo), contorno café oscuro de grosor constante (nunca negro) y una sombra sólida corta.
-4. **La luz es el progreso.** Gris y lila al inicio; verde vivo al revivir; dorado al despertar al Árbol Padre. La red de micelio es luz dorada que corre por el suelo.
+4. **La luz es el progreso.** Gris y lila al inicio; verde vivo al revivir; dorado al despertar al Árbol Ancestral. La red de micelio es luz dorada que corre por el suelo.
 5. **Los personajes son la marca.** Aparecen grandes en portada, fichas y "El gremio", y siempre a la vista en el dock.
 
 ## Paleta v2
@@ -35,7 +35,7 @@ Medida sobre la hoja de piezas (color dominante de cada material). Los tokens nu
 | Selección | `#6EF0D8` | Brillo de casilla seleccionada y del Hogar |
 | Hoja viva | `#B9D23A` | Copas revividas |
 | Gris dormido | `#A99C92` | Copas y troncos dormidos |
-| Oro | `#FFD21A` | Árbol Padre despierto, destellos |
+| Oro | `#FFD21A` | Árbol Ancestral despierto, destellos |
 | Lila | `#A994AE` | Bosque apagado (intro, fin del invierno) |
 | Hongo naranja | `#F2902A` | Sombrero de la casa-hongo, flores |
 
@@ -71,7 +71,7 @@ Contraste mínimo de texto: Tinta sobre Pergamino, Crema o Sol (todos ≥ 7:1). 
 - **Red de micelio:** `board/mycelium/net`/`-b`: grietas de luz dorada sobre el pasto, una casilla entera por casilla de la red (decisión del 010: tile completo, no conectores). **Cambio respecto del 008:** el micelio pasa de verde menta a dorado; el turquesa queda para la selección y el Hogar.
 - **Estados:** válida = brillo amarillo; seleccionada / Hogar = brillo turquesa; sugerida = ★ (`ui/icons/star`, en uso) sobre la casilla. Se implementan como **capas** encima de la casilla, no como casillas distintas. `state-valid` y `state-selected` traen el pasto horneado, así que no sirven de capa sobre un objeto: hasta tener la capa transparente, el brillo de casilla válida es el trazo vectorial del 008.
 - **Objetos:** `board/trees/grey` (dormido) → `board/trees/waking` cuando la red lo alcanza → `alive` al revivir (`autumn` y `winter` en esas estaciones); `board/logs/log` → `board/logs/log-used` tras el primer uso; `board/rocks/rock` (`rock-winter` en invierno); `board/terrain/home` es la casilla del Hogar (con alguien encima queda la red). `board/terrain/sprout` para la tierra creada por el Brote arcano queda pendiente.
-- **Árbol Padre:** se dibuja grande (`board/father-tree/asleep-painted` / `awake-painted`, desde el 010) y **sobresale por encima del tablero**, saliendo de su casilla en la fila superior. La regla no cambia: sigue siendo una casilla del tablero; solo su dibujo desborda. Las raíces bajan hacia la casilla.
+- **Árbol Ancestral:** se dibuja grande (`board/father-tree/asleep-painted` / `awake-painted`, desde el 010) y **sobresale por encima del tablero**, saliendo de su casilla en la fila superior. La regla no cambia: sigue siendo una casilla del tablero; solo su dibujo desborda. Las raíces bajan hacia la casilla.
 - **Casilla ocupada (se mantiene del 008):** si un hongo trabajó este mes en una casilla, su retrato la ocupa y el objeto de abajo no se pinta.
 - **Árbol marcado y apagado (019):** sin pieza nueva. Un velo de escarcha del token `frost` (`#CFE8F5`) sobre la casilla del árbol gris: el marcado lleva además un contorno punteado de tinta y un copo chico, y late suave (alfa 0,35–0,6 cada 1,6 s; fijo en 0,5 con movimiento reducido); el apagado lleva el velo fijo y un copo con contorno en la esquina superior. La pastilla del mes muestra un copo `frost` junto a la estación mientras hay escarcha.
 - **Casilla con plaga (032, 033, 035, Ancestral):** la casilla tejida marcada se pinta con `board/plague/blight` (`blight-winter` en invierno) en vez de la red: bordes de podredumbre violeta con manchas y garras de hilo seco, y el centro crema con los hilos dorados todavía vivos. Pierde la luz de la red y lleva el contorno punteado que late, como el árbol marcado. Al marchitarse, la plaga viva se funde sobre `board/plague/withered` (la red muerta), que se queda con el mismo contorno hasta que un hongo la limpie; entonces vuelve el pasto (035). Mientras hay una casilla con plaga, tejida o marchita, la pastilla del mes muestra `ui/icons/plague` (una hoja podrida) junto a la estación. Si una pieza no carga, se dibuja un velo del token `blight` (`#7E5A86`) con tres manchas de corteza ([piezas](#piezas-de-la-plaga-032)).
@@ -85,7 +85,7 @@ Contraste mínimo de texto: Tinta sobre Pergamino, Crema o Sol (todos ≥ 7:1). 
 JUEGO                          PORTADA                        CÓMO JUGAR (carrusel de 5)
 ┌────────────────────────┐     ┌────────────────────────┐     ┌────────────────────────┐
 │[logo] [Mes][🍃][✳][🌳][?]│     │      [   LOGO   ]      │     │ (letrero) Cómo jugar  × │
-│      (Árbol Padre)      │     │  Indi Bruno Rubí Chispa│     │ pergamino:              │
+│      (Árbol Ancestral)      │     │  Indi Bruno Rubí Chispa│     │ pergamino:              │
 │  ┌ marco de raíces ┐    │     │        Bruma           │     │ ① Elige un miembro      │
 │  │ tablero 5 × 8    │   │     │ [▶ Nueva partida ]     │     │ ② Toca junto a la red   │
 │  │                  │   │     │ [📖 Cómo jugar   ]     │     │ ③ Cada especie, 1 acción│
@@ -104,14 +104,14 @@ FICHA                          EL GREMIO                      INTRO / VICTORIA
 │ [Nutrientes]            │     │ [retrato] Bruma·…      ›│     │  (marco de bosque)      │
 └────────────────────────┘     └────────────────────────┘     └────────────────────────┘
 ```
-- **Juego:** HUD con logo mini, pastilla del mes y estación, tres pastillas de recurso y ayuda redonda. Árbol Padre grande sobre el tablero. Bitácora con la cinta "Pista del mes". Dock con tarjetas verticales y "Fin del mes" como pastilla amarilla a todo lo ancho, con ícono de luna.
+- **Juego:** HUD con logo mini, pastilla del mes y estación, tres pastillas de recurso y ayuda redonda. Árbol Ancestral grande sobre el tablero. Bitácora con la cinta "Pista del mes". Dock con tarjetas verticales y "Fin del mes" como pastilla amarilla a todo lo ancho, con ícono de luna.
   - **Pendiente de decidir:** el dock más alto y el logo restan alto al tablero. A 390 × 664 las casillas bajarían de 56 a unos 48 px (el mínimo de la spec es 56). Opciones: aceptar 48 en ese tamaño, ocultar el logo por debajo de 700 px de alto, o tarjetas más bajas.
 - **Portada (012, hecho):** logo y menú sobre el claro (los personajes se sacaron en el 018 para dejarla más limpia): Nueva partida (pastilla amarilla con ▶), Cómo jugar y El gremio (madera). "Opciones" se sacó hasta que haya algo que ajustar. En apaisado, logo a la izquierda y menú a la derecha.
 - **Cómo jugar (012, hecho):** carrusel de 5 pasos en pergamino, cada uno con una ilustración de piezas publicadas, ‹ › (`ui/buttons/prev`, `next`), puntos y deslizar. Es la ayuda principal (el "?" la abre); la Libreta de campo queda como detalle.
 - **Ficha:** retrato grande, nombre, nombre científico y rol, contexto, frase entre comillas y secciones con etiqueta verde (Habilidad, Movimiento, Nutrientes…), como la ficha actual.
 - **El gremio (012, hecho):** lista de las cinco especies, cada fila con su medallón, nombre, rol y una línea; abre la ficha encima.
 - **Intro (003, hecho):** fondo `backgrounds/intro` (hoja `fondo-intro-v2`: camino del bosque al atardecer lila, con hongos de colores), tres cartas de pergamino con letrero de madera ("El bosque se apaga", "Un gremio despierta", "Antes del invierno"), puntos de progreso, "Saltar" y "Siguiente"/"Comenzar". La llegada de Maestra Bruma usa la misma carta con su retrato.
-- **Victoria (003, hecho):** fondo `backgrounds/victory`, letrero "¡El bosque despertó!", texto y resumen (mes, árboles, nutrientes, esporas); "Ver el claro" y "Jugar de nuevo" ("Ver resumen" se descartó: el resumen ya está en la carta). El fin del invierno usa el mismo layout con `backgrounds/intro`. En apaisado, el intro usa `intro-landscape` (la misma hoja completa, 16:9); la victoria usa `victory-landscape` (hoja `fondo-victoria-v2`: Árbol Padre dorado en el claro) con la carta a un costado para que el árbol se vea entero.
+- **Victoria (003, hecho):** fondo `backgrounds/victory`, letrero "¡El bosque despertó!", texto y resumen (mes, árboles, nutrientes, esporas); "Ver el claro" y "Jugar de nuevo" ("Ver resumen" se descartó: el resumen ya está en la carta). El fin del invierno usa el mismo layout con `backgrounds/intro`. En apaisado, el intro usa `intro-landscape` (la misma hoja completa, 16:9); la victoria usa `victory-landscape` (hoja `fondo-victoria-v2`: Árbol Ancestral dorado en el claro) con la carta a un costado para que el árbol se vea entero.
 
 ## Personajes
 - Cuerpo-tallo redondo, sombrero ≈ 55 % de la altura, cara mínima (ojos de punto, rubor, boca pequeña).
@@ -152,11 +152,11 @@ Prueba de silueta: domo bajo, embudo, domo alto con falda, campana pequeña, hue
 
 La saturación del progreso (003, hecho) va de apagado (40 % de color) a color pleno según los árboles revividos; solo afecta al claro pintado.
 
-**Luz de la red (016, hecho):** la columna Micelio se cumple con una capa aditiva propia, encima del claro y debajo del Árbol Padre y los retratos, que no recibe la saturación. Intensidad 0,2 / 0,4 / 0,65 / 1,0 (`theme.ts` › `MYCELIUM_GLOW`), con 600 ms de transición entre estaciones. Sobre árboles, troncos y la casa la luz los rodea sin taparlos. El fondo vivo no se oscurece en invierno (pregunta abierta del 016).
+**Luz de la red (016, hecho):** la columna Micelio se cumple con una capa aditiva propia, encima del claro y debajo del Árbol Ancestral y los retratos, que no recibe la saturación. Intensidad 0,2 / 0,4 / 0,65 / 1,0 (`theme.ts` › `MYCELIUM_GLOW`), con 600 ms de transición entre estaciones. Sobre árboles, troncos y la casa la luz los rodea sin taparlos. El fondo vivo no se oscurece en invierno (pregunta abierta del 016).
 - Íconos de estación: `ui/icons/season-spring` (flor rosa), `-verano` (flor amarilla), `-otono` (hoja naranja), `-invierno` (copo). Van en la pastilla del mes.
 
 ## Movimiento (004)
-- **Cada jugada responde en ≤ 400 ms**, encima del estado ya pintado: tejer = el pasto se desvanece y un hilo dorado crece desde la red; descomponer = el tronco se encoge con astillas; revivir = estallido de hojas y luz; despertar = anillo de luz y halo que late detrás del Árbol Padre.
+- **Cada jugada responde en ≤ 400 ms**, encima del estado ya pintado: tejer = el pasto se desvanece y un hilo dorado crece desde la red; descomponer = el tronco se encoge con astillas; revivir = estallido de hojas y luz; despertar = anillo de luz y halo que late detrás del Árbol Ancestral.
 - **Esporas al contador** al empezar el mes (una por árbol vivo, hasta 12) y saltito del contador.
 - **Motas** de luz sobre los árboles vivos, como máximo 40 partículas en pantalla; una sola textura de punto con mezcla aditiva, sin desenfoques por cuadro.
 - **Movimiento reducido:** nada se mueve; solo el estado final y el halo quieto.
@@ -202,7 +202,7 @@ public/assets/
 ```
 - **Personajes:** la carpeta lleva el nombre del primer miembro de la especie (Indi = *Lactarius indigo*, Bruno = Champiñón, Rubí = *Amanita*, Chispa = *Gliophorus*, Panal = *Morchella*, Ámbar = *Ganoderma*, Pompón = *Lycoperdon*, Maestra Bruma = *Conocybe arcana*); los reclutas de la misma especie usan el mismo arte. `portrait` es el retrato pintado para tablero, dock, fichas y "El gremio"; los sprites de Blender son fuente (`assets/sprites/webp/`).
 - **Micelio:** se dibuja con el tile completo `net`/`net-b` (decisión del 010). Los conectores (`straight-h`, `straight-v`, `corner`, `cross`…) sobre `dirt` quedan publicados para un efecto futuro (p. ej. el hilo que se teje); falta la pieza en T.
-- **Estaciones:** pasto (`grass-autumn`, `grass-winter`), rocas (`rock-winter`) y árboles (`autumn`, `winter`) cambian por estación (010). El Árbol Padre por estación (`spring-`…`winter-painted`) muestra un árbol vivo y verde, que se confunde con "despierto": por ahora el Padre usa solo `asleep-painted` y `awake-painted`.
+- **Estaciones:** pasto (`grass-autumn`, `grass-winter`), rocas (`rock-winter`) y árboles (`autumn`, `winter`) cambian por estación (010). El Árbol Ancestral por estación (`spring-`…`winter-painted`) muestra un árbol vivo y verde, que se confunde con "despierto": por ahora el Árbol Ancestral usa solo `asleep-painted` y `awake-painted`.
 - **Fondos por orientación:** vertical en el teléfono (`menu`, `intro`, `victory`); en horizontal y escritorio, los 16:9 a pantalla completa (`menu-landscape` en la portada y la partida, `intro-landscape` en la intro, `victory-landscape` en la victoria). La panorámica `menu-wide` solo tiene 310 px de alto: estirada a pantalla completa se ve borrosa, así que solo sirve como franja.
 - **Fuera del árbol propuesto:** el Hogar, los estados de casilla y `blocked` van en `board/terrain/`, y los logos y pastillas en `ui/hud/`.
 - **Código:** `src/theme.ts` arma las rutas (`assetUrl`, `portraitKey`, `uiPortraitKey`, `CHARACTER_DIR`, `fatherKey`, `BOARD_ART`, y las variables CSS `--art-*` de la interfaz); ningún otro archivo escribe rutas de assets a mano.
@@ -331,7 +331,7 @@ Reglas para todas: contorno café oscuro de grosor constante (nunca negro), luz 
 ## Sprites en el juego
 - **Desde el 010** el juego usa los retratos pintados (`characters/<personaje>/portrait`): en el dock (con un salto "feliz" cuando está seleccionado o sugerido), grande en la ficha y en el tablero sobre la casilla donde ese miembro trabajó este mes, a 0,92 casillas de ancho y con su alto propio (Maestra Bruma, más alta).
 - Los renders de Blender viven en `assets/sprites/` (PNG) y sus WebP de 176 × 128 (Maestra Bruma 176 × 160) en `assets/sprites/webp/`, como fuente.
-- **Árbol Padre:** desde el 010 el tablero usa `asleep-painted` / `awake-painted` a 1,35 casillas de ancho (`FATHER_SCALE`). El de Blender, `assets/blender/arbol-padre.blend` (estados en `estados_arbol.py`), queda como fuente en `assets/sprites/webp/board/father-tree/{asleep,awake}.webp` (176 × 192). Dormido: tronco retorcido gris, raíces largas y ramas desnudas. Despierto: corteza cálida y copa dorada en paraguas (hojas `#F2BC45`, sombra `#C98A2B`, luz `#FFE08A`) con borde que brilla `#FFE27A`, aura `#FFF4C2`, luces cálidas y destellos. En el tablero mide 1,2 casillas de ancho y su copa asoma por encima del marco. Sustituye en el tablero a los recortes `public/assets/ui/arbol-padre-*.webp` (placeholders de baja resolución). La v2 plantea dibujarlo de unas 3 casillas de ancho; este mes mide 1,2 (`FATHER_SCALE` en `theme.ts`) y queda pendiente decidir el tamaño final.
+- **Árbol Ancestral:** desde el 010 el tablero usa `asleep-painted` / `awake-painted` a 1,35 casillas de ancho (`FATHER_SCALE`). El de Blender, `assets/blender/arbol-padre.blend` (estados en `estados_arbol.py`), queda como fuente en `assets/sprites/webp/board/father-tree/{asleep,awake}.webp` (176 × 192). Dormido: tronco retorcido gris, raíces largas y ramas desnudas. Despierto: corteza cálida y copa dorada en paraguas (hojas `#F2BC45`, sombra `#C98A2B`, luz `#FFE08A`) con borde que brilla `#FFE27A`, aura `#FFF4C2`, luces cálidas y destellos. En el tablero mide 1,2 casillas de ancho y su copa asoma por encima del marco. Sustituye en el tablero a los recortes `public/assets/ui/arbol-padre-*.webp` (placeholders de baja resolución). La v2 plantea dibujarlo de unas 3 casillas de ancho; este mes mide 1,2 (`FATHER_SCALE` en `theme.ts`) y queda pendiente decidir el tamaño final.
 - La silueta de cono de cada especie (`.hat--*` en `styles.css`) queda solo como respaldo si un retrato faltara.
 - Peso: todo `public/assets/` suma 2.82 MB en WebP (límite 4 MB).
 
@@ -355,4 +355,4 @@ Reglas para todas: contorno café oscuro de grosor constante (nunca negro), luz 
 - Low-poly, shader toon de 2–3 bandas, contorno café por casco invertido (o Line Art).
 - Cámara ortográfica a ¾, fondo transparente, PNG a 2×.
 - Validar primero un personaje a 56 px en un teléfono real; luego producir los demás y sus poses (reposo, trabajando, feliz).
-- Para la v2: renderizar retratos y objetos del tablero (árboles, troncos, rocas, casa-hongo, Árbol Padre) con la iluminación cálida de la propuesta, a 2×, si se elige Blender como fuente única.
+- Para la v2: renderizar retratos y objetos del tablero (árboles, troncos, rocas, casa-hongo, Árbol Ancestral) con la iluminación cálida de la propuesta, a 2×, si se elige Blender como fuente única.

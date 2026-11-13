@@ -32,7 +32,7 @@ export interface Tile extends Point {
   readonly net: boolean;
   /** Usos de un tronco (se vuelve tierra al llegar a `LOG_USES`). */
   readonly uses: number;
-  /** Árbol (o Árbol Padre) revivido. */
+  /** Árbol (o Árbol Ancestral) revivido. */
   readonly alive: boolean;
   /** Árbol gris marcado: se apaga al terminar el mes si nadie lo revive (019). */
   readonly fading: boolean;

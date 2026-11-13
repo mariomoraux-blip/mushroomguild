@@ -15,7 +15,7 @@ export interface PaintInput {
   readonly star: { x: number; y: number } | null;
   /** Casillas con un miembro trabajando encima ("x,y"): su objeto no se pinta. */
   readonly occupied: ReadonlySet<string>;
-  /** El Árbol Padre se dibuja aparte con su sprite de Blender: aquí solo su aura y su aro. */
+  /** El Árbol Ancestral se dibuja aparte con su sprite de Blender: aquí solo su aura y su aro. */
   readonly fatherSprite?: boolean;
   /** Piezas pintadas del tablero (cambio 010). Sin ellas, o si falta una, se usa el dibujo vectorial. */
   readonly art?: ArtLookup;
@@ -24,8 +24,8 @@ export interface PaintInput {
 }
 
 /**
- * Saturación del claro según el progreso (003): apagado al empezar y color pleno al despertar al Árbol Padre.
- * FLOOR + (1 − FLOOR) × (árboles vivos + Árbol Padre × 2) / (árboles del claro + 2). El piso subió de 0,15
+ * Saturación del claro según el progreso (003): apagado al empezar y color pleno al despertar al Árbol Ancestral.
+ * FLOOR + (1 − FLOOR) × (árboles vivos + Árbol Ancestral × 2) / (árboles del claro + 2). El piso subió de 0,15
  * a 0,4 con las piezas pintadas (010): casi gris, el claro permes el arte.
  */
 export const SATURATION_FLOOR = 0.4;
@@ -469,7 +469,7 @@ function paintHome(ctx: Ctx, T: number, t: Tile) {
   }
 }
 
-/** Aura y aro de meta del Árbol Padre (se pinta aunque alguien trabaje encima). */
+/** Aura y aro de meta del Árbol Ancestral (se pinta aunque alguien trabaje encima). */
 function paintMotherAura(ctx: Ctx, T: number, t: Tile) {
   const cx = (t.x + 0.5) * T;
   const cy = (t.y + 0.5) * T;
@@ -885,7 +885,7 @@ export function paintBoard(ctx: Ctx, T: number, input: PaintInput): Painted[] {
   const painted: Painted[] = [];
   for (const t of game.tiles) {
     if (t.kind === 'mother') paintMotherAura(ctx, T, t);
-    // Con sprite, el Árbol Padre se ve siempre (quien trabaje encima se dibuja delante).
+    // Con sprite, el Árbol Ancestral se ve siempre (quien trabaje encima se dibuja delante).
     if (t.kind === 'mother' && fatherSprite) {
       painted.push({ x: t.x, y: t.y, object: 'mother' });
       continue;

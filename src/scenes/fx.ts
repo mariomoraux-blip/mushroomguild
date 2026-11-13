@@ -1,4 +1,4 @@
-// Efectos del tablero (004): animaciones cortas por jugada, motas sobre los árboles vivos y halo del Árbol Padre.
+// Efectos del tablero (004): animaciones cortas por jugada, motas sobre los árboles vivos y halo del Árbol Ancestral.
 // Solo dibuja encima del claro ya pintado: el estado final lo muestra `paint.ts`, aquí solo va la transición.
 // Con `prefers-reduced-motion` no se anima nada (solo queda el estado final).
 import * as Phaser from 'phaser';
@@ -76,7 +76,7 @@ export class BoardFx {
     this.net = game.tiles.filter((t) => t.net).map(({ x, y }) => ({ x, y }));
   }
 
-  /** Halo cálido detrás del Árbol Padre despierto; late suave si se permite movimiento. */
+  /** Halo cálido detrás del Árbol Ancestral despierto; late suave si se permite movimiento. */
   fatherHalo(at: Point | null, awake: boolean, T: number): void {
     if (!at || !awake) {
       this.halo?.setVisible(false);
@@ -396,7 +396,7 @@ export class BoardFx {
     this.burst(e.at, ['wood', 'peach', 'leaf'], 8, 0.55);
   }
 
-  /** Despertar: un anillo de luz se abre desde el Árbol Padre y una ola dorada recorre la red desde él (022). */
+  /** Despertar: un anillo de luz se abre desde el Árbol Ancestral y una ola dorada recorre la red desde él (022). */
   private awaken(at: Point): void {
     const [cx, cy] = this.center(at);
     const ring = this.scene.add.image(cx, cy - this.T * 0.2, DOT).setDepth(6).setTint(hex('glow')).setBlendMode(Phaser.BlendModes.ADD);

@@ -1,4 +1,4 @@
-// Temporadas frías (028, 030) y Árbol Padre de Ancestral (031): game-rules › Temporadas frías, Despertar al Árbol Padre y Niveles de dificultad;
+// Temporadas frías (028, 030) y Árbol Ancestral de Ancestral (031): game-rules › Temporadas frías, Despertar al Árbol Ancestral y Niveles de dificultad;
 // story-presentation › Llega el frío; player-guidance › Avisos de la presión.
 import { describe, expect, it } from 'vitest';
 import { es } from '../src/copy/es';
@@ -80,14 +80,14 @@ describe('Requirement: Temporadas frías', () => {
   });
 });
 
-describe('Requirement: Despertar al Árbol Padre', () => {
-  it('el Árbol Padre pide 3 árboles y 10 nutrientes en Brote, 11 en Bosque, y 4 árboles y 13 nutrientes en Ancestral (041)', () => {
+describe('Requirement: Despertar al Árbol Ancestral', () => {
+  it('el Árbol Ancestral pide 3 árboles y 10 nutrientes en Brote, 11 en Bosque, y 4 árboles y 13 nutrientes en Ancestral (041)', () => {
     expect([LEVELS.brote.mother, LEVELS.bosque.mother, LEVELS.ancestral.mother]).toEqual([10, 11, 13]);
     expect([LEVELS.brote.motherTrees, LEVELS.bosque.motherTrees, LEVELS.ancestral.motherTrees]).toEqual([3, 3, 4]);
     expect([motherCost(at('ancestral')), motherTrees(at('ancestral'))]).toEqual([13, 4]);
   });
 
-  // En el mapa clásico la red toca al Árbol Padre (2,0) desde (2,1); los árboles son (1,0), (4,1), (0,3), (2,5) y (4,6).
+  // En el mapa clásico la red toca al Árbol Ancestral (2,0) desde (2,1); los árboles son (1,0), (4,1), (0,3), (2,5) y (4,6).
   const THREE = [TREE, { x: 4, y: 6 }, { x: 0, y: 3 }];
   const FOUR = [...THREE, { x: 4, y: 1 }];
   const awaken = (s: GameState) => {
