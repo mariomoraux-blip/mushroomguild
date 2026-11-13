@@ -13,8 +13,13 @@ export type Puff = 'spores' | 'nutrients';
 /** Lo que se elige antes de tocar la casilla: un hechizo de Maestra Bruma o un cambio de Pompón. */
 export type Choice = Spell | Puff;
 export type GameStatus = 'playing' | 'won' | 'lost';
-/** Nivel de dificultad (019): Brote es el juego de siempre; Bosque y Ancestral suman presión. */
-export type Level = 'brote' | 'bosque' | 'ancestral';
+/**
+ * Nivel de dificultad (019): Brote es el juego de siempre; Bosque y Ancestral suman presión. `tutorial` (046):
+ * «Primeros pasos», la partida guiada en un claro fijo, sin puntaje ni ranking.
+ */
+export type Level = 'tutorial' | 'brote' | 'bosque' | 'ancestral';
+/** Niveles con claro generado a partir de Brote y certificado (`LEVEL_SEEDS`). */
+export type ScaledLevel = 'bosque' | 'ancestral';
 
 export interface Point {
   readonly x: number;

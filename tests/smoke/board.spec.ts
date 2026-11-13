@@ -668,12 +668,12 @@ test('Niveles: Elige tu dificultad con teclado, Ancestral sin ★, árbol marcad
   const shot = (name: string) => (size ? page.screenshot({ path: `docs/screenshots/019-${name}-${size}.png` }) : undefined);
   const screen = page.locator('#screen');
   const card = page.locator('#story [role="dialog"]');
-  // Teclado: Enter en "Nueva partida" abre los niveles con el foco en Brote; Esc vuelve a la portada.
+  // Teclado: Enter en "Nueva partida" abre los niveles con el foco en «Primeros pasos» (046); Esc vuelve a la portada.
   await page.goto('/');
   await expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeFocused();
   await page.keyboard.press('Enter');
-  await expect(screen.locator('.level')).toHaveCount(3);
-  await expect(screen.locator('[data-level="brote"]')).toBeFocused();
+  await expect(screen.locator('.level')).toHaveCount(4);
+  await expect(screen.locator('[data-level="tutorial"]')).toBeFocused();
   for (const b of await screen.locator('.level').all()) expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   await expect(screen).toContainText('Puntaje ×1,5');
   await noScrollNoZoom(page);
@@ -682,8 +682,7 @@ test('Niveles: Elige tu dificultad con teclado, Ancestral sin ★, árbol marcad
   await expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeFocused();
   // Elegir Ancestral con Tab y Enter: intro la primera vez; después, el tablero sin ★ ni «Pista:».
   await page.keyboard.press('Enter');
-  await page.keyboard.press('Tab');
-  await page.keyboard.press('Tab');
+  for (let i = 0; i < 3; i++) await page.keyboard.press('Tab');
   await expect(screen.locator('[data-level="ancestral"]')).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(card).toContainText('El bosque se apaga');

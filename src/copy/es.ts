@@ -299,13 +299,17 @@ export const es = {
   levels: {
     title: 'Elige tu dificultad',
     label: 'Niveles de dificultad',
-    names: { brote: 'Brote', bosque: 'Bosque', ancestral: 'Ancestral' },
+    names: { tutorial: 'Primeros pasos', brote: 'Brote', bosque: 'Bosque', ancestral: 'Ancestral' },
     lines: {
+      tutorial: 'Una partida corta y guiada: aprende a jugar paso a paso.',
       brote: 'El claro de siempre, con la ★ para guiarte.',
       bosque: 'Más rocas, escarcha en otoño e invierno, dos árboles que se apagan, una plaga que crece en invierno y un Árbol Padre más exigente. Los árboles solo dan si la red los une al Hogar.',
       ancestral: 'Más rocas aún, escarcha hasta el final, seis árboles que se apagan, una plaga que crece desde el otoño, un Árbol Padre aún más exigente y sin ★. Los árboles solo dan si la red los une al Hogar.',
     },
     multiplier: (m: number) => `Puntaje ${times(m)}`,
+    /** 046: «Primeros pasos» lo lleva hasta completarlo o saltarlo. */
+    recommended: 'Recomendado',
+    noScore: 'Sin puntaje',
     back: 'Volver a la portada',
   } satisfies { names: Record<Level, string>; lines: Record<Level, string> } & Record<string, unknown>,
 
@@ -637,5 +641,65 @@ export const es = {
       nutrients > 0
         ? `Nadie tiene trabajo este mes. Termina el mes: la hojarasca traerá ${plural(nutrients, 'nutriente')}.`
         : 'Nadie tiene trabajo este mes. Termina el mes.',
+  },
+
+  /** «Primeros pasos» (046): el globo de cada paso del guion (`src/tutorial.ts`), frases cortas. */
+  tutorial: {
+    label: 'Tutorial',
+    count: (n: number, total: number) => `Paso ${n} de ${total}`,
+    next: 'Siguiente',
+    skip: 'Saltar tutorial',
+    skipAsk: '¿Saltar el tutorial?',
+    skipYes: 'Sí, saltar',
+    skipNo: 'No, seguir',
+    // Mes 1
+    mother: `Este es el Árbol Padre. Despiértalo y el claro vuelve a la vida: pide ${LEVELS.tutorial.motherTrees} árboles revividos y ${plural(LEVELS.tutorial.mother, 'nutriente')}.`,
+    hud: 'Arriba ves tus nutrientes (para trabajar), tus esporas (para reclutar) y los árboles que reviviste.',
+    pickBruno: 'Este es tu gremio. Elige a Bruno.',
+    openCard: 'Toca Ficha para ver qué hace Bruno.',
+    readCard: 'Cada hongo tiene su ficha: qué hace y cuánto cuesta. Toca Entendido.',
+    log: `Bruno descompone troncos junto a la red. Toca el tronco: ganas ${plural(GAIN.log, 'nutriente')}.`,
+    pickIndi: 'Ahora elige a Indi, que teje la red.',
+    weave: `Indi teje la red de micelio hacia el árbol gris (${plural(COST.weave, 'nutriente')}).`,
+    end: 'Cada hongo trabaja una vez por mes. Termina el mes.',
+    // Mes 2
+    month2: 'Al empezar el mes, aquí ves lo que pasó. «Ver el mes» lo cuenta completo.',
+    revive: `La red ya toca el árbol gris. Elige a Rubí y revívelo (${plural(COST.revive, 'nutriente')}).`,
+    logAgain: `Bruno otra vez al tronco: cada tronco da ${LOG_USES} veces.`,
+    weaveOn: 'Indi sigue la red hacia el otro árbol gris.',
+    endGives: `Termina el mes: cada árbol vivo da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}.`,
+    // Mes 3
+    recruit: 'Con esporas reclutas hongos nuevos. Toca Reclutar.',
+    recruitChispa: `Recluta a Chispa (${plural(RECRUIT_COSTS[0], 'espora')}). Llega cansada: trabaja desde el mes que viene.`,
+    weaveTree2: 'Indi lleva la red hasta el segundo árbol.',
+    log3: 'Bruno junta nutrientes en el otro tronco.',
+    end3: 'Termina el mes.',
+    // Mes 4
+    logGone: 'Bruno usa el tronco por segunda vez y se deshace.',
+    call: `Chispa pasa la voz: toca donde trabajó Bruno y Bruno trabaja otra vez (${plural(COST.call, 'espora')}).`,
+    again: '¡Bruno está listo de nuevo! Llévalo al último tronco.',
+    revive2: 'Rubí revive el segundo árbol. Alguien lo va a notar…',
+    end4: 'Termina el mes.',
+    // Mes 5
+    mage: 'Llegó Maestra Bruma.',
+    pickBruma: 'Elige a Maestra Bruma.',
+    sprout: 'Una vez por estación lanza un hechizo. Elige Brote arcano.',
+    sproutRock: 'Toca la roca junto al árbol: se vuelve tierra con red.',
+    recruitMore: 'Hay esporas para otro hongo. Toca Reclutar.',
+    recruitPompon: `Recluta a Pompón (${plural(RECRUIT_COSTS[1], 'espora')}): cambia nutrientes por esporas, o al revés.`,
+    weaveMother: 'Indi teje hasta tocar al Árbol Padre.',
+    help: 'Si dudas, el «?» abre Cómo jugar y la Libreta de campo: ahí está todo lo que aprendiste.',
+    end5: 'Termina el mes.',
+    // Mes 6
+    star: 'Cuando juegues sin guía, la ★ te sugiere a quién elegir y dónde tocar.',
+    pickPompon: `Al Árbol Padre le falta ${plural(GAIN.compost, 'nutriente')}. Elige a Pompón.`,
+    compost: `Elige Abonar el árbol: ${plural(COST.compost, 'espora')} por ${plural(GAIN.compost, 'nutriente')}.`,
+    compostTree: 'Toca un árbol vivo.',
+    wake: '¡Ya está todo! Elige a Rubí y despierta al Árbol Padre.',
+    // Final
+    doneTitle: '¡Ya sabes jugar!',
+    doneText: 'El Árbol Padre despertó. En Brote cada partida es un claro nuevo, y la ★ te acompaña.',
+    playBrote: 'Jugar Brote',
+    toTitle: 'Volver a la portada',
   },
 } as const;

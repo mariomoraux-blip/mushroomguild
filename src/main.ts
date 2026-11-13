@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { es } from './copy/es';
 import { tileSize } from './layout';
 import { GameScene } from './scenes/GameScene';
-import { aliasFor, checkName, LEVEL_IDS, newRandomGame, randomSeed, scoreResult, thresholds, type Level, type ScoreResult, type SpeciesId } from './rules';
+import { aliasFor, checkName, newRandomGame, PLAY_LEVELS, randomSeed, scoreResult, thresholds, type Level, type ScoreResult, type SpeciesId } from './rules';
 import { createLeaderboardClient } from './leaderboard';
 import { formatClock, newClock, read, sync } from './clock';
 import { saveIfBest } from './records';
@@ -14,6 +14,7 @@ import { mountDock } from './ui/dock';
 import { mountHud } from './ui/hud';
 import { mountSheet } from './ui/sheet';
 import { mountStory } from './ui/story';
+import { mountCoach } from './ui/coach';
 import { mountScreens } from './ui/screens';
 import { mountFlyers } from './ui/flyers';
 import { debugGame } from './debug';
@@ -34,10 +35,13 @@ const seen = readList<SpeciesId>(SEEN);
 // Niveles (019): el último elegido (foco en "Elige tu dificultad") y los ya jugados (la intro sale solo la primera vez).
 const LAST_LEVEL = 'gremio.lastLevel';
 const PLAYED_LEVELS = 'gremio.playedLevels';
-const isLevel = (v: string | null): v is Level => LEVEL_IDS.includes(v as Level);
-const lastLevel = (): Level => { const v = storage.get(LAST_LEVEL); return isLevel(v) ? v : 'brote'; };
+// «Primeros pasos» (046): 'done' al completarlo, 'skipped' al saltarlo; sin valor, se recomienda (y recibe el foco).
+const TUTORIAL = 'gremio.tutorial';
+const tutorialPending = () => !storage.get(TUTORIAL);
+const isLevel = (v: string | null): v is Level => PLAY_LEVELS.includes(v as Level);
+const lastLevel = (): Level => { const v = storage.get(LAST_LEVEL); return isLevel(v) ? v : tutorialPending() ? 'tutorial' : 'brote'; };
 // Claro de la partida: aleatorio por defecto; `?seed=N` repite un mapa, `?map=clasico` usa el del Capítulo 1
-// y `?nivel=brote|bosque|ancestral` elige el nivel.
+// y `?nivel=tutorial|brote|bosque|ancestral` elige el nivel.
 const params = new URLSearchParams(location.search);
 const levelParam = params.get('nivel');
 const level: Level = isLevel(levelParam) ? levelParam : 'brote';
@@ -58,14 +62,19 @@ const store = createStore(initialState(firstGame, seen, { title, player: leaderb
 /** "Jugar de nuevo": mismo nivel, con el mapa clásico o un claro aleatorio nuevo. */
 const restart = () => store.dispatch({ type: 'restart', game: gameFor(store.getState().game.level) });
 /** Nivel elegido en "Elige tu dificultad": se recuerda, y la intro sale solo la primera vez en ese nivel. */
-const startLevel = (lv: Level) => {
+const startLevel = (lv: Level, skipIntro = false) => {
   const played = readList<Level>(PLAYED_LEVELS);
-  storage.set(LAST_LEVEL, lv);
-  if (!played.includes(lv)) storage.set(PLAYED_LEVELS, JSON.stringify([...played, lv]));
-  store.dispatch({ type: 'start', game: gameFor(lv), intro: !played.includes(lv) });
+  // 046: la intro del tutorial es la de Brote (no se repite); después del tutorial, el foco va a Brote.
+  const shares: Level[] = lv === 'tutorial' ? ['tutorial', 'brote'] : [lv];
+  const intro = !skipIntro && !shares.some((l) => played.includes(l));
+  storage.set(LAST_LEVEL, lv === 'tutorial' ? 'brote' : lv);
+  storage.set(PLAYED_LEVELS, JSON.stringify([...new Set([...played, ...shares])]));
+  store.dispatch({ type: 'start', game: gameFor(lv), intro });
 };
 store.subscribe((state, prev) => {
   if (state.ui.seen !== prev.ui.seen) storage.set(SEEN, JSON.stringify(state.ui.seen));
+  // 046: el tutorial cuenta como visto al terminarlo o al saltarlo.
+  if (prev.ui.tutorial && !state.ui.tutorial && prev.game.level === 'tutorial') storage.set(TUTORIAL, state.game.status === 'won' ? 'done' : 'skipped');
 });
 
 // ─── Puntaje (015): umbrales por claro, cronómetro de juego activo y récord local ──────────
@@ -80,7 +89,8 @@ store.subscribe((state, prev) => {
     thresholdsNow = thresholds(state.game);
   }
   syncClock();
-  if (prev.game.status === 'playing' && state.game.status === 'won') {
+  // 046: el tutorial no da puntaje ni récord, ni entra al ranking.
+  if (prev.game.status === 'playing' && state.game.status === 'won' && state.game.level !== 'tutorial') {
     const score = scoreResult(state.game, read(clock, now()), thresholdsNow);
     const { newRecord } = saveIfBest(score);
     queueMicrotask(() => {
@@ -161,8 +171,15 @@ const hud = mountHud($('hud'), store);
 const renderDock = mountDock($('dock'), store);
 const overlay = mountBoardOverlay($('overlay'), store);
 const renderSheet = mountSheet($('sheet'), store, (x, y) => overlay.tap(x, y), aliasActions);
-const renderStory = mountStory($('story'), store, restart, { register: () => openAlias('register'), open: () => rankingScreen.open('game') });
-const renderScreens = mountScreens($('screen'), store, { pickLevel: startLevel, lastLevel }, rankingScreen);
+const renderStory = mountStory($('story'), store, restart, { register: () => openAlias('register'), open: () => rankingScreen.open('game') }, {
+  playBrote: () => startLevel('brote', true),
+  toTitle: () => {
+    store.dispatch({ type: 'closeStory' });
+    store.dispatch({ type: 'openScreen', screen: { kind: 'title' } });
+  },
+});
+const renderScreens = mountScreens($('screen'), store, { pickLevel: (lv) => startLevel(lv), lastLevel, recommendTutorial: tutorialPending }, rankingScreen);
+const renderCoach = mountCoach($('coach'), store);
 const notice = $('notice');
 mountAmbient($<HTMLCanvasElement>('ambient'));
 const noticeBar = $('notice-bar');
@@ -186,6 +203,7 @@ const renderDom = () => {
   renderSheet(state);
   renderStory(state);
   renderScreens(state);
+  renderCoach(state);
   // Con una pantalla o una carta encima, la partida no recibe foco ni lectores de pantalla.
   $('app').inert = Boolean(state.ui.screen || state.ui.story);
   notice.textContent = state.ui.notice.text;

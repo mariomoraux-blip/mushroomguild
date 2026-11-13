@@ -34,6 +34,7 @@ import {
   type MonthReport,
 } from './rules';
 import type { BoardView, Submission } from './leaderboard';
+import { currentPart, nextPart, scriptedSpecies, scriptedTile, starsOn, TUTORIAL_START, type Expect, type TutorialState } from './tutorial';
 
 export type Sheet =
   | { kind: 'recruit' }
@@ -58,7 +59,9 @@ export type Story =
   /** 044: la primera vez en la partida que un árbol queda suelto. */
   | { kind: 'loose' }
   | { kind: 'won' }
-  | { kind: 'lost' };
+  | { kind: 'lost' }
+  /** 046: final de «Primeros pasos», «¡Ya sabes jugar!». */
+  | { kind: 'tutorial' };
 /** Al cerrar una carta: la que sigue, si hay. */
 const nextStory = (st: Story | null): Story | null => (st && 'then' in st && st.then) || null;
 export const INTRO_STEPS = 3;
@@ -109,6 +112,8 @@ export interface UiState {
   readonly submission: Submission | null;
   /** Lo que muestra la pantalla «Ranking». */
   readonly board: BoardView | null;
+  /** «Primeros pasos» (046): paso del guion en curso; `null` fuera del tutorial o al terminarlo. */
+  readonly tutorial?: TutorialState | null;
 }
 
 export interface AppState {
@@ -144,7 +149,10 @@ export type Action =
   /** Ranking (036): alias registrado (cierra «Tu nombre en el gremio»), estado del envío y datos del ranking. */
   | { type: 'player'; alias: string | null }
   | { type: 'submission'; submission: Submission | null }
-  | { type: 'board'; board: BoardView };
+  | { type: 'board'; board: BoardView }
+  /** 046: «Siguiente» en un paso «Ver» del tutorial y «Saltar tutorial» (ya confirmado). */
+  | { type: 'tutorialNext' }
+  | { type: 'tutorialSkip' };
 
 const info = (text: string): Notice => ({ text, tone: 'info' });
 const warn = (text: string, short?: Resource | null): Notice => (short ? { text, tone: 'warn', short } : { text, tone: 'warn' });
@@ -230,6 +238,12 @@ export function idleHint(game: GameState): Notice {
 
 /** Miembro sugerido (★ en el dock), si el consejo es de un miembro. */
 export function suggestedMember(state: AppState): number | null {
+  const t = state.ui.tutorial;
+  if (t) {
+    // 046: desde el paso de la ★, marca a quien pide el guion.
+    const sp = starsOn(t) ? scriptedSpecies(t) : null;
+    return (sp && state.game.members.find((m) => m.species === sp)?.id) ?? null;
+  }
   if (!hintsOn(state.game)) return null;
   const a = advise(state.game);
   return 'memberId' in a ? a.memberId : null;
@@ -237,6 +251,11 @@ export function suggestedMember(state: AppState): number | null {
 
 /** Casilla sugerida (★ en el tablero): solo con el miembro sugerido seleccionado (y su hechizo, si es la maga). */
 export function suggestedTile(state: AppState): Tile | null {
+  const t = state.ui.tutorial;
+  if (t) {
+    const p = starsOn(t) && state.ui.selected !== null && state.ui.selected === suggestedMember(state) ? scriptedTile(t) : null;
+    return (p && highlighted(state).find((h) => h.x === p.x && h.y === p.y)) ?? null;
+  }
   if (!hintsOn(state.game)) return null;
   const a = advise(state.game);
   if (!('memberId' in a) || a.memberId !== state.ui.selected) return null;
@@ -272,6 +291,7 @@ export function initialState(game: GameState = newGame(), seen: readonly Species
       player: o.player ?? null,
       submission: null,
       board: null,
+      tutorial: game.level === 'tutorial' ? TUTORIAL_START : null,
     },
   };
 }
@@ -317,7 +337,9 @@ const hasLoose = (st: Story | null): boolean => !!st && (st.kind === 'loose' || 
 
 /** Aplica un nuevo estado del juego y abre la carta de historia que corresponda. */
 function advance(game: GameState, next: GameState, ui: UiState): UiState {
-  const story = storyFor(game, next, ui.looseShown);
+  const found = storyFor(game, next, ui.looseShown);
+  // 046: el tutorial termina con su propia carta, sin puntaje.
+  const story: Story | null = found?.kind === 'won' && next.level === 'tutorial' ? { kind: 'tutorial' } : found;
   return story ? { ...ui, story, ...(hasLoose(story) ? { looseShown: true } : {}) } : ui;
 }
 
@@ -367,10 +389,65 @@ const cleared = (ui: UiState, notice: Notice): UiState => ({ ...ui, selected: nu
 /** Interfaz de una partida nueva: sin selección, hojas, cartas ni pantallas (se conservan las fichas vistas). */
 const fresh = (ui: UiState, game: GameState): UiState => ({
   selected: null, spell: null, sheet: null, story: null, screen: null, result: null, notice: idleHint(game), seen: ui.seen,
-  player: ui.player, submission: null, board: ui.board,
+  player: ui.player, submission: null, board: ui.board, tutorial: game.level === 'tutorial' ? TUTORIAL_START : null,
 });
 
+/** Acciones que no son un toque del jugador en la partida: pasan siempre, también en el tutorial. */
+const FREE: ReadonlySet<Action['type']> = new Set(['scored', 'player', 'submission', 'board', 'start', 'restart']);
+const STORY_ACTIONS: ReadonlySet<Action['type']> = new Set(['storyNext', 'closeStory', 'cancel']);
+
+/** ¿La acción es la que pide esta parte del guion? (046) */
+function matches(e: Expect, action: Action, state: AppState): boolean {
+  const { game, ui } = state;
+  switch (e.type) {
+    case 'next':
+      return action.type === 'tutorialNext';
+    case 'select':
+      return action.type === 'select' && ui.selected !== action.id && member(game, action.id)?.species === e.species;
+    case 'openCard':
+      return action.type === 'openSheet' && action.sheet.kind === 'member';
+    case 'closeSheet':
+      return Boolean(ui.sheet) && (action.type === 'closeSheet' || action.type === 'cancel');
+    case 'tapTile':
+      return action.type === 'tapTile' && action.x === e.x && action.y === e.y;
+    case 'openRecruit':
+      return action.type === 'openSheet' && action.sheet.kind === 'recruit';
+    case 'recruit':
+      return action.type === 'recruit' && action.species === e.species;
+    case 'chooseSpell':
+      return action.type === 'chooseSpell' && action.spell === e.spell;
+    case 'endMonth':
+      return action.type === 'endMonth';
+    case 'closeStory':
+      return Boolean(ui.story) && STORY_ACTIONS.has(action.type);
+  }
+}
+
+/**
+ * «Primeros pasos» (046): solo pasa la acción que pide el guion, y al cumplirse avanza el paso. Las demás no tienen
+ * efecto. Mientras hay una carta de historia que el guion no espera (la intro), se puede pasar y cerrar como siempre.
+ */
+function reduceTutorial(state: AppState, action: Action, t: TutorialState): AppState {
+  const { game, ui } = state;
+  if (action.type === 'tutorialSkip') return { game, ui: { ...cleared(ui, ui.notice), story: null, tutorial: null, screen: { kind: 'level' } } };
+  const part = currentPart(t);
+  if (!part) return state;
+  if (ui.story && part.expect.type !== 'closeStory') return STORY_ACTIONS.has(action.type) ? reduceGame(state, action) : state;
+  if (!matches(part.expect, action, state)) return state;
+  const next = part.expect.type === 'next' ? state : reduceGame(state, action);
+  // Un toque que las reglas rechazan (o un recluta que no alcanza) deja el motivo en la bitácora y no avanza.
+  const done = part.expect.type === 'tapTile' || part.expect.type === 'recruit' ? next.game !== game : part.expect.type === 'select' ? next.ui.selected !== null : true;
+  if (!done) return next;
+  return { game: next.game, ui: { ...next.ui, tutorial: nextPart(t) } };
+}
+
 export function reduce(state: AppState, action: Action): AppState {
+  const t = state.ui.tutorial;
+  if (t && !FREE.has(action.type)) return reduceTutorial(state, action, t);
+  return reduceGame(state, action);
+}
+
+function reduceGame(state: AppState, action: Action): AppState {
   const { game, ui } = state;
   switch (action.type) {
     case 'select': {
@@ -465,7 +542,8 @@ export function reduce(state: AppState, action: Action): AppState {
     case 'closeStory':
       return ui.story ? { game, ui: { ...ui, story: nextStory(ui.story) } } : state;
     case 'showEnd':
-      return game.status === 'playing' || ui.story ? state : { game, ui: { ...cleared(ui, ui.notice), story: { kind: game.status } } };
+      if (game.status === 'playing' || ui.story) return state;
+      return { game, ui: { ...cleared(ui, ui.notice), story: game.level === 'tutorial' && game.status === 'won' ? { kind: 'tutorial' } : { kind: game.status } } };
     case 'restart':
       return { game: action.game, ui: fresh(ui, action.game) };
     case 'scored':
@@ -476,6 +554,9 @@ export function reduce(state: AppState, action: Action): AppState {
       return { game, ui: { ...ui, submission: action.submission } };
     case 'board':
       return { game, ui: { ...ui, board: action.board } };
+    case 'tutorialNext':
+    case 'tutorialSkip':
+      return state;
   }
 }
 

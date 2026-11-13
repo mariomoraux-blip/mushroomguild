@@ -26,6 +26,7 @@ export function rankedSeed(mapId: string, level: Level): number | null {
   const m = /^seed-(\d{1,10})$/.exec(mapId);
   const seed = m ? Number(m[1]) : NaN;
   if (!isInt(seed, 1, MAX_SEED)) return null;
+  if (level === 'tutorial') return null; // 046: el tutorial no entra al ranking
   if (level === 'brote') return seed;
   const known = LEVEL_SEEDS[level].charAt(seed);
   return known && known !== '-' ? seed : null;

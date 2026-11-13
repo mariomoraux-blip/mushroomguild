@@ -1,6 +1,6 @@
 import { es } from '../copy/es';
 import type { Row } from '../api-types';
-import { LEVEL_IDS, LEVELS, RECRUITABLE, STARTING_GUILD, seasonIndex, type Level, type SpeciesId } from '../rules';
+import { LEVELS, PLAY_LEVELS, RECRUITABLE, STARTING_GUILD, seasonIndex, type Level, type SpeciesId } from '../rules';
 import { HOWTO_STEPS, type AppState, type Screen, type Store } from '../store';
 import { assetUrl, SCREEN_ART } from '../theme';
 import { el, portrait } from './dom';
@@ -24,6 +24,8 @@ const FOCUS: Readonly<Record<Screen['kind'], (last: Level) => string>> = {
 export interface LevelPicker {
   pickLevel(level: Level): void;
   lastLevel(): Level;
+  /** 046: «Primeros pasos» lleva «Recomendado» hasta completarlo o saltarlo. */
+  recommendTutorial(): boolean;
 }
 
 /** Lo que el ranking (036) pide a quien lo monta: abrirlo (y cargarlo), volver a cargarlo y cambiar el alias. */
@@ -101,18 +103,26 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
       el('p', { class: 'title__credit', lang: 'en' }, es.titleScreen.credit));
   }
 
-  // Elige tu dificultad (019): tres botones grandes con el nombre, qué cambia y el multiplicador del puntaje.
+  // Elige tu dificultad (019): botones grandes con el nombre, qué cambia y el multiplicador del puntaje. 046: «Primeros
+  // pasos» va primero, sin multiplicador, con «Recomendado» mientras no se haya completado ni saltado.
   function levelScreen() {
+    const recommend = levels.recommendTutorial();
+    const tag = (lv: Level) =>
+      lv !== 'tutorial'
+        ? [el('span', { class: 'level__mult' }, es.levels.multiplier(LEVELS[lv].multiplier))]
+        : recommend
+          ? [el('span', { class: 'level__mult level__mult--tip' }, es.levels.recommended)]
+          : [];
     return el('div', { class: 'screen__panel' },
       header(es.levels.title),
       el('ul', { class: 'levels', 'aria-label': es.levels.label },
-        ...LEVEL_IDS.map((lv) =>
+        ...PLAY_LEVELS.map((lv) =>
           el('li', {},
             el('button', { class: `level level--${lv}`, type: 'button', 'data-action': 'level', 'data-level': lv },
               el('span', { class: 'level__text' },
                 el('strong', { class: 'level__name' }, es.levels.names[lv]),
                 el('span', { class: 'level__line' }, es.levels.lines[lv])),
-              el('span', { class: 'level__mult' }, es.levels.multiplier(LEVELS[lv].multiplier)))))));
+              ...tag(lv))))));
   }
 
   function howto(screen: Extract<Screen, { kind: 'howto' }>, state: AppState) {

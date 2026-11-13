@@ -91,6 +91,7 @@ export function score(final: GameState, timeMs: number): Score {
 /** Estado inicial del claro de un `mapId` (`clasico` o `seed-<n>`) en un nivel, o null si no se puede reconstruir. */
 export function startOf(mapId: string, level: Level = 'brote'): GameState | null {
   if (mapId === 'clasico') return newRandomGame(0, level);
+  if (mapId === 'tutorial') return newRandomGame(0, 'tutorial');
   const m = /^seed-(\d+)$/.exec(mapId);
   return m ? newRandomGame(Number(m[1]), level) : null;
 }
