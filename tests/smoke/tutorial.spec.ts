@@ -1,9 +1,10 @@
 // Escenarios de las specs que se verifican aquí (openspec/specs/):
-// tutorial › Nivel Primeros pasos: "Se gana siguiendo el guion" y "Sin puntaje" → "recorre el tutorial".
+// tutorial › Nivel Cómo jugar: "Se gana siguiendo el guion" y "Sin puntaje" → "recorre el tutorial".
 // tutorial › Viñetas paso a paso: "Paso Hacer" y "Paso Ver" → "recorre el tutorial" (lo de fuera del hueco no responde).
 // tutorial › Final del tutorial: "Terminar" → "recorre el tutorial".
 // tutorial › Viñetas accesibles: "Solo teclado" → "solo con teclado".
-// tutorial › Saltar el tutorial: "Saltar" y title-screens › Elige tu dificultad: "Primera vez" → "entrada y saltar".
+// tutorial › Saltar el tutorial: "Saltar", title-screens › Elige tu dificultad: "Primera vez" y "Tutorial visto",
+//   y title-screens › Portada: "Repetir el tutorial" → "entrada y saltar".
 import { expect, test, type Page } from '@playwright/test';
 import { currentPart, TUTORIAL, type Expect, type TutorialState } from '../../src/tutorial';
 
@@ -147,7 +148,7 @@ test('solo con teclado: Tab se queda en el objetivo y el globo, Enter avanza y E
   await expect(page.locator('#story [role="dialog"]')).toContainText('¡Ya sabes jugar!');
 });
 
-test('entrada y saltar: «Primeros pasos» primero y recomendado; al saltarlo vuelve a los niveles con el foco en Brote', async ({ page }, info) => {
+test('entrada y saltar: «Cómo jugar» primero en los niveles; al saltarlo desaparece de ahí y sigue en la portada', async ({ page }, info) => {
   const size = ['vertical-390x844', 'horizontal-844x390'].includes(info.project.name) ? info.project.name : null;
   const screen = page.locator('#screen');
   await page.goto('/');
@@ -155,7 +156,7 @@ test('entrada y saltar: «Primeros pasos» primero y recomendado; al saltarlo vu
   await expect(screen.locator('.level')).toHaveCount(4);
   await expect(screen.locator('.level').first()).toHaveAttribute('data-level', 'tutorial');
   await expect(screen.locator('[data-level="tutorial"]')).toBeFocused();
-  await expect(screen.locator('[data-level="tutorial"]')).toContainText('Recomendado');
+  await expect(screen.locator('[data-level="tutorial"]')).toContainText('Cómo jugar');
   await expect(screen.locator('[data-level="tutorial"]')).not.toContainText('Puntaje');
   for (const b of await screen.locator('.level').all()) expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   await noScroll(page);
@@ -175,11 +176,24 @@ test('entrada y saltar: «Primeros pasos» primero y recomendado; al saltarlo vu
   await page.locator('.coach__skip').click();
   if (size) await page.screenshot({ path: `docs/screenshots/046-saltar-${size}.png` });
   await page.getByRole('button', { name: 'Sí, saltar' }).click();
-  await expect(screen.locator('.level')).toHaveCount(4);
+  // Tutorial visto (048): los niveles ya no lo muestran y el foco va a Brote.
+  await expect(screen.locator('.level')).toHaveCount(3);
+  await expect(screen.locator('[data-level="tutorial"]')).toHaveCount(0);
   await expect(screen.locator('[data-level="brote"]')).toBeFocused();
-  await expect(screen.locator('[data-level="tutorial"]')).not.toContainText('Recomendado');
+  if (size) await page.screenshot({ path: `docs/screenshots/048-elegir-nivel-visto-${size}.png` });
+  // También tras recargar.
+  await page.reload();
+  await page.getByRole('button', { name: 'Nueva partida' }).click();
+  await expect(screen.locator('.level')).toHaveCount(3);
+  await expect(screen.locator('[data-level="tutorial"]')).toHaveCount(0);
   // Brote ya no repite la intro.
   await screen.locator('[data-level="brote"]').click();
   await expect(card).toHaveCount(0);
   await expect(page.locator('.coach')).toBeHidden();
+  // Repetir el tutorial: «Cómo jugar» de la portada lo empieza aunque se haya saltado, ya sin intro.
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Cómo jugar', exact: true }).click();
+  await expect(page.locator('.coach__bubble')).toBeVisible();
+  await expect(card).toHaveCount(0);
+  expect(await tutorialOf(page)).toEqual({ step: 0, part: 0 });
 });

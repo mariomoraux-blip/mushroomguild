@@ -1,10 +1,9 @@
 import { es } from '../copy/es';
 import type { Row } from '../api-types';
 import { LEVELS, PLAY_LEVELS, RECRUITABLE, STARTING_GUILD, seasonIndex, type Level, type SpeciesId } from '../rules';
-import { HOWTO_STEPS, type AppState, type Screen, type Store } from '../store';
+import type { AppState, Screen, Store } from '../store';
 import { assetUrl, SCREEN_ART } from '../theme';
 import { el, portrait } from './dom';
-import { howtoArt } from './howto-art';
 import { hideLayer, showLayer } from './motion';
 
 /** Las ocho especies (039): las del inicio, las que solo llegan reclutando y Maestra Bruma. */
@@ -15,7 +14,6 @@ const nameOf = (sp: SpeciesId) => (sp === 'mago' ? es.mageName : es.species[sp].
 const FOCUS: Readonly<Record<Screen['kind'], (last: Level) => string>> = {
   title: () => '.menu-btn--primary',
   level: (last) => `[data-level="${last}"]`,
-  howto: () => '.round-btn--next',
   guild: () => '.guild__row',
   ranking: () => '.round-btn--back',
 };
@@ -24,8 +22,8 @@ const FOCUS: Readonly<Record<Screen['kind'], (last: Level) => string>> = {
 export interface LevelPicker {
   pickLevel(level: Level): void;
   lastLevel(): Level;
-  /** 046: «Primeros pasos» lleva «Recomendado» hasta completarlo o saltarlo. */
-  recommendTutorial(): boolean;
+  /** 048: el tutorial («Cómo jugar») aparece en los niveles hasta completarlo o saltarlo. */
+  tutorialPending(): boolean;
 }
 
 /** Lo que el ranking (036) pide a quien lo monta: abrirlo (y cargarlo), volver a cargarlo y cambiar el alias. */
@@ -36,8 +34,8 @@ export interface RankingScreen {
 }
 
 /**
- * Pantallas fuera de la partida (012): portada (Nueva partida, Cómo jugar, El gremio), "Elige tu dificultad" (019),
- * "Cómo jugar" (carrusel de 5 pasos con ‹ ›, puntos y deslizar) y "El gremio" (las cinco especies; abre su ficha).
+ * Pantallas fuera de la partida (012): portada (Nueva partida, Cómo jugar, El gremio, Ranking), "Elige tu dificultad"
+ * (019), "El gremio" (las especies; abre su ficha) y el ranking (036). «Cómo jugar» empieza el tutorial (048).
  * Solo dibuja `ui.screen` y despacha acciones; Esc vuelve (main.ts › cancel).
  */
 export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicker, ranking: RankingScreen) {
@@ -48,44 +46,22 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
   root.addEventListener('click', (e) => {
     const b = (e.target as HTMLElement).closest('button');
     if (!b) return;
-    const screen = store.getState().ui.screen;
-    const { action, step, species, level } = b.dataset;
+    const { action, species, level } = b.dataset;
     if (action === 'play') store.dispatch({ type: 'play' });
     if (action === 'level') levels.pickLevel(level as Level);
-    if (action === 'howto') store.dispatch({ type: 'openScreen', screen: { kind: 'howto', step: 0, back: 'title' } });
+    // 048: «Cómo jugar» es el tutorial, también si ya se completó (así se repite).
+    if (action === 'howto') levels.pickLevel('tutorial');
     if (action === 'guild') store.dispatch({ type: 'openScreen', screen: { kind: 'guild', back: 'title' } });
     if (action === 'ranking') ranking.open('title');
     if (action === 'rankingRetry') ranking.retry();
     if (action === 'rename') ranking.rename();
     if (action === 'back') store.dispatch({ type: 'closeScreen' });
-    if (action === 'step') store.dispatch({ type: 'howtoStep', step: Number(step) });
-    if (action === 'notebook') store.dispatch({ type: 'openSheet', sheet: { kind: 'help' } });
     if (action === 'creature') store.dispatch({ type: 'openSheet', sheet: { kind: 'creature', species: species as SpeciesId } });
-    // "¡A jugar!": desde la portada empieza la partida (intro); desde la partida, vuelve al tablero.
-    if (action === 'done') store.dispatch(screen?.kind === 'howto' && screen.back === 'title' ? { type: 'play' } : { type: 'closeScreen' });
-  });
-
-  // Carrusel: flechas del teclado y deslizar con el dedo.
-  const go = (delta: number) => {
-    const s = store.getState().ui.screen;
-    if (s?.kind === 'howto') store.dispatch({ type: 'howtoStep', step: s.step + delta });
-  };
-  root.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') go(1);
-    if (e.key === 'ArrowLeft') go(-1);
-  });
-  let startX: number | null = null;
-  root.addEventListener('pointerdown', (e) => (startX = e.clientX));
-  root.addEventListener('pointerup', (e) => {
-    if (startX === null) return;
-    const dx = e.clientX - startX;
-    startX = null;
-    if (Math.abs(dx) > 48) go(dx < 0 ? 1 : -1);
   });
 
   const header = (title: string) =>
     el('header', { class: 'screen__head' },
-      el('button', { class: 'round-btn round-btn--back', type: 'button', 'data-action': 'back', 'aria-label': es.howto.back }),
+      el('button', { class: 'round-btn round-btn--back', type: 'button', 'data-action': 'back', 'aria-label': es.screens.back }),
       el('h1', { class: 'screen__title', id: 'screen-title' }, title));
 
   // Portada limpia (018): solo el logo, el menú y la firma (020); el gremio se presenta en la intro y en "El gremio".
@@ -103,49 +79,21 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
       el('p', { class: 'title__credit', lang: 'en' }, es.titleScreen.credit));
   }
 
-  // Elige tu dificultad (019): botones grandes con el nombre, qué cambia y el multiplicador del puntaje. 046: «Primeros
-  // pasos» va primero, sin multiplicador, con «Recomendado» mientras no se haya completado ni saltado.
+  // Elige tu dificultad (019): botones grandes con el nombre, qué cambia y el multiplicador del puntaje. 048: «Cómo
+  // jugar» (el tutorial) va primero, sin multiplicador, solo mientras no se haya completado ni saltado.
   function levelScreen() {
-    const recommend = levels.recommendTutorial();
-    const tag = (lv: Level) =>
-      lv !== 'tutorial'
-        ? [el('span', { class: 'level__mult' }, es.levels.multiplier(LEVELS[lv].multiplier))]
-        : recommend
-          ? [el('span', { class: 'level__mult level__mult--tip' }, es.levels.recommended)]
-          : [];
+    const shown = PLAY_LEVELS.filter((lv) => lv !== 'tutorial' || levels.tutorialPending());
+    const tag = (lv: Level) => (lv === 'tutorial' ? [] : [el('span', { class: 'level__mult' }, es.levels.multiplier(LEVELS[lv].multiplier))]);
     return el('div', { class: 'screen__panel' },
       header(es.levels.title),
       el('ul', { class: 'levels', 'aria-label': es.levels.label },
-        ...PLAY_LEVELS.map((lv) =>
+        ...shown.map((lv) =>
           el('li', {},
             el('button', { class: `level level--${lv}`, type: 'button', 'data-action': 'level', 'data-level': lv },
               el('span', { class: 'level__text' },
                 el('strong', { class: 'level__name' }, es.levels.names[lv]),
                 el('span', { class: 'level__line' }, es.levels.lines[lv])),
               ...tag(lv))))));
-  }
-
-  function howto(screen: Extract<Screen, { kind: 'howto' }>, state: AppState) {
-    const page = es.howto.steps[screen.step]!;
-    const last = screen.step === HOWTO_STEPS - 1;
-    return el('div', { class: 'screen__panel' },
-      header(es.howto.title),
-      el('section', { class: 'howto', 'aria-roledescription': 'carrusel', 'aria-labelledby': 'screen-title' },
-        el('div', { class: 'howto__card', 'aria-live': 'polite' },
-          el('p', { class: 'howto__count' }, es.howto.step(screen.step + 1, HOWTO_STEPS)),
-          // Miniatura de la interfaz (029): decorativa, no se toca ni se enfoca.
-          el('div', { class: 'howto__art', 'aria-hidden': 'true', inert: '' }, ...howtoArt(screen.step, state.game, seasonIndex(state.game.month))),
-          el('h2', { class: 'howto__title' }, page.title),
-          el('p', { class: 'howto__text' }, page.text)),
-        el('div', { class: 'howto__nav' },
-          el('button', { class: 'round-btn round-btn--prev', type: 'button', 'data-action': 'step', 'data-step': screen.step - 1, 'aria-label': es.howto.prev, disabled: screen.step === 0 }),
-          el('div', { class: 'howto__dots' },
-            ...Array.from({ length: HOWTO_STEPS }, (_, i) =>
-              el('button', { class: `howto__dot${i === screen.step ? ' is-active' : ''}`, type: 'button', 'data-action': 'step', 'data-step': i, 'aria-label': es.howto.goTo(i + 1), 'aria-current': i === screen.step ? 'step' : undefined }))),
-          el('button', { class: 'round-btn round-btn--next', type: 'button', 'data-action': 'step', 'data-step': screen.step + 1, 'aria-label': es.howto.next, disabled: last })),
-        el('div', { class: 'screen__actions' },
-          el('button', { class: 'menu-btn', type: 'button', 'data-action': 'notebook' }, es.howto.notebook),
-          el('button', { class: 'menu-btn menu-btn--primary', type: 'button', 'data-action': 'done' }, es.howto.play))));
   }
 
   function guild(state: AppState) {
@@ -205,8 +153,6 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
         return title(state);
       case 'level':
         return levelScreen();
-      case 'howto':
-        return howto(screen, state);
       case 'guild':
         return guild(state);
       case 'ranking':
@@ -233,15 +179,12 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
     if (kindChanged && screen.kind === 'ranking' && screen.back === 'game') opener = document.activeElement as HTMLElement | null;
     showLayer(root);
     root.dataset.kind = screen.kind;
-    const focused = (document.activeElement as HTMLElement | null)?.dataset;
-    const refocus = focused?.action === 'step' ? `[data-action="step"][data-step="${focused.step}"]` : null;
     const keep = !kindChanged && (document.activeElement as HTMLElement | null)?.dataset.action;
     root.replaceChildren(views(screen, state));
-    // Entrada (022): el panel sube al cambiar de pantalla, no al pasar de paso en el carrusel.
+    // Entrada (022): el panel sube al cambiar de pantalla, no al redibujar la misma.
     if (kindChanged) root.querySelector('.screen__panel')?.classList.add('is-entering');
-    // Foco: el botón principal al entrar; en el carrusel, se mantiene en el control que se usó.
+    // Foco: el botón principal al entrar; al redibujar, se mantiene en el control que se usó.
     const target =
-      (!kindChanged && refocus && root.querySelector<HTMLElement>(refocus)) ||
       (keep && (root.querySelector<HTMLElement>(`[data-action="${keep}"]`) ?? root.querySelector<HTMLElement>('.round-btn--back'))) ||
       // Al volver del ranking, el foco queda en «Ranking» (036).
       (kindChanged && fromRanking && root.querySelector<HTMLElement>('[data-action="ranking"]')) ||

@@ -56,7 +56,7 @@ export interface LevelRules {
   readonly start?: { readonly nutrients: number; readonly spores: number };
 }
 export const LEVELS: Readonly<Record<Level, LevelRules>> = {
-  // 046: «Primeros pasos». Recursos y Árbol Ancestral ajustados para que el guion (`src/tutorial.ts`) se gane en el mes 6.
+  // 046: el tutorial «Cómo jugar». Recursos y Árbol Ancestral ajustados para que el guion (`src/tutorial.ts`) se gane en el mes 6.
   tutorial: { rocks: 3, frost: [], fading: [], upkeep: [], sporeless: [], mother: 9, motherTrees: 2, plague: [], rooted: false, hints: false, multiplier: 0, start: { nutrients: 2, spores: 4 } },
   brote: { rocks: 6, frost: [], fading: [], upkeep: [], sporeless: [], mother: 10, motherTrees: TREES_FOR_MOTHER, plague: [], rooted: false, hints: true, multiplier: 1 },
   bosque: { rocks: 9, frost: [2, 3], fading: [4, 6], upkeep: [2, 3], sporeless: [3], mother: 11, motherTrees: TREES_FOR_MOTHER, plague: [3], rooted: true, hints: true, multiplier: 1.5 },
@@ -64,7 +64,7 @@ export const LEVELS: Readonly<Record<Level, LevelRules>> = {
 };
 /** Niveles con puntaje y ranking (el servidor rechaza los demás). */
 export const LEVEL_IDS: readonly Level[] = ['brote', 'bosque', 'ancestral'];
-/** Niveles de «Elige tu dificultad», en orden (046: «Primeros pasos» primero). */
+/** Niveles de «Elige tu dificultad», en orden (046: el tutorial «Cómo jugar» primero). */
 export const PLAY_LEVELS: readonly Level[] = ['tutorial', ...LEVEL_IDS];
 /** Costo de tejer con escarcha. */
 export const FROST_WEAVE = 2;
@@ -123,7 +123,7 @@ export const MAP: readonly string[] = [
 ];
 
 /**
- * Claro de «Primeros pasos» (046), hecho a mano para el guion: un tronco junto al Hogar, dos árboles en fila, una barrera
+ * Claro de el tutorial «Cómo jugar» (046), hecho a mano para el guion: un tronco junto al Hogar, dos árboles en fila, una barrera
  * de rocas que Maestra Bruma abre con el Brote arcano y el Árbol Ancestral detrás.
  */
 export const TUTORIAL_MAP: readonly string[] = [

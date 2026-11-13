@@ -299,7 +299,7 @@ export const es = {
   levels: {
     title: 'Elige tu dificultad',
     label: 'Niveles de dificultad',
-    names: { tutorial: 'Primeros pasos', brote: 'Brote', bosque: 'Bosque', ancestral: 'Ancestral' },
+    names: { tutorial: 'Cómo jugar', brote: 'Brote', bosque: 'Bosque', ancestral: 'Ancestral' },
     lines: {
       tutorial: 'Una partida corta y guiada: aprende a jugar paso a paso.',
       brote: 'El claro de siempre, con la ★ para guiarte.',
@@ -307,9 +307,6 @@ export const es = {
       ancestral: 'Más rocas aún, escarcha hasta el final, seis árboles que se apagan, una plaga que crece desde el otoño, un Árbol Ancestral aún más exigente y sin ★. Los árboles solo dan si la red los une al Hogar.',
     },
     multiplier: (m: number) => `Puntaje ${times(m)}`,
-    /** 046: «Primeros pasos» lo lleva hasta completarlo o saltarlo. */
-    recommended: 'Recomendado',
-    noScore: 'Sin puntaje',
     back: 'Volver a la portada',
   } satisfies { names: Record<Level, string>; lines: Record<Level, string> } & Record<string, unknown>,
 
@@ -325,23 +322,8 @@ export const es = {
     credit: 'By Mario Mora for BerryLab',
   },
 
-  howto: {
-    title: 'Cómo jugar',
-    steps: [
-      { title: 'Elige un hongo', text: 'Toca un hongo del gremio: se resaltan las casillas donde puede trabajar.' },
-      { title: 'Trabaja junto a la red', text: 'Toca una casilla resaltada. Solo se trabaja junto a la red de micelio.' },
-      { title: 'Una vez por mes', text: 'Cada hongo trabaja una vez por mes. Después pulsa «Fin del mes».' },
-      { title: 'Al empezar el mes', text: `Cada árbol vivo da ${plural(GAIN.treeSpores, 'espora')} y ${plural(GAIN.treeNutrients, 'nutriente')}. Con esporas reclutas otro hongo: ${recruitCurve}.` },
-      { title: 'Despierta al Árbol Ancestral', text: `Antes de que acabe el invierno: que la red lo toque y ${motherNeeds}. Si dudas, sigue la ★.` },
-    ],
-    step: (n: number, total: number) => `Paso ${n} de ${total}`,
-    prev: 'Paso anterior',
-    next: 'Paso siguiente',
-    goTo: (n: number) => `Ir al paso ${n}`,
-    notebook: 'Libreta de campo',
-    back: 'Volver',
-    play: '¡A jugar!',
-  },
+  /** Pantallas fuera de la partida. */
+  screens: { back: 'Volver' },
 
   guild: {
     title: 'El gremio',
@@ -353,7 +335,7 @@ export const es = {
   },
 
   help: {
-    button: 'Ayuda: Cómo jugar',
+    button: 'Ayuda: Libreta de campo',
     title: 'Libreta de campo',
     goalTitle: 'La meta',
     goal: (n: number, trees: number) => `Despierta al Árbol Ancestral (arriba) antes de que acabe el invierno. Necesitas que la red lo toque, ${trees} árboles revividos y ${n} nutrientes.`,
@@ -643,7 +625,7 @@ export const es = {
         : 'Nadie tiene trabajo este mes. Termina el mes.',
   },
 
-  /** «Primeros pasos» (046): el globo de cada paso del guion (`src/tutorial.ts`), frases cortas. */
+  /** Tutorial, «Cómo jugar» (046, 048): el globo de cada paso del guion (`src/tutorial.ts`), frases cortas. */
   tutorial: {
     label: 'Tutorial',
     count: (n: number, total: number) => `Paso ${n} de ${total}`,
@@ -688,7 +670,7 @@ export const es = {
     recruitMore: 'Hay esporas para otro hongo. Toca Reclutar.',
     recruitPompon: `Recluta a Pompón (${plural(RECRUIT_COSTS[1], 'espora')}): cambia nutrientes por esporas, o al revés.`,
     weaveMother: 'Indi teje hasta tocar al Árbol Ancestral.',
-    help: 'Si dudas, el «?» abre Cómo jugar y la Libreta de campo: ahí está todo lo que aprendiste.',
+    help: 'Si dudas, el «?» abre la Libreta de campo: ahí está todo lo que aprendiste.',
     end5: 'Termina el mes.',
     // Mes 6
     star: 'Cuando juegues sin guía, la ★ te sugiere a quién elegir y dónde tocar.',

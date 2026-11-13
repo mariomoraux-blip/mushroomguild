@@ -9,7 +9,7 @@ import { countChange, replay } from './motion';
 
 /**
  * HUD del referente (011): mes y estación en una pastilla verde, pastillas de crema con ícono pintado
- * para nutrientes, esporas (abre reclutar) y árboles vivos (del total del claro), y "?" amarillo (Cómo jugar).
+ * para nutrientes, esporas (abre reclutar) y árboles vivos (del total del claro), y "?" amarillo (Libreta de campo, 048).
  * Devuelve `render` (estado) y `setTime` (mm:ss del cronómetro, sin `aria-live`: no se anuncia cada segundo).
  */
 export function mountHud(root: HTMLElement, store: Store) {
@@ -41,7 +41,7 @@ export function mountHud(root: HTMLElement, store: Store) {
   root.append(month, nutrients.node, spores.node, treesChip.node, help);
 
   spores.node.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'recruit' } }));
-  help.addEventListener('click', () => store.dispatch({ type: 'openScreen', screen: { kind: 'howto', step: 0, back: 'game' } }));
+  help.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'help' } }));
 
   const setTime = (text: string) => {
     setText(time, text);

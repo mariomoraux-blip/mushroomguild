@@ -685,8 +685,7 @@ button { font: inherit; color: inherit; }
   cursor: pointer;
   filter: drop-shadow(0 3px 0 color-mix(in srgb, var(--ink) 50%, transparent));
 }
-.round-btn--back, .round-btn--prev { background-image: var(--art-btn-prev); }
-.round-btn--next { background-image: var(--art-btn-next); }
+.round-btn--back { background-image: var(--art-btn-prev); }
 .round-btn:disabled { opacity: 0.35; cursor: default; }
 .round-btn:active:not(:disabled) { transform: translateY(2px); }
 .menu-btn {
@@ -744,44 +743,6 @@ button { font: inherit; color: inherit; }
   background: var(--paper);
   border-radius: 10px;
 }
-/* Cómo jugar */
-.howto { display: grid; gap: 14px; }
-.howto__card {
-  min-height: 330px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 18px 20px;
-  text-align: center;
-  border: 2px solid var(--ink);
-  border-radius: 22px;
-  background: var(--grain), linear-gradient(var(--cream), var(--paper) 65%, var(--peach));
-  box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--wood) 30%, transparent), 0 10px 24px color-mix(in srgb, var(--ink) 50%, transparent);
-}
-.howto__count { margin: 0; font-size: 12px; font-weight: 800; color: var(--ink-soft); }
-.howto__art { flex: 1; min-height: 140px; display: flex; align-items: center; justify-content: center; gap: 4px; }
-/* Miniaturas de la interfaz (029): las mismas piezas del juego, quietas y sin toque. */
-.howto-ui { --recipe-tile: 64px; display: flex; align-items: center; justify-content: center; gap: 10px; pointer-events: none; }
-.howto-ui--dock { gap: 14px; align-items: flex-end; }
-.howto-ui--dock .card { flex: 0 0 auto; }
-.howto-ui--dock .card[aria-pressed='true'] { transform: translateY(-6px); }
-.howto-ui--tiles { gap: 8px; }
-.howto-ui__chips { display: flex; flex-direction: column; gap: 6px; }
-.howto-ui__chips--hud { gap: 8px; }
-.howto-ui__chips--hud .chip { width: 82px; }
-.howto-ui--goal { gap: 12px; }
-.howto-ui__father { width: 150px; max-width: 46vw; height: auto; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--sun) 80%, transparent)) drop-shadow(0 4px 4px color-mix(in srgb, var(--ink) 30%, transparent)); }
-.howto__title { margin: 0; font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--moss); }
-.howto__text { margin: 0; font-size: 16px; font-weight: 700; line-height: 1.35; }
-.howto__nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.howto__dots { display: flex; gap: 2px; }
-.howto__dot { width: 32px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; position: relative; }
-.howto__dot::before { content: ''; position: absolute; inset: 16px 9px; border-radius: 50%; border: 2px solid var(--ink); background: var(--paper); }
-.howto__dot.is-active::before { background: var(--sun); inset: 14px 7px; }
-.screen__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.screen__actions .menu-btn { font-size: 17px; padding: 0 10px 3px; }
-.screen__actions .menu-btn--primary { min-height: 52px; font-size: 19px; }
 /* El gremio */
 .guild__intro { margin: 0; padding: 10px 14px; font-weight: 700; text-align: center; border: 2px solid var(--ink); border-radius: 16px; background: var(--grain), var(--paper); }
 .guild__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
@@ -1109,16 +1070,7 @@ button { font: inherit; color: inherit; }
   .title__menu { grid-column: 2; margin: 0; }
   .screen__panel { width: min(760px, 100%); gap: 8px; }
   .screen__head { min-height: 48px; }
-  .howto { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-rows: 1fr auto; column-gap: 16px; row-gap: 10px; align-items: center; }
-  .howto__card { grid-row: 1 / span 2; min-height: 0; padding: 10px 14px 14px; gap: 4px; }
-  .howto__art { min-height: 0; }
-  .howto-ui { --recipe-tile: 52px; }
-  .howto-ui__father { width: 112px; }
-  .howto__title { font-size: 20px; }
-  .howto__text { font-size: 14px; }
-  .howto__nav { grid-column: 2; align-self: end; }
-  .screen__actions { grid-column: 2; align-self: start; }
-  .guild__list { grid-template-columns: 1fr 1fr; }
+    .guild__list { grid-template-columns: 1fr 1fr; }
   .guild__intro { padding: 6px 12px; }
   .app {
     max-width: none;
@@ -1152,7 +1104,7 @@ button { font: inherit; color: inherit; }
   }
 }
 
-/* ─── Primeros pasos (046): viñetas del tutorial ───────────────────────────── */
+/* ─── Tutorial «Cómo jugar» (046): viñetas del tutorial ───────────────────────────── */
 /* Sobre todo (hojas 40): la sombra del aro es la máscara; los bloques atrapan los toques fuera del hueco. */
 .coach { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
 .coach[hidden] { display: none; }
@@ -1223,7 +1175,6 @@ button { font: inherit; color: inherit; }
 .coach__bubble[data-side='right'] .coach__arrow { left: -9px; translate: 0 -50%; border-top: 0; border-right: 0; }
 .coach__bubble[data-side='left'] .coach__arrow { left: auto; right: -9px; translate: 0 -50%; border-bottom: 0; border-left: 0; }
 .coach__bubble:is([data-side='center'], [data-side='top']) .coach__arrow { display: none; }
-.level__mult--tip { background: var(--meadow); }
 
 /* Movimiento reducido (022): sin desplazamiento, escala, rotación ni rebotes; quedan los cambios de color y opacidad. */
 @media (prefers-reduced-motion: reduce) {

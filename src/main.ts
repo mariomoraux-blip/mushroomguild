@@ -35,7 +35,8 @@ const seen = readList<SpeciesId>(SEEN);
 // Niveles (019): el último elegido (foco en "Elige tu dificultad") y los ya jugados (la intro sale solo la primera vez).
 const LAST_LEVEL = 'gremio.lastLevel';
 const PLAYED_LEVELS = 'gremio.playedLevels';
-// «Primeros pasos» (046): 'done' al completarlo, 'skipped' al saltarlo; sin valor, se recomienda (y recibe el foco).
+// Tutorial, «Cómo jugar» (046, 048): 'done' al completarlo, 'skipped' al saltarlo; sin valor, aparece primero en
+// «Elige tu dificultad» (y recibe el foco).
 const TUTORIAL = 'gremio.tutorial';
 const tutorialPending = () => !storage.get(TUTORIAL);
 const isLevel = (v: string | null): v is Level => PLAY_LEVELS.includes(v as Level);
@@ -178,7 +179,7 @@ const renderStory = mountStory($('story'), store, restart, { register: () => ope
     store.dispatch({ type: 'openScreen', screen: { kind: 'title' } });
   },
 });
-const renderScreens = mountScreens($('screen'), store, { pickLevel: (lv) => startLevel(lv), lastLevel, recommendTutorial: tutorialPending }, rankingScreen);
+const renderScreens = mountScreens($('screen'), store, { pickLevel: (lv) => startLevel(lv), lastLevel, tutorialPending }, rankingScreen);
 const renderCoach = mountCoach($('coach'), store);
 const notice = $('notice');
 mountAmbient($<HTMLCanvasElement>('ambient'));

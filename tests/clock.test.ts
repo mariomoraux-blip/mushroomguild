@@ -31,7 +31,8 @@ describe('Requirement: Cronómetro', () => {
     expect(clockShouldRun(acted, false)).toBe(false);
     expect(clockShouldRun(run(acted, { type: 'openSheet', sheet: { kind: 'recruit' } }), true)).toBe(false);
     expect(clockShouldRun(run(acted, { type: 'openSheet', sheet: { kind: 'creature', species: 'champi' } }), true)).toBe(false);
-    expect(clockShouldRun(run(acted, { type: 'openScreen', screen: { kind: 'howto', step: 0, back: 'game' } }), true)).toBe(false);
+    expect(clockShouldRun(run(acted, { type: 'openSheet', sheet: { kind: 'help' } }), true)).toBe(false);
+    expect(clockShouldRun(run(acted, { type: 'openScreen', screen: { kind: 'guild', back: 'game' } }), true)).toBe(false);
     expect(clockShouldRun({ ...acted, ui: { ...acted.ui, story: { kind: 'mage' } } }, true)).toBe(false);
   });
 
