@@ -4,6 +4,8 @@ Auditoría para ponerle sonido al juego. Aquí está qué suena, cuándo, de dó
 
 Este documento no cambia reglas ni código. La implementación nace de un cambio de OpenSpec (049 en adelante), igual que la dirección de arte.
 
+> **050 (Mario, 13 de noviembre de 2026):** el juego no lleva ambiente y la portada va en silencio; el sonido empieza en el tablero. Lo que este documento dice del ambiente (sección A, buses, ducking, mezcla a −30 LUFS) queda como referencia y no está en el juego. La fuente de verdad es `openspec/specs/audio`.
+
 ## Principios
 
 1. **El sonido es el progreso.** Igual que la luz (dirección de arte, principio 4): el claro empieza casi en silencio, con viento y pocos grillos. Cada árbol revivido suma vida al ambiente (hojas, pájaros, insectos). Al despertar el Árbol Ancestral, el claro suena entero.

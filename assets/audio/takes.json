@@ -1,6 +1,5 @@
 {
   "_": "Toma elegida por sonido (cambio 049). Con varias, son variantes que se alternan. Después de editar: python3 scripts/build-audio.py",
-  "amb-clearing": [4],
   "ui-tap": [1],
   "ui-tap-primary": [1],
   "ui-select": [1],

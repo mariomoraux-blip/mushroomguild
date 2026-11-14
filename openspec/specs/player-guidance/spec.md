@@ -51,7 +51,7 @@ El HUD SHALL tener un botón "?" que abre la Libreta de campo encima del tablero
 
 #### Scenario: Apagar el sonido en la partida
 - WHEN el jugador abre la Libreta y pulsa «Sonido»
-- THEN el interruptor queda apagado y el ambiente se calla
+- THEN el interruptor queda apagado y los efectos del tablero dejan de sonar
 
 ### Requirement: Pista y camino sugerido
 El juego SHALL proponer un siguiente paso con `advise(state)`, con esta prioridad: despertar al Árbol Ancestral > revivir un árbol > frenar la plaga (en Bosque y Ancestral: que el Ganoderma limpie, o que un miembro listo trabaje a 2 casillas o menos de, la casilla tejida con plaga que nadie frena este mes, primero la más cercana al Hogar) > hechizo de Maestra Bruma > pasar la voz a una Amanita > descomponer > pasar la voz a un Champiñón > tejer > pasar la voz a un Lactarius > reclutar > terminar el mes. Reclutar SHALL sugerirse solo en dos casos (ver "Cómo reclutar"): cuando ningún miembro listo tiene una acción útil, o cuando falta el rol que pide el siguiente paso sugerido. El miembro sugerido SHALL llevar una ★ en el dock; al seleccionarlo, la casilla sugerida SHALL llevar una ★ en el tablero. Tejer SHALL apuntar a la casilla válida más cercana al árbol gris (o vivo pero suelto, en Bosque y Ancestral) más cercano a la red mientras haya menos árboles revividos de los que pide el Árbol Ancestral del nivel (3, o 4 en Ancestral), y al Árbol Ancestral después. En Ancestral no SHALL mostrarse ninguna pista: ni ★ en el dock o el tablero, ni «Pista:» en la bitácora (los bots siguen usando `advise`). Los avisos de la presión y el aviso de mes vacío no son pistas.

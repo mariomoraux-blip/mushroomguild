@@ -1,12 +1,12 @@
 # audio
 
 ## Purpose
-Sonido del juego: efectos, ambiente y cortinas en Web Audio, fuera de `src/rules/`. Origen: cambio 049 (archivado). Cues en `src/audio-cues.ts`, motor en `src/audio.ts`, interruptores en `src/ui/audio-toggles.ts`, tomas en `assets/audio/takes.json` y dirección en `docs/sound-design.md`.
+Sonido del juego: efectos y cortinas en Web Audio, fuera de `src/rules/`. Origen: cambio 049 (archivado); el 050 quitó el ambiente y dejó la portada en silencio. Cues en `src/audio-cues.ts`, motor en `src/audio.ts`, interruptores en `src/ui/audio-toggles.ts`, tomas en `assets/audio/takes.json` y dirección en `docs/sound-design.md`.
 
 ## Requirements
 
 ### Requirement: El sonido acompaña
-El juego SHALL tener sonido según `docs/sound-design.md` (P0): un ambiente en loop, efectos para las acciones del tablero y la interfaz, y cortinas de victoria y derrota. El sonido SHALL salir de `src/audio.ts`, que escucha al store y a `diffEffects` y nunca cambia el estado del juego; `src/rules/` no SHALL saber del audio. Todo lo que suena SHALL verse también: jugar en silencio no quita información.
+El juego SHALL tener sonido según `docs/sound-design.md` (P0), sin ambiente (050): efectos para las acciones del tablero y la interfaz, y cortinas de victoria y derrota. El sonido SHALL salir de `src/audio.ts`, que escucha al store y a `diffEffects` y nunca cambia el estado del juego; `src/rules/` no SHALL saber del audio. Todo lo que suena SHALL verse también: jugar en silencio no quita información.
 
 #### Scenario: Tejer suena
 - WHEN Indi teje una casilla junto a la red
@@ -19,7 +19,7 @@ El juego SHALL tener sonido según `docs/sound-design.md` (P0): un ambiente en l
 
 #### Scenario: Victoria
 - WHEN la Amanita despierta al Árbol Ancestral
-- THEN suena `sfx-awaken` y, al abrirse la carta de victoria, `stg-victory`, con el ambiente 6 dB más bajo mientras dura
+- THEN suena `sfx-awaken` y, al abrirse la carta de victoria, `stg-victory`
 
 ### Requirement: Nada suena antes del primer gesto
 El `AudioContext` SHALL crearse (o reanudarse) en el primer `pointerdown` o `keydown` del jugador, nunca antes, y los archivos de audio SHALL descargarse después de ese gesto. Donde exista `navigator.audioSession`, su tipo SHALL ser `ambient`, para que el interruptor de silencio de iOS calle el juego y no corte la música del jugador.
@@ -30,22 +30,23 @@ El `AudioContext` SHALL crearse (o reanudarse) en el primer `pointerdown` o `key
 
 #### Scenario: Primer toque
 - WHEN el jugador pulsa "Nueva partida"
-- THEN se crea el `AudioContext`, empieza la descarga del audio y el ambiente entra a −6 dB en «Elige tu dificultad»
+- THEN se crea el `AudioContext` y empieza la descarga de los efectos y las cortinas
+- AND en «Elige tu dificultad» no suena nada
 
 ### Requirement: Pausa con la pestaña oculta
 Al ocultarse la pestaña, el audio SHALL suspenderse; al volver, SHALL reanudarse si ya estaba desbloqueado.
 
 #### Scenario: Cambiar de app
-- WHEN el jugador cambia de pestaña en plena partida
-- THEN el ambiente y los efectos se detienen
-- AND al volver, el ambiente sigue
+- WHEN el jugador cambia de pestaña mientras suena una cortina
+- THEN la cortina se detiene y no suena ningún efecto
+- AND al volver, el sonido sigue
 
 ### Requirement: Interruptores de sonido
-«Sonido» (ambiente, efectos e interfaz) y «Música» (cortinas de victoria y derrota y, cuando exista, el tema de portada) SHALL ser interruptores de sí o no en la portada y en la Libreta de campo, con áreas táctiles de 44 px o más, `aria-pressed` y foco visible. SHALL guardarse en `localStorage` (`gremio.audio`) y empezar encendidos; si el almacenamiento falla, empiezan encendidos y el juego sigue. Con un interruptor apagado, nada de su grupo SHALL sonar ni descargarse.
+«Sonido» (efectos e interfaz) y «Música» (cortinas de victoria y derrota y, cuando exista, el tema de portada) SHALL ser interruptores de sí o no en la portada y en la Libreta de campo, con áreas táctiles de 44 px o más, `aria-pressed` y foco visible. SHALL guardarse en `localStorage` (`gremio.audio`) y empezar encendidos; si el almacenamiento falla, empiezan encendidos y el juego sigue. Con un interruptor apagado, nada de su grupo SHALL sonar ni descargarse.
 
 #### Scenario: Apagar el sonido
 - WHEN el jugador apaga «Sonido» en la portada y empieza una partida
-- THEN no suena el ambiente ni ningún efecto
+- THEN no suena ningún efecto
 - AND al volver a abrir el juego, «Sonido» sigue apagado
 
 #### Scenario: Teclado
@@ -65,3 +66,11 @@ Mientras los sonidos salgan del plan gratis de ElevenLabs, el juego SHALL decir 
 #### Scenario: Crédito visible
 - WHEN el jugador pulsa «Atribuciones» en la portada
 - THEN ve el crédito de ElevenLabs
+
+### Requirement: Silencio fuera del tablero
+Mientras se muestre una pantalla fuera del tablero (portada, «Elige tu dificultad», «El gremio» o el ranking), no SHALL sonar nada: ni botones, ni hojas, ni la modal «Atribuciones». El sonido SHALL empezar al entrar al tablero. El primer gesto en la portada sí desbloquea el audio y empieza la descarga, para que el tablero ya suene.
+
+#### Scenario: Portada en silencio
+- WHEN el jugador toca botones en la portada, abre «Atribuciones» y pulsa «Nueva partida»
+- THEN no suena nada
+- AND al elegir el nivel y elegir a Indi en el tablero, suena `ui-select`
