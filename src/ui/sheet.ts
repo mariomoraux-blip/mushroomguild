@@ -23,7 +23,7 @@ export interface AliasActions {
  * Hoja inferior: reclutar (con fichas), ficha de criatura, elegir hechizo o «Tu nombre en el gremio» (036).
  * `tapBoard`: un toque en el fondo, sobre una casilla visible, con la ficha de un miembro abierta (022).
  */
-export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number, y: number) => void, alias: AliasActions) {
+export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number, y: number) => void, alias: AliasActions, soundToggles: () => HTMLElement | null) {
   let shown: Sheet | null = null;
   let currentSeason = 0;
   let opener: HTMLElement | null = null;
@@ -175,7 +175,23 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
         el('h3', {}, h.levelsTitle),
         el('p', {}, h.levels),
         el('p', { class: 'help__tip' }, h.tip),
+        // 049: los mismos interruptores de la portada.
+        ...soundSection(),
         el('button', { class: 'btn btn--wide', type: 'button', 'data-action': 'close' }, h.start)),
+    );
+  }
+
+  function soundSection(): Node[] {
+    const toggles = soundToggles();
+    return toggles ? [el('h3', {}, es.help.soundTitle), toggles] : [];
+  }
+
+  /** «Atribuciones» (049): créditos de terceros, desde la firma de la portada. */
+  function creditsSheet() {
+    return panel(
+      es.credits.title,
+      el('ul', { class: 'credits' }, el('li', {}, es.credits.elevenlabs)),
+      el('button', { class: 'btn btn--wide', type: 'button', 'data-action': 'close' }, es.card.understood),
     );
   }
 
@@ -272,6 +288,7 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
       spell: () => spellSheet(state),
       help: () => helpSheet(),
       month: () => monthSheet(state),
+      credits: () => creditsSheet(),
       alias: () => aliasSheet(sheet as Extract<Sheet, { kind: 'alias' }>),
     };
     // «Otro nombre» (036) y el problema de lo escrito (038): cambian en el lugar, sin volver a abrir la hoja, sin

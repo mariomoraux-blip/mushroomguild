@@ -1,0 +1,12 @@
+Id: mus-title
+Estado: NO generado. La API de música de ElevenLabs (compose_music) no está disponible en el plan gratis: respondió 402 "paid_plan_required" el 2026-11-13 (sin cargo de créditos).
+Duración del catálogo: loop 60 s · Prioridad P2
+
+Cómo generarlo (sin pagar):
+- Suno (suno.com): activar Instrumental, letra vacía y el prompt en "Style". 50 créditos al día. Plan gratis: uso NO comercial.
+- ACE-Step 1.5 (Space de Hugging Face): el prompt en "tags" y la letra como [instrumental]. Licencia MIT: uso comercial permitido. Es la opción para lo que se publique.
+- ElevenLabs con plan pago (Starter, 6 USD un mes): compose_music con music_length_ms=60000 y force_instrumental=true; con ese plan lo generado tiene uso comercial.
+Guardar las tomas aquí como mus-title-1.mp3, -2, -3.
+
+Prompt exacto:
+cozy fantasy game main menu theme, instrumental, music box, soft marimba, plucked strings, light flute, warm felt piano, D major, 80 bpm, gentle and whimsical, forest guild of mushrooms, seamless loop, no drums, no vocals

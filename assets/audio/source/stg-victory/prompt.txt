@@ -1,0 +1,11 @@
+Id: stg-victory
+Herramienta: ElevenLabs Sound Effects (MCP elevenlabs 0.12.2, text_to_sound_effects, mp3_44100_128, loop=false)
+Plan: gratis — uso NO comercial
+Fecha: 2026-11-13
+Duración del catálogo: 4 s
+Duración pedida: 4 s
+Nota: Stinger por text_to_sound_effects (más barato que compose_music). Prompt sin ancla, tal como está en el documento.
+Tomas: stg-victory-1.mp3, stg-victory-2.mp3, stg-victory-3.mp3
+
+Prompt exacto:
+short triumphant cozy fantasy sting, instrumental, rising celesta arpeggio into a bright warm D major chord, shimmering bells, soft choir of rustling leaves, magical ancient tree awakens, joyful, no drums, no vocals, 4 seconds

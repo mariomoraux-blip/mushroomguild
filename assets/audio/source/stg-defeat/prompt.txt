@@ -1,0 +1,11 @@
+Id: stg-defeat
+Herramienta: ElevenLabs Sound Effects (MCP elevenlabs 0.12.2, text_to_sound_effects, mp3_44100_128, loop=false)
+Plan: gratis — uso NO comercial
+Fecha: 2026-11-13
+Duración del catálogo: 3,5 s
+Duración pedida: 3.5 s
+Nota: Stinger por text_to_sound_effects. Prompt sin ancla, tal como está en el documento (el texto dice 3 seconds; se pidió 3,5 s).
+Tomas: stg-defeat-1.mp3, stg-defeat-2.mp3, stg-defeat-3.mp3
+
+Prompt exacto:
+short gentle game over sting, instrumental, slow music box phrase in soft minor key that resolves to a hopeful major final note, tender and calm, not dramatic, no drums, no vocals, 3 seconds

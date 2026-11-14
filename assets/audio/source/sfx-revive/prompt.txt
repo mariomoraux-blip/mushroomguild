@@ -1,0 +1,10 @@
+Id: sfx-revive
+Herramienta: ElevenLabs Sound Effects (MCP elevenlabs 0.12.2, text_to_sound_effects, mp3_44100_128, loop=false)
+Plan: gratis — uso NO comercial
+Fecha: 2026-11-13
+Duración del catálogo: 900 ms
+Duración pedida: 0.9 s
+Tomas: sfx-revive-1.mp3, sfx-revive-2.mp3, sfx-revive-3.mp3
+
+Prompt exacto:
+Cozy hand-crafted fantasy forest game, soft and warm, gentle, organic, high quality foley, close and intimate, no harsh transients, no distortion, no voices, no music unless asked, clean recording. A grey tree comes back to life: burst of fresh leaves unfurling and rustling, followed by a warm chord of soft bells, D F# A B, satisfying and joyful, 0.9 seconds.

@@ -726,23 +726,61 @@ button { font: inherit; color: inherit; }
 .title__logo-img { width: 100%; height: auto; display: block; filter: drop-shadow(0 6px 8px color-mix(in srgb, var(--ink) 45%, transparent)); }
 .title__menu { width: min(300px, 100%); display: grid; gap: 12px; margin-bottom: 8px; }
 /* Firma (020): letra pequeña sobre pergamino sólido, así el contraste no depende del fondo pintado (Tinta/Pergamino ≈ 11:1).
-   Fija abajo y centrada con un margen pequeño (021); la portada le reserva `--credit-room` para que no tape el menú. */
-.screen { --credit-room: 28px; }
-.title__credit {
+   Fija abajo y centrada con un margen pequeño (021); la portada le reserva `--credit-room` para que no tape el menú.
+   049: a su lado, «Atribuciones», con un área táctil de 44 px alrededor de la pastilla. */
+.screen { --credit-room: 48px; }
+.title__foot {
   position: fixed;
   left: 50%;
-  bottom: max(8px, env(safe-area-inset-bottom));
+  /* La pastilla queda a ~11 px del borde dentro de la fila de 44 px; con área segura, sobre ella. */
+  bottom: max(0px, calc(env(safe-area-inset-bottom) - 11px));
   transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.title__credit, .title__attrib span {
   margin: 0;
   padding: 3px 10px;
   font-size: 12px;
   font-weight: 700;
   line-height: 1.3;
-  white-space: nowrap;
   color: var(--ink);
   background: var(--paper);
   border-radius: 10px;
 }
+.title__attrib { min-height: var(--touch); padding: 0 2px; border: 0; background: none; font: inherit; cursor: pointer; }
+.title__attrib span { display: block; text-decoration: underline; text-underline-offset: 2px; }
+/* Interruptores de sonido (049): pastillas de pergamino; encendido, la etiqueta «Sí» va en sol. */
+.sound-toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sound-toggle {
+  min-height: var(--touch);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 22px;
+  background: var(--grain), var(--paper);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+.sound-toggle:active { transform: translateY(2px); }
+.sound-toggle__icon { flex: 0 0 18px; height: 18px; background: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
+.sound-toggle--sound { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z' fill='black'/%3E%3Cpath d='M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12'/%3E%3C/svg%3E"); }
+.sound-toggle--music { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18V5l11-2v13'/%3E%3Ccircle cx='6' cy='18' r='3' fill='black'/%3E%3Ccircle cx='17' cy='16' r='3' fill='black'/%3E%3C/svg%3E"); }
+.sound-toggle__state { min-width: 2.4em; padding: 1px 6px; font-size: 13px; text-align: center; border: 1.5px solid var(--ink); border-radius: 10px; background: color-mix(in srgb, var(--sun) 75%, var(--paper)); }
+.sound-toggle[aria-pressed='false'] { background: var(--grain), color-mix(in srgb, var(--paper) 78%, var(--wood)); box-shadow: none; }
+.sound-toggle[aria-pressed='false'] .sound-toggle__state { background: var(--paper); }
+.sound-toggle[aria-pressed='false'] .sound-toggle__icon { opacity: 0.55; }
+/* Atribuciones (049) */
+.credits { margin: 0 0 12px; padding: 12px 14px; list-style: none; font-weight: 700; border: 2px solid var(--ink); border-radius: 16px; background: var(--grain), var(--paper); }
 /* El gremio */
 .guild__intro { margin: 0; padding: 10px 14px; font-weight: 700; text-align: center; border: 2px solid var(--ink); border-radius: 16px; background: var(--grain), var(--paper); }
 .guild__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }

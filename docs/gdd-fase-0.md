@@ -174,7 +174,7 @@ Interacción: tocar un miembro resalta las casillas válidas; tocar una casilla 
 En escritorio también se juega con teclado: Tab y Enter para elegir, Esc para cancelar.
 
 ### Audio
-Fuera del slice inicial. Primera iteración: ambiente de bosque nocturno y un tono suave por acción, que arranca tras la primera interacción.
+Dirección de sonido en `docs/sound-design.md` («El claro que despierta»). Desde el cambio 049 suena lo P0: ambiente del claro en loop, efectos de las acciones del tablero y de la interfaz, y cortinas de victoria y derrota. Arranca tras la primera interacción, se pausa con la pestaña oculta y tiene interruptores «Sonido» y «Música» en la portada y en la Libreta. Los efectos salen del plan gratis de ElevenLabs, con atribución en «Atribuciones» (portada).
 
 ### Balance
 Medido por simulación (`tests/balance.test.ts`, 100 claros generados con semillas fijas):

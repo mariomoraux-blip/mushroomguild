@@ -44,6 +44,8 @@ export type Sheet =
   | { kind: 'help' }
   /** «Ver el mes» (045): lo que pasó al empezar el mes, línea por línea. */
   | { kind: 'month' }
+  /** «Atribuciones» (049): créditos de terceros, desde la firma de la portada. */
+  | { kind: 'credits' }
   /**
    * «Tu nombre en el gremio» (036): alias propuesto, su número de sorteo y para qué se abrió. `writing`: el campo
    * para escribir el nombre (038); `problem`: por qué no vale lo escrito.
@@ -555,7 +557,8 @@ function reduceGame(state: AppState, action: Action): AppState {
   }
 }
 
-export type Listener = (state: AppState, prev: AppState) => void;
+/** `action`: la acción que produjo el cambio (049: el audio distingue un toque rechazado). */
+export type Listener = (state: AppState, prev: AppState, action: Action) => void;
 
 export interface Store {
   getState(): AppState;
@@ -571,7 +574,7 @@ export function createStore(initial: AppState = initialState()): Store {
     dispatch(action) {
       const prev = state;
       state = reduce(state, action);
-      if (state !== prev) listeners.forEach((fn) => fn(state, prev));
+      if (state !== prev) listeners.forEach((fn) => fn(state, prev, action));
     },
     subscribe(fn) {
       listeners.add(fn);
