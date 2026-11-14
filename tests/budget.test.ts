@@ -18,8 +18,8 @@ describe('Requirement: Peso de la página', () => {
     for (const f of files(ROOT).filter((x) => !x.endsWith('README.md'))) expect(f.slice(ROOT.length + 1)).toMatch(/^(?:audio\/[a-z0-9/-]+\.(?:m4a|json)|[a-z0-9/-]+\.webp)$/);
   });
 
-  it('Scenario: Audio diferido (049) — el sprite, el ambiente y las cortinas existen y el mapa apunta dentro del sprite', () => {
-    for (const f of ['sfx.m4a', 'ambience/amb-clearing.m4a', 'stingers/stg-victory.m4a', 'stingers/stg-defeat.m4a']) expect(statSync(join(ROOT, 'audio', f)).size).toBeGreaterThan(0);
+  it('Scenario: Audio diferido (049) — el sprite y las cortinas existen (sin ambiente desde el 050) y el mapa apunta dentro del sprite', () => {
+    for (const f of ['sfx.m4a', 'stingers/stg-victory.m4a', 'stingers/stg-defeat.m4a']) expect(statSync(join(ROOT, 'audio', f)).size).toBeGreaterThan(0);
     const map = JSON.parse(readFileSync(join(ROOT, 'audio', 'sfx.json'), 'utf8')) as { length: number; sounds: Record<string, [number, number][]> };
     const sprite = SOUNDS.filter((id) => !id.startsWith('stg-'));
     expect(Object.keys(map.sounds).sort()).toEqual([...sprite].sort());

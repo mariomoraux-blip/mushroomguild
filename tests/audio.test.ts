@@ -42,11 +42,11 @@ class FakeContext {
   async resume() { this.state = 'running'; this.calls.push('resume'); }
 }
 
-const SPRITE = { length: 2, sounds: { 'ui-select': [[0.1, 0.08]], 'sfx-weave': [[0.5, 0.48]], 'sfx-revive': [[1, 0.9]] } };
+const SPRITE = { length: 3, sounds: { 'ui-select': [[0.1, 0.08]], 'ui-tap': [[2, 0.08]], 'ui-sheet-open': [[2.2, 0.25]], 'ui-sheet-close': [[2.5, 0.2]], 'sfx-weave': [[0.5, 0.48]], 'sfx-revive': [[1, 0.9]] } };
 
-function rig(stored: string | null = null, opts: { reduced?: boolean } = {}) {
+function rig(stored: string | null = null, opts: { reduced?: boolean; title?: boolean } = {}) {
   const ALL: SpeciesId[] = ['champi', 'lactarius', 'amanita', 'gliophorus', 'mago'];
-  const store = createStore(initialState(newGame(), ALL));
+  const store = createStore(initialState(newGame(), ALL, { title: opts.title ?? false }));
   const doc = Object.assign(new EventTarget(), { hidden: false });
   const contexts: FakeContext[] = [];
   const loads: string[] = [];
@@ -88,20 +88,20 @@ describe('Requirement: Nada suena antes del primer gesto', () => {
     expect(r.loads).toEqual([]);
   });
 
-  it('Scenario: Primer toque — crea el contexto en modo ambient, descarga el audio y suena lo que sigue', async () => {
+  it('Scenario: Primer toque — crea el contexto en modo ambient, descarga el audio (sin ambiente) y suena lo que sigue', async () => {
     const r = rig();
     await r.gesture();
     expect(r.contexts).toHaveLength(1);
     expect(r.session.type).toBe('ambient');
-    expect(r.loads).toEqual(['sfx.json', 'stingers/stg-victory.m4a', 'stingers/stg-defeat.m4a', 'sfx.m4a', 'ambience/amb-clearing.m4a']);
-    // El ambiente arranca en loop al cargar.
-    expect(r.ctx().started.filter((s) => s.src.loop)).toHaveLength(1);
+    expect(r.loads).toEqual(['sfx.json', 'stingers/stg-victory.m4a', 'stingers/stg-defeat.m4a', 'sfx.m4a']);
+    // Sin ambiente (050): nada suena en loop.
+    expect(r.ctx().started.filter((s) => s.src.loop)).toHaveLength(0);
     r.store.dispatch({ type: 'select', id: INDI });
     expect(r.offsets()).toEqual([0.1]);
     // Un segundo gesto no crea otro contexto ni vuelve a descargar.
     await r.gesture();
     expect(r.contexts).toHaveLength(1);
-    expect(r.loads).toHaveLength(5);
+    expect(r.loads).toHaveLength(4);
   });
 });
 
@@ -123,19 +123,37 @@ describe('Requirement: Pausa con la pestaña oculta', () => {
   });
 });
 
+describe('Requirement: Silencio fuera del tablero', () => {
+  it('Scenario: Portada en silencio — ni botones ni hojas suenan hasta entrar al tablero', async () => {
+    const r = rig(null, { title: true });
+    await r.gesture();
+    // Un clic en un botón: el «toc» de interfaz que se oye en la partida.
+    const tap = () => r.doc.dispatchEvent(new Event('click'));
+    Object.assign(r.doc, { closest: () => ({ disabled: false, matches: () => false }) });
+    tap();
+    r.store.dispatch({ type: 'openSheet', sheet: { kind: 'credits' } });
+    r.store.dispatch({ type: 'cancel' });
+    r.store.dispatch({ type: 'play' });
+    tap();
+    expect(r.offsets()).toEqual([]);
+    // Al elegir el nivel empieza la partida y el sonido.
+    r.store.dispatch({ type: 'start', game: newGame(), intro: false });
+    r.store.dispatch({ type: 'select', id: INDI });
+    expect(r.offsets()).toEqual([0.1]);
+  });
+});
+
 describe('Requirement: Interruptores de sonido', () => {
-  it('Scenario: Apagar el sonido — nada de efectos ni ambiente, y la preferencia queda guardada', async () => {
+  it('Scenario: Apagar el sonido — nada de efectos, y la preferencia queda guardada', async () => {
     const r = rig();
     await r.gesture();
-    const amb = r.ctx().started.find((s) => s.src.loop)!;
     r.audio.set('sound', false);
-    expect(amb.src.stopped).toBe(true);
     expect(JSON.parse(r.saved.get(PREFS_KEY)!)).toEqual({ sound: false, music: true });
     r.store.dispatch({ type: 'select', id: INDI });
     expect(r.offsets()).toEqual([]);
   });
 
-  it('con «Sonido» apagado desde antes, el primer gesto no descarga efectos ni ambiente', async () => {
+  it('con «Sonido» apagado desde antes, el primer gesto no descarga efectos', async () => {
     const r = rig(JSON.stringify({ sound: false, music: true }));
     await r.gesture();
     expect(r.loads).toEqual(['stingers/stg-victory.m4a', 'stingers/stg-defeat.m4a']);

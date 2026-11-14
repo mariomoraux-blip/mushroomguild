@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ambientLevel, cuesFor, PENTATONIC, SPORES_AFTER_MONTH_MS, VICTORY_AFTER_AWAKEN_MS, type Cue } from '../src/audio-cues';
+import { cuesFor, PENTATONIC, silentScreen, SPORES_AFTER_MONTH_MS, VICTORY_AFTER_AWAKEN_MS, type Cue } from '../src/audio-cues';
 import { newGame, type GameState, type SpeciesId } from '../src/rules';
 import { initialState, reduce, type Action, type AppState } from '../src/store';
 import { BRUNO, INDI, RUBI, setup } from './helpers';
@@ -92,11 +92,12 @@ describe('cues de interfaz', () => {
   });
 });
 
-describe('ambiente', () => {
-  it('a −6 dB en la portada y en «Elige tu dificultad»; entero en el tablero', () => {
+describe('Requirement: Silencio fuera del tablero', () => {
+  it('la portada, «Elige tu dificultad» y «El gremio» callan; el tablero suena', () => {
     const title = initialState(newGame(), [], { title: true });
-    expect(ambientLevel(title)).toBe(0.5);
-    expect(ambientLevel(reduce(title, { type: 'play' }))).toBe(0.5);
-    expect(ambientLevel(init())).toBe(1);
+    expect(silentScreen(title)).toBe(true);
+    expect(silentScreen(reduce(title, { type: 'play' }))).toBe(true);
+    expect(silentScreen(reduce(title, { type: 'openScreen', screen: { kind: 'guild', back: 'title' } }))).toBe(true);
+    expect(silentScreen(init())).toBe(false);
   });
 });

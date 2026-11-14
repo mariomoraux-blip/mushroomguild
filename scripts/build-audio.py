@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Audio P0 (cambio 049): de las tomas de assets/audio/source/ a public/assets/audio/.
+"""Audio P0 (cambios 049 y 050): de las tomas de assets/audio/source/ a public/assets/audio/.
 
 Sin dependencias: afconvert (macOS) decodifica el MP3 y codifica el AAC; lo demás es Python puro.
 Proceso por toma: paso alto a 80 Hz, recorte al largo del catálogo, fundidos de 10 ms y normalización
-(efectos y cortinas a -18 LUFS de máximo momentáneo, ambiente a -30 LUFS integrado), con el pico en -1 dBFS o menos.
-El ambiente cierra el loop con un cruce de 1 s. Las tomas elegidas están en assets/audio/takes.json.
+(efectos y cortinas a -18 LUFS de máximo momentáneo), con el pico en -1 dBFS o menos.
+Sin ambiente desde el 050. Las tomas elegidas están en assets/audio/takes.json.
 
 Uso: python3 scripts/build-audio.py
 """
@@ -39,15 +39,12 @@ SPRITE = {
     'sfx-invalid': 0.2,
 }
 STINGERS = {'stg-victory': 4.0, 'stg-defeat': 3.5}
-AMBIENCE = 'amb-clearing'
 
 SFX_LUFS = -18.0
-AMB_LUFS = -30.0
 PEAK = 10 ** (-1.0 / 20)
 FADE = 0.010
 GAP = 0.25
 LEAD = 0.10
-LOOP_XFADE = 1.0
 
 
 # ─── Lectura y escritura ──────────────────────────────────────────────────────
@@ -144,13 +141,6 @@ def momentary_max(chans, sr):
     return max(lufs(p) for p in block_powers(chans, sr, 0.4, 0.1))
 
 
-def integrated(chans, sr):
-    blocks = [p for p in block_powers(chans, sr, 0.4, 0.1) if lufs(p) > -70]
-    rel = lufs(sum(blocks) / len(blocks)) - 10
-    gated = [p for p in blocks if lufs(p) > rel]
-    return lufs(sum(gated) / len(gated))
-
-
 def normalize(chans, measured, target):
     gain = 10 ** ((target - measured) / 20)
     peak = max(max(abs(v) for v in c) for c in chans) * gain
@@ -181,22 +171,6 @@ def fade(chans, sr, seconds=FADE):
             c[i] *= g
             c[-1 - i] *= g
     return chans
-
-
-def loop(chans, sr, xfade=LOOP_XFADE):
-    """Cierra el loop: el último segundo se cruza (igual potencia) con el inicio y el corte cae en un cruce por cero."""
-    x = chans[0]
-    L = round(xfade * sr)
-    cut = len(x) - L
-    # Corte en el cruce por cero más cercano (±10 ms).
-    window = range(max(L, cut - round(0.01 * sr)), min(len(x) - 1, cut + round(0.01 * sr)))
-    cut = min(window, key=lambda i: abs(x[i]), default=cut)
-    L = len(x) - cut
-    out = x[:cut]
-    for i in range(L):
-        t = i / L
-        out[i] = x[i] * math.sin(t * math.pi / 2) + x[cut + i] * math.cos(t * math.pi / 2)
-    return [out]
 
 
 def mono(chans):
@@ -246,14 +220,6 @@ def main():
     for sound, length in STINGERS.items():
         chans, rate = process(sound, takes[sound][0], length, stereo=True)
         encode(chans, rate, os.path.join(OUT, 'stingers', f'{sound}.m4a'), 96000)
-
-    print('Ambiente')
-    chans, rate = decode(take_path(AMBIENCE, takes[AMBIENCE][0]))
-    chans = hp(mono(chans), rate)
-    chans, gain = normalize(chans, integrated(chans, rate), AMB_LUFS)
-    chans = loop(chans, rate)
-    print(f'  {AMBIENCE}-{takes[AMBIENCE][0]}: loop {len(chans[0]) / rate:.2f} s, {gain:+.1f} dB, {integrated(chans, rate):.1f} LUFS')
-    encode(chans, rate, os.path.join(OUT, 'ambience', f'{AMBIENCE}.m4a'), 48000)
 
     total = sum(os.path.getsize(os.path.join(d, f)) for d, _, fs in os.walk(OUT) for f in fs)
     print(f'public/assets/audio: {total / 1024:.0f} KB')
