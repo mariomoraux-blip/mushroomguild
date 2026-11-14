@@ -320,6 +320,23 @@ export const es = {
     hello: (alias: string) => `Hola de nuevo, ${alias}`,
     /** Firma del autor (020): va tal cual, en inglés. */
     credit: 'By Mario Mora for BerryLab',
+    /** 049: abre la modal de créditos de terceros. */
+    attributions: 'Atribuciones',
+  },
+
+  /** Interruptores de sonido (049), en la portada y en la Libreta de campo. */
+  audio: {
+    label: 'Sonido del juego',
+    sound: 'Sonido',
+    music: 'Música',
+    on: 'Sí',
+    off: 'No',
+  },
+
+  /** Modal «Atribuciones» (049): créditos de terceros. */
+  credits: {
+    title: 'Atribuciones',
+    elevenlabs: 'Efectos de sonido generados con ElevenLabs (elevenlabs.io)',
   },
 
   /** Pantallas fuera de la partida. */
@@ -349,6 +366,7 @@ export const es = {
     guildTitle: 'El gremio',
     tilesTitle: 'Las casillas',
     tip: 'Si no sabes qué hacer, sigue la ★: marca el hongo sugerido y la casilla que acerca la red a tu meta.',
+    soundTitle: 'Sonido',
     levelsTitle: 'Bosque y Ancestral',
     levels: `La escarcha hace que tejer cueste ${plural(FROST_WEAVE, 'nutriente')}. Algunos meses, un árbol gris se cubre de escarcha: si nadie lo revive ese mes, se apaga y revivirlo cuesta ${plural(FADED_REVIVE, 'nutriente')}. En otoño e invierno, al terminar cada mes el gremio come ${plural(UPKEEP, 'nutriente')} (si no hay, el primero en llegar descansa el mes siguiente). En invierno los árboles no dan esporas. Nunca se pierden los árboles vivos, pero solo dan si la red los une al Hogar. En invierno en Bosque, y en otoño e invierno en Ancestral, la plaga marca casillas tejidas junto a los árboles vivos, cada mes de la estación más (1, 2 y 3): al terminar el mes se marchitan si ningún hongo trabajó a ${PLAGUE_REACH} casillas o menos, y la plaga sigue ahí (no se puede tejer) hasta que un hongo trabaje así de cerca. Si corta la red, los árboles del otro lado dejan de dar: la red cortada se ve gris. En el nivel Ancestral no hay ★ y el Árbol Ancestral pide ${A.motherTrees} árboles revividos y ${plural(A.mother, 'nutriente')}.`,
     start: '¡A jugar!',

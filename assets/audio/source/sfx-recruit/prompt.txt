@@ -1,0 +1,10 @@
+Id: sfx-recruit
+Herramienta: ElevenLabs Sound Effects (MCP elevenlabs 0.12.2, text_to_sound_effects, mp3_44100_128, loop=false)
+Plan: gratis — uso NO comercial
+Fecha: 2026-11-13
+Duración del catálogo: 700 ms
+Duración pedida: 0.7 s
+Tomas: sfx-recruit-1.mp3, sfx-recruit-2.mp3, sfx-recruit-3.mp3
+
+Prompt exacto:
+Cozy hand-crafted fantasy forest game, soft and warm, gentle, organic, high quality foley, close and intimate, no harsh transients, no distortion, no voices, no music unless asked, clean recording. Welcome jingle: three rising soft marimba notes D F# A, followed by a cute mushroom popping out of the ground, 0.7 seconds.

@@ -1,0 +1,11 @@
+Id: sfx-weave
+Herramienta: ElevenLabs Sound Effects (MCP elevenlabs 0.12.2, text_to_sound_effects, mp3_44100_128, loop=false)
+Plan: gratis — uso NO comercial
+Fecha: 2026-11-13
+Duración del catálogo: 500 ms
+Duración pedida: 0.5 s
+Nota: El documento sugiere elegir una toma y derivar los grados de la escala en código o en Audacity.
+Tomas: sfx-weave-1.mp3, sfx-weave-2.mp3, sfx-weave-3.mp3
+
+Prompt exacto:
+Cozy hand-crafted fantasy forest game, soft and warm, gentle, organic, high quality foley, close and intimate, no harsh transients, no distortion, no voices, no music unless asked, clean recording. Magical mycelium growing through soil: a short rising glassy shimmer with a fine soft crackle of earth, golden light, tuned to D major pentatonic, 0.5 seconds.

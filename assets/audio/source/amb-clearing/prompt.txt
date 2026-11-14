@@ -1,0 +1,27 @@
+Id: amb-clearing
+Herramienta: ElevenLabs Sound Effects (MCP elevenlabs 0.12.2, text_to_sound_effects, mp3_44100_128, loop=true)
+Plan: gratis — uso NO comercial
+Fecha: 2026-11-13
+Duración del catálogo: loop 40 s
+Duración pedida: 5 s (el máximo que acepta el MCP)
+Tomas: amb-clearing-1.mp3, amb-clearing-2.mp3, amb-clearing-3.mp3
+
+Nota: son BOCETOS de 5 s para elegir el carácter, no el loop final. Con 5 s el loop se nota enseguida.
+Para el loop definitivo (30–40 s):
+- Opción A: elevenlabs.io → Sound Effects, con "Loop" activado, 30 s, "Prompt influence" 0,6–0,8, el mismo prompt (cambiando solo lo que no te guste de estos bocetos). Plan gratis: uso no comercial.
+- Opción B: Stable Audio Open (Space de Hugging Face), 40 s. Licencia Stability AI Community: uso comercial gratis por debajo de 1 M USD al año.
+- Si la herramienta no cierra el loop: cruzar final e inicio durante 1 s en Audacity y cortar en un cruce por cero.
+
+Prompt exacto:
+Cozy hand-crafted fantasy forest game, soft and warm, gentle, organic, high quality foley, close and intimate, no harsh transients, no distortion, no voices, no music unless asked, clean recording. Ambient loop of a quiet forest clearing at dusk: very soft breeze through leaves, sparse distant crickets with long gaps, an occasional tiny twig creak, calm and spacious, no birds, no melody, no wind gusts, seamless loop.
+
+---
+Segunda vuelta · loop de 30 s
+Herramienta: elevenlabs.io → Sound Effects (web), modelo v3
+Plan: gratis — uso NO comercial. La cuenta tiene activado compartir generaciones en Explorar.
+Fecha: 2026-11-13
+Ajustes: Bucle activado · Duración 30,0 s · Influencia del prompt 70 % · Mejora automática del prompt DESACTIVADA
+Prompt: el mismo de arriba, exacto.
+Una generación dio 4 variantes (#1–#4), descargadas en MP3 (48 kHz, 192 kbps, estéreo, 721 KB cada una):
+  amb-clearing-4.mp3 = #1 · amb-clearing-5.mp3 = #2 · amb-clearing-6.mp3 = #3 · amb-clearing-7.mp3 = #4
+Créditos restantes después de generar: 4.126 de 10.000.

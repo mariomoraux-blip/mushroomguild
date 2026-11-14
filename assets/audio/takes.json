@@ -1,0 +1,19 @@
+{
+  "_": "Toma elegida por sonido (cambio 049). Con varias, son variantes que se alternan. Después de editar: python3 scripts/build-audio.py",
+  "amb-clearing": [4],
+  "ui-tap": [1],
+  "ui-tap-primary": [1],
+  "ui-select": [1],
+  "ui-sheet-open": [1],
+  "ui-sheet-close": [1],
+  "sfx-weave": [1],
+  "sfx-decompose": [1],
+  "sfx-revive": [1],
+  "sfx-awaken": [1],
+  "sfx-spores": [1],
+  "sfx-recruit": [1],
+  "sfx-month-end": [1],
+  "sfx-invalid": [1],
+  "stg-victory": [1],
+  "stg-defeat": [1]
+}

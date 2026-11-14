@@ -1,0 +1,11 @@
+Id: sfx-spores
+Herramienta: ElevenLabs Sound Effects (MCP elevenlabs 0.12.2, text_to_sound_effects, mp3_44100_128, loop=false)
+Plan: gratis — uso NO comercial
+Fecha: 2026-11-13
+Duración del catálogo: 400–800 ms
+Duración pedida: 0.8 s
+Nota: Se pidió el máximo del rango; se puede recortar.
+Tomas: sfx-spores-1.mp3, sfx-spores-2.mp3, sfx-spores-3.mp3
+
+Prompt exacto:
+Cozy hand-crafted fantasy forest game, soft and warm, gentle, organic, high quality foley, close and intimate, no harsh transients, no distortion, no voices, no music unless asked, clean recording. A handful of tiny bubbly pops like magical seeds jumping out, light and sparkly, playful, 0.8 seconds.

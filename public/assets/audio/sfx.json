@@ -1,0 +1,18 @@
+{
+ "length": 10.1097,
+ "sounds": {
+  "ui-tap": [[0.1, 0.08]],
+  "ui-tap-primary": [[0.43, 0.15]],
+  "ui-select": [[0.83, 0.08]],
+  "ui-sheet-open": [[1.16, 0.25]],
+  "ui-sheet-close": [[1.66, 0.2]],
+  "sfx-weave": [[2.11, 0.48]],
+  "sfx-decompose": [[2.8399, 0.5999]],
+  "sfx-revive": [[3.6898, 0.88]],
+  "sfx-awaken": [[4.8198, 1.48]],
+  "sfx-spores": [[6.5498, 0.8]],
+  "sfx-recruit": [[7.5998, 0.6802]],
+  "sfx-month-end": [[8.53, 0.8797]],
+  "sfx-invalid": [[9.6597, 0.2]]
+ }
+}

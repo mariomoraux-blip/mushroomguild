@@ -640,12 +640,14 @@ test('Portada: crédito del autor fijo abajo, en letra pequeña, con contraste �
   const gap = vp.height - (box.y + box.height);
   expect(gap).toBeGreaterThanOrEqual(8);
   expect(gap).toBeLessThanOrEqual(12);
-  expect(Math.abs(box.x + box.width / 2 - vp.width / 2)).toBeLessThanOrEqual(2);
+  // 049: la firma y «Atribuciones» van juntas y centradas.
+  const foot = (await page.locator('#screen .title__foot').boundingBox())!;
+  expect(Math.abs(foot.x + foot.width / 2 - vp.width / 2)).toBeLessThanOrEqual(2);
   expect(await page.locator('#screen').evaluate((n) => n.scrollHeight - n.clientHeight)).toBeLessThanOrEqual(0);
   for (const sel of ['.title__menu', '.title__logo']) {
     const o = (await page.locator(`#screen ${sel}`).boundingBox())!;
-    const overlap = box.x < o.x + o.width && o.x < box.x + box.width && box.y < o.y + o.height && o.y < box.y + box.height;
-    expect(overlap, sel).toBe(false);
+    const overlap = foot.x < o.x + o.width && o.x < foot.x + foot.width && foot.y < o.y + o.height && o.y < foot.y + foot.height;
+    expect(overlap, `${sel} y el pie`).toBe(false);
   }
   await noScrollNoZoom(page);
   if (info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390') await page.screenshot({ path: `docs/screenshots/021-credito-fijo-${info.project.name}.png` });
@@ -1272,4 +1274,68 @@ test('La plaga se entiende (045): resumen corto con «Ver el mes», red cortada 
   await page.keyboard.press('Escape');
   await expect(sheet).toHaveCount(0);
   await noScrollNoZoom(page);
+});
+
+// audio (049) › Interruptores de sonido: "Apagar el sonido" y "Teclado"; Nada suena antes del primer gesto: "Abrir sin
+// tocar"; title-screens › Atribuciones: "Ver las atribuciones" y "Atribuciones en horizontal"; player-guidance › Libreta de
+// campo: "Apagar el sonido en la partida"; visual-feedback › Peso de la página: "Audio diferido".
+test('Sonido (049): interruptores en la portada y la Libreta, guardados, y nada de audio antes del primer gesto', async ({ page }, info) => {
+  const audio: string[] = [];
+  page.on('request', (r) => r.url().includes('/assets/audio/') && audio.push(r.url()));
+  await page.goto('/');
+  const sound = page.locator('#screen [data-action="audio"][data-key="sound"]');
+  const music = page.locator('#screen [data-action="audio"][data-key="music"]');
+  await expect(sound).toHaveAttribute('aria-pressed', 'true');
+  await expect(music).toHaveAttribute('aria-pressed', 'true');
+  for (const b of [sound, music]) expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await page.waitForTimeout(400);
+  expect(audio).toEqual([]);
+  await noScrollNoZoom(page);
+  const size = info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390' ? info.project.name : null;
+  if (size) await page.screenshot({ path: `docs/screenshots/049-portada-${size}.png` });
+  // Apagar «Sonido»: el interruptor cambia, se guarda y sigue apagado al volver.
+  await sound.click();
+  await expect(sound).toHaveAttribute('aria-pressed', 'false');
+  await expect(sound).toContainText('No');
+  await page.reload();
+  await expect(page.locator('#screen [data-action="audio"][data-key="sound"]')).toHaveAttribute('aria-pressed', 'false');
+  // Teclado: Tab hasta «Música» y Enter.
+  if (!isTouch(info.project.name)) {
+    await page.locator('#screen [data-action="audio"][data-key="sound"]').focus();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#screen [data-action="audio"][data-key="music"]')).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#screen [data-action="audio"][data-key="music"]')).toHaveAttribute('aria-pressed', 'false');
+  }
+  // La Libreta tiene los mismos interruptores, con el estado guardado.
+  await page.goto('/?map=clasico');
+  await page.getByRole('button', { name: 'Ayuda: Libreta de campo' }).click();
+  const inSheet = page.locator('#sheet [data-action="audio"][data-key="sound"]');
+  await inSheet.scrollIntoViewIfNeeded();
+  await expect(inSheet).toHaveAttribute('aria-pressed', 'false');
+  await inSheet.click();
+  await expect(inSheet).toHaveAttribute('aria-pressed', 'true');
+  if (size) await page.screenshot({ path: `docs/screenshots/049-libreta-${size}.png` });
+});
+
+test('Atribuciones (049): enlace junto a la firma, modal con el crédito de ElevenLabs, foco atrapado y Esc', async ({ page }, info) => {
+  await page.goto('/');
+  const link = page.locator('#screen .title__attrib');
+  await expect(link).toHaveText('Atribuciones');
+  expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await link.focus();
+  await page.keyboard.press('Enter');
+  const dialog = page.getByRole('dialog', { name: 'Atribuciones' });
+  await expect(dialog).toContainText('Efectos de sonido generados con ElevenLabs (elevenlabs.io)');
+  await expect(page.locator('#sheet .round-btn--close')).toBeFocused();
+  for (let i = 0; i < 4; i++) {
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => Boolean(document.activeElement?.closest('#sheet')) || document.activeElement === document.body)).toBe(true);
+  }
+  await noScrollNoZoom(page);
+  const size = info.project.name === 'vertical-390x844' || info.project.name === 'horizontal-844x390' ? info.project.name : null;
+  if (size) await page.screenshot({ path: `docs/screenshots/049-atribuciones-${size}.png` });
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(link).toBeFocused();
 });

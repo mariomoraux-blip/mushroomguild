@@ -1,0 +1,10 @@
+Id: sfx-decompose
+Herramienta: ElevenLabs Sound Effects (MCP elevenlabs 0.12.2, text_to_sound_effects, mp3_44100_128, loop=false)
+Plan: gratis — uso NO comercial
+Fecha: 2026-11-13
+Duración del catálogo: 600 ms
+Duración pedida: 0.6 s
+Tomas: sfx-decompose-1.mp3, sfx-decompose-2.mp3, sfx-decompose-3.mp3
+
+Prompt exacto:
+Cozy hand-crafted fantasy forest game, soft and warm, gentle, organic, high quality foley, close and intimate, no harsh transients, no distortion, no voices, no music unless asked, clean recording. Soft damp rotten wood log crumbling gently into soil, organic and moist, ending with a tiny cute mushroom pop, 0.6 seconds.

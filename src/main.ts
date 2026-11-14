@@ -17,6 +17,8 @@ import { mountStory } from './ui/story';
 import { mountCoach } from './ui/coach';
 import { mountScreens } from './ui/screens';
 import { mountFlyers } from './ui/flyers';
+import { mountAudioToggles } from './ui/audio-toggles';
+import { browserAudio } from './audio';
 import { debugGame } from './debug';
 import './styles.css';
 
@@ -168,10 +170,14 @@ const rankingScreen = {
 document.addEventListener('visibilitychange', syncClock);
 setInterval(() => hud.setTime(formatClock(read(clock, now()))), 250);
 
+// Audio (049): escucha al store; nada suena ni se descarga antes del primer gesto.
+const audio = browserAudio(store);
+const soundToggles = mountAudioToggles(audio);
+
 const hud = mountHud($('hud'), store);
 const renderDock = mountDock($('dock'), store);
 const overlay = mountBoardOverlay($('overlay'), store);
-const renderSheet = mountSheet($('sheet'), store, (x, y) => overlay.tap(x, y), aliasActions);
+const renderSheet = mountSheet($('sheet'), store, (x, y) => overlay.tap(x, y), aliasActions, soundToggles);
 const renderStory = mountStory($('story'), store, restart, { register: () => openAlias('register'), open: () => rankingScreen.open('game') }, {
   playBrote: () => startLevel('brote', true),
   toTitle: () => {
@@ -179,7 +185,7 @@ const renderStory = mountStory($('story'), store, restart, { register: () => ope
     store.dispatch({ type: 'openScreen', screen: { kind: 'title' } });
   },
 });
-const renderScreens = mountScreens($('screen'), store, { pickLevel: (lv) => startLevel(lv), lastLevel, tutorialPending }, rankingScreen);
+const renderScreens = mountScreens($('screen'), store, { pickLevel: (lv) => startLevel(lv), lastLevel, tutorialPending }, rankingScreen, soundToggles);
 const renderCoach = mountCoach($('coach'), store);
 const notice = $('notice');
 mountAmbient($<HTMLCanvasElement>('ambient'));
@@ -198,6 +204,9 @@ monthBtn.addEventListener('click', () => store.dispatch({ type: 'openSheet', she
 
 const renderDom = () => {
   const state = store.getState();
+  // Una hoja sobre una pantalla (la ficha en «El gremio», «Atribuciones» en la portada) es modal: el foco no sale de ella.
+  // Va antes de dibujar la hoja, para que al cerrarla el foco pueda volver al botón que la abrió.
+  $('screen').inert = Boolean(state.ui.screen && state.ui.sheet);
   hud.render(state);
   renderDock(state);
   overlay.render(state);
@@ -309,4 +318,4 @@ document.addEventListener('visibilitychange', () => {
   else game.loop.wake();
 });
 
-if (import.meta.env.DEV) Object.assign(window, { game, store });
+if (import.meta.env.DEV) Object.assign(window, { game, store, audio });
