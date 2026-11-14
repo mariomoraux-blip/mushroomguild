@@ -6,7 +6,7 @@ Pantallas fuera de la partida: portada, "Elige tu dificultad", "El gremio" y el 
 ## Requirements
 
 ### Requirement: Portada
-Al abrir el juego sin `?map`, `?seed`, `?nivel` ni `?debugState`, el juego SHALL mostrar la portada: el logo completo (sin recortes) y un menú con "Nueva partida" (principal), "Cómo jugar", "El gremio" y "Ranking". "Nueva partida" SHALL abrir "Elige tu dificultad" y, tras elegir el nivel, la intro o el tablero. "Cómo jugar" SHALL empezar el tutorial (`tutorial`, 048), también si ya se completó o se saltó. "Ranking" SHALL abrir la pantalla del ranking (`leaderboard`). Si el dispositivo tiene un jugador registrado, la portada SHALL saludarlo por su alias en una línea que no es un control.
+Al abrir el juego sin `?map`, `?seed`, `?nivel` ni `?debugState`, el juego SHALL mostrar la portada: el logo completo (sin recortes) y un menú con "Nueva partida" (principal), "Cómo jugar", "El gremio" y "Ranking". "Nueva partida" SHALL abrir "Elige tu dificultad" y, tras elegir el nivel, la intro o el tablero. "Cómo jugar" SHALL empezar el tutorial (`tutorial`, 048), también si ya se completó o se saltó. "Ranking" SHALL abrir la pantalla del ranking (`leaderboard`). Si el dispositivo tiene un jugador registrado, la portada SHALL saludarlo por su alias en una línea que no es un control. Debajo del menú SHALL estar los interruptores «Sonido» y «Música» (`audio`, 049), y junto a la firma, el enlace «Atribuciones» (049).
 
 #### Scenario: Abrir el juego
 - WHEN el jugador abre el sitio
@@ -20,7 +20,7 @@ Al abrir el juego sin `?map`, `?seed`, `?nivel` ni `?debugState`, el juego SHALL
 
 #### Scenario: Portada en horizontal con saludo
 - WHEN un jugador registrado abre la portada a 844 × 390
-- THEN el menú de cuatro opciones, el saludo y el crédito se ven completos y la página no hace scroll
+- THEN el menú de cuatro opciones, el saludo, los interruptores de sonido y el crédito se ven completos y la página no hace scroll
 
 #### Scenario: Repetir el tutorial
 - WHEN un jugador que ya completó el tutorial pulsa "Cómo jugar" en la portada
@@ -41,16 +41,16 @@ Al abrir el juego sin `?map`, `?seed`, `?nivel` ni `?debugState`, el juego SHALL
 - THEN sigue en el mismo paso del tutorial
 
 ### Requirement: Crédito del autor
-La portada SHALL mostrar, fija al borde inferior de la pantalla y centrada, con un margen pequeño (8 px, o el área segura del teléfono si es mayor), en letra pequeña (12 px), la línea «By Mario Mora for BerryLab». El texto SHALL tener un contraste de al menos 4,5:1 con su fondo inmediato, que es sólido (no depende del fondo pintado), y no SHALL tapar el logo ni el menú en vertical ni en horizontal. La línea no es un control: no recibe el foco.
+La portada SHALL mostrar, fija al borde inferior de la pantalla, con un margen pequeño (8 a 12 px, o el área segura del teléfono si es mayor), en letra pequeña (12 px), la línea «By Mario Mora for BerryLab» y a su lado el enlace «Atribuciones» (049); los dos juntos van centrados. El texto SHALL tener un contraste de al menos 4,5:1 con su fondo inmediato, que es sólido (no depende del fondo pintado), y no SHALL tapar el logo ni el menú en vertical ni en horizontal. La línea no es un control: no recibe el foco (el enlace sí).
 
 #### Scenario: Ver el crédito
 - WHEN el jugador abre el sitio
-- THEN la portada muestra «By Mario Mora for BerryLab» centrada y a 8 px del borde inferior
+- THEN la portada muestra «By Mario Mora for BerryLab» y «Atribuciones» centrados y a unos 10 px del borde inferior
 - AND el contraste entre el texto y su fondo es de al menos 4,5:1
 
 #### Scenario: Portada en horizontal
 - WHEN se abre la portada a 844 × 390
-- THEN el crédito sigue fijo abajo y centrado, se ve completo y no se superpone al logo ni al menú, y la página no hace scroll
+- THEN el crédito y «Atribuciones» siguen fijos abajo y centrados, se ven completos y no se superponen al logo ni al menú, y la página no hace scroll
 
 ### Requirement: Elige tu dificultad
 "Nueva partida" SHALL abrir la pantalla "Elige tu dificultad" con los tres niveles (Brote, Bosque y Ancestral), cada uno con su nombre, una línea que diga qué cambia y su multiplicador de puntaje. Mientras el tutorial no se haya completado ni saltado, «Cómo jugar» (el tutorial, sin multiplicador) SHALL ir primero; después ya no SHALL aparecer en esta pantalla (sigue en la portada). Cada nivel SHALL ser un botón de al menos 44 px de alto. El foco SHALL ir al último nivel elegido (mientras aparezca, «Cómo jugar»; después del tutorial, Brote), recordado entre visitas; si el almacenamiento falla, «Cómo jugar» aparece y recibe el foco. Esc SHALL volver a la portada. Elegir un nivel SHALL abrir la intro la primera vez que se juega ese nivel y el tablero las demás; la intro vista en el tutorial no se repite en Brote. "Jugar de nuevo" SHALL conservar el nivel. `?nivel=tutorial|brote|bosque|ancestral` SHALL entrar directo al tablero en ese nivel.
@@ -75,3 +75,16 @@ La portada SHALL mostrar, fija al borde inferior de la pantalla y centrada, con 
 #### Scenario: Tutorial visto
 - WHEN el jugador ya completó o saltó el tutorial y pulsa "Nueva partida"
 - THEN ve solo Brote, Bosque y Ancestral
+
+### Requirement: Atribuciones
+Junto a la firma de la portada («By Mario Mora for BerryLab») SHALL haber un enlace «Atribuciones», con área táctil de 44 px o más, que abre una modal encima de la portada con los créditos de terceros: «Efectos de sonido generados con ElevenLabs (elevenlabs.io)». La modal SHALL tener título y botón de cerrar, atrapar el foco (Tab no sale de ella), cerrarse con el botón, con Esc, con «atrás» o tocando fuera, y devolver el foco a «Atribuciones». Los textos van en `src/copy/es.ts`.
+
+#### Scenario: Ver las atribuciones
+- WHEN el jugador pulsa «Atribuciones» en la portada
+- THEN se abre una modal con el crédito de ElevenLabs y el foco en ella
+- AND con Tab el foco no sale de la modal
+- AND con Esc se cierra y el foco vuelve a «Atribuciones»
+
+#### Scenario: Atribuciones en horizontal
+- WHEN el jugador abre la portada a 844 × 390
+- THEN la firma y «Atribuciones» se ven completas y la página no hace scroll

@@ -43,11 +43,15 @@ Al cerrar la ficha con "Entendido", el miembro SHALL seguir seleccionado con sus
 - AND al pulsar "Entendido" se pide elegir el hechizo
 
 ### Requirement: Libreta de campo
-El HUD SHALL tener un botón "?" que abre la Libreta de campo encima del tablero (048: ya no pasa por "Cómo jugar"): la meta, cómo se juega en 4 pasos, para qué sirve cada una de las 5 especies, cada una con su retrato, su nombre, qué hace y su receta visual (ver «Recetas visuales») y la leyenda de casillas. La libreta no se abre sola; se cierra con "¡A jugar!", el botón de cerrar o Esc, y la partida sigue donde estaba.
+El HUD SHALL tener un botón "?" que abre la Libreta de campo encima del tablero (048: ya no pasa por "Cómo jugar"): la meta, cómo se juega en 4 pasos, para qué sirve cada una de las 5 especies, cada una con su retrato, su nombre, qué hace y su receta visual (ver «Recetas visuales») y la leyenda de casillas. Al final SHALL tener una sección «Sonido» con los interruptores «Sonido» y «Música» (`audio`, 049). La libreta no se abre sola; se cierra con "¡A jugar!", el botón de cerrar o Esc, y la partida sigue donde estaba.
 
 #### Scenario: Consultar la ayuda
 - WHEN el jugador pulsa "?" durante la partida
 - THEN se abre la Libreta de campo con las 5 especies, qué hace cada una y su receta visual con lo que gana o gasta
+
+#### Scenario: Apagar el sonido en la partida
+- WHEN el jugador abre la Libreta y pulsa «Sonido»
+- THEN el interruptor queda apagado y el ambiente se calla
 
 ### Requirement: Pista y camino sugerido
 El juego SHALL proponer un siguiente paso con `advise(state)`, con esta prioridad: despertar al Árbol Ancestral > revivir un árbol > frenar la plaga (en Bosque y Ancestral: que el Ganoderma limpie, o que un miembro listo trabaje a 2 casillas o menos de, la casilla tejida con plaga que nadie frena este mes, primero la más cercana al Hogar) > hechizo de Maestra Bruma > pasar la voz a una Amanita > descomponer > pasar la voz a un Champiñón > tejer > pasar la voz a un Lactarius > reclutar > terminar el mes. Reclutar SHALL sugerirse solo en dos casos (ver "Cómo reclutar"): cuando ningún miembro listo tiene una acción útil, o cuando falta el rol que pide el siguiente paso sugerido. El miembro sugerido SHALL llevar una ★ en el dock; al seleccionarlo, la casilla sugerida SHALL llevar una ★ en el tablero. Tejer SHALL apuntar a la casilla válida más cercana al árbol gris (o vivo pero suelto, en Bosque y Ancestral) más cercano a la red mientras haya menos árboles revividos de los que pide el Árbol Ancestral del nivel (3, o 4 en Ancestral), y al Árbol Ancestral después. En Ancestral no SHALL mostrarse ninguna pista: ni ★ en el dock o el tablero, ni «Pista:» en la bitácora (los bots siguen usando `advise`). Los avisos de la presión y el aviso de mes vacío no son pistas.

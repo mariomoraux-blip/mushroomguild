@@ -65,7 +65,7 @@ El juego SHALL funcionar aunque falte una pieza pintada: el claro usa su dibujo 
 - THEN ese miembro se ve como silueta sobre su casilla y el juego sigue
 
 ### Requirement: Peso de la página
-El total de assets publicados (`public/assets/`) SHALL ser de 4 MB o menos, sin contar el JavaScript del juego, y las piezas de portada, intro y victoria SHALL cargarse solo al mostrarse esas pantallas.
+El total de assets publicados (`public/assets/`) SHALL ser de 4 MB o menos, sin contar el JavaScript del juego, y las piezas de portada, intro y victoria SHALL cargarse solo al mostrarse esas pantallas. Lo publicado SHALL ser WebP, salvo el audio (049): `.m4a` y el mapa `sfx.json` dentro de `audio/`, que se descargan solo después del primer gesto del jugador.
 
 #### Scenario: Build de producción
 - WHEN se ejecuta `npm run test`
@@ -74,6 +74,10 @@ El total de assets publicados (`public/assets/`) SHALL ser de 4 MB o menos, sin 
 #### Scenario: Partida directa
 - WHEN se abre `?map=clasico`
 - THEN no se descargan el logo ni los fondos de intro y victoria
+
+#### Scenario: Audio diferido
+- WHEN se abre el juego y nadie toca la pantalla ni el teclado
+- THEN no se descarga ningún archivo de `audio/`
 
 ### Requirement: La red alumbra el invierno
 La red de micelio SHALL tener su propia luz (salvo la casilla con plaga, que la pierde), encima del claro pintado y debajo del Árbol Ancestral, los retratos y las partículas, con una intensidad que crece con la estación: primavera 0,2, verano 0,4, otoño 0,65 e invierno 1,0. La saturación del progreso no SHALL afectar esa luz. Al cambiar de estación, la intensidad SHALL cambiar en 600 ms; con `prefers-reduced-motion`, de inmediato.
