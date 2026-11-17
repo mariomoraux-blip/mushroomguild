@@ -185,7 +185,7 @@ const renderStory = mountStory($('story'), store, restart, { register: () => ope
     store.dispatch({ type: 'openScreen', screen: { kind: 'title' } });
   },
 });
-const renderScreens = mountScreens($('screen'), store, { pickLevel: (lv) => startLevel(lv), lastLevel, tutorialPending }, rankingScreen, soundToggles);
+const renderScreens = mountScreens($('screen'), store, { pickLevel: (lv) => startLevel(lv), lastLevel, tutorialPending }, rankingScreen);
 const renderCoach = mountCoach($('coach'), store);
 const notice = $('notice');
 mountAmbient($<HTMLCanvasElement>('ambient'));

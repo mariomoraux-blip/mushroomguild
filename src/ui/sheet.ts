@@ -175,23 +175,23 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
         el('h3', {}, h.levelsTitle),
         el('p', {}, h.levels),
         el('p', { class: 'help__tip' }, h.tip),
-        // 049: los mismos interruptores de la portada.
-        ...soundSection(),
         el('button', { class: 'btn btn--wide', type: 'button', 'data-action': 'close' }, h.start)),
     );
   }
 
-  function soundSection(): Node[] {
+  /** «Configuración» (051): «Sonido» y «Música» (sin Web Audio no aparecen) y los créditos. Desde la portada y el HUD. */
+  function settingsSheet() {
+    const s = es.settings;
     const toggles = soundToggles();
-    return toggles ? [el('h3', {}, es.help.soundTitle), toggles] : [];
-  }
-
-  /** «Atribuciones» (049): créditos de terceros, desde la firma de la portada. */
-  function creditsSheet() {
     return panel(
-      es.credits.title,
-      el('ul', { class: 'credits' }, el('li', {}, es.credits.elevenlabs)),
-      el('button', { class: 'btn btn--wide', type: 'button', 'data-action': 'close' }, es.card.understood),
+      s.title,
+      el('div', { class: 'settings' },
+        ...(toggles ? [el('h3', {}, s.soundTitle), toggles] : []),
+        el('h3', {}, s.creditsTitle),
+        el('ul', { class: 'credits' },
+          el('li', { lang: 'en' }, es.titleScreen.credit),
+          el('li', {}, s.elevenlabs))),
+      el('button', { class: 'btn btn--wide', type: 'button', 'data-action': 'close' }, s.done),
     );
   }
 
@@ -288,7 +288,7 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
       spell: () => spellSheet(state),
       help: () => helpSheet(),
       month: () => monthSheet(state),
-      credits: () => creditsSheet(),
+      settings: () => settingsSheet(),
       alias: () => aliasSheet(sheet as Extract<Sheet, { kind: 'alias' }>),
     };
     // «Otro nombre» (036) y el problema de lo escrito (038): cambian en el lugar, sin volver a abrir la hoja, sin

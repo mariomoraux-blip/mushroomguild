@@ -22,9 +22,9 @@ export const SOUNDS = [
 ] as const;
 export type SoundId = (typeof SOUNDS)[number];
 
-/** Buses de la mezcla: «Sonido» enciende `game` y `ui`; «Música», `music`. */
-export type Bus = 'music' | 'game' | 'ui';
-export const busOf = (id: SoundId): Bus => (id.startsWith('stg-') ? 'music' : id.startsWith('sfx-') ? 'game' : 'ui');
+/** Buses de la mezcla (051): «Música» enciende `ambient`; «Sonido», las cortinas (`stinger`), `game` y `ui`. */
+export type Bus = 'ambient' | 'stinger' | 'game' | 'ui';
+export const busOf = (id: SoundId): Bus => (id.startsWith('stg-') ? 'stinger' : id.startsWith('sfx-') ? 'game' : 'ui');
 
 /** Una reproducción: `delay` en ms; `step`, semitonos sobre la nota de la toma. */
 export interface Cue {
@@ -119,5 +119,11 @@ function uiCue(prev: AppState, next: AppState, action: Action, changed: boolean)
   return null;
 }
 
-/** Fuera del tablero (portada, «Elige tu dificultad», «El gremio», ranking) no suena nada (050). */
+/** Fuera del tablero (portada, «Elige tu dificultad», «El gremio», ranking) no suena ningún efecto (050); la música sí (051). */
 export const silentScreen = (state: AppState): boolean => state.ui.screen !== null;
+
+/** Volumen de la música (051): −6 dB en la portada y en «Elige tu dificultad»; entera en el tablero y lo demás. */
+export function ambientLevel(state: AppState): number {
+  const kind = state.ui.screen?.kind;
+  return kind === 'title' || kind === 'level' ? 0.5 : 1;
+}

@@ -13,7 +13,8 @@ class Param {
   cancelScheduledValues() { return this; }
 }
 class Node {
-  connect<T>(n: T) { return n; }
+  out: unknown = null;
+  connect<T>(n: T) { this.out = n; return n; }
 }
 class Gain extends Node {
   gain = new Param();
@@ -88,13 +89,13 @@ describe('Requirement: Nada suena antes del primer gesto', () => {
     expect(r.loads).toEqual([]);
   });
 
-  it('Scenario: Primer toque — crea el contexto en modo ambient, descarga el audio (sin ambiente) y suena lo que sigue', async () => {
+  it('Scenario: Primer toque — crea el contexto en modo ambient, descarga los efectos (la música empieza apagada) y suena lo que sigue', async () => {
     const r = rig();
     await r.gesture();
     expect(r.contexts).toHaveLength(1);
     expect(r.session.type).toBe('ambient');
     expect(r.loads).toEqual(['sfx.json', 'stingers/stg-victory.m4a', 'stingers/stg-defeat.m4a', 'sfx.m4a']);
-    // Sin ambiente (050): nada suena en loop.
+    // «Música» apagada por defecto (051): ni se descarga ni suena el ambiente.
     expect(r.ctx().started.filter((s) => s.src.loop)).toHaveLength(0);
     r.store.dispatch({ type: 'select', id: INDI });
     expect(r.offsets()).toEqual([0.1]);
@@ -131,7 +132,7 @@ describe('Requirement: Silencio fuera del tablero', () => {
     const tap = () => r.doc.dispatchEvent(new Event('click'));
     Object.assign(r.doc, { closest: () => ({ disabled: false, matches: () => false }) });
     tap();
-    r.store.dispatch({ type: 'openSheet', sheet: { kind: 'credits' } });
+    r.store.dispatch({ type: 'openSheet', sheet: { kind: 'settings' } });
     r.store.dispatch({ type: 'cancel' });
     r.store.dispatch({ type: 'play' });
     tap();
@@ -148,28 +149,60 @@ describe('Requirement: Interruptores de sonido', () => {
     const r = rig();
     await r.gesture();
     r.audio.set('sound', false);
-    expect(JSON.parse(r.saved.get(PREFS_KEY)!)).toEqual({ sound: false, music: true });
+    expect(JSON.parse(r.saved.get(PREFS_KEY)!)).toEqual({ v: 2, sound: false, music: false });
     r.store.dispatch({ type: 'select', id: INDI });
     expect(r.offsets()).toEqual([]);
   });
 
-  it('con «Sonido» apagado desde antes, el primer gesto no descarga efectos', async () => {
-    const r = rig(JSON.stringify({ sound: false, music: true }));
+  it('con «Sonido» apagado desde antes, el primer gesto no descarga nada; al encenderlo, efectos y cortinas', async () => {
+    const r = rig(JSON.stringify({ v: 2, sound: false, music: false }));
     await r.gesture();
-    expect(r.loads).toEqual(['stingers/stg-victory.m4a', 'stingers/stg-defeat.m4a']);
+    expect(r.loads).toEqual([]);
     r.audio.set('sound', true);
     for (let i = 0; i < 10; i++) await Promise.resolve();
-    expect(r.loads).toContain('sfx.m4a');
+    expect(r.loads).toEqual(['sfx.json', 'stingers/stg-victory.m4a', 'stingers/stg-defeat.m4a', 'sfx.m4a']);
   });
 
-  it('avisa a los interruptores en pantalla y lee lo guardado (o los dos encendidos)', () => {
+  it('avisa a los interruptores en pantalla y lee lo guardado («Sonido» encendido y «Música» apagada si no hay nada)', () => {
     const r = rig();
     const seen: unknown[] = [];
     r.audio.onPrefs((p) => seen.push(p));
+    r.audio.set('music', true);
+    expect(seen).toEqual([{ sound: true, music: true }]);
+    const read = (s: string | null) => readPrefs({ get: () => s, set: () => {} });
+    expect(read(null)).toEqual({ sound: true, music: false });
+    expect(read('{roto')).toEqual({ sound: true, music: false });
+    // Un «music: true» guardado en el 049 hablaba de las cortinas: no enciende el ambiente.
+    expect(read(JSON.stringify({ sound: true, music: true }))).toEqual({ sound: true, music: false });
+    expect(read(JSON.stringify({ v: 2, sound: false, music: true }))).toEqual({ sound: false, music: true });
+  });
+});
+
+describe('Requirement: Música', () => {
+  it('Scenario: Encender la música — el ambiente se descarga y suena en loop, −6 dB en la portada y entero en el tablero', async () => {
+    const r = rig(null, { title: true });
+    await r.gesture();
+    expect(r.loads).not.toContain('ambience/amb-clearing.m4a');
+    r.audio.set('music', true);
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+    expect(r.loads.at(-1)).toBe('ambience/amb-clearing.m4a');
+    const loops = () => r.ctx().started.filter((s) => s.src.loop);
+    expect(loops()).toHaveLength(1);
+    // La portada sigue sin efectos, pero la música suena (más bajita).
+    expect(r.offsets()).toEqual([]);
+    const level = () => (loops()[0]!.src.out as Gain).gain.value;
+    expect(level()).toBe(0.5);
+    r.store.dispatch({ type: 'start', game: newGame(), intro: false });
+    expect(level()).toBe(1);
     r.audio.set('music', false);
-    expect(seen).toEqual([{ sound: true, music: false }]);
-    expect(readPrefs({ get: () => null, set: () => {} })).toEqual({ sound: true, music: true });
-    expect(readPrefs({ get: () => '{roto', set: () => {} })).toEqual({ sound: true, music: true });
+    expect(loops()[0]!.src.stopped).toBe(true);
+  });
+
+  it('con la música guardada encendida, arranca con el primer gesto', async () => {
+    const r = rig(JSON.stringify({ v: 2, sound: true, music: true }));
+    await r.gesture();
+    expect(r.loads).toContain('ambience/amb-clearing.m4a');
+    expect(r.ctx().started.filter((s) => s.src.loop)).toHaveLength(1);
   });
 });
 

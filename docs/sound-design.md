@@ -4,7 +4,7 @@ Auditoría para ponerle sonido al juego. Aquí está qué suena, cuándo, de dó
 
 Este documento no cambia reglas ni código. La implementación nace de un cambio de OpenSpec (049 en adelante), igual que la dirección de arte.
 
-> **050 (Mario, 13 de noviembre de 2026):** el juego no lleva ambiente y la portada va en silencio; el sonido empieza en el tablero. Lo que este documento dice del ambiente (sección A, buses, ducking, mezcla a −30 LUFS) queda como referencia y no está en el juego. La fuente de verdad es `openspec/specs/audio`.
+> **050 y 051 (Mario, 13 y 16 de noviembre de 2026):** fuera del tablero no suena ningún efecto. «Música» es el ambiente `amb-clearing` (−6 dB en la portada), apagada por defecto; las cortinas van con «Sonido». Los controles y los créditos viven en «Configuración» (portada y engranaje del HUD). La fuente de verdad es `openspec/specs/audio`.
 
 ## Principios
 
