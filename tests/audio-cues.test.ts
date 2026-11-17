@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ambientLevel, busOf, cuesFor, PENTATONIC, silentScreen, SPORES_AFTER_MONTH_MS, VICTORY_AFTER_AWAKEN_MS, type Cue } from '../src/audio-cues';
+import { busOf, cuesFor, PENTATONIC, silentScreen, SPORES_AFTER_MONTH_MS, VICTORY_AFTER_AWAKEN_MS, type Cue } from '../src/audio-cues';
 import { newGame, type GameState, type SpeciesId } from '../src/rules';
 import { initialState, reduce, type Action, type AppState } from '../src/store';
 import { BRUNO, INDI, RUBI, setup } from './helpers';
@@ -102,15 +102,8 @@ describe('Requirement: Silencio fuera del tablero', () => {
   });
 });
 
-describe('Requirement: Música', () => {
-  it('a −6 dB en la portada y en «Elige tu dificultad»; entera en el tablero', () => {
-    const title = initialState(newGame(), [], { title: true });
-    expect(ambientLevel(title)).toBe(0.5);
-    expect(ambientLevel(reduce(title, { type: 'play' }))).toBe(0.5);
-    expect(ambientLevel(init())).toBe(1);
-  });
-
-  it('las cortinas van con «Sonido» (bus `stinger`), no con «Música»', () => {
+describe('buses', () => {
+  it('las cortinas van con «Sonido» (bus `stinger`), igual que los efectos y la interfaz', () => {
     expect(busOf('stg-victory')).toBe('stinger');
     expect(busOf('sfx-weave')).toBe('game');
     expect(busOf('ui-tap')).toBe('ui');

@@ -324,16 +324,15 @@ export const es = {
     settings: 'Configuración',
   },
 
-  /** Interruptores de sonido (049), en «Configuración» desde el 051. «Música» es el ambiente del claro. */
+  /** Interruptor «Sonido» (049), en «Configuración» desde el 051; sin «Música» desde el 052. */
   audio: {
     label: 'Sonido del juego',
     sound: 'Sonido',
-    music: 'Música',
     on: 'Sí',
     off: 'No',
   },
 
-  /** «Configuración» (051): sonido y música, y los créditos (antes «Atribuciones», 049). */
+  /** «Configuración» (051): el interruptor «Sonido» y los créditos (antes «Atribuciones», 049). */
   settings: {
     title: 'Configuración',
     /** Botón del HUD (engranaje). */

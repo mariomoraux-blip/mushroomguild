@@ -22,8 +22,8 @@ export const SOUNDS = [
 ] as const;
 export type SoundId = (typeof SOUNDS)[number];
 
-/** Buses de la mezcla (051): «Música» enciende `ambient`; «Sonido», las cortinas (`stinger`), `game` y `ui`. */
-export type Bus = 'ambient' | 'stinger' | 'game' | 'ui';
+/** Buses de la mezcla: «Sonido» enciende las cortinas (`stinger`), `game` y `ui`. Sin música desde el 052. */
+export type Bus = 'stinger' | 'game' | 'ui';
 export const busOf = (id: SoundId): Bus => (id.startsWith('stg-') ? 'stinger' : id.startsWith('sfx-') ? 'game' : 'ui');
 
 /** Una reproducción: `delay` en ms; `step`, semitonos sobre la nota de la toma. */
@@ -54,7 +54,7 @@ export interface CueResult {
  */
 export function cuesFor(prev: AppState, next: AppState, action: Action, weaves = 0): CueResult {
   const game: Cue[] = [];
-  const music: Cue[] = [];
+  const stingers: Cue[] = [];
   const g0 = prev.game;
   const g1 = next.game;
   const changed = g1 !== g0;
@@ -98,12 +98,12 @@ export function cuesFor(prev: AppState, next: AppState, action: Action, weaves =
 
   // Cortinas: solo cuando la partida termina (no al volver a «Ver final»).
   if (g0.status === 'playing' && next.ui.story?.kind !== prev.ui.story?.kind) {
-    if (next.ui.story?.kind === 'won') music.push({ id: 'stg-victory', delay: effects.some((e) => e.kind === 'awaken') ? VICTORY_AFTER_AWAKEN_MS : 0 });
-    if (next.ui.story?.kind === 'lost') music.push({ id: 'stg-defeat' });
+    if (next.ui.story?.kind === 'won') stingers.push({ id: 'stg-victory', delay: effects.some((e) => e.kind === 'awaken') ? VICTORY_AFTER_AWAKEN_MS : 0 });
+    if (next.ui.story?.kind === 'lost') stingers.push({ id: 'stg-defeat' });
   }
 
   const ui = game.length ? null : uiCue(prev, next, action, changed);
-  return { cues: [...game, ...music, ...(ui ? [ui] : [])], weaves: w };
+  return { cues: [...game, ...stingers, ...(ui ? [ui] : [])], weaves: w };
 }
 
 /** La cue de interfaz de la acción, por prioridad: elegir, abrir una hoja, cerrarla. */
@@ -119,11 +119,5 @@ function uiCue(prev: AppState, next: AppState, action: Action, changed: boolean)
   return null;
 }
 
-/** Fuera del tablero (portada, «Elige tu dificultad», «El gremio», ranking) no suena ningún efecto (050); la música sí (051). */
+/** Fuera del tablero (portada, «Elige tu dificultad», «El gremio», ranking) no suena nada (050). */
 export const silentScreen = (state: AppState): boolean => state.ui.screen !== null;
-
-/** Volumen de la música (051): −6 dB en la portada y en «Elige tu dificultad»; entera en el tablero y lo demás. */
-export function ambientLevel(state: AppState): number {
-  const kind = state.ui.screen?.kind;
-  return kind === 'title' || kind === 'level' ? 0.5 : 1;
-}

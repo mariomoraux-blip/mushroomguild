@@ -1274,10 +1274,10 @@ test('La plaga se entiende (045): resumen corto con «Ver el mes», red cortada 
   await noScrollNoZoom(page);
 });
 
-// audio (049, 051) › Interruptores de sonido: "Apagar el sonido" y "Teclado"; Música: "Música apagada por defecto"; Nada
+// audio (049, 051, 052) › Interruptores de sonido: "Apagar el sonido", "Teclado" y "Sin música"; Nada
 // suena antes del primer gesto: "Abrir sin tocar"; player-guidance › Configuración: "Abrir desde la portada", "Abrir en la
 // partida" y "Créditos"; visual-feedback › Peso de la página: "Audio diferido".
-test('Configuración (051): portada y engranaje del HUD, «Sonido» y «Música» (apagada), créditos, foco atrapado y Esc', async ({ page }, info) => {
+test('Configuración (051, 052): portada y engranaje del HUD, solo «Sonido», créditos, foco atrapado y Esc', async ({ page }, info) => {
   const audio: string[] = [];
   page.on('request', (r) => r.url().includes('/assets/audio/') && audio.push(r.url()));
   await page.goto('/');
@@ -1303,22 +1303,23 @@ test('Configuración (051): portada y engranaje del HUD, «Sonido» y «Música�
   await expect(dialog).toContainText('By Mario Mora for BerryLab');
   await expect(dialog).toContainText('Efectos de sonido generados con ElevenLabs (elevenlabs.io)');
   const sound = dialog.locator('[data-action="audio"][data-key="sound"]');
-  const music = dialog.locator('[data-action="audio"][data-key="music"]');
   await expect(sound).toHaveAttribute('aria-pressed', 'true');
-  await expect(music).toHaveAttribute('aria-pressed', 'false');
-  for (const b of [sound, music]) expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  // 052: sin música, no hay interruptor «Música».
+  await expect(dialog.locator('[data-action="audio"]')).toHaveCount(1);
+  await expect(dialog).not.toContainText('Música');
+  expect((await sound.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   if (!isTouch(info.project.name)) {
     await expect(page.locator('#sheet .round-btn--close')).toBeFocused();
     for (let i = 0; i < 5; i++) {
       await page.keyboard.press('Tab');
       expect(await page.evaluate(() => Boolean(document.activeElement?.closest('#sheet')) || document.activeElement === document.body)).toBe(true);
     }
-    // Teclado: «Música» con Enter.
-    await music.focus();
+    // Teclado: «Sonido» con Enter (y de vuelta).
+    await sound.focus();
     await page.keyboard.press('Enter');
-    await expect(music).toHaveAttribute('aria-pressed', 'true');
+    await expect(sound).toHaveAttribute('aria-pressed', 'false');
     await page.keyboard.press('Enter');
-    await expect(music).toHaveAttribute('aria-pressed', 'false');
+    await expect(sound).toHaveAttribute('aria-pressed', 'true');
   }
   await noScrollNoZoom(page);
   if (size) await page.screenshot({ path: `docs/screenshots/051-configuracion-${size}.png` });
@@ -1341,7 +1342,6 @@ test('Configuración (051): portada y engranaje del HUD, «Sonido» y «Música�
   await gear.click();
   const inGame = page.getByRole('dialog', { name: 'Configuración' });
   await expect(inGame.locator('[data-action="audio"][data-key="sound"]')).toHaveAttribute('aria-pressed', 'false');
-  await expect(inGame.locator('[data-action="audio"][data-key="music"]')).toHaveAttribute('aria-pressed', 'false');
   if (size) await page.screenshot({ path: `docs/screenshots/051-configuracion-partida-${size}.png` });
   await inGame.getByRole('button', { name: 'Listo' }).click();
   await expect(inGame).toBeHidden();
