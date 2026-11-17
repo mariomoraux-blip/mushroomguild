@@ -1,16 +1,14 @@
 // Audio del juego (049): Web Audio, fuera de src/rules/ y sin Phaser. Escucha al store y nunca cambia el estado.
 // Nada se crea ni se descarga antes del primer gesto del jugador; se suspende con la pestaña oculta.
-// Fuera del tablero no suena ningún efecto (050). La música es el ambiente del claro, apagada por defecto (051).
+// Sin música (052) y en silencio fuera del tablero (050): el sonido empieza en la partida.
 // Todo lo del navegador llega inyectado (`AudioDeps`) para probarlo sin navegador.
-import { ambientLevel, busOf, cuesFor, silentScreen, type Bus, type Cue, type SoundId } from './audio-cues';
+import { busOf, cuesFor, silentScreen, type Bus, type Cue, type SoundId } from './audio-cues';
 import type { Store } from './store';
 import { MOTION } from './theme';
 
 export interface AudioPrefs {
-  /** «Sonido»: efectos del tablero, interfaz y cortinas de victoria y derrota. Encendido por defecto. */
+  /** «Sonido»: efectos del tablero, interfaz y cortinas de victoria y derrota. El único interruptor desde el 052. */
   readonly sound: boolean;
-  /** «Música»: el ambiente del claro en loop (051). Apagada por defecto. */
-  readonly music: boolean;
 }
 export type PrefKey = keyof AudioPrefs;
 export const PREFS_KEY = 'gremio.audio';
@@ -41,26 +39,22 @@ interface SpriteMap {
   readonly sounds: Partial<Record<SoundId, [number, number][]>>;
 }
 
-const BUS_GAIN: Readonly<Record<Bus, number>> = { ambient: 1, stinger: 1, game: 1, ui: 0.7 };
+const BUS_GAIN: Readonly<Record<Bus, number>> = { stinger: 1, game: 1, ui: 0.7 };
 const MAX_VOICES = 3;
 const PITCH_JITTER = 0.03;
 const GAIN_JITTER_DB = 1.5;
 const RAMP = 0.2;
-const DUCK = 0.5; // −6 dB
 const REDUCED_MAX = MOTION.ms.standard / 1000;
 const REDUCED_FADE = 0.08;
 const STINGERS: readonly SoundId[] = ['stg-victory', 'stg-defeat'];
 const PRIMARY = '.menu-btn--primary, .btn--primary, .story__btn--primary';
 
-/** Formato guardado: `v: 2` desde el 051, cuando «Música» pasó a ser el ambiente. Un `music` del 049 no cuenta. */
-const PREFS_VERSION = 2;
-
 export function readPrefs(storage: AudioDeps['storage']): AudioPrefs {
   try {
-    const v = JSON.parse(storage.get(PREFS_KEY) ?? '{}') as Partial<AudioPrefs> & { v?: number };
-    return { sound: v.sound !== false, music: v.v === PREFS_VERSION && v.music === true };
+    const v = JSON.parse(storage.get(PREFS_KEY) ?? '{}') as Partial<AudioPrefs>;
+    return { sound: v.sound !== false };
   } catch {
-    return { sound: true, music: false };
+    return { sound: true };
   }
 }
 
@@ -72,10 +66,6 @@ export function createAudio(store: Store, deps: AudioDeps): GameAudio {
 
   let ctx: AudioContext | null = null;
   let buses: Record<Bus, GainNode> | null = null;
-  let duck: GainNode | null = null;
-  let ambGain: GainNode | null = null;
-  let ambSource: AudioBufferSourceNode | null = null;
-  let ambience: AudioBuffer | null = null;
   let sprite: { buffer: AudioBuffer; map: SpriteMap } | null = null;
   const stingers = new Map<SoundId, AudioBuffer>();
   const loading = new Set<string>();
@@ -83,9 +73,8 @@ export function createAudio(store: Store, deps: AudioDeps): GameAudio {
   const variant = new Map<SoundId, number>();
   let weaves = 0;
   let cued = 0;
-  let ducks = 0;
 
-  const enabled = (bus: Bus) => (bus === 'ambient' ? prefs.music : prefs.sound);
+  const enabled = (_bus: Bus) => prefs.sound;
   const busLevel = (bus: Bus) => (enabled(bus) ? BUS_GAIN[bus] : 0);
 
   // ─── Desbloqueo: el primer gesto crea (o reanuda) el contexto ──────────────
@@ -101,12 +90,7 @@ export function createAudio(store: Store, deps: AudioDeps): GameAudio {
         g.connect(master);
         return g;
       };
-      buses = { ambient: bus('ambient'), stinger: bus('stinger'), game: bus('game'), ui: bus('ui') };
-      duck = ctx.createGain();
-      duck.connect(buses.ambient);
-      ambGain = ctx.createGain();
-      ambGain.gain.value = ambientLevel(store.getState());
-      ambGain.connect(duck);
+      buses = { stinger: bus('stinger'), game: bus('game'), ui: bus('ui') };
     }
     // `suspended` o, en iOS, `interrupted` (una llamada, otra app con audio): el gesto lo reanuda.
     if (ctx.state !== 'running' && !deps.doc.hidden) void ctx.resume();
@@ -115,7 +99,7 @@ export function createAudio(store: Store, deps: AudioDeps): GameAudio {
   // iOS solo deja reanudar el audio al soltar el dedo: `touchend` y `click` reintentan el mismo desbloqueo.
   for (const type of ['pointerdown', 'keydown', 'touchend', 'click']) deps.doc.addEventListener(type, unlock, { capture: true });
 
-  // ─── Carga diferida: sprite y cortinas con «Sonido», ambiente con «Música» ──
+  // ─── Carga diferida: sprite y cortinas, solo lo que está encendido ──────────
   const decode = (bytes: ArrayBuffer) => ctx!.decodeAudioData(bytes);
   function once(key: string, job: () => Promise<void>) {
     if (loading.has(key)) return;
@@ -131,27 +115,6 @@ export function createAudio(store: Store, deps: AudioDeps): GameAudio {
       });
       for (const id of STINGERS) once(id, async () => void stingers.set(id, await decode(await deps.load(`stingers/${id}.m4a`))));
     }
-    if (prefs.music) {
-      once('ambience', async () => {
-        ambience = await decode(await deps.load('ambience/amb-clearing.m4a'));
-        startAmbient();
-      });
-    }
-  }
-
-  // ─── Música: el ambiente del claro en loop ───────────────────────────────────
-  function startAmbient() {
-    if (!ctx || !ambience || !ambGain || ambSource || !prefs.music) return;
-    ambSource = ctx.createBufferSource();
-    ambSource.buffer = ambience;
-    ambSource.loop = true;
-    ambSource.connect(ambGain);
-    ambSource.start();
-  }
-  function stopAmbient() {
-    const src = ambSource;
-    ambSource = null;
-    if (src && ctx) src.stop(ctx.currentTime + RAMP);
   }
 
   const ramp = (param: AudioParam, value: number, seconds = RAMP) => {
@@ -213,24 +176,13 @@ export function createAudio(store: Store, deps: AudioDeps): GameAudio {
       if (l && k >= 0) l.splice(k, 1);
     };
     src.start(at, found.offset, duration);
-    if (bus === 'stinger' && duck) {
-      // Ducking: la música baja 6 dB mientras suena la cortina.
-      ducks++;
-      const d = duck;
-      d.gain.setValueAtTime(d.gain.value, at);
-      d.gain.linearRampToValueAtTime(DUCK, at + RAMP);
-      src.addEventListener('ended', () => {
-        if (--ducks === 0) ramp(d.gain, 1);
-      });
-    }
   }
 
-  // ─── Store: cues de cada cambio y volumen de la música por pantalla ─────────
+  // ─── Store: cues de cada cambio ─────────────────────────────────────────────
   store.subscribe((state, prev, action) => {
     const r = cuesFor(prev, state, action, weaves);
     weaves = r.weaves;
     r.cues.forEach(play);
-    if (ambGain && ambientLevel(state) !== ambientLevel(prev)) ramp(ambGain.gain, ambientLevel(state));
   });
 
   // Botones: «toc» de madera si el clic no produjo otro sonido (el principal, con campanita).
@@ -260,12 +212,8 @@ export function createAudio(store: Store, deps: AudioDeps): GameAudio {
     set(key, on) {
       if (prefs[key] === on) return;
       prefs = { ...prefs, [key]: on };
-      deps.storage.set(PREFS_KEY, JSON.stringify({ v: PREFS_VERSION, ...prefs }));
+      deps.storage.set(PREFS_KEY, JSON.stringify(prefs));
       if (buses) for (const b of Object.keys(buses) as Bus[]) ramp(buses[b].gain, busLevel(b));
-      if (key === 'music') {
-        if (on) startAmbient();
-        else stopAmbient();
-      }
       loadWanted();
       listeners.forEach((fn) => fn(prefs));
     },

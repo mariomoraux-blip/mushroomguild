@@ -179,7 +179,7 @@ export function mountSheet(root: HTMLElement, store: Store, tapBoard: (x: number
     );
   }
 
-  /** «Configuración» (051): «Sonido» y «Música» (sin Web Audio no aparecen) y los créditos. Desde la portada y el HUD. */
+  /** «Configuración» (051): el interruptor «Sonido» (sin Web Audio no aparece; sin «Música» desde el 052) y los créditos. Desde la portada y el HUD. */
   function settingsSheet() {
     const s = es.settings;
     const toggles = soundToggles();

@@ -1,10 +1,10 @@
-// Interruptores «Sonido» y «Música» (049): los mismos en la portada y en la Libreta de campo.
+// Interruptor «Sonido» (049; en «Configuración» desde el 051, solo, sin «Música», desde el 052).
 // Un solo escucha de clics los atiende a todos, y cada cambio de preferencia actualiza los que estén en pantalla.
 import { es } from '../copy/es';
 import type { AudioPrefs, GameAudio, PrefKey } from '../audio';
 import { el } from './dom';
 
-const KEYS: readonly PrefKey[] = ['sound', 'music'];
+const KEYS: readonly PrefKey[] = ['sound'];
 
 function sync(button: HTMLElement, prefs: AudioPrefs) {
   const on = prefs[button.dataset.key as PrefKey];
