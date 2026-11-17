@@ -37,11 +37,14 @@ export function mountHud(root: HTMLElement, store: Store) {
   const spores = chip('spores', es.hud.recruitHint, 'button');
   const treesChip = chip('trees', es.hud.treesShort);
   const help = el('button', { class: 'hud__help', type: 'button', 'aria-label': es.help.button });
+  // 051: «Configuración» (sonido, música y créditos) también en la partida.
+  const settings = el('button', { class: 'hud__settings', type: 'button', 'aria-label': es.settings.button });
   root.setAttribute('aria-label', es.hud.label);
-  root.append(month, nutrients.node, spores.node, treesChip.node, help);
+  root.append(month, nutrients.node, spores.node, treesChip.node, help, settings);
 
   spores.node.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'recruit' } }));
   help.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'help' } }));
+  settings.addEventListener('click', () => store.dispatch({ type: 'openSheet', sheet: { kind: 'settings' } }));
 
   const setTime = (text: string) => {
     setText(time, text);

@@ -174,7 +174,7 @@ Interacción: tocar un miembro resalta las casillas válidas; tocar una casilla 
 En escritorio también se juega con teclado: Tab y Enter para elegir, Esc para cancelar.
 
 ### Audio
-Dirección de sonido en `docs/sound-design.md` («El claro que despierta»). Desde el cambio 049 suena lo P0: efectos de las acciones del tablero y de la interfaz, y cortinas de victoria y derrota. Desde el 050 no hay ambiente y la portada va en silencio: el sonido empieza en el tablero. Se desbloquea tras la primera interacción, se pausa con la pestaña oculta y tiene interruptores «Sonido» y «Música» en la portada y en la Libreta. Los efectos salen del plan gratis de ElevenLabs, con atribución en «Atribuciones» (portada).
+Dirección de sonido en `docs/sound-design.md` («El claro que despierta»). Desde el cambio 049 suena lo P0: efectos de las acciones del tablero y de la interfaz, y cortinas de victoria y derrota. Fuera del tablero no suena ningún efecto (050). La música es el ambiente del claro, apagada por defecto (051). Se desbloquea tras la primera interacción, se pausa con la pestaña oculta y tiene interruptores «Sonido» y «Música» en «Configuración» (portada y engranaje del HUD). Los efectos salen del plan gratis de ElevenLabs, con atribución en «Créditos» (Configuración).
 
 ### Balance
 Medido por simulación (`tests/balance.test.ts`, 100 claros generados con semillas fijas):

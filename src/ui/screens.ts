@@ -38,7 +38,7 @@ export interface RankingScreen {
  * (019), "El gremio" (las especies; abre su ficha) y el ranking (036). «Cómo jugar» empieza el tutorial (048).
  * Solo dibuja `ui.screen` y despacha acciones; Esc vuelve (main.ts › cancel).
  */
-export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicker, ranking: RankingScreen, soundToggles: () => HTMLElement | null) {
+export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicker, ranking: RankingScreen) {
   let shown = '';
   let shownKind = '';
   let opener: HTMLElement | null = null;
@@ -57,8 +57,8 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
     if (action === 'rename') ranking.rename();
     if (action === 'back') store.dispatch({ type: 'closeScreen' });
     if (action === 'creature') store.dispatch({ type: 'openSheet', sheet: { kind: 'creature', species: species as SpeciesId } });
-    // 049: créditos de terceros, desde la firma.
-    if (action === 'credits') store.dispatch({ type: 'openSheet', sheet: { kind: 'credits' } });
+    // 051: «Configuración» (sonido, música y créditos).
+    if (action === 'settings') store.dispatch({ type: 'openSheet', sheet: { kind: 'settings' } });
   });
 
   const header = (title: string) =>
@@ -78,12 +78,9 @@ export function mountScreens(root: HTMLElement, store: Store, levels: LevelPicke
         el('button', { class: 'menu-btn', type: 'button', 'data-action': 'howto' }, el('span', { class: 'menu-btn__icon menu-btn__icon--book', 'aria-hidden': 'true' }), es.titleScreen.howto),
         el('button', { class: 'menu-btn', type: 'button', 'data-action': 'guild' }, el('span', { class: 'menu-btn__icon menu-btn__icon--guild', 'aria-hidden': 'true' }), es.titleScreen.guild),
         el('button', { class: 'menu-btn', type: 'button', 'data-action': 'ranking' }, el('span', { class: 'menu-btn__icon menu-btn__icon--star', 'aria-hidden': 'true' }), es.titleScreen.ranking),
-        // 049: «Sonido» y «Música».
-        ...[soundToggles()].filter((n): n is HTMLElement => n !== null)),
-      // Firma (020) y, a su lado, «Atribuciones» (049), que abre los créditos de terceros.
-      el('footer', { class: 'title__foot' },
-        el('p', { class: 'title__credit', lang: 'en' }, es.titleScreen.credit),
-        el('button', { class: 'title__attrib', type: 'button', 'data-action': 'credits' }, el('span', {}, es.titleScreen.attributions))));
+        // 051: sonido, música y créditos.
+        el('button', { class: 'menu-btn', type: 'button', 'data-action': 'settings' }, el('span', { class: 'menu-btn__icon menu-btn__icon--gear', 'aria-hidden': 'true' }), es.titleScreen.settings)),
+      el('p', { class: 'title__credit', lang: 'en' }, es.titleScreen.credit));
   }
 
   // Elige tu dificultad (019): botones grandes con el nombre, qué cambia y el multiplicador del puntaje. 048: «Cómo

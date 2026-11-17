@@ -45,7 +45,7 @@ export type Sheet =
   /** «Ver el mes» (045): lo que pasó al empezar el mes, línea por línea. */
   | { kind: 'month' }
   /** «Atribuciones» (049): créditos de terceros, desde la firma de la portada. */
-  | { kind: 'credits' }
+  | { kind: 'settings' }
   /**
    * «Tu nombre en el gremio» (036): alias propuesto, su número de sorteo y para qué se abrió. `writing`: el campo
    * para escribir el nombre (038); `problem`: por qué no vale lo escrito.
